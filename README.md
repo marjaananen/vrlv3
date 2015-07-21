@@ -9,3 +9,7 @@ Kuvat, javascripta yms. sijoitetaan assets kansioon
 
 Alkuunsa luo tietokanta, ja aja sinne database kansion _schema.sql tiedostot seuraavassa järjestyksessä:
 fuel_schema.sql
+tunnukset_schema.sql
+
+
+
