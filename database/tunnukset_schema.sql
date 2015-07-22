@@ -28,7 +28,7 @@ CREATE TABLE IF NOT EXISTS `vrlv3_tunnukset` (
   `nimimerkki` varchar(20) NOT NULL,
   `email` text NOT NULL,
   `nayta_email` smallint(1) NOT NULL DEFAULT '0',
-  `laani` smallint(2) NOT NULL,
+  `laani` smallint(2),
   `syntymavuosi` date NOT NULL,
   `nayta_vuosilaani` smallint(1) NOT NULL DEFAULT '0',
   `jaahylla` datetime NOT NULL,
@@ -156,8 +156,14 @@ CREATE TABLE IF NOT EXISTS `vrlv3_tunnukset_yhteystiedot` (
 
 --
 -- Rajoitteet vedostauluille
+
+--
+--
+-- Rajoitteet taululle `vrlv3_tunnukset`
 --
 
+ ALTER TABLE `vrlv3_tunnukset` 
+  ADD CONSTRAINT `vrlv3_tunnukset_ibfk_1` FOREIGN KEY (`laani`) REFERENCES `vrlv3`.`vrlv3_lista_maakunnat`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 --
 -- Rajoitteet taululle `vrlv3_tunnukset_epa`
 --
@@ -187,3 +193,5 @@ ALTER TABLE `vrlv3_tunnukset_salasanat`
 --
 ALTER TABLE `vrlv3_tunnukset_yhteystiedot`
   ADD CONSTRAINT `vrlv3_tunnukset_yhteystiedot_ibfk_1` FOREIGN KEY (`tunnus`) REFERENCES `vrlv3_tunnukset` (`tunnus`) ON DELETE CASCADE ON UPDATE CASCADE;
+  
+ 
