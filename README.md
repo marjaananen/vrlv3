@@ -1,9 +1,12 @@
 ﻿# vrlv3
 
-Oletuksena tietokannan nimi on vrlv3, serveri localhost ja user root ilman salasanaa. Muokkaa vastaamaan omaa konfiguraatiotasi tiedostosta fuel/application/config/database.php, mutta ÄLÄ COMMITOI NÄITÄ TIETOJA!
+Oletuksena tietokannan nimi on vrlv3, serveri localhost ja user root ilman salasanaa. 
+Kopioi tiedosto fuel/application/config/database_skeleton.php samaan kansioon ja nimeä se pelkäksi database.php:ksi. 
+Sitten muokkaa se vastaamaan omaa konfiguraatiotasi, mutta ÄLÄ COMMITOI TÄTÄ TIEDOSTOA, vaan laita se .gitignoreen vaikka tortoisegitin avulla!
 
 Oletuksena salausavaimeksi on asetettu $config['encryption_key'] = 'test_test_test_test';
-Voit muokata tätä tiedostosta fuel/application/config/config.php, mutta ÄLÄ COMMITOI NÄITÄ TIETOJA!
+Kopioi tiedosto fuel/application/config/config_skeleton.php samaan kansioon ja nimeä se pelkäksi config.php:ksi. 
+Sitten voit halutessasi muokata sen vastaamaan omaa konfiguraatiotasi, mutta ÄLÄ COMMITOI TÄTÄ TIEDOSTOA, vaan laita se .gitignoreen vaikka tortoisegitin avulla!
 
 Kuvat, javascripta yms. sijoitetaan assets kansioon
 
