@@ -14,6 +14,7 @@ Alkuunsa luo tietokanta, ja aja sinne database kansion _schema.sql tiedostot seu
 fuel_schema.sql
 listat_data_schema.sql 
 tunnukset_schema.sql
+tallirekisteri_schema.sql
 
 
 
