@@ -54,3 +54,35 @@ INSERT INTO `vrlv3_lista_maakunnat` (`id`, `maakunta`) VALUES
 (19, 'Uusimaa'),
 (20, 'Varsinais-Suomi'),
 (21, 'Ulkomaat');
+
+
+-- 
+-- Rakenne taululle `vrlv3_lista_tallikategoriat`
+-- 
+
+CREATE TABLE IF NOT EXISTS `vrlv3_lista_tallikategoriat` (
+  `kat` smallint(2) NOT NULL auto_increment,
+  `kategoria` varchar(20) character set latin1 NOT NULL,
+  `katelyh` varchar(3) character set latin1 NOT NULL,
+  `katnro` varchar(4) collate utf8_swedish_ci NOT NULL,
+  PRIMARY KEY  (`kat`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_swedish_ci AUTO_INCREMENT=14 ;
+
+-- 
+-- Vedostetaan dataa taulusta `lista_tallikategoriat`
+-- 
+
+INSERT INTO `vrlv3_lista_tallikategoriat` (`kat`, `kategoria`, `katelyh`, `katnro`) VALUES 
+(1, 'ratsastuskoulu', 'RK', 'KAT1'),
+(2, 'siittola', 'ST', 'KAT2'),
+(3, 'kilpailukeskus', 'KK', 'KAT3'),
+(4, 'valjakkotalli', 'VT', 'KAT4'),
+(5, 'ravitalli', 'RT', 'KAT4'),
+(6, 'laukkatalli', 'LK', 'KAT4'),
+(7, 'westerntalli', 'WT', 'KAT4'),
+(8, 'myyntitalli', 'MT', 'KAT5'),
+(9, 'oriasema', 'OA', 'KAT6'),
+(10, 'yksityistalli', 'YT', 'KAT7'),
+(11, 'muu kilpatalli', 'KT', 'KAT4'),
+(12, 'tamma-asema', 'TA', 'KAT6'),
+(13, 'harrastetalli', 'HT', 'KAT0');
