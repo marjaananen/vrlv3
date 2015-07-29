@@ -41,7 +41,7 @@ CREATE TABLE IF NOT EXISTS `vrlv3_tallirekisteri` (
   PRIMARY KEY (`tnro`),
   KEY `lopetti_tunnus` (`lopetti_tunnus`),
   KEY `hyvaksyi` (`hyvaksyi`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -62,7 +62,7 @@ CREATE TABLE IF NOT EXISTS `vrlv3_tallirekisteri_jonossa` (
   PRIMARY KEY (`id`),
   KEY `id` (`id`),
   KEY `kategoria` (`kategoria`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=5660 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=5660 ;
 
 -- --------------------------------------------------------
 
@@ -83,7 +83,7 @@ CREATE TABLE IF NOT EXISTS `vrlv3_tallirekisteri_kategoriat` (
   KEY `tnro` (`tnro`),
   KEY `tnro_2` (`tnro`),
   KEY `kategoria` (`kategoria`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -101,7 +101,7 @@ CREATE TABLE IF NOT EXISTS `vrlv3_tallirekisteri_omistajamuutokset` (
   KEY `tnro` (`tnro`),
   KEY `omistaja` (`omistaja`),
   KEY `tnro_2` (`tnro`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -119,7 +119,7 @@ CREATE TABLE IF NOT EXISTS `vrlv3_tallirekisteri_omistajat` (
   KEY `omistaja` (`omistaja`),
   KEY `tnro_2` (`tnro`),
   KEY `omistaja_2` (`omistaja`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -136,7 +136,7 @@ CREATE TABLE IF NOT EXISTS `vrlv3_tallirekisteri_paivitetty` (
   KEY `tnro` (`tnro`),
   KEY `tnro_2` (`tnro`),
   KEY `paivitti` (`paivitti`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -148,7 +148,7 @@ CREATE TABLE IF NOT EXISTS `vrlv3_tallirekisteri_yesno` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `tunnus` int(5) unsigned zerofill NOT NULL,
   `aani` smallint(1) NOT NULL,
-  `tnro` varchar(8) CHARACTER SET latin1 NOT NULL,
+  `tnro` varchar(8) CHARACTER SET utf8 NOT NULL,
   `aika` datetime NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `tunnus_2` (`tunnus`,`tnro`),
@@ -175,7 +175,7 @@ CREATE TABLE IF NOT EXISTS `vrlv3_tallirekisteri_yhteistyo` (
   KEY `t2` (`t2`),
   KEY `pyysi` (`pyysi`),
   KEY `hyvaksyi` (`hyvaksyi`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 --
 -- Rajoitteet vedostauluille

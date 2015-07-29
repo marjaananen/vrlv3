@@ -62,8 +62,8 @@ INSERT INTO `vrlv3_lista_maakunnat` (`id`, `maakunta`) VALUES
 
 CREATE TABLE IF NOT EXISTS `vrlv3_lista_tallikategoriat` (
   `kat` smallint(2) NOT NULL auto_increment,
-  `kategoria` varchar(20) character set latin1 NOT NULL,
-  `katelyh` varchar(3) character set latin1 NOT NULL,
+  `kategoria` varchar(20) character set utf8 NOT NULL,
+  `katelyh` varchar(3) character set utf8 NOT NULL,
   `katnro` varchar(4) collate utf8_swedish_ci NOT NULL,
   PRIMARY KEY  (`kat`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_swedish_ci AUTO_INCREMENT=14 ;

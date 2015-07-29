@@ -23,24 +23,37 @@ SET time_zone = "+00:00";
 --
 
 CREATE TABLE IF NOT EXISTS `vrlv3_tunnukset` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `ip_address` varchar(15) NOT NULL,
+  `username` varchar(100) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `salt` varchar(255) DEFAULT NULL,
+  `email` varchar(100) NOT NULL,
+  `activation_code` varchar(40) DEFAULT NULL,
+  `forgotten_password_code` varchar(40) DEFAULT NULL,
+  `forgotten_password_time` int(11) unsigned DEFAULT NULL,
+  `remember_code` varchar(40) DEFAULT NULL,
+  `created_on` int(11) unsigned NOT NULL,
+  `last_login` int(11) unsigned DEFAULT NULL,
+  `active` tinyint(1) unsigned DEFAULT NULL,
   `tunnus` int(5) unsigned zerofill NOT NULL,
-  `salasana` text NOT NULL,
   `nimimerkki` varchar(20) NOT NULL,
-  `email` text NOT NULL,
   `nayta_email` smallint(1) NOT NULL DEFAULT '0',
   `laani` smallint(2),
   `syntymavuosi` date NOT NULL,
   `nayta_vuosilaani` smallint(1) NOT NULL DEFAULT '0',
   `jaahylla` datetime NOT NULL,
-  `rekisteroitynyt` datetime NOT NULL,
-  `rek_ip` tinytext NOT NULL,
   `frozen` int(1) NOT NULL,
   `reason` varchar(400) NOT NULL,
   `hyvaksyi` int(5) unsigned zerofill NOT NULL,
   `hyvaksytty` datetime NOT NULL,
-  PRIMARY KEY (`tunnus`),
+  PRIMARY KEY (`id`),
+  KEY `id` (`id`),
   KEY `tunnus` (`tunnus`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+INSERT INTO `vrlv3_tunnukset` (`id`, `ip_address`, `username`, `password`, `salt`, `email`, `activation_code`, `forgotten_password_code`, `created_on`, `last_login`, `active`, `tunnus`, `nimimerkki`, `nayta_email`, `laani`, `syntymavuosi`, `nayta_vuosilaani`, `jaahylla`, `frozen`, `reason`, `hyvaksyi`, `hyvaksytty`) VALUES
+     ('1','127.0.0.1','administrator','$2a$07$SeBknntpZror9uyftVopmu61qg0ms8Qv1yV6FG.kQOSM.9QhmTo36','','admin@admin.com','',NULL,'1268889823','1268889823','1', '0','administrator','0','1','1970-01-01','0', '1000-01-01 00:00:00', '0', '-', '0', '1000-01-01 00:00:00');
 
 -- --------------------------------------------------------
 
@@ -57,7 +70,7 @@ CREATE TABLE IF NOT EXISTS `vrlv3_tunnukset_epa` (
   `ip` text NOT NULL,
   PRIMARY KEY (`id`),
   KEY `tunnus` (`tunnus`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='Epäonnistuneet kirjautumisyritykset';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Epäonnistuneet kirjautumisyritykset';
 
 -- --------------------------------------------------------
 
@@ -80,7 +93,7 @@ CREATE TABLE IF NOT EXISTS `vrlv3_tunnukset_jonossa` (
   `ip` text NOT NULL,
   `kasitelty` datetime DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 COMMENT='Hyväksyntää tai vahvistusta odottavat tunnukset';
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='Hyväksyntää tai vahvistusta odottavat tunnukset';
 
 -- --------------------------------------------------------
 
@@ -97,7 +110,7 @@ CREATE TABLE IF NOT EXISTS `vrlv3_tunnukset_kirjautunut` (
   `ip` text NOT NULL,
   PRIMARY KEY (`id`),
   KEY `tunnus` (`tunnus`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='Onnistuneet kirjautumiset';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Onnistuneet kirjautumiset';
 
 -- --------------------------------------------------------
 
@@ -115,7 +128,7 @@ CREATE TABLE IF NOT EXISTS `vrlv3_tunnukset_nimimerkit` (
   `piilotettu` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   KEY `tunnus` (`tunnus`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='Käyttäjien edelliset nimimerkit';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Käyttäjien edelliset nimimerkit';
 
 -- --------------------------------------------------------
 
@@ -134,7 +147,7 @@ CREATE TABLE IF NOT EXISTS `vrlv3_tunnukset_salasanat` (
   `ip` text NOT NULL,
   PRIMARY KEY (`id`),
   KEY `tunnus` (`tunnus`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 COMMENT='Salasananvahvistuslista';
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='Salasananvahvistuslista';
 
 -- --------------------------------------------------------
 
@@ -152,7 +165,7 @@ CREATE TABLE IF NOT EXISTS `vrlv3_tunnukset_yhteystiedot` (
   `nayta` smallint(1) NOT NULL,
   PRIMARY KEY (`id`),
   KEY `tunnus` (`tunnus`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='Tunnusten yhteystiedot';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Tunnusten yhteystiedot';
 
 --
 -- Rajoitteet vedostauluille

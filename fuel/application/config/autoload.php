@@ -54,7 +54,7 @@ $autoload['packages'] = array(
 |	$autoload['libraries'] = array('database', 'session', 'xmlrpc');
 */
 
-$autoload['libraries'] = array('fuel/asset', 'fuel/fuel');
+$autoload['libraries'] = array('fuel/asset', 'fuel/fuel', 'session', 'ion_auth');
 
 
 /*
