@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 class Main extends CI_Controller
 {
     function __construct()
@@ -24,15 +24,12 @@ class Main extends CI_Controller
         
         if ($this->ion_auth->logged_in())
         {
-            $vars['testi'] = "Olet kirjautunut sisään: " . $this->ion_auth->get_user_id();
+            $vars['login_status'] = "Olet kirjautunut sisään: " . $this->ion_auth->get_user_id() . "<br> <a href=" . site_url('/auth/logout') . "> Logout </a>";
         }
         else
         {
-            $vars['testi'] = "Et ole kirjautunut sisään";
+            $vars['login_status'] = "Et ole kirjautunut sisään";
         }
-        
-        //$vars['testi'] = $this->session->userdata('identity');//$this->session->flashdata('message');
-
 
         $this->fuel->pages->render('index', $vars);
     }

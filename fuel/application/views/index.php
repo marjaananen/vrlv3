@@ -1,8 +1,13 @@
-<h1>VRL</h1>
-<?php
-echo fuel_var('login_form', 'Login form missing');
-echo '<br>';
-echo fuel_var('testi', '');
-echo '<br>';
-?>
-<a href="/auth/logout"> Logout </a>
+<h2>Etusivu</h2>
+
+<p>
+    <?php
+        echo fuel_var('login_form', 'Login form missing');
+        echo "</p><p>";
+        echo fuel_var('login_status', '');
+    ?>
+</p>
+
+<p>
+    <a href="jasenyys/liity">Liity jäseneksi</a>
+</p>
