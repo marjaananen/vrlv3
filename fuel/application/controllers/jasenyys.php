@@ -49,12 +49,14 @@ class Jasenyys extends CI_Controller
                 $this->form_validation->set_rules('syntymavuosi', 'Syntymäaika', 'regex_match[/^[0-9]{4}-[0-9]{1,2}-[0-9]{1,2}$/]'); //validointi ei ole valmis, ja kentän formaattikin muuttuu vielä suomalaiseen muotoon
                 $this->form_validation->set_rules('sijainti', 'Sijainti', 'min_length[1]|max_length[2]|numeric');
 
-		if ($this->form_validation->run() == FALSE)
+		if ($this->form_validation->run() == FALSE){
 		    $vars['join_msg'] = "Lomakkeen lähetys epäonnistui!";
+		    $vars['join_msg_type'] = "danger";
+		}
 		else
 		{
 		    $vars['join_msg'] = "Lomakkeen lähetys onnistui!<br />Tarkasta antamasi sähköpostin postilaatikko (jos ei näy, katso roskapostikansio) ja seuraa lähetettyjä ohjeita.";
-                    
+                    $vars['join_msg_type'] = "success";
                     $return_data = $this->tunnukset_jonossa_model->add_new($this->input->post('nimimerkki'), $this->input->post('email'), $this->input->post('syntymavuosi'), $this->input->post('sijainti'));
                     
                     $this->email->from('jasenyys@virtuaalihevoset.net', 'Jäsenyyskone');
@@ -69,6 +71,7 @@ class Jasenyys extends CI_Controller
             }
             else
                 $vars['join_msg'] = "Roskapostitarkastus epäonnistui. Olet botti.";
+		$vars['join_msg_type'] = "danger";
             
             $this->fuel->pages->render('jasenyys/liity', $vars);
         }
