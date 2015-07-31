@@ -5,3 +5,8 @@
     color: gray;
     padding-bottom: 3px;
 }
+
+td.label label {
+    color: black;
+    font-size: small;
+}
