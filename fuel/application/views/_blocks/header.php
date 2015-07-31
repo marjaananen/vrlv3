@@ -72,6 +72,3 @@
 
       		</div>  
       		<div class="col-md-9">
-
-	
-<h2 id="sec0">VRL</h2>

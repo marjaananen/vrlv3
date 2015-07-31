@@ -7,6 +7,8 @@
     ?>
 </p>
 
+<?php echo validation_errors(); ?>
+
 <p>
     <a href="/">Etusivulle</a>
 </p>
