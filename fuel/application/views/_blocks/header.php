@@ -38,20 +38,9 @@
       <a href="/" class="navbar-brand">VRL</a>
     </div>
     <nav class="collapse navbar-collapse" role="navigation">
-      <ul class="nav navbar-nav">
-        <li>
-          <a href="#">Get Started</a>
-        </li>
-        <li>
-          <a href="#">Edit</a>
-        </li>
-        <li>
-          <a href="#">Visualize</a>
-        </li>
-        <li>
-          <a href="#">Prototype</a>
-        </li>
-      </ul>
+	  <?php echo fuel_nav(array('container_tag_id' => 'topmenu', 'container_tag_class' => 'nav navbar-nav', 'item_id_prefix' => 'topmenu_', 'depth'=>'0')); ?>
+
+     
     </nav>
   </div>
 </header>
@@ -62,16 +51,15 @@
   			<div class="col-md-3" id="leftCol">
               	
 				<div class="well"> 
-              	<ul class="nav nav-stacked" id="sidebar">
-                  <li><a href="#sec1">Section 1</a></li>
-                  <li><a href="#sec2">Section 2</a></li>
-                  <li><a href="#sec3">Section 3</a></li>
-                  <li><a href="#sec4">Section 4</a></li>
-              	</ul>
+					<?php if (!empty($sidemenu)) : ?>
+					<?php echo $sidemenu; ?>
+					<?php endif ?>
+
   				</div>
 
       		</div>  
       		<div class="col-md-9">
 
+	<?php echo fuel_nav(array('render_type' => 'breadcrumb', 'container_tag_class' => 'breadcrumb', 'delimiter' => '&nbsp;', 'order' => 'desc', 'home_link' => 'Etusivu'));
 	
-<h2 id="sec0">VRL</h2>
+	?>
