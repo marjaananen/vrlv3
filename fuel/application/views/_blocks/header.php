@@ -56,6 +56,8 @@
 					<?php endif ?>
 
   				</div>
+				
+				<a href="<?php echo base_url();?>profiili">Oma profiili</a>
 
       		</div>  
 
