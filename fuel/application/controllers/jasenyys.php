@@ -51,6 +51,7 @@ class Jasenyys extends CI_Controller
 
 		if ($this->form_validation->run() == FALSE)
 		    $vars['join_msg'] = "Lomakkeen lähetys epäonnistui!";
+			$vars['join_msg_type'] = "danger";
 		else
 		{
 		    $vars['join_msg'] = "Lomakkeen lähetys onnistui!<br />Tarkasta antamasi sähköpostin postilaatikko (jos ei näy, katso roskapostikansio) ja seuraa lähetettyjä ohjeita.";
@@ -69,6 +70,7 @@ class Jasenyys extends CI_Controller
             }
             else
                 $vars['join_msg'] = "Roskapostitarkastus epäonnistui. Olet botti.";
+				$vars['join_msg_type'] = "danger";
             
             $this->fuel->pages->render('jasenyys/liity', $vars);
         }
