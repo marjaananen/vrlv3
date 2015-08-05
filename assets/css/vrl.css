@@ -10,3 +10,8 @@ td.label label {
     color: black;
     font-size: small;
 }
+
+.application_data {
+    background-color: gray;
+    padding: 10px;
+}

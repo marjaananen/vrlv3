@@ -50,6 +50,42 @@ class Tunnukset_model extends Base_module_model
         
         return false;
     }
+    
+    function get_queue_length()
+    {
+        $this->db->where('vahvistettu', 1);
+        $this->db->from('vrlv3_tunnukset_jonossa');
+        return $this->db->count_all_results();
+    }
+    
+    function get_next_application()
+    {
+        $data = array('success' => false);
+        $date = new DateTime();
+        $date->setTimestamp(time() - 60*15); //nykyhetki miinus 15min, eli ei saa ottaa samaa hakemusta uudestaan käsittelyyn 15 minuuttiin
+        
+        $this->db->select('id, nimimerkki, email, syntymavuosi, rekisteroitynyt, sijainti, ip');
+        $this->db->from('vrlv3_tunnukset_jonossa');
+        $this->db->where('vahvistettu', 1);
+        $this->db->where('kasitelty IS NULL OR kasitelty < "' . $date->format('Y-m-d H:i:s') . '"');
+        $this->db->order_by("rekisteroitynyt", "asc"); 
+        $query = $this->db->get();
+        
+        if ($query->num_rows() > 0)
+        {
+            $data = $query->row_array(); 
+
+            $date->setTimestamp(time());
+            $update_data = array('kasitelty' => $date->format('Y-m-d H:i:s'));
+            
+            $this->db->where('id', $data['id']);
+            $this->db->update('vrlv3_tunnukset_jonossa', $update_data);
+            
+            $data['success'] = true;
+        }
+        
+        return $data;
+    }
 
     function _generate_random_string($length)
     {

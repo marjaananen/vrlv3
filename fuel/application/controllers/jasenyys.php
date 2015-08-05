@@ -36,7 +36,7 @@ class Jasenyys extends CI_Controller
             
             $this->fuel->pages->render('jasenyys/liity', $vars);
         }
-        else
+        else if($this->input->server('REQUEST_METHOD') == 'POST')
         {
             if($this->input->post('roskapostitarkastus') == '4')
             {
@@ -78,6 +78,8 @@ class Jasenyys extends CI_Controller
             
             $this->fuel->pages->render('jasenyys/liity', $vars);
         }
+        else
+            redirect('/', 'refresh');
     }
     
     function vahvista()
@@ -88,11 +90,11 @@ class Jasenyys extends CI_Controller
         $code = $this->input->get('code', TRUE);
         
         if($email != false && $code != false && $this->tunnukset_model->validate($email, $code) == true)
-            $vars['validate_msg'] = "Sähköpostiosoitteesi vahvistaminen onnistui!<br /><br />Hakemuksesi siirtyy nyt tunnusjonoon, josta VRL:n työntekijä hyväksyy sen.<br />Saat tämän jälkeen sähköpostilla tunnuksen ja salasanan, joilla pääset kirjautumaan sisään.";
+            $vars['msg'] = "Sähköpostiosoitteesi vahvistaminen onnistui!<br /><br />Hakemuksesi siirtyy nyt tunnusjonoon, josta VRL:n työntekijä hyväksyy sen.<br />Saat tämän jälkeen sähköpostilla tunnuksen ja salasanan, joilla pääset kirjautumaan sisään.";
         else
-            $vars['validate_msg'] = "Jotain meni pieleen!<br /><br />Varmista, ettei sähköpostiisi tullut osoite katkennut osoitepalkille siirrettäessä ja yritä uudelleen.";
+            $vars['msg'] = "Jotain meni pieleen!<br /><br />Varmista, ettei sähköpostiisi tullut osoite katkennut osoitepalkille siirrettäessä ja yritä uudelleen.";
             
-        $this->fuel->pages->render('jasenyys/vahvista', $vars);
+        $this->fuel->pages->render('misc/showmessage', $vars);
     }
     
     function _date_valid($date)

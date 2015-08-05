@@ -1,4 +1,4 @@
-<h2>Jäsenyys</h2>
+<h2>Liity jäseneksi</h2>
 
 <p>
     <div class="alert alert-<?php echo fuel_var('join_msg_type', 'info')?>" role="alert">   
