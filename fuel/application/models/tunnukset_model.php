@@ -9,7 +9,7 @@ class Tunnukset_model extends Base_module_model
         parent::__construct();
     }
  
-    function add_new($nimimerkki, $email, $syntymavuosi, $sijainti)
+    function add_new_application($nimimerkki, $email, $syntymavuosi, $sijainti)
     {
         $data = array('nimimerkki' => $nimimerkki, 'email' => $email, 'sijainti' => $sijainti);
         
@@ -19,14 +19,22 @@ class Tunnukset_model extends Base_module_model
         $data['ip'] = $this->input->ip_address();
         
         //syntymä on muodossa dd.mm.yyyy joten pitää muuttaa
-        $data['syntymavuosi'] = date('Y-m-d', strtotime($syntymavuosi));
+        if($syntymavuosi == '')
+            $data['syntymavuosi'] = '0000-00-00';
+        else
+            $data['syntymavuosi'] = date('Y-m-d', strtotime($syntymavuosi));
         
         $this->db->insert('vrlv3_tunnukset_jonossa', $data);
         
         return $data;
     }
     
-    function validate($email, $varmistus)
+    function delete_application($id)
+    {
+        $this->db->delete('vrlv3_tunnukset_jonossa', array('id' => $id)); 
+    }
+    
+    function validate_application($email, $varmistus)
     {
         $this->db->select('email, varmistus, id');
         $this->db->from('vrlv3_tunnukset_jonossa');
@@ -51,11 +59,29 @@ class Tunnukset_model extends Base_module_model
         return false;
     }
     
-    function get_queue_length()
+    function get_application_queue_length()
     {
         $this->db->where('vahvistettu', 1);
         $this->db->from('vrlv3_tunnukset_jonossa');
         return $this->db->count_all_results();
+    }
+    
+    function get_application($id)
+    {
+        $data = array('success' => false);
+        
+        $this->db->select('nimimerkki, email, syntymavuosi, sijainti, salasana');
+        $this->db->from('vrlv3_tunnukset_jonossa');
+        $this->db->where('id', $id);
+        $query = $this->db->get();
+        
+        if ($query->num_rows() > 0)
+        {
+            $data = $query->row_array(); 
+            $data['success'] = true;
+        }
+        
+        return $data;
     }
     
     function get_next_application()
@@ -82,6 +108,24 @@ class Tunnukset_model extends Base_module_model
             $this->db->update('vrlv3_tunnukset_jonossa', $update_data);
             
             $data['success'] = true;
+        }
+        
+        return $data;
+    }
+    
+    function get_next_pinnumber()
+    {
+        $data = 0;
+
+        $this->db->select('tunnus');
+        $this->db->from('vrlv3_tunnukset');
+        $this->db->order_by("tunnus", "desc"); 
+        $query = $this->db->get();
+        
+        if ($query->num_rows() > 0)
+        {
+            $data = $query->row_array();
+            $data = $data['tunnus']+1;
         }
         
         return $data;

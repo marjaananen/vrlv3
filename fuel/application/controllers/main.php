@@ -24,7 +24,7 @@ class Main extends CI_Controller
         
         if ($this->ion_auth->logged_in())
         {
-            $vars['login_status'] = "Olet kirjautunut sisään: " . $this->ion_auth->get_user_id() . "<br> <a href=" . site_url('/auth/logout') . "> Logout </a>";
+            $vars['login_status'] = "Olet kirjautunut sisään nimellä: " . $this->session->userdata( 'username' ) . "<br> <a href=" . site_url('/auth/logout') . "> Logout </a>";
         }
         else
         {

@@ -87,10 +87,10 @@ $nav['kilpailutoiminta/jarjestaminen'] = array('label' => 'Näyttelyiden järjes
 $nav['yllapito/tunnukset'] = array('label' => 'Tunnukset', 'parent_id' => 'yllapito', 'active' => 'yllapito/tunnukset');
 //$nav['yllapito/hevosrekisteri'] = array('label' => 'Hevosrekisteri', 'parent_id' => 'yllapito', 'active' => 'yllapito/hevosrekisteri');
     
-    // ylläpito/tunnukset alamenu
-    $nav['yllapito/tunnukset/hyvaksy'] = array('label' => 'Hyväksy VRL-tunnuksia', 'parent_id' => 'yllapito/tunnukset', 'active' => 'yllapito/tunnukset/hyvaksy');
-    $nav['yllapito/tunnukset/muokkaa'] = array('label' => 'Muokkaa tunnuksen tietoja', 'parent_id' => 'yllapito/tunnukset', 'active' => 'yllapito/tunnukset/muokkaa');
-    $nav['yllapito/tunnukset/haku'] = array('label' => 'Tee hakuja tunnuksista', 'parent_id' => 'yllapito/tunnukset', 'active' => 'yllapito/tunnukset/haku');
+// ylläpito/tunnukset alamenu
+$nav['yllapito/tunnukset/hyvaksy'] = array('label' => 'Hyväksy VRL-tunnuksia', 'parent_id' => 'yllapito/tunnukset', 'active' => 'yllapito/tunnukset/hyvaksy');
+$nav['yllapito/tunnukset/muokkaa'] = array('label' => 'Muokkaa tunnuksen tietoja', 'parent_id' => 'yllapito/tunnukset', 'active' => 'yllapito/tunnukset/muokkaa');
+$nav['yllapito/tunnukset/haku'] = array('label' => 'Tee hakuja tunnuksista', 'parent_id' => 'yllapito/tunnukset', 'active' => 'yllapito/tunnukset/haku');
 
 
 // profiili alamenu

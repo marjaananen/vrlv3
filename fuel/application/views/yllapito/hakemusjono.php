@@ -1,11 +1,26 @@
 <h2>Hakemusjono</h2>
 
+<p>
+    //tämän sivun css pitäisi uusia bootstrappiin
+    <br>
+    //myös routet pitää korjata
+</p>
+
+<?php if($this->session->flashdata('return_status') != '') : ?>
+    <div class="alert alert-<?php echo $this->session->flashdata('return_status'); ?>" role="alert">
+        <p>
+            <?php echo $this->session->flashdata('return_info'); ?>
+        </p>
+    </div>
+<?php endif; ?>
+
 <?php if ($view_status === 'queue_status') : ?>
     <p>
         Jonossa on <?php echo $queue_length; ?> hakemusta.
     </p>
     <?php
-        echo fuel_var('get_next_application', '');
+        if($queue_length > 0)
+            echo fuel_var('get_next_application', '');
     ?>
 <?php elseif ($view_status === 'next_join_application'): ?>
     
@@ -20,7 +35,17 @@
         <p>IP-osoite: <?=$application_data['ip']?></p>
     </div>
     
-    //luo hyväksy hylkää seuraava napit
+    <form method="post" action="<?=site_url('/yllapito/kasittele_hakemus')?>/hyvaksy/<?=$application_data['id']?>">
+        <input type="submit" value="Hyväksy">
+    </form>
+    
+    <form method="post" action="<?=site_url('/yllapito/kasittele_hakemus')?>/hylkaa/<?=$application_data['id']?>">
+        <input type="submit" value="Hylkää">
+    </form>
+    
+    <form method="post" action="<?=site_url('/yllapito/hakemusjono')?>">
+        <input type="submit" value="Ohita ja ota seuraava">
+    </form>
     
 <?php else: ?>
     <div class="alert alert-danger" role="alert">
