@@ -33,7 +33,7 @@ CREATE TABLE `vrlv3_lista_maakunnat` (
 --
 
 INSERT INTO `vrlv3_lista_maakunnat` (`id`, `maakunta`) VALUES
-(0, 'Ei-annettu'),
+(0, 'Ei saatavilla'),
 (1, 'Ahvenanmaa'),
 (2, 'Etelä-Karjala'),
 (3, 'Etelä-Pohjanmaa'),

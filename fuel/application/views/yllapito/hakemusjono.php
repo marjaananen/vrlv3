@@ -1,9 +1,7 @@
-<h2>Hakemusjono</h2>
+﻿<h2>Hakemusjono</h2>
 
 <p>
     //tämän sivun css pitäisi uusia bootstrappiin
-    <br>
-    //myös routet pitää korjata
 </p>
 
 <?php if($this->session->flashdata('return_status') != '') : ?>
@@ -40,6 +38,7 @@
     </form>
     
     <form method="post" action="<?=site_url('/yllapito/kasittele_hakemus')?>/hylkaa/<?=$application_data['id']?>">
+        Hylkäyssyy: <input type="text" name="rejection_reason">
         <input type="submit" value="Hylkää">
     </form>
     

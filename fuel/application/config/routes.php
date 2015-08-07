@@ -38,8 +38,8 @@
 |
 */
 
+$route['yllapito/tunnukset/hyvaksy'] = "yllapito/hakemusjono";
 
-//$route['default_controller'] = 'fuel/page_router';
 $route['default_controller'] = 'main';
 $route['404_override'] = 'fuel/page_router';
 

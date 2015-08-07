@@ -53,8 +53,15 @@ class Yllapito extends CI_Controller
                 {
                     $this->session->set_flashdata('return_info', 'Hakemustietojen noutaminen epäonnistui!<br />Joku saattaa olla jo hyväksymässä haettua hakemusta, tai tapahtui muu virhe.');
                     $this->session->set_flashdata('return_status', 'danger');
-                    redirect('/yllapito/hakemusjono');
+                    redirect('/yllapito/tunnukset/hyvaksy');
                 }
+                
+                $vars['application_data']['rekisteroitynyt'] = date('d.m.Y H:i',strtotime($vars['application_data']['rekisteroitynyt']));
+                $vars['application_data']['sijainti'] = $this->tunnukset_model->get_location($vars['application_data']['sijainti']);
+                if($vars['application_data']['syntymavuosi'] == '0000-00-00')
+                    $vars['application_data']['syntymavuosi'] = 'Ei saatavilla';
+                else
+                    $vars['application_data']['syntymavuosi'] = date("d.m.Y", strtotime($vars['application_data']['syntymavuosi']));
             }
             else
             {
@@ -63,7 +70,7 @@ class Yllapito extends CI_Controller
                 $vars['queue_length'] = $this->tunnukset_model->get_application_queue_length();
                 
                 $this->load->library('form_builder', array('submit_value' => 'Hae seuraava hakemus'));
-                $this->form_builder->form_attrs = array('method' => 'post', 'action' => site_url('/yllapito/hakemusjono'));
+                $this->form_builder->form_attrs = array('method' => 'post', 'action' => site_url('/yllapito/tunnukset/hyvaksy'));
                 $vars['get_next_application'] = $this->form_builder->render();
             }
         }
@@ -80,6 +87,7 @@ class Yllapito extends CI_Controller
         $new_pinnumber = -1;
         $date->setTimestamp(time());
         $this->session->set_flashdata('return_status', '');
+        $rej_reason = $this->input->post('rejection_reason');
         
         if($this->input->server('REQUEST_METHOD') == 'POST' && is_numeric($id) && $id >= 0 && ($paatos == 'hyvaksy' || $paatos == 'hylkaa'))
         {
@@ -94,7 +102,7 @@ class Yllapito extends CI_Controller
                 {
                     $this->session->set_flashdata('return_info', 'Hakemuksen käsittely epäonnistui!');
                     $this->session->set_flashdata('return_status', 'danger');
-                    redirect('/yllapito/hakemusjono');
+                    redirect('/yllapito/tunnukset/hyvaksy');
                 }
                 
                 if($paatos == 'hyvaksy')
@@ -125,7 +133,12 @@ class Yllapito extends CI_Controller
                 if($paatos == 'hyvaksy')
                     $this->email->message('Tunnushakemuksesi on hyväksytty, tervetuloa käyttämään VRL:ää!\nVoit kirjautua sisään alla olevalla tunnuksella ja salasanalla sivuston oikeassa yläkulmassa olevan lomakkeen avulla. Kirjoita tunnuksen numero-osa ensimmäiseen laatikkoon ja salasanasi toiseen. Muista vaihtaa salasana ensimmäisellä kirjautumiskerralla!\n\n---------------------------------------\n\nVRL-tunnus: ' .  $new_pinnumber . '\nSalasana: ' .  $application_data['salasana'] . '\n\n---------------------------------------\n\nÄlä vastaa tähän sähköpostiin!\nJos et ole lähettänyt jäsenhakemusta, ota yhteys VRL:n ylläpitoon osoitteessa yllapito@virtuaalihevoset.net');
                 else
-                    $this->email->message('Valitettavasti tunnushakemuksesi on hylätty!\n\nÄlä vastaa tähän sähköpostiin!\nJos et ole lähettänyt jäsenhakemusta, ota yhteys VRL:n ylläpitoon osoitteessa yllapito@virtuaalihevoset.net');
+                {
+                    if($rej_reason != false)
+                        $this->email->message('Valitettavasti tunnushakemuksesi on hylätty!\nSyy: ' . $rej_reason . '\n\nÄlä vastaa tähän sähköpostiin!\nJos et ole lähettänyt jäsenhakemusta, ota yhteys VRL:n ylläpitoon osoitteessa yllapito@virtuaalihevoset.net');
+                    else
+                        $this->email->message('Valitettavasti tunnushakemuksesi on hylätty!\n\nÄlä vastaa tähän sähköpostiin!\nJos et ole lähettänyt jäsenhakemusta, ota yhteys VRL:n ylläpitoon osoitteessa yllapito@virtuaalihevoset.net');
+                }
                     
                 //$this->email->send();
                 //TESTAAMATON --^
@@ -135,7 +148,7 @@ class Yllapito extends CI_Controller
             }
         }
             
-        redirect('/yllapito/hakemusjono');
+        redirect('/yllapito/tunnukset/hyvaksy');
     }
 }
 ?>

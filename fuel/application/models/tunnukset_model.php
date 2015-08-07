@@ -84,6 +84,24 @@ class Tunnukset_model extends Base_module_model
         return $data;
     }
     
+    function get_location($id)
+    {
+        $data = 'Ei saatavilla';
+        
+        $this->db->select('maakunta');
+        $this->db->from('vrlv3_lista_maakunnat');
+        $this->db->where('id', $id);
+        $query = $this->db->get();
+        
+        if ($query->num_rows() > 0)
+        {
+            $data = $query->row_array(); 
+            $data = $data['maakunta'];
+        }
+        
+        return $data;
+    }
+    
     function get_next_application()
     {
         $data = array('success' => false);
