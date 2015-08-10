@@ -14,25 +14,21 @@ class Jasenyys extends CI_Controller
         {
             // load form_builder
             $this->load->library('form_builder', array('submit_value' => 'Liity', 'required_text' => '*Pakollinen kenttä'));
-            
-            $options = array('1' => 'Ahvenanmaa', '2' => 'Etelä-Karjala', '3' => 'Etelä-Pohjanmaa', '4' => 'Etelä-Savo', '5' => 'Itä-Uusimaa', '6' => 'Kainuu', '7' => 'Kanta-Häme', '8' => 'Keski-Pohjanmaa',
-                             '9' => 'Keski-Suomi', '10' => 'Kymenlaakso', '11' => 'Lappi', '12' => 'Pirkanmaa', '13' => 'Pohjanmaa', '14' => 'Pohjois-Karjala', '15' => 'Pohjois-Pohjanmaa',
-                             '16' => 'Pohjois-Savo', '17' => 'Päijät-Häme', '18' => 'Satakunta', '19' => 'Uusimaa', '20' => 'Varsinais-Suomi', '21' => 'Ulkomaat');
+            $this->load->model('tunnukset_model');
+			$options = $this->tunnukset_model->get_location_option_list();
+
              
             // create fields
-            $fields['nimimerkki'] = array('type' => 'text', 'required' => TRUE, 'after_html' => '<span class="form_comment">Nimimerkit eivät ole yksilöllisiä</span>');
-            $fields['email'] = array('type' => 'text', 'required' => TRUE, 'label' => 'Sähköpostiosoite', 'after_html' => '<span class="form_comment">esimerkki@osoite.fi</span>');
-            $fields['syntymavuosi'] = array('type' => 'text', 'label' => 'Syntymäaika', 'size' => '10', 'value' => '', 'after_html' => '<span class="form_comment">esim. 31.12.1999</span>');
-            $fields['sijainti'] = array('type' => 'select', 'options' => $options, 'first_option' => 'En halua kertoa', 'after_html' => '<span class="form_comment">Voit halutessasi laittaa iän ja sijainnin näkyväksi rekisteröitymisen jälkeen</span>');
-            $fields['roskapostitarkastus'] = array('type' => 'number', 'required' => TRUE, 'after_html' => '<span class="form_comment">Montako kaviota hevosella on? Numerona.</span>');
+            $fields['nimimerkki'] = array('type' => 'text', 'required' => TRUE, 'after_html' => '<span class="form_comment">Nimimerkit eivät ole yksilöllisiä</span>', 'class'=>'form-control');
+            $fields['email'] = array('type' => 'text', 'required' => TRUE, 'label' => 'Sähköpostiosoite', 'after_html' => '<span class="form_comment">esimerkki@osoite.fi</span>', 'class'=>'form-control');
+            $fields['syntymavuosi'] = array('type' => 'text', 'label' => 'Syntymäaika', 'size' => '10', 'value' => '', 'after_html' => '<span class="form_comment">esim. 31.12.1999</span>', 'class'=>'form-control');
+            $fields['sijainti'] = array('type' => 'select', 'options' => $options, 'first_option' => 'En halua kertoa', 'after_html' => '<span class="form_comment">Voit halutessasi laittaa iän ja sijainnin näkyväksi rekisteröitymisen jälkeen</span>', 'class'=>'form-control');
+            $fields['roskapostitarkastus'] = array('type' => 'number', 'required' => TRUE, 'after_html' => '<span class="form_comment">Montako kaviota hevosella on? Numerona.</span>', 'class'=>'form-control');
             
             $this->form_builder->form_attrs = array('method' => 'post', 'action' => site_url('/jasenyys/liity'));
     
-                            
-            // set the fields
-            $this->form_builder->set_fields($fields);
             // render the page
-            $vars['join_form'] = $this->form_builder->render();
+            $vars['join_form'] = $this->form_builder->render_template('_layouts/basic_form_template', $fields );
             
             $this->fuel->pages->render('jasenyys/liity', $vars);
         }
@@ -40,7 +36,7 @@ class Jasenyys extends CI_Controller
         {
             if($this->input->post('roskapostitarkastus') == '4')
             {
-		$this->load->helper(array('form', 'url'));
+				$this->load->helper(array('form', 'url'));
                 $this->load->model('tunnukset_model');
                 $this->load->library('email');
                 
