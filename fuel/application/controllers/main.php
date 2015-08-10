@@ -9,18 +9,16 @@ class Main extends CI_Controller
     function index()
     {
         // load form_builder
-        $this->load->library('form_builder', array('submit_value' => 'Kirjaudu sisään', 'required_text' => '*Pakollinen kenttä'));
+        $this->load->library('form_builder', array('submit_name'=>'Kirjaudu sisään', 'submit_value'=>'Kirjaudu sisään', 'required_text' => '*Pakollinen kenttä'));
          
         // create fields
-        $fields['tunnus'] = array('type' => 'text', 'required' => TRUE, 'name' => 'identity', 'label' => 'Tunnus');
-        $fields['salasana'] = array('type' => 'password', 'required' => TRUE, 'name' => 'password', 'label' => 'Salasana');
-        $this->form_builder->form_attrs = array('method' => 'post', 'action' => site_url('/auth/login'));
+        $fields['tunnus'] = array('type' => 'text', 'required' => TRUE, 'name' => 'identity', 'label' => 'Tunnus', 'class'=>'form-control');
+        $fields['salasana'] = array('type' => 'password', 'required' => TRUE, 'name' => 'password', 'label' => 'Salasana', 'class'=>'form-control');
 
-                        
-        // set the fields
-        $this->form_builder->set_fields($fields);
+        $this->form_builder->form_attrs = array('method' => 'post', 'action' => site_url('/auth/login'));   
+
         // render the page
-        $vars['login_form'] = $this->form_builder->render();
+        $vars['login_form'] = $this->form_builder->render_template('_layouts/basic_form_template', $fields );
         
         if ($this->ion_auth->logged_in())
         {
