@@ -10,9 +10,3 @@
         echo fuel_var('join_form', '');
     ?>
 </p>
-
-
-
-<p>
-    <a href="/">Etusivulle</a>
-</p>

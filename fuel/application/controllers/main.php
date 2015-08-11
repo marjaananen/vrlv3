@@ -9,7 +9,7 @@ class Main extends CI_Controller
     function index()
     {
         // load form_builder
-        $this->load->library('form_builder', array('submit_name'=>'Kirjaudu sisään', 'submit_value'=>'Kirjaudu sisään', 'required_text' => '*Pakollinen kenttä'));
+        $this->load->library('form_builder', array('submit_name'=>'Kirjaudu', 'submit_value'=>'Kirjaudu sisään', 'required_text' => '*Pakollinen kenttä'));
          
         // create fields
         $fields['tunnus'] = array('type' => 'text', 'required' => TRUE, 'name' => 'identity', 'label' => 'Tunnus', 'class'=>'form-control');
