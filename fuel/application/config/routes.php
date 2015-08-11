@@ -39,6 +39,7 @@
 */
 
 $route['yllapito/tunnukset/hyvaksy'] = "yllapito/hakemusjono";
+$route['profiili'] = "profiili/tiedot";
 
 $route['default_controller'] = 'main';
 $route['404_override'] = 'fuel/page_router';

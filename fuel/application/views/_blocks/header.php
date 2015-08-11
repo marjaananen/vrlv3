@@ -40,7 +40,7 @@
     <nav class="collapse navbar-collapse" role="navigation">
 	  <?php echo fuel_nav(array('container_tag_id' => 'topmenu', 'container_tag_class' => 'nav navbar-nav', 'item_id_prefix' => 'topmenu_', 'depth'=>'0')); ?>
 
-     
+
     </nav>
   </div>
 </header>
@@ -54,11 +54,33 @@
 					<?php if (!empty($sidemenu)) : ?>
 					<?php echo $sidemenu; ?>
 					<?php endif ?>
-
   				</div>
-				
-				<a href="<?php echo base_url();?>profiili">Oma profiili</a>
-
+<?php
+//kirjautumislomake / profiili ja logout
+	if(!empty($this->ion_auth))
+	{
+		if ($this->ion_auth->logged_in())
+		{		
+			echo "Tervetuloa, " . $this->session->userdata( 'username' ) . "<br /> <a href=" . site_url('/auth/logout') . ">Kirjaudu ulos</a> <br /> <a href=" . site_url('/profiili') . ">Profiili</a>";
+		}
+		else
+		{
+			// load form_builder
+			$this->load->library('form_builder', array('submit_name'=>'Kirjaudu', 'submit_value'=>'Kirjaudu sisään', 'required_text' => '*Pakollinen kenttä'));
+			$this->form_builder->submit_value = "Kirjaudu sisään";
+			
+			// create fields
+			$fields = array();
+			$fields['tunnus'] = array('type' => 'text', 'required' => TRUE, 'name' => 'identity', 'label' => 'Tunnus', 'class'=>'form-control');
+			$fields['salasana'] = array('type' => 'password', 'required' => TRUE, 'name' => 'password', 'label' => 'Salasana', 'class'=>'form-control');
+			
+			$this->form_builder->form_attrs = array('method' => 'post', 'action' => site_url('/auth/login'));   
+			
+			// render the form
+			echo $this->form_builder->render_template('_layouts/basic_form_template', $fields );
+		}
+	}
+?>
       		</div>  
 
       		<div class="col-md-9">

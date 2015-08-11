@@ -45,11 +45,4 @@
     <form method="post" action="<?=site_url('/yllapito/hakemusjono')?>">
         <input type="submit" value="Ohita ja ota seuraava">
     </form>
-    
-<?php else: ?>
-    <div class="alert alert-danger" role="alert">
-        <p>
-            Tämä alue on vain ylläpidolle.
-        </p>
-    </div>
 <?php endif; ?>
