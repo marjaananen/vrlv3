@@ -9,9 +9,9 @@ class Tunnukset_model extends Base_module_model
         parent::__construct();
     }
  
-    function add_new_application($nimimerkki, $email, $syntymavuosi, $sijainti)
+    function add_new_application($nickname, $email, $dateofbirth, $location)
     {
-        $data = array('nimimerkki' => $nimimerkki, 'email' => $email, 'sijainti' => $sijainti);
+        $data = array('nimimerkki' => $nickname, 'email' => $email, 'sijainti' => $location);
         
         $data['salasana'] = $this->_generate_random_string(8);
         $data['rekisteroitynyt'] = date("Y-m-d H:i:s");
@@ -22,7 +22,7 @@ class Tunnukset_model extends Base_module_model
         if($syntymavuosi == '')
             $data['syntymavuosi'] = '0000-00-00';
         else
-            $data['syntymavuosi'] = date('Y-m-d', strtotime($syntymavuosi));
+            $data['syntymavuosi'] = date('Y-m-d', strtotime($dateofbirth));
         
         $this->db->insert('vrlv3_tunnukset_jonossa', $data);
         
@@ -34,7 +34,7 @@ class Tunnukset_model extends Base_module_model
         $this->db->delete('vrlv3_tunnukset_jonossa', array('id' => $id)); 
     }
     
-    function validate_application($email, $varmistus)
+    function validate_application($email, $validation)
     {
         $this->db->select('email, varmistus, id');
         $this->db->from('vrlv3_tunnukset_jonossa');
@@ -45,7 +45,7 @@ class Tunnukset_model extends Base_module_model
         {
             $row = $query->row(); 
         
-            if($row->email == $email && $row->varmistus == $varmistus)
+            if($row->email == $email && $row->varmistus == $validation)
             {
                 $data = array('vahvistettu' => 1);
                 
@@ -167,6 +167,16 @@ class Tunnukset_model extends Base_module_model
         }
         
         return $data;
+    }
+    
+    function add_previous_nickname($nickname, $pinnumber, $hidden=0)
+    {
+        $data = array('nimimerkki' => $nickname, 'tunnus' => $pinnumber, 'piilotettu' => $hidden);
+        $data['vaihtanut'] = date("Y-m-d H:i:s");
+        
+        $this->db->insert('vrlv3_tunnukset_nimimerkit', $data);
+        
+        return true;
     }
 
     function _generate_random_string($length)

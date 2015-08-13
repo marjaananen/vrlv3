@@ -1,10 +1,13 @@
 <h2>Omat tiedot</h2>
 
 <p>
-    <?php if(!empty(validation_errors())) : ?>
+    <?php if(!empty($fail_msg) || !empty(validation_errors())) : ?>
         <div class="alert alert-danger" role="alert">
             <p>Tietojen päivitys epäonnistui!</p>
-            <?php echo validation_errors(); ?>
+            <?php
+                echo validation_errors();
+                echo $fail_msg;
+            ?>
         </div>
     <?php endif; ?>
     
@@ -12,9 +15,13 @@
         <div class="alert alert-success" role="alert">
             <p>Tietojen päivitys onnistui.</p>
         </div>
+    <?php elseif(!empty($success) && $success == false) : ?>
+        <div class="alert alert-danger" role="alert">
+            <p>Tietojen päivitys epäonnistui! Tarkasta tietosi uudelleen profiilistasi.</p>
+        </div>
     <?php endif; ?>
     
     <?php
-        echo fuel_var('profile_form', '');
+        echo fuel_var('profile_form', '<a href="">Takaisin profiilin muokkaukseen</a>');
     ?>
 </p>

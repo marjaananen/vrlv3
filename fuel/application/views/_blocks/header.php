@@ -78,6 +78,8 @@
 			
 			// render the form
 			echo $this->form_builder->render_template('_layouts/basic_form_template', $fields );
+			
+			echo "<br /><a href='" . site_url('/auth/forgot_password') . "'>Unohtuiko salasana?</a>";
 		}
 	}
 ?>
