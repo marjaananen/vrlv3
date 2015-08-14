@@ -1,9 +1,5 @@
 ﻿<h2>Hakemusjono</h2>
 
-<p>
-    //tämän sivun css pitäisi uusia bootstrappiin
-</p>
-
 <?php if($this->session->flashdata('return_status') != '') : ?>
     <div class="alert alert-<?php echo $this->session->flashdata('return_status'); ?>" role="alert">
         <p>
@@ -15,11 +11,14 @@
 <?php if ($view_status === 'queue_status') : ?>
     <p>
         Jonossa on <?php echo $queue_length; ?> hakemusta.
-    </p>
     <?php
         if($queue_length > 0)
+        {
+            echo "Vanhin hakemus on lähetetty " . $oldest_application . ".</p><p>";
             echo fuel_var('get_next_application', '');
+        }
     ?>
+    </p>
 <?php elseif ($view_status === 'next_join_application'): ?>
     
     <div class="application_data">

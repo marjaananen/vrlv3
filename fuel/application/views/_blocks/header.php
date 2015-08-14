@@ -62,6 +62,7 @@
 		if ($this->ion_auth->logged_in())
 		{		
 			echo "Tervetuloa, " . $this->session->userdata( 'username' ) . "<br /> <a href=" . site_url('/auth/logout') . ">Kirjaudu ulos</a> <br /> <a href=" . site_url('/profiili') . ">Profiili</a>";
+			echo "<br />Sinulle on 0 uutta pikaviestiä.";
 		}
 		else
 		{

@@ -66,6 +66,25 @@ class Tunnukset_model extends Base_module_model
         return $this->db->count_all_results();
     }
     
+    function get_oldest_application()
+    {
+        $data = 0;
+        
+        $this->db->select('rekisteroitynyt');
+        $this->db->where('vahvistettu', 1);
+        $this->db->from('vrlv3_tunnukset_jonossa');
+        $this->db->order_by("rekisteroitynyt", "asc"); 
+        $query = $this->db->get();
+        
+        if ($query->num_rows() > 0)
+        {
+            $data = $query->row_array(); 
+            $data = $data['rekisteroitynyt'];
+        }
+        
+        return $data;
+    }
+    
     function get_application($id)
     {
         $data = array('success' => false);
@@ -102,7 +121,7 @@ class Tunnukset_model extends Base_module_model
         return $data;
     }
 	
-	function get_location_option_list()
+    function get_location_option_list()
     {
         $data = array();
         
@@ -175,6 +194,17 @@ class Tunnukset_model extends Base_module_model
         $data['vaihtanut'] = date("Y-m-d H:i:s");
         
         $this->db->insert('vrlv3_tunnukset_nimimerkit', $data);
+        
+        return true;
+    }
+    
+    function add_successful_login($pinnumber)
+    {
+        $data = array('tunnus' => $pinnumber);
+        $data['aika'] = date("Y-m-d H:i:s");
+        $data['ip'] = $this->input->ip_address();
+        
+        $this->db->insert('vrlv3_tunnukset_kirjautumiset', $data);
         
         return true;
     }

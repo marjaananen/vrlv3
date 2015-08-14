@@ -61,15 +61,16 @@ class Auth extends CI_Controller {
 
 			if ($this->ion_auth->login($this->input->post('identity'), $this->input->post('password'), $remember))
 			{
-				//if the login is successful
-				//redirect them back to the home page
+				//if the login is successful,
+                                $this->load->model('tunnukset_model');
+                                $this->tunnukset_model->add_successful_login($this->input->post('identity'));
+				//ohjataan sinne missä kirjautui sisään
 				$this->session->set_flashdata('message', $this->ion_auth->messages());
-				//redirect('/', 'refresh');
-                                redirect($_SERVER['HTTP_REFERER'], 'refresh'); //ohjataan sinne missä kirjautui sisään
+                                redirect($_SERVER['HTTP_REFERER'], 'refresh'); 
 			}
 			else
 			{
-				// if the login was un-successful
+				// if the login was un-successful,
 				// redirect them back to the login page
 				$this->session->set_flashdata('message', $this->ion_auth->errors());
 				redirect('auth/login', 'refresh'); // use redirects instead of loading views for compatibility with MY_Controller libraries
