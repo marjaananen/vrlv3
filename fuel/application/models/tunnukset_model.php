@@ -221,7 +221,76 @@ class Tunnukset_model extends Base_module_model
         }
         
         return $randomString;
-    }    
-}
+    }
+    
+    //Messages
+    function send_message($user, $recipient, $message)
+    {
+        $data = array('lahettaja' => $user, 'vastaanottaja' => $recipient, 'viesti' => $message);   
+        $this->db->insert('vrlv3_tunnukset_pikaviestit', $data);
+    }
+    
+    function unread_messages($user)
+    {
+        $data = array('vastaanottaja' => $user, 'luettu' => 0);   
+        $this->db->where($data);
+        $this->db->from('vrlv3_tunnukset_pikaviestit');
+        return $this->db->count_all_results();
+    }
+    
+    function get_users_messages($user)
+    {
+        $this->clean_messages($user);
+        
+        $data = array();
+        $this->db->where('vastaanottaja', $user);
+        $this->db->from('vrlv3_tunnukset_pikaviestit');
+        $this->db->order_by("aika", "desc"); 
+        $query = $this->db->get();
+        
+        $this->mark_all_as_read($user);
+        return $query->result_array();
+    }
+    
+        
+    function delete_message($user, $id)
+    {
+        $this->db->delete('vrlv3_tunnukset_pikaviestit', array('id' => $id, "vastaanottaja"=> $user)); 
+    }
+    
+    function clean_messages($user)
+    {
+        //seitsemän päivää vanhat poistetaan
+        $date = new DateTime();
+        $date->setTimestamp(time() - 7*24*60*60);
+        $oldest_possible = $date->format('Y-m-d H:i:s');
+        $this->db->delete('vrlv3_tunnukset_pikaviestit', array("vastaanottaja"=> $user, "tarkea" => 0, "luettu" => 1, "aika <" => $oldest_possible)); 
+    }
+    
+
+    function mark_all_as_read($user)
+    {
+        $data = array('luettu' => 1);
+        $this->db->where('vastaanottaja', $user);
+        $this->db->update('vrlv3_tunnukset_pikaviestit', $data);
+    }
+    
+    function mark_as_important($user, $id)
+    {
+        $data = array('tarkea' => 1);
+        $this->_edit_message($id, $user, $data);
+    }
+    
+    function mark_as_unimportant($user, $id)
+    {
+        $data = array('tarkea' => 0);
+        $this->_edit_message($id, $user, $data);
+    }
+
+    function _edit_message($id, $user, $data){
+        $where = array('id' => $id, 'vastaanottaja' => $user);
+        $this->db->where($where);
+        $this->db->update('vrlv3_tunnukset_pikaviestit', $data);
+    }
 
 ?>

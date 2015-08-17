@@ -132,8 +132,36 @@ CREATE TABLE IF NOT EXISTS `vrlv3_tunnukset_yhteystiedot` (
   KEY `tunnus` (`tunnus`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Tunnusten yhteystiedot';
 
+
+
+--
+-- Rakenne taululle `vrlv3_tunnukset_pikaviestit`
+--
+
+CREATE TABLE IF NOT EXISTS `vrlv3_tunnukset_pikaviestit` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `lahettaja` int(5) unsigned zerofill DEFAULT NULL,
+  `vastaanottaja` int(5) unsigned zerofill NOT NULL,
+  `aika` datetime NOT NULL,
+  `viesti` varchar(360) NOT NULL,
+  `luettu` int(1) NOT NULL,
+  `tarkea` int(1) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `lahettaja` (`lahettaja`),
+  KEY `vastaanottaja` (`vastaanottaja`)
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='Tunnusten pikaviestit';
+
 --
 -- Rajoitteet vedostauluille
+--
+
+--
+-- Rajoitteet taululle `tunnukset_pikaviestit`
+--
+ALTER TABLE `vrlv3_tunnukset_pikaviestit`
+  ADD CONSTRAINT `tunnukset_pikaviestit_ibfk_2` FOREIGN KEY (`lahettaja`) REFERENCES `vrlv3_tunnukset` (`tunnus`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `tunnukset_pikaviestit_ibfk_1` FOREIGN KEY (`vastaanottaja`) REFERENCES `vrlv3_tunnukset` (`tunnus`) ON DELETE CASCADE ON UPDATE CASCADE;
+
 
 --
 --
