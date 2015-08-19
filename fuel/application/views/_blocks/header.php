@@ -51,9 +51,7 @@
   			<div class="col-md-3" id="leftCol">
               	
 				<div class="well"> 
-					<?php if (!empty($sidemenu)) : ?>
-					<?php echo $sidemenu; ?>
-					<?php endif ?>
+					<?php if (!empty($sidemenu)) { echo $sidemenu;} else {echo $main_quickmenu;} ?>
   				</div>
 <?php
 //kirjautumislomake / profiili ja logout

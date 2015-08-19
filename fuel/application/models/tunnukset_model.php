@@ -223,6 +223,36 @@ class Tunnukset_model extends Base_module_model
         return $randomString;
     }
     
+    //Contacts
+    function add_contact($user, $type, $info)
+    {
+        $data = array('tunnus' => $user, 'tyyppi' => $type, 'tieto' => $info);   
+        $this->db->insert('vrlv3_tunnukset_yhteystiedot', $data);
+    }
+    
+    function delete_contact($user, $id)
+    {
+        $this->db->delete('vrlv3_tunnukset_yhteystiedot', array('id' => $id, "tunnus"=> $user)); 
+    }
+    
+    function edit_contact($user, $edit, $type, $info){
+        $where = array('id' => $id, 'tunnus' => $user);
+        $data = array('tyyppi' => $type, 'tieto' => $info);   
+
+        $this->db->where($where);
+        $this->db->update('vrlv3_tunnukset_yhteystiedot', $data);
+    }
+    
+    function get_users_contacts($user)
+    {
+        $this->db->where('tunnus', $user);
+        $this->db->from('vrlv3_tunnukset_yhteystiedot');
+        $query = $this->db->get();
+        return $query->result_array();
+    }
+    
+    
+    
     //Messages
     function send_message($user, $recipient, $message)
     {
@@ -242,7 +272,6 @@ class Tunnukset_model extends Base_module_model
     {
         $this->clean_messages($user);
         
-        $data = array();
         $this->db->where('vastaanottaja', $user);
         $this->db->from('vrlv3_tunnukset_pikaviestit');
         $this->db->order_by("aika", "desc"); 

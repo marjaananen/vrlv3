@@ -126,8 +126,7 @@ CREATE TABLE IF NOT EXISTS `vrlv3_tunnukset_yhteystiedot` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `tunnus` int(5) unsigned zerofill NOT NULL,
   `tyyppi` varchar(10) NOT NULL,
-  `tieto` text NOT NULL,
-  `nayta` smallint(1) NOT NULL,
+  `tieto` varchar(200) NOT NULL,
   PRIMARY KEY (`id`),
   KEY `tunnus` (`tunnus`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Tunnusten yhteystiedot';
