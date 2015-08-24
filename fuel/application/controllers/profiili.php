@@ -20,11 +20,24 @@ class Profiili extends Loggedin_Controller
 
             $dateofbirth = date("d.m.Y", strtotime($user->syntymavuosi));
             $options = $this->tunnukset_model->get_location_option_list();
+            $contacts_html = '';
+            
+            foreach($this->tunnukset_model->get_users_contacts($user->tunnus) as $row)
+            {
+                if(empty($contacts_html))
+                    $contacts_html .= "<ul>";
+                    
+                $contacts_html .= "<li><b>" . $row['tyyppi'] . ": </b>" . $row['tieto'] . "</li>";
+            }
+        
+            if(!empty($contacts_html))
+                $contacts_html .= "</ul><br />";
             
             // create fields
             $fields['nimimerkki'] = array('type' => 'text', 'value' => $user->nimimerkki, 'class'=>'form-control');
             $fields['email'] = array('type' => 'text', 'value' => $user->email, 'label' => 'Sähköpostiosoite', 'after_html' => '<span class="form_comment">Anna toimiva osoite tai saatat menettää tunnuksesi!</span>', 'class'=>'form-control');
             $fields['nayta_email'] = array('type' => 'checkbox', 'checked' => $user->nayta_email, 'label' => 'Näytetäänkö sähköposti julkisesti?', 'after_html' => '<span class="form_comment">Näytetäänkö sähköposti julkisesti profiilissasi.</span>', 'class'=>'form-control');
+            $fields['muut_yhteystiedot'] = array('type' => 'section', 'tag' => 'label', 'value' => 'Muut yhteystiedot', 'display_label' => false, 'after_html' => $contacts_html . '<span class="form_comment"><a href="' . site_url('/profiili/lisaa_yhteystietoja') . '">Muokkaa yhteystietoja</a></span>');
             $fields['syntymavuosi'] = array('type' => 'text', 'label' => 'Syntymäaika', 'disabled' => 'disabled', 'size' => '10', 'value' => $dateofbirth, 'class'=>'form-control');
             $fields['sijainti'] = array('type' => 'select', 'options' => $options, 'value' => $user->laani, 'class'=>'form-control');
             $fields['nayta_vuosilaani'] = array('type' => 'checkbox', 'checked' => $user->nayta_vuosilaani, 'label' => 'Näytetäänkö sijainti ja ikä julkisesti?', 'after_html' => '<span class="form_comment">Näytetäänkö tiedot julkisesti profiilissasi. Huom! Vain yli 16-vuotiaiden tiedot voidaan näyttää profiilissa.</span>', 'class'=>'form-control');
@@ -118,5 +131,62 @@ class Profiili extends Loggedin_Controller
         else
             redirect('/', 'refresh');
     }
+    
+    function lisaa_yhteystietoja()
+    {
+        $vars = array();
+        $vars['success'] = false;
+	$this->load->library('form_validation');
+        $this->load->model('tunnukset_model');
+        $user = $this->ion_auth->user()->row();
+        
+        // load form_builder
+        $this->load->library('form_builder', array('submit_value' => 'Lisää'));
+        $options = array('irc' => 'IRC', 'line' => 'Line', 'skype' => 'Skype', 'www' => 'WWW');
+        
+        // create fields
+        $fields['tyyppi'] = array('type' => 'select', 'options' => $options, 'value' => 'www', 'class'=>'form-control');
+        $fields['yhteystieto'] = array('type' => 'text', 'class'=>'form-control');
+        $fields['nayta'] = array('type' => 'checkbox', 'checked' => 1, 'label' => 'Näytetäänkö julkisesti?', 'after_html' => '<span class="form_comment">Näytetäänkö yhteystieto julkisesti profiilissasi. Huom! Vain yli 16-vuotiaiden tiedot voidaan näyttää profiilissa.</span>', 'class'=>'form-control');
+
+        $this->form_builder->form_attrs = array('method' => 'post', 'action' => site_url('profiili/lisaa_yhteystietoja'));
+
+        // render the page
+        $vars['add_contacts_form'] = $this->form_builder->render_template('_layouts/basic_form_template', $fields );
+            
+        if($this->input->server('REQUEST_METHOD') == 'POST')
+        {
+            $this->form_validation->set_rules('tyyppi', 'Tyyppi', "required|min_length[1]|max_length[10]|regex_match[/^[A-Za-z0-9_\-.:,; *~#&'@()]*$/]");
+            $this->form_validation->set_rules('yhteystieto', 'Yhteystieto', "required|min_length[1]|max_length[128]|regex_match[/^[A-Za-z0-9_\-.:,; *~#&'@()]*$/]");
+            $this->form_validation->set_rules('nayta', 'Näkyvyys', 'min_length[1]|max_length[1]|numeric|regex_match[/^[01]*$/]');
+            
+            if ($this->form_validation->run() == true)
+            {
+                $this->tunnukset_model->add_contact($user->tunnus, $this->input->post('tyyppi'), $this->input->post('yhteystieto'), $this->input->post('nayta'));
+                $vars['success'] = true;
+            }
+        }
+        
+        $vars['contact_info'] = $this->tunnukset_model->get_users_contacts($user->tunnus);
+        $this->fuel->pages->render('profiili/lisaa_yhteystietoja', $vars);
+    }
+    
+    function poista_yhteystieto($id)
+    {
+        if(!empty($id))
+        {
+            $this->load->model('tunnukset_model');
+            $user = $this->ion_auth->user()->row();
+            $this->tunnukset_model->delete_contact($user->tunnus, $id);
+        }
+        
+        redirect('profiili/lisaa_yhteystietoja');
+    }
 }
 ?>
+
+
+
+
+
+

@@ -9,6 +9,7 @@ class Tunnukset_model extends Base_module_model
         parent::__construct();
     }
  
+    //Applications
     function add_new_application($nickname, $email, $dateofbirth, $location)
     {
         $data = array('nimimerkki' => $nickname, 'email' => $email, 'sijainti' => $location);
@@ -102,7 +103,37 @@ class Tunnukset_model extends Base_module_model
         
         return $data;
     }
+
+    function get_next_application()
+    {
+        $data = array('success' => false);
+        $date = new DateTime();
+        $date->setTimestamp(time() - 60*15); //nykyhetki miinus 15min, eli ei saa ottaa samaa hakemusta uudestaan käsittelyyn 15 minuuttiin
+        
+        $this->db->select('id, nimimerkki, email, syntymavuosi, rekisteroitynyt, sijainti, ip');
+        $this->db->from('vrlv3_tunnukset_jonossa');
+        $this->db->where('vahvistettu', 1);
+        $this->db->where('kasitelty IS NULL OR kasitelty < "' . $date->format('Y-m-d H:i:s') . '"');
+        $this->db->order_by("rekisteroitynyt", "asc"); 
+        $query = $this->db->get();
+        
+        if ($query->num_rows() > 0)
+        {
+            $data = $query->row_array(); 
+
+            $date->setTimestamp(time());
+            $update_data = array('kasitelty' => $date->format('Y-m-d H:i:s'));
+            
+            $this->db->where('id', $data['id']);
+            $this->db->update('vrlv3_tunnukset_jonossa', $update_data);
+            
+            $data['success'] = true;
+        }
+        
+        return $data;
+    }
     
+    //Location
     function get_location($id)
     {
         $data = 'Ei saatavilla';
@@ -141,35 +172,7 @@ class Tunnukset_model extends Base_module_model
         return $data;
     }
     
-    function get_next_application()
-    {
-        $data = array('success' => false);
-        $date = new DateTime();
-        $date->setTimestamp(time() - 60*15); //nykyhetki miinus 15min, eli ei saa ottaa samaa hakemusta uudestaan käsittelyyn 15 minuuttiin
-        
-        $this->db->select('id, nimimerkki, email, syntymavuosi, rekisteroitynyt, sijainti, ip');
-        $this->db->from('vrlv3_tunnukset_jonossa');
-        $this->db->where('vahvistettu', 1);
-        $this->db->where('kasitelty IS NULL OR kasitelty < "' . $date->format('Y-m-d H:i:s') . '"');
-        $this->db->order_by("rekisteroitynyt", "asc"); 
-        $query = $this->db->get();
-        
-        if ($query->num_rows() > 0)
-        {
-            $data = $query->row_array(); 
-
-            $date->setTimestamp(time());
-            $update_data = array('kasitelty' => $date->format('Y-m-d H:i:s'));
-            
-            $this->db->where('id', $data['id']);
-            $this->db->update('vrlv3_tunnukset_jonossa', $update_data);
-            
-            $data['success'] = true;
-        }
-        
-        return $data;
-    }
-    
+    //Other/misc
     function get_next_pinnumber()
     {
         $data = 0;
@@ -224,28 +227,29 @@ class Tunnukset_model extends Base_module_model
     }
     
     //Contacts
-    function add_contact($user, $type, $info)
+    function add_contact($pinnumber, $type, $info, $nayta=0)
     {
-        $data = array('tunnus' => $user, 'tyyppi' => $type, 'tieto' => $info);   
+        $data = array('tunnus' => $pinnumber, 'tyyppi' => $type, 'tieto' => $info, 'nayta' => $nayta);   
         $this->db->insert('vrlv3_tunnukset_yhteystiedot', $data);
     }
     
-    function delete_contact($user, $id)
+    function delete_contact($pinnumber, $id)
     {
-        $this->db->delete('vrlv3_tunnukset_yhteystiedot', array('id' => $id, "tunnus"=> $user)); 
+        $this->db->delete('vrlv3_tunnukset_yhteystiedot', array('id' => $id, "tunnus"=> $pinnumber)); 
     }
     
-    function edit_contact($user, $edit, $type, $info){
-        $where = array('id' => $id, 'tunnus' => $user);
+    function edit_contact($pinnumber, $edit, $type, $info)
+    {
+        $where = array('id' => $id, 'tunnus' => $pinnumber);
         $data = array('tyyppi' => $type, 'tieto' => $info);   
 
         $this->db->where($where);
         $this->db->update('vrlv3_tunnukset_yhteystiedot', $data);
     }
     
-    function get_users_contacts($user)
+    function get_users_contacts($pinnumber)
     {
-        $this->db->where('tunnus', $user);
+        $this->db->where('tunnus', $pinnumber);
         $this->db->from('vrlv3_tunnukset_yhteystiedot');
         $query = $this->db->get();
         return $query->result_array();
@@ -254,72 +258,73 @@ class Tunnukset_model extends Base_module_model
     
     
     //Messages
-    function send_message($user, $recipient, $message)
+    function send_message($pinnumber, $recipient, $message)
     {
-        $data = array('lahettaja' => $user, 'vastaanottaja' => $recipient, 'viesti' => $message);   
+        $data = array('lahettaja' => $pinnumber, 'vastaanottaja' => $recipient, 'viesti' => $message);   
         $this->db->insert('vrlv3_tunnukset_pikaviestit', $data);
     }
     
-    function unread_messages($user)
+    function unread_messages($pinnumber)
     {
-        $data = array('vastaanottaja' => $user, 'luettu' => 0);   
+        $data = array('vastaanottaja' => $pinnumber, 'luettu' => 0);   
         $this->db->where($data);
         $this->db->from('vrlv3_tunnukset_pikaviestit');
         return $this->db->count_all_results();
     }
     
-    function get_users_messages($user)
+    function get_users_messages($pinnumber)
     {
-        $this->clean_messages($user);
+        $this->clean_messages($pinnumber);
         
-        $this->db->where('vastaanottaja', $user);
+        $this->db->where('vastaanottaja', $pinnumber);
         $this->db->from('vrlv3_tunnukset_pikaviestit');
         $this->db->order_by("aika", "desc"); 
         $query = $this->db->get();
         
-        $this->mark_all_as_read($user);
+        $this->mark_all_as_read($pinnumber);
         return $query->result_array();
     }
     
         
-    function delete_message($user, $id)
+    function delete_message($pinnumber, $id)
     {
-        $this->db->delete('vrlv3_tunnukset_pikaviestit', array('id' => $id, "vastaanottaja"=> $user)); 
+        $this->db->delete('vrlv3_tunnukset_pikaviestit', array('id' => $id, "vastaanottaja"=> $pinnumber)); 
     }
     
-    function clean_messages($user)
+    function clean_messages($pinnumber)
     {
         //seitsemän päivää vanhat poistetaan
         $date = new DateTime();
         $date->setTimestamp(time() - 7*24*60*60);
         $oldest_possible = $date->format('Y-m-d H:i:s');
-        $this->db->delete('vrlv3_tunnukset_pikaviestit', array("vastaanottaja"=> $user, "tarkea" => 0, "luettu" => 1, "aika <" => $oldest_possible)); 
+        $this->db->delete('vrlv3_tunnukset_pikaviestit', array("vastaanottaja"=> $pinnumber, "tarkea" => 0, "luettu" => 1, "aika <" => $oldest_possible)); 
     }
     
 
-    function mark_all_as_read($user)
+    function mark_all_as_read($pinnumber)
     {
         $data = array('luettu' => 1);
-        $this->db->where('vastaanottaja', $user);
+        $this->db->where('vastaanottaja', $pinnumber);
         $this->db->update('vrlv3_tunnukset_pikaviestit', $data);
     }
     
-    function mark_as_important($user, $id)
+    function mark_as_important($pinnumber, $id)
     {
         $data = array('tarkea' => 1);
-        $this->_edit_message($id, $user, $data);
+        $this->_edit_message($id, $pinnumber, $data);
     }
     
-    function mark_as_unimportant($user, $id)
+    function mark_as_unimportant($pinnumber, $id)
     {
         $data = array('tarkea' => 0);
-        $this->_edit_message($id, $user, $data);
+        $this->_edit_message($id, $pinnumber, $data);
     }
 
-    function _edit_message($id, $user, $data){
-        $where = array('id' => $id, 'vastaanottaja' => $user);
+    function _edit_message($id, $pinnumber, $data)
+    {
+        $where = array('id' => $id, 'vastaanottaja' => $pinnumber);
         $this->db->where($where);
         $this->db->update('vrlv3_tunnukset_pikaviestit', $data);
     }
+}
 
-?>
