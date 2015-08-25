@@ -67,9 +67,12 @@ class Yllapito extends CI_Controller
             $vars['view_status'] = "queue_status";
             
             $vars['queue_length'] = $this->tunnukset_model->get_application_queue_length();
-            
             if($vars['queue_length'] > 0)
                 $vars['oldest_application'] = $this->tunnukset_model->get_oldest_application();
+                
+            $vars['latest_approvals'] = $this->tunnukset_model->get_latest_approvals();
+            $vars['latest_logins'] = $this->tunnukset_model->get_latest_logins();
+            $vars['latest_failed_logins'] = $this->tunnukset_model->get_latest_failed_logins();
             
             $this->load->library('form_builder', array('submit_value' => 'Hae seuraava hakemus'));
             $this->form_builder->form_attrs = array('method' => 'post', 'action' => site_url('/yllapito/tunnukset/hyvaksy'));

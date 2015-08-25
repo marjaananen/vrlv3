@@ -201,6 +201,57 @@ class Tunnukset_model extends Base_module_model
         return true;
     }
     
+    function get_latest_approvals()
+    {
+        $this->db->select('nimimerkki, hyvaksytty');
+        $this->db->from('vrlv3_tunnukset');
+        $this->db->order_by("hyvaksytty", "desc");
+        $this->db->limit(5);
+        $query = $this->db->get();
+        
+        if ($query->num_rows() > 0)
+        {
+            return $query->result_array(); 
+        }
+        
+        return array();
+    }
+    
+    function get_latest_logins()
+    {
+        $this->db->select('nimimerkki, aika');
+        $this->db->from('vrlv3_tunnukset_kirjautumiset');
+        $this->db->join('vrlv3_tunnukset', 'vrlv3_tunnukset_kirjautumiset.tunnus = vrlv3_tunnukset.tunnus');
+        $this->db->where('onnistuiko', 1);
+        $this->db->order_by("aika", "desc");
+        $this->db->limit(5);
+        $query = $this->db->get();
+        
+        if ($query->num_rows() > 0)
+        {
+            return $query->result_array(); 
+        }
+        
+        return array();
+    }
+    
+    function get_latest_failed_logins()
+    {
+        $this->db->select('nimimerkki, time');
+        $this->db->from('vrlv3_login_attempts');
+        $this->db->join('vrlv3_tunnukset', 'vrlv3_login_attempts.login = vrlv3_tunnukset.tunnus');
+        $this->db->order_by("time", "desc");
+        $this->db->limit(5);
+        $query = $this->db->get();
+        
+        if ($query->num_rows() > 0)
+        {
+            return $query->result_array(); 
+        }
+        
+        return array();
+    }
+    
     function add_successful_login($pinnumber)
     {
         $data = array('tunnus' => $pinnumber);

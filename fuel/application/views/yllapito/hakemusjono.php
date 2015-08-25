@@ -10,14 +10,52 @@
 
 <?php if ($view_status === 'queue_status') : ?>
     <p>
+        Viimeisimmät hyväksynnät:
+        <ul>
+            <?php
+                foreach($latest_approvals as $la)
+                {
+                    echo "<li>" . $la['nimimerkki'] . " (" . $la['hyvaksytty'] . ")</li>";
+                }
+            ?>
+        </ul>
+    </p>
+    <p>
+        Viimeisimmät kirjautumiset:
+        <ul>
+            <?php
+                foreach($latest_logins as $ll)
+                {
+                    echo "<li>" . $ll['nimimerkki'] . " (" . $ll['aika'] . ")</li>";
+                }
+            ?>
+        </ul>
+    </p>
+    <p>
+        Viimeisimmät epäonnistuneet kirjautumiset:
+        <ul>
+            <?php
+                $date = new DateTime();
+                foreach($latest_failed_logins as $lfl)
+                {
+                    $date->setTimestamp($lfl['time']);
+                    echo "<li>" . $lfl['nimimerkki'] . " (" . $date->format('Y-m-d H:i:s') . ")</li>";
+                }
+            ?>
+        </ul>
+    </p>
+
+    <br />
+    
+    <p>
         Jonossa on <?php echo $queue_length; ?> hakemusta.
-    <?php
-        if($queue_length > 0)
-        {
-            echo "Vanhin hakemus on lähetetty " . $oldest_application . ".</p><p>";
-            echo fuel_var('get_next_application', '');
-        }
-    ?>
+        <?php
+            if($queue_length > 0)
+            {
+                echo "Vanhin hakemus on lähetetty " . $oldest_application . ".</p><p>";
+                echo fuel_var('get_next_application', '');
+            }
+        ?>
     </p>
 <?php elseif ($view_status === 'next_join_application'): ?>
     
