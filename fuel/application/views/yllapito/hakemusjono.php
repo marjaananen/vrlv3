@@ -59,7 +59,7 @@
     </p>
 <?php elseif ($view_status === 'next_join_application'): ?>
     
-    <div class="application_data">
+    <div class="container" style="border-radius: 0;">
         <h3>Hakemuksen tiedot</h3>
         
         <p>Nimimerkki: <?=$application_data['nimimerkki']?></p>
@@ -70,16 +70,62 @@
         <p>IP-osoite: <?=$application_data['ip']?></p>
     </div>
     
-    <form method="post" action="<?=site_url('/yllapito/kasittele_hakemus')?>/hyvaksy/<?=$application_data['id']?>">
-        <input type="submit" value="Hyväksy">
-    </form>
+    <?php if(!empty($same_ip_logins)) : ?>
+        <p>
+            Viimeisimmät kirjautumiset samasta IP:stä:
+            <ul>
+                <?php
+                    foreach($same_ip_logins as $sil)
+                    {
+                        echo "<li><a href='" . site_url('/tunnukset/tunnus') . "/" . $sil['tunnus'] . "'>" . $sil['nimimerkki'] . " (" . $sil['aika'] . ")</a></li>";
+                    }
+                ?>
+            </ul>
+        </p>
+    <?php endif; ?>
     
-    <form method="post" action="<?=site_url('/yllapito/kasittele_hakemus')?>/hylkaa/<?=$application_data['id']?>">
-        Hylkäyssyy: <input type="text" name="rejection_reason">
-        <input type="submit" value="Hylkää">
-    </form>
+    <?php if(!empty($same_nicknames)) : ?>
+        <p>
+            Käyttäjät samalla nimimerkillä:
+            <ul>
+                <?php
+                    foreach($same_nicknames as $sn)
+                    {
+                        echo "<li><a href='" . site_url('/tunnukset/tunnus') . "/" . $sn['tunnus'] . "'>VRL-" . $sn['tunnus'] . "</a></li>";
+                    }
+                ?>
+            </ul>
+        </p>
+    <?php endif; ?>
     
-    <form method="post" action="<?=site_url('/yllapito/hakemusjono')?>">
-        <input type="submit" value="Ohita ja ota seuraava">
-    </form>
+    <?php if(!empty($same_dateofbirths)) : ?>
+        <p>
+            Käyttäjät samalla syntymäpäivällä:
+            <ul>
+                <?php
+                    foreach($same_dateofbirths as $sd)
+                    {
+                        echo "<li><a href='" . site_url('/tunnukset/tunnus') . "/" . $sd['tunnus'] . "'>" . $sd['nimimerkki'] . "</a></li>";
+                    }
+                ?>
+            </ul>
+        </p>
+    <?php endif; ?>
+        
+    <br />
+    
+    <p>
+        <form method="post" action="<?=site_url('/yllapito/kasittele_hakemus')?>/hyvaksy/<?=$application_data['id']?>">
+            <input type="submit" value="Hyväksy">
+        </form>
+        
+        <form method="post" action="<?=site_url('/yllapito/kasittele_hakemus')?>/hylkaa/<?=$application_data['id']?>">
+            Hylkäyssyy: <input type="text" name="rejection_reason">
+            <input type="submit" value="Hylkää">
+        </form>
+        
+        <form method="post" action="<?=site_url('/yllapito/hakemusjono')?>">
+            <input type="submit" value="Ohita ja ota seuraava">
+        </form>
+    </p>
 <?php endif; ?>

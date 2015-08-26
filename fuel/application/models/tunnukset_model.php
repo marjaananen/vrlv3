@@ -217,6 +217,54 @@ class Tunnukset_model extends Base_module_model
         return array();
     }
     
+    function get_pinnumbers_by_nickname($nick)
+    {
+        $this->db->select('tunnus');
+        $this->db->from('vrlv3_tunnukset');
+        $this->db->where('nimimerkki', $nick);
+        $query = $this->db->get();
+        
+        if ($query->num_rows() > 0)
+        {
+            return $query->result_array(); 
+        }
+        
+        return array();
+    }
+    
+    function get_users_by_dateofbirth($dateofbirth)
+    {
+        $this->db->select('tunnus, nimimerkki');
+        $this->db->from('vrlv3_tunnukset');
+        $this->db->where('syntymavuosi', $dateofbirth);
+        $query = $this->db->get();
+        
+        if ($query->num_rows() > 0)
+        {
+            return $query->result_array(); 
+        }
+        
+        return array();
+    }   
+    
+    //Logins
+    function get_latest_failed_logins()
+    {
+        $this->db->select('nimimerkki, time');
+        $this->db->from('vrlv3_login_attempts');
+        $this->db->join('vrlv3_tunnukset', 'vrlv3_login_attempts.login = vrlv3_tunnukset.tunnus');
+        $this->db->order_by("time", "desc");
+        $this->db->limit(5);
+        $query = $this->db->get();
+        
+        if ($query->num_rows() > 0)
+        {
+            return $query->result_array(); 
+        }
+        
+        return array();
+    }
+    
     function get_latest_logins()
     {
         $this->db->select('nimimerkki, aika');
@@ -235,12 +283,13 @@ class Tunnukset_model extends Base_module_model
         return array();
     }
     
-    function get_latest_failed_logins()
+    function get_logins_by_ip($ip)
     {
-        $this->db->select('nimimerkki, time');
-        $this->db->from('vrlv3_login_attempts');
-        $this->db->join('vrlv3_tunnukset', 'vrlv3_login_attempts.login = vrlv3_tunnukset.tunnus');
-        $this->db->order_by("time", "desc");
+        $this->db->select('nimimerkki, vrlv3_tunnukset.tunnus, aika');
+        $this->db->from('vrlv3_tunnukset_kirjautumiset');
+        $this->db->join('vrlv3_tunnukset', 'vrlv3_tunnukset_kirjautumiset.tunnus = vrlv3_tunnukset.tunnus');
+        $this->db->where('ip',  $ip);
+        $this->db->order_by("aika", "desc");
         $this->db->limit(5);
         $query = $this->db->get();
         
@@ -263,6 +312,7 @@ class Tunnukset_model extends Base_module_model
         return true;
     }
 
+    //Private
     function _generate_random_string($length)
     {
         $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';

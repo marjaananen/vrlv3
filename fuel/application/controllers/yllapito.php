@@ -55,6 +55,13 @@ class Yllapito extends CI_Controller
                 redirect('/yllapito/tunnukset/hyvaksy');
             }
             
+            $vars['same_ip_logins'] = $this->tunnukset_model->get_logins_by_ip($vars['application_data']['ip']);
+            $vars['same_nicknames'] = $this->tunnukset_model->get_pinnumbers_by_nickname($vars['application_data']['nimimerkki']);
+            if($vars['application_data']['syntymavuosi'] != '0000-00-00')
+                $vars['same_dateofbirths'] = $this->tunnukset_model->get_users_by_dateofbirth($vars['application_data']['syntymavuosi']);
+            else
+                $vars['same_dateofbirths'] = array();
+            
             $vars['application_data']['rekisteroitynyt'] = date('d.m.Y H:i',strtotime($vars['application_data']['rekisteroitynyt']));
             $vars['application_data']['sijainti'] = $this->tunnukset_model->get_location($vars['application_data']['sijainti']);
             if($vars['application_data']['syntymavuosi'] == '0000-00-00')
@@ -111,9 +118,9 @@ class Yllapito extends CI_Controller
                 $additional_data['hyvaksytty'] = $date->format('Y-m-d H:i:s');
                 $additional_data['hyvaksyi'] = $user->tunnus;
                 $additional_data['tunnus'] = $this->tunnukset_model->get_next_pinnumber();
-                $new_pinnumber = $additional_data['tunnus'];
+                $new_pinnumber = str_pad($additional_data['tunnus'], 5, '0', STR_PAD_LEFT);
                 
-                $this->ion_auth->register($application_data['nimimerkki'], $application_data['salasana'], $application_data['email'], $additional_data);
+                $this->ion_auth->register($new_pinnumber, $application_data['salasana'], $application_data['email'], $additional_data);
                 
                 $this->session->set_flashdata('return_info', 'Hakemus hyväksytty.');
                 $this->session->set_flashdata('return_status', 'success');
