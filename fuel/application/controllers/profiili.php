@@ -126,7 +126,7 @@ class Profiili extends Loggedin_Controller
                 }
             }
             
-            $this->fuel->pages->render('profiili/tiedot', $vars);
+            $this->fuel->pages->render('profiili/etusivu', $vars);
         }
         else
             redirect('/', 'refresh');
@@ -181,6 +181,94 @@ class Profiili extends Loggedin_Controller
         }
         
         redirect('profiili/lisaa_yhteystietoja');
+    }
+    
+    
+    
+    
+    function pikaviestit()
+    {
+        $vars = array();
+        $vars['success'] = false;
+	$this->load->library('form_validation');
+        $this->load->model('tunnukset_model');
+        $user = $this->ion_auth->user()->row();
+        
+        // load form_builder
+        $this->load->library('form_builder', array('submit_value' => 'Lisää'));
+        
+        // create fields
+        $fields['vastaanottaja'] = array('type' => 'text', 'class'=>'form-control');
+        $fields['viesti'] = array('type' => 'text', 'class'=>'form-control');
+
+        $this->form_builder->form_attrs = array('method' => 'post', 'action' => site_url('profiili/pikaviestit'));
+
+        // render the page
+        $vars['quick_messages_form'] = $this->form_builder->render_template('_layouts/basic_form_template', $fields );
+            
+        if($this->input->server('REQUEST_METHOD') == 'POST')
+        {
+            $this->form_validation->set_rules('vastaanottaja', 'Vastaanottaja', "required|min_length[5]|max_length[9]|callback__pinnumber_check");
+            $this->form_validation->set_rules('viesti', 'Viesti', "required|min_length[1]|max_length[360]|regex_match[/^[A-Za-z0-9_\-.:,; *~#&'@()]*$/]");
+            
+            if ($this->form_validation->run() == true)
+            {
+		$this->load->library('Vrl_helper');
+		$recipient = $this->Vrl_helper->vrl_to_number($this->input->post('vastaanottaja'));
+                $this->tunnukset_model->send_message($user->tunnus, $recipient, $this->input->post('viesti'));
+                $vars['success'] = true;
+            }
+        }
+        
+        $vars['messages'] = $this->tunnukset_model->get_users_messages($user->tunnus);
+        $this->fuel->pages->render('profiili/etusivu', $vars);
+    }
+    
+    function poista_pikaviesti($id)
+    {
+        if(!empty($id))
+        {
+            $this->load->model('tunnukset_model');
+            $user = $this->ion_auth->user()->row();
+            $this->tunnukset_model->delete_message($user->tunnus, $id);
+        }
+        
+        redirect('profiili');
+    }
+    
+    function aseta_tarkeys($id, $important)
+    {
+        if(!empty($id))
+        {
+	    $this->load->model('tunnukset_model');
+	    $user = $this->ion_auth->user()->row();
+	    if ($important == "0" || empty($important)){
+		$this->tunnukset_model->mark_as_important($user->tunnus, $id);
+	    }
+            else if ($important == "1"){
+		$this->tunnukset_model->mark_as_unimportant($user->tunnus, $id);
+	    }  
+        }        
+        redirect('profiili');
+    }
+    
+    
+    function _pinnumber_check($id)
+    {
+	$this->load->library('Vrl_helper');
+	 
+
+	if ($this->Vrl_helper->check_vrl_syntax($id) && $this->ion_auth->identity_check($id))
+	{
+	    return TRUE;
+	}
+	else
+	{
+	    $this->form_validation->set_message('pinnumber_check', 'Kyseistä VRL-tunnusta ei ole olemassa!');
+	    return FALSE;
+		
+	}
+
     }
 }
 ?>
