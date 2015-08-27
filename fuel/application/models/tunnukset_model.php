@@ -20,7 +20,7 @@ class Tunnukset_model extends Base_module_model
         $data['ip'] = $this->input->ip_address();
         
         //syntymä on muodossa dd.mm.yyyy joten pitää muuttaa
-        if($syntymavuosi == '')
+        if($dateofbirth == '')
             $data['syntymavuosi'] = '0000-00-00';
         else
             $data['syntymavuosi'] = date('Y-m-d', strtotime($dateofbirth));
@@ -122,7 +122,8 @@ class Tunnukset_model extends Base_module_model
             $data = $query->row_array(); 
 
             $date->setTimestamp(time());
-            $update_data = array('kasitelty' => $date->format('Y-m-d H:i:s'));
+            $user = $this->ion_auth->user()->row();
+            $update_data = array('kasitelty' => $date->format('Y-m-d H:i:s'), 'kasittelija' => $user->tunnus);
             
             $this->db->where('id', $data['id']);
             $this->db->update('vrlv3_tunnukset_jonossa', $update_data);

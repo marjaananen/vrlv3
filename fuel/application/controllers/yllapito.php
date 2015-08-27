@@ -89,7 +89,7 @@ class Yllapito extends CI_Controller
         $this->fuel->pages->render('yllapito/hakemusjono', $vars);
     }
     
-    function kasittele_hakemus($paatos, $id)
+    function kasittele_hakemus($approved, $id)
     {
         $user = $this->ion_auth->user()->row();
         $date = new DateTime();
@@ -98,7 +98,7 @@ class Yllapito extends CI_Controller
         $this->session->set_flashdata('return_status', '');
         $rej_reason = $this->input->post('rejection_reason');
         
-        if($this->input->server('REQUEST_METHOD') == 'POST' && is_numeric($id) && $id >= 0 && ($paatos == 'hyvaksy' || $paatos == 'hylkaa'))
+        if($this->input->server('REQUEST_METHOD') == 'POST' && is_numeric($id) && $id >= 0 && ($approved == 'hyvaksy' || $approved == 'hylkaa'))
         {
             $this->load->library('email');
             $this->load->model('tunnukset_model');
@@ -112,7 +112,7 @@ class Yllapito extends CI_Controller
                 redirect('/yllapito/tunnukset/hyvaksy');
             }
             
-            if($paatos == 'hyvaksy')
+            if($approved == 'hyvaksy')
             {   
                 $additional_data = array('laani' => $application_data['sijainti'], 'syntymavuosi' => $application_data['syntymavuosi'], 'nimimerkki' => $application_data['nimimerkki']);
                 $additional_data['hyvaksytty'] = $date->format('Y-m-d H:i:s');
@@ -137,7 +137,7 @@ class Yllapito extends CI_Controller
             
             $this->email->subject('VRL-tunnushakemuksesi on käsitelty');
             
-            if($paatos == 'hyvaksy')
+            if($approved == 'hyvaksy')
                 $this->email->message('Tunnushakemuksesi on hyväksytty, tervetuloa käyttämään VRL:ää!\nVoit kirjautua sisään alla olevalla tunnuksella ja salasanalla sivuston oikeassa yläkulmassa olevan lomakkeen avulla. Kirjoita tunnuksen numero-osa ensimmäiseen laatikkoon ja salasanasi toiseen. Muista vaihtaa salasana ensimmäisellä kirjautumiskerralla!\n\n---------------------------------------\n\nVRL-tunnus: ' .  $new_pinnumber . '\nSalasana: ' .  $application_data['salasana'] . '\n\n---------------------------------------\n\nÄlä vastaa tähän sähköpostiin!\nJos et ole lähettänyt jäsenhakemusta, ota yhteys VRL:n ylläpitoon osoitteessa yllapito@virtuaalihevoset.net');
             else
             {

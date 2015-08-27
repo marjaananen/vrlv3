@@ -59,7 +59,7 @@
     </p>
 <?php elseif ($view_status === 'next_join_application'): ?>
     
-    <div class="container" style="border-radius: 0;">
+    <div class="container">
         <h3>Hakemuksen tiedot</h3>
         
         <p>Nimimerkki: <?=$application_data['nimimerkki']?></p>

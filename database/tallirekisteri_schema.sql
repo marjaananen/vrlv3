@@ -55,10 +55,11 @@ CREATE TABLE IF NOT EXISTS `vrlv3_tallirekisteri_jonossa` (
   `lyhenne` varchar(4) NOT NULL,
   `url` text NOT NULL,
   `kuvaus` text NOT NULL,
-  `ilmoitettu` datetime NOT NULL,
-  `ilmoitti` smallint(5) unsigned zerofill NOT NULL,
+  `lisatty` datetime NOT NULL,
+  `lisaaja` smallint(5) unsigned zerofill NOT NULL,
   `kategoria` smallint(2) NOT NULL,
   `kasitelty` datetime DEFAULT NULL,
+  `kasittelija` int(5) unsigned zerofill DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `id` (`id`),
   KEY `kategoria` (`kategoria`)
