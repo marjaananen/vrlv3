@@ -141,7 +141,7 @@ CREATE TABLE IF NOT EXISTS `vrlv3_tunnukset_pikaviestit` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `lahettaja` int(5) unsigned zerofill DEFAULT NULL,
   `vastaanottaja` int(5) unsigned zerofill NOT NULL,
-  `aika` datetime NOT NULL,
+  `aika` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `viesti` varchar(360) NOT NULL,
   `luettu` int(1) NOT NULL,
   `tarkea` int(1) NOT NULL,
