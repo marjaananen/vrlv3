@@ -101,6 +101,7 @@ $nav['yllapito/tallirekisteri/haku'] = array('label' => 'Tee hakuja talleista', 
 
 // profiili alamenu
 $nav['profiili/tiedot'] = array('label' => 'Omat tiedot', 'parent_id' => 'profiili', 'active' => 'profiili/tiedot');
+$nav['profiili/pikaviestit'] = array('label' => 'Pikaviestit', 'parent_id' => 'profiili', 'active' => 'profiili/pikaviestit');
 $nav['profiili/omat-hevoset'] = array('label' => 'Omat hevoset', 'parent_id' => 'profiili', 'active' => 'profiili/omat-hevoset');
 $nav['profiili/omat-tallit'] = array('label' => 'Omat tallit', 'parent_id' => 'profiili', 'active' => 'profiili/omat-tallit');
 $nav['profiili/omat-kasvattajanimet'] = array('label' => 'Omat kasvattajanimet', 'parent_id' => 'profiili', 'active' => 'profiili/omat-kasvattajanimet');

@@ -43,8 +43,6 @@ $route['yllapito/tunnukset/hyvaksy'] = "yllapito/hakemusjono";
 $route['yllapito/tallirekisteri/hyvaksy'] = "yllapito/tallijono";
 $route['yllapito/tallirekisteri/hyvaksy_kasittele/(:any)/(:num)'] = "yllapito/kasittele_talli/$1/$2";
 
-$route['profiili'] = "profiili/pikaviestit";
-
 $route['default_controller'] = 'main';
 $route['404_override'] = 'fuel/page_router';
 

@@ -1,5 +1,5 @@
-<h2>Omat tiedot</h2>
-Tervetuloa VRL:n profiiliin. 
+
+
 
 <h2>Pikaviestit</h2>
 
@@ -48,6 +48,10 @@ Viestiss채 voi olla korkeintaan 360 merkki채, eik채 viestiss채 voi k채ytt채채 k�
                     $icon = img_path('icons/star.png');
                 }
                 
+                else {
+                    $icon = img_path('icons/star_grey.png');
+                }
+                
                 if ($message['lahettaja'] === "00000"){
                     $lahettaja = "Yll채pito";
                 }
@@ -59,10 +63,15 @@ Viestiss채 voi olla korkeintaan 360 merkki채, eik채 viestiss채 voi k채ytt채채 k�
                 if($message['luettu'] == 0){
                     $class = " class=\"success\"";
                 }
+                
+                else {
+                    $class = "";
+                }
                 echo "<tr$class>";
                 echo "<td> <a href=\"". site_url('/profiili/aseta_tarkeys') . "/" . $message['id'] . "/". $message['tarkea'] . "\"><img src=\"$icon\"></a> <a href=\"". site_url('/profiili/poista_pikaviesti') . "/" . $message['id'] . "\"><img src=\"$delete\"></a></td>";
-                echo "<td>" . $message['aika'] . "</td>";
+                echo "<td>" . date('d.m.Y H:i',strtotime($message['aika'])) . "</td>";
                 echo "<td>$lahettaja</td>";
+                echo "<td>".$message['viesti']." </td>";
                 echo "</tr>";
             }
             

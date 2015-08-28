@@ -34,8 +34,8 @@ class Vrl_helper {
   
   public function vh_to_number($vh){
     
-    if (check_vh_syntax($vh)){
-      return ereg_replace("[^0-9]", "", $vh);					
+    if ($this->check_vh_syntax($vh)){
+      return preg_replace("[^0-9]", "", $vh);					
     }
     
     else return "";
@@ -45,8 +45,8 @@ class Vrl_helper {
     
   public function vrl_to_number($vrl) {
     
-    if (check_vrl_syntax($vrl)){
-      return ereg_replace("[^0-9]", "", $vrl);					
+    if ($this->check_vrl_syntax($vrl)){
+      return preg_replace("[^0-9]", "", $vrl);					
     }
     
     else return "";
@@ -64,7 +64,7 @@ class Vrl_helper {
   }
   
   public function get_vrl($nro) {
-    if (check_vrl_syntax($nro)){
+    if ($this->check_vrl_syntax($nro)){
       
       if(strlen($nro)==5){
         return "VRL-".$nro;

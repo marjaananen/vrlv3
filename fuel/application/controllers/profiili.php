@@ -5,7 +5,25 @@ class Profiili extends Loggedin_Controller
     {
         parent::__construct();
     }
+    
+    function index (){
+	
+	$user = $this->ion_auth->user()->row();
+	
+	$vars = array();
+	$vars['nimimerkki'] =  $user->nimimerkki;
+        $vars['email'] = $user->email;
+	$dateofbirth = date("d.m.Y", strtotime($user->syntymavuosi));
+	$dateofaccept = date("d.m.Y", strtotime($user->hyvaksytty));
+	$vars['syntymavuosi'] =  $dateofbirth;
+	$vars['sijainti'] = $user->laani;
+	$vars['hyvaksytty'] = $dateofaccept;
+	
+	$this->fuel->pages->render('profiili/index', $vars);
 
+    }
+    
+    
     function tiedot()
     {
         $vars = array();
@@ -191,8 +209,10 @@ class Profiili extends Loggedin_Controller
         $this->load->model('tunnukset_model');
         $user = $this->ion_auth->user()->row();
         
+    
+     
         // load form_builder
-        $this->load->library('form_builder', array('submit_value' => 'Lisää'));
+        $this->load->library('form_builder', array('submit_value' => 'Lähetä'));
         
         // create fields
         $fields['vastaanottaja'] = array('type' => 'text', 'class'=>'form-control');
@@ -211,14 +231,16 @@ class Profiili extends Loggedin_Controller
             if ($this->form_validation->run() == true)
             {
 		$this->load->library('Vrl_helper');
-		$recipient = $this->Vrl_helper->vrl_to_number($this->input->post('vastaanottaja'));
+		
+		$recipient = $this->vrl_helper->vrl_to_number($this->input->post('vastaanottaja'));
                 $this->tunnukset_model->send_message($user->tunnus, $recipient, $this->input->post('viesti'));
                 $vars['success'] = true;
+		
             }
         }
         
         $vars['messages'] = $this->tunnukset_model->get_users_messages($user->tunnus);
-        $this->fuel->pages->render('profiili/etusivu', $vars);
+        $this->fuel->pages->render('profiili/pikaviestit', $vars);
     }
     
     function poista_pikaviesti($id)
@@ -230,7 +252,7 @@ class Profiili extends Loggedin_Controller
             $this->tunnukset_model->delete_message($user->tunnus, $id);
         }
         
-        redirect('profiili');
+        redirect('profiili/pikaviestit');
     }
     
     function aseta_tarkeys($id, $important)
@@ -246,7 +268,7 @@ class Profiili extends Loggedin_Controller
 		$this->tunnukset_model->mark_as_unimportant($user->tunnus, $id);
 	    }  
         }        
-        redirect('profiili');
+        redirect('profiili/pikaviestit');
     }
     
     
@@ -255,7 +277,7 @@ class Profiili extends Loggedin_Controller
 	$this->load->library('Vrl_helper');
 	 
 
-	if ($this->Vrl_helper->check_vrl_syntax($id) && $this->ion_auth->identity_check($id))
+	if ($this->vrl_helper->check_vrl_syntax($id) && $this->ion_auth->identity_check($id))
 	{
 	    return TRUE;
 	}
