@@ -12,6 +12,8 @@ class Yllapito extends CI_Controller
         }
     }
 
+    //ADMIN-OSUUS
+    
     //salainen adminin funktio, jolla voi lisätä käyttäjän johonkin käyttöoikeusryhmään
     //parametrit query stringinä
     function add_user_to_group()
@@ -36,6 +38,8 @@ class Yllapito extends CI_Controller
 
         $this->fuel->pages->render('misc/showmessage', $vars);
     }
+    
+    //HAKEMUSJONO-OSUUS
     
     function hakemusjono()
     {
@@ -89,7 +93,7 @@ class Yllapito extends CI_Controller
         $this->fuel->pages->render('yllapito/hakemusjono', $vars);
     }
     
-    function kasittele_hakemus($paatos, $id)
+    function kasittele_hakemus($approved, $id)
     {
         $user = $this->ion_auth->user()->row();
         $date = new DateTime();
@@ -98,7 +102,10 @@ class Yllapito extends CI_Controller
         $this->session->set_flashdata('return_status', '');
         $rej_reason = $this->input->post('rejection_reason');
         
-        if($this->input->server('REQUEST_METHOD') == 'POST' && is_numeric($id) && $id >= 0 && ($paatos == 'hyvaksy' || $paatos == 'hylkaa'))
+        if(empty($rej_reason))
+            $rej_reason = "-";
+        
+        if($this->input->server('REQUEST_METHOD') == 'POST' && is_numeric($id) && $id >= 0 && ($approved == 'hyvaksy' || $approved == 'hylkaa'))
         {
             $this->load->library('email');
             $this->load->model('tunnukset_model');
@@ -112,7 +119,7 @@ class Yllapito extends CI_Controller
                 redirect('/yllapito/tunnukset/hyvaksy');
             }
             
-            if($paatos == 'hyvaksy')
+            if($approved == 'hyvaksy')
             {   
                 $additional_data = array('laani' => $application_data['sijainti'], 'syntymavuosi' => $application_data['syntymavuosi'], 'nimimerkki' => $application_data['nimimerkki']);
                 $additional_data['hyvaksytty'] = $date->format('Y-m-d H:i:s');
@@ -137,7 +144,7 @@ class Yllapito extends CI_Controller
             
             $this->email->subject('VRL-tunnushakemuksesi on käsitelty');
             
-            if($paatos == 'hyvaksy')
+            if($approved == 'hyvaksy')
                 $this->email->message('Tunnushakemuksesi on hyväksytty, tervetuloa käyttämään VRL:ää!\nVoit kirjautua sisään alla olevalla tunnuksella ja salasanalla sivuston oikeassa yläkulmassa olevan lomakkeen avulla. Kirjoita tunnuksen numero-osa ensimmäiseen laatikkoon ja salasanasi toiseen. Muista vaihtaa salasana ensimmäisellä kirjautumiskerralla!\n\n---------------------------------------\n\nVRL-tunnus: ' .  $new_pinnumber . '\nSalasana: ' .  $application_data['salasana'] . '\n\n---------------------------------------\n\nÄlä vastaa tähän sähköpostiin!\nJos et ole lähettänyt jäsenhakemusta, ota yhteys VRL:n ylläpitoon osoitteessa yllapito@virtuaalihevoset.net');
             else
             {
@@ -155,6 +162,101 @@ class Yllapito extends CI_Controller
         }
             
         redirect('/yllapito/tunnukset/hyvaksy');
+    }
+    
+    //TALLIJONO-OSUUS
+    
+    function tallijono()
+    {
+        $this->load->library('queue_manager', array('db_table' => 'vrlv3_tallirekisteri_jonossa'));
+        $this->session->set_flashdata('return_status', '');
+        
+        if($this->input->server('REQUEST_METHOD') == 'POST')
+        {
+            $vars['view_status'] = "next_queue_item";
+            $qitem = $this->queue_manager->get_next();
+            
+            if($qitem['success'] == false)
+            {
+                $this->session->set_flashdata('return_info', 'Tallianomuksen tietojen noutaminen epäonnistui!<br />Joku saattaa olla jo hyväksymässä haettua tallia, tai tapahtui muu virhe.');
+                $this->session->set_flashdata('return_status', 'danger');
+                redirect('/yllapito/tallirekisteri/hyvaksy');
+            }
+            
+            $raw_data = array();
+            $raw_data['Nimi'] = $qitem['nimi'];
+            $raw_data['Lyhenne'] = $qitem['lyhenne'];
+            $raw_data['Kategoria'] = $qitem['kategoria'];
+            $raw_data['URL'] = $qitem['url'];
+            $raw_data['Kuvaus'] = $qitem['kuvaus'];
+            $raw_data['Anottu'] = $qitem['lisatty'];
+            $raw_data['Anoja'] = "VRL-" . $qitem['lisaaja'];
+            
+            $vars['queue_item_html'] = $this->queue_manager->format_html('Tallianomus', $raw_data, $qitem['id']);
+        }
+        else
+        {
+            $vars['view_status'] = "queue_status";
+            
+            $frontpage = $this->queue_manager->get_queue_frontpage();
+            
+            $vars['queue_status_html'] = $frontpage['html'];
+        }
+            
+        $this->fuel->pages->render('yllapito/tallijono', $vars);
+    }
+    
+    function kasittele_talli($approved, $id)
+    {
+        $this->load->library('queue_manager', array('db_table' => 'vrlv3_tallirekisteri_jonossa'));
+        $this->session->set_flashdata('return_status', '');
+        $rej_reason = $this->input->post('rejection_reason');
+        $insert_data = array();
+        $msg = "";
+        
+        if(empty($rej_reason))
+            $rej_reason = "-";
+        
+        if($this->input->server('REQUEST_METHOD') == 'POST' && is_numeric($id) && $id >= 0 && ($approved == 'hyvaksy' || $approved == 'hylkaa'))
+        {
+            $qitem = $this->queue_manager->get_by_id($id);
+            
+            if($qitem['success'] == false)
+            {
+                $this->session->set_flashdata('return_info', 'Anomuksen käsittely epäonnistui!');
+                $this->session->set_flashdata('return_status', 'danger');
+                redirect('/yllapito/tallirekisteri/hyvaksy');
+            }
+            
+            if($approved == 'hyvaksy')
+            {   
+                $approved = true;
+                $this->session->set_flashdata('return_info', 'Anomus hyväksytty.');
+                $this->session->set_flashdata('return_status', 'success');
+                
+                $msg = "Tallianomuksesi tallille " . $qitem['nimi'] . " on hyväksytty.";
+                
+                $date = new DateTime();
+                $date->setTimestamp(time());
+                
+                $insert_data['nimi'] = $qitem['nimi'];
+                $insert_data['url'] = $qitem['url'];
+                $insert_data['kuvaus'] = $qitem['kuvaus'];
+                $insert_data['perustettu'] = $date->format('Y-m-d H:i:s');
+            }
+            else
+            {
+                $approved = false;
+                $this->session->set_flashdata('return_info', 'Anomus hylätty.');
+                $this->session->set_flashdata('return_status', 'success');
+                
+                $msg = "Valitettavasti tallianomuksesi tallille " . $qitem['nimi'] . " hylättiin. Syy: " . $rej_reason;
+            }
+            
+            $this->queue_manager->process_queue_item($id, $approved, $insert_data, $qitem['lisaaja'], $msg);
+        }
+            
+        redirect('/yllapito/tallirekisteri/hyvaksy');
     }
 }
 ?>

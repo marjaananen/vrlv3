@@ -53,7 +53,7 @@ CREATE TABLE IF NOT EXISTS `vrlv3_tunnukset` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 INSERT INTO `vrlv3_tunnukset` (`id`, `ip_address`, `username`, `password`, `salt`, `email`, `activation_code`, `forgotten_password_code`, `created_on`, `last_login`, `active`, `tunnus`, `nimimerkki`, `nayta_email`, `laani`, `syntymavuosi`, `nayta_vuosilaani`, `jaahylla`, `frozen`, `reason`, `hyvaksyi`, `hyvaksytty`) VALUES
-     ('1','127.0.0.1','administrator','$2a$07$SeBknntpZror9uyftVopmu61qg0ms8Qv1yV6FG.kQOSM.9QhmTo36','','admin@admin.com','',NULL,'1268889823','1268889823','1', '0','administrator','0','1','1970-01-01','0', '1000-01-01 00:00:00', '0', '-', '0', '1000-01-01 00:00:00');
+     ('1','127.0.0.1','00001','$2a$07$SeBknntpZror9uyftVopmu61qg0ms8Qv1yV6FG.kQOSM.9QhmTo36','','admin@admin.com','',NULL,'1268889823','1268889823','1', '1','administrator','0','1','1970-01-01','0', '1000-01-01 00:00:00', '0', '-', '0', '1000-01-01 00:00:00');
 
 -- --------------------------------------------------------
 
@@ -75,6 +75,7 @@ CREATE TABLE IF NOT EXISTS `vrlv3_tunnukset_jonossa` (
   `vahvistettu` smallint(1) NOT NULL DEFAULT '0',
   `ip` text NOT NULL,
   `kasitelty` datetime DEFAULT NULL,
+  `kasittelija` int(5) unsigned zerofill DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='Hyväksyntää tai vahvistusta odottavat tunnukset';
 

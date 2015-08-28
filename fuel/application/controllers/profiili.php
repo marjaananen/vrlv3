@@ -183,9 +183,6 @@ class Profiili extends Loggedin_Controller
         redirect('profiili/lisaa_yhteystietoja');
     }
     
-    
-    
-    
     function pikaviestit()
     {
         $vars = array();
