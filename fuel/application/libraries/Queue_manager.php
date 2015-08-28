@@ -2,10 +2,13 @@
 
 class Queue_manager
 {
+    private $CI = 0;
+    private $db_table = "";
+    
     public function __construct($params)
     {
-        $db_table = $params['db_table'];
-        $CI =& get_instance();
+        $this->db_table = $params['db_table'];
+        $this->CI =& get_instance();
     }
 
     //hakee seuraavan ja lukitsee sen. paluutaulukon success kertoo miten kävi
@@ -15,21 +18,21 @@ class Queue_manager
         $date = new DateTime();
         $date->setTimestamp(time() - 60*15); //nykyhetki miinus 15min, eli ei saa ottaa samaa jonoitemiä uudestaan käsittelyyn 15 minuuttiin
         
-        $CI->db->from($db_table);
-        $CI->db->where('kasitelty IS NULL OR kasitelty < "' . $date->format('Y-m-d H:i:s') . '"');
-        $CI->db->order_by("lisatty", "asc"); 
-        $query = $CI->db->get();
+        $this->CI->db->from($this->db_table);
+        $this->CI->db->where('kasitelty IS NULL OR kasitelty < "' . $date->format('Y-m-d H:i:s') . '"');
+        $this->CI->db->order_by("lisatty", "asc"); 
+        $query = $this->CI->db->get();
         
         if ($query->num_rows() > 0)
         {
             $data = $query->row_array(); 
 
             $date->setTimestamp(time());
-            $user = $CI->ion_auth->user()->row();
+            $user = $this->CI->ion_auth->user()->row();
             $update_data = array('kasitelty' => $date->format('Y-m-d H:i:s'), 'kasittelija' => $user->tunnus);
             
-            $CI->db->where('id', $data['id']);
-            $CI->db->update($db_table, $update_data);
+            $this->CI->db->where('id', $data['id']);
+            $this->CI->db->update($this->db_table, $update_data);
             
             $data['success'] = true;
         }
@@ -42,9 +45,9 @@ class Queue_manager
     {
         $data = array('success' => false);
         
-        $CI->db->from($db_table);
-        $CI->db->where('id', $id);
-        $query = $CI->db->get();
+        $this->CI->db->from($this->db_table);
+        $this->CI->db->where('id', $id);
+        $query = $this->CI->db->get();
         
         if ($query->num_rows() > 0)
         {
@@ -79,44 +82,52 @@ class Queue_manager
     //lisää datat db_table poislukien loppupääte _jonossa -tauluun, plus hyvaksyi ja hyvaksytty -kentät
     //poistaa id:n jonosta
     //lähettää recipientille msg:n adminilta
-    public function process_queue_item($id, $insert_data, $msg_recipient, $msg)
+    public function process_queue_item($id, $approved, $insert_data, $msg_recipient, $msg)
     {
-        $CI->load->model('tunnukset_model');
-        $CI->tunnukset_model->send_message(1, $msg_recipient, $msg);
+        $this->CI->load->model('tunnukset_model');
+        $this->CI->tunnukset_model->send_message(1, $msg_recipient, $msg);
         
-        $user = $CI->ion_auth->user()->row();
-        $insert_data['hyvaksyi'] = $user->tunnus;
-        $insert_data['hyvaksytty'] = time();
-        $CI->db->insert(str_replace("_jonossa", "", $db_table), $insert_data);
+        if($approved == true)
+        {
+            $user = $this->CI->ion_auth->user()->row();
+            $insert_data['hyvaksyi'] = $user->tunnus;
+            $this->CI->db->insert(str_replace("_jonossa", "", $this->db_table), $insert_data);
+        }
         
-        $CI->db->delete($db_table, array('id' => $id));
+        $this->CI->db->delete($this->db_table, array('id' => $id));
     }
     
     //palauttaa html:nä montako jonossa on ja mikä on vanhimman datetime plus seuraavanhakunappi
     public function get_queue_frontpage()
     {
-        $data = array('success' => false);
+        $data = array();
         
-        $CI->db->select('lisatty');
-        $CI->db->from($db_table);
-        $CI->db->order_by("lisatty", "asc"); 
-        $query = $CI->db->get();
+        $this->CI->db->select('lisatty');
+        $this->CI->db->from($this->db_table);
+        $this->CI->db->order_by("lisatty", "asc"); 
+        $query = $this->CI->db->get();
         
         if ($query->num_rows() > 0)
         {
             $db_data = $query->row_array(); 
             $data['oldest'] = $db_data['lisatty'];
             
-            $CI->db->from($db_table);
-            $data['queue_length'] = $CI->db->count_all_results();
+            $this->CI->db->from($this->db_table);
+            $data['queue_length'] = $this->CI->db->count_all_results();
             
             $data['html'] = "<p>Jonon pituus on " . $data['queue_length'] . ". Vanhin jonottaja on lisätty " . $data['oldest'] . ".</p><p>";
-            $CI->load->library('form_builder', array('submit_value' => 'Hae seuraava'));
-            $CI->form_builder->form_attrs = array('method' => 'post', 'action' => current_url());
-            $vars['html'] .= $CI->form_builder->render();
-            $vars['html'] .= "</p>";
-            
-            $data['success'] = true;
+            $this->CI->load->library('form_builder', array('submit_value' => 'Hae seuraava'));
+            $this->CI->form_builder->form_attrs = array('method' => 'post', 'action' => current_url());
+            $data['html'] .= $this->CI->form_builder->render();
+            $data['html'] .= "</p>";
+        }
+        else
+        {
+            $data['html'] = "<p>Jono on tyhjä.</p><p>";
+            $this->CI->load->library('form_builder', array('submit_value' => 'Hae seuraava'));
+            $this->CI->form_builder->form_attrs = array('method' => 'post', 'action' => current_url());
+            $data['html'] .= $this->CI->form_builder->render();
+            $data['html'] .= "</p>";
         }
         
         return $data;

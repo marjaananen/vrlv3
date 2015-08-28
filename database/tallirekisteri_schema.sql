@@ -36,8 +36,8 @@ CREATE TABLE IF NOT EXISTS `vrlv3_tallirekisteri` (
   `piilotettu` tinyint(1) NOT NULL DEFAULT '0',
   `hyvaksytty` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `lopettanut` int(1) NOT NULL DEFAULT '0',
-  `lopetti_pvm` datetime NOT NULL,
-  `lopetti_tunnus` int(5) unsigned zerofill NOT NULL,
+  `lopetti_pvm` datetime DEFAULT NULL,
+  `lopetti_tunnus` int(5) unsigned zerofill DEFAULT NULL,
   PRIMARY KEY (`tnro`),
   KEY `lopetti_tunnus` (`lopetti_tunnus`),
   KEY `hyvaksyi` (`hyvaksyi`)

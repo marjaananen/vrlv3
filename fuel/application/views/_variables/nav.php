@@ -85,6 +85,7 @@ $nav['kilpailutoiminta/jarjestaminen'] = array('label' => 'Näyttelyiden järjes
 
 // ylläpito alamenu
 $nav['yllapito/tunnukset'] = array('label' => 'Tunnukset', 'parent_id' => 'yllapito', 'active' => 'yllapito/tunnukset');
+$nav['yllapito/tallirekisteri'] = array('label' => 'Tallirekisteri', 'parent_id' => 'yllapito', 'active' => 'yllapito/tallirekisteri');
 //$nav['yllapito/hevosrekisteri'] = array('label' => 'Hevosrekisteri', 'parent_id' => 'yllapito', 'active' => 'yllapito/hevosrekisteri');
     
 // ylläpito/tunnukset alamenu
@@ -92,8 +93,14 @@ $nav['yllapito/tunnukset/hyvaksy'] = array('label' => 'Hyväksy VRL-tunnuksia', 
 $nav['yllapito/tunnukset/muokkaa'] = array('label' => 'Muokkaa tunnuksen tietoja', 'parent_id' => 'yllapito/tunnukset', 'active' => 'yllapito/tunnukset/muokkaa');
 $nav['yllapito/tunnukset/haku'] = array('label' => 'Tee hakuja tunnuksista', 'parent_id' => 'yllapito/tunnukset', 'active' => 'yllapito/tunnukset/haku');
 
+// ylläpito/tallirekisteri alamenu
+$nav['yllapito/tallirekisteri/hyvaksy'] = array('label' => 'Hyväksy talleja', 'parent_id' => 'yllapito/tallirekisteri', 'active' => 'yllapito/tallirekisteri/hyvaksy');
+$nav['yllapito/tallirekisteri/muokkaa'] = array('label' => 'Muokkaa tallin tietoja', 'parent_id' => 'yllapito/tallirekisteri', 'active' => 'yllapito/tallirekisteri/muokkaa');
+$nav['yllapito/tallirekisteri/haku'] = array('label' => 'Tee hakuja talleista', 'parent_id' => 'yllapito/tallirekisteri', 'active' => 'yllapito/tallirekisteri/haku');
+
 
 // profiili alamenu
+$nav['profiili/tiedot'] = array('label' => 'Omat tiedot', 'parent_id' => 'profiili', 'active' => 'profiili/tiedot');
 $nav['profiili/omat-hevoset'] = array('label' => 'Omat hevoset', 'parent_id' => 'profiili', 'active' => 'profiili/omat-hevoset');
 $nav['profiili/omat-tallit'] = array('label' => 'Omat tallit', 'parent_id' => 'profiili', 'active' => 'profiili/omat-tallit');
 $nav['profiili/omat-kasvattajanimet'] = array('label' => 'Omat kasvattajanimet', 'parent_id' => 'profiili', 'active' => 'profiili/omat-kasvattajanimet');
