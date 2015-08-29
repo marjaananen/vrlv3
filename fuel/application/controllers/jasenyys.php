@@ -6,6 +6,44 @@ class Jasenyys extends CI_Controller
         parent::__construct();
     }
 
+    function tunnus($tunnus, $tila = ""){
+	
+	$this->load->library('Vrl_helper');
+	 
+	$fields = array();
+
+	if (!($this->vrl_helper->check_vrl_syntax($tunnus) && $this->ion_auth->identity_check($tunnus)))
+	{
+	    $this->fuel->pages->render('jasenyys/tunnus', $fields);
+	}
+	else
+	{
+	    $pinnumber = $this->vrl_helper->vrl_to_number($tunnus);
+	    
+	    $user = $this->ion_auth->user()->row();
+	    $this->load->model('Tunnukset_model');
+
+	    $fields['tunnus'] = $this->vrl_helper->get_vrl($tunnus);
+	    $fields['nimimerkki'] = $user->nimimerkki;
+            $fields['email'] = $user->email;
+            $fields['nayta_email'] = $user->nayta_email;
+            
+	    
+	    $dateofbirth = date("d.m.Y", strtotime($user->syntymavuosi));
+            $fields['syntymavuosi'] = $dateofbirth;
+            $fields['sijainti'] = $user->laani;
+            $fields['nayta_vuosilaani'] = $user->nayta_vuosilaani;
+	    //TODO: Tarkasta onko yli 16v vai oliko se 15v??
+           
+	    $fields['muut_yhteystiedot'] = $this->tunnukset_model->get_users_contacts($pinnumber);
+	    
+	    
+	    
+	    
+	    $this->fuel->pages->render('jasenyys/tunnus', $fields);
+	}
+	
+    }
     function liity()
     {
 	$this->load->library('form_validation');
@@ -100,5 +138,9 @@ class Jasenyys extends CI_Controller
         else
             return false;
     }
+    
+    
+    
+    
 }
 ?>

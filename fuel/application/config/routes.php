@@ -43,6 +43,9 @@ $route['yllapito/tunnukset/hyvaksy'] = "yllapito/hakemusjono";
 $route['yllapito/tallirekisteri/hyvaksy'] = "yllapito/tallijono";
 $route['yllapito/tallirekisteri/hyvaksy_kasittele/(:any)/(:num)'] = "yllapito/kasittele_talli/$1/$2";
 
+$route['tunnus/(:any)'] = "jasenyys/tunnus/$1";
+$route['tunnus/(:any)/(:any)'] = "jasenyys/tunnus/$1/$2";
+
 $route['default_controller'] = 'main';
 $route['404_override'] = 'fuel/page_router';
 
