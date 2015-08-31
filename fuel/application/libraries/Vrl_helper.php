@@ -35,7 +35,7 @@ class Vrl_helper {
   public function vh_to_number($vh){
     
     if ($this->check_vh_syntax($vh)){
-      return preg_replace("[^0-9]", "", $vh);					
+      return preg_replace("/[^0-9]/", "", $vh);					
     }
     
     else return "";
@@ -46,7 +46,7 @@ class Vrl_helper {
   public function vrl_to_number($vrl) {
     
     if ($this->check_vrl_syntax($vrl)){
-      return preg_replace("[^0-9]", "", $vrl);					
+      return preg_replace("/[^0-9]/", "", $vrl);					
     }
     
     else return "";

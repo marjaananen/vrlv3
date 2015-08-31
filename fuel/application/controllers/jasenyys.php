@@ -6,15 +6,13 @@ class Jasenyys extends CI_Controller
         parent::__construct();
     }
 
-    function tunnus($tunnus, $tila = "")
+    function tunnus($tunnus, $sivu = "")
     {
-	if(!$this->ion_auth->logged_in())
-            $this->fuel->pages->render('misc/showmessage', array('msg' => 'Profiilit näkyvät vain kirjautuneille käyttäjille.'));
-        
+
 	$this->load->library('Vrl_helper');
 	$fields = array();
-
-                //BUGBUG VRL- tunnuksilla urlissa!!!!!! 
+	$fields['logged_in'] = $this->ion_auth->logged_in();
+	$fields['sivu'] = $sivu;	
 	if (!($this->vrl_helper->check_vrl_syntax($tunnus) && $this->ion_auth->identity_check($this->vrl_helper->vrl_to_number($tunnus))))
 	{
 	    $this->fuel->pages->render('misc/showmessage', array('msg' => 'Profiilia ei löytynyt!'));
@@ -24,10 +22,10 @@ class Jasenyys extends CI_Controller
             $this->load->model('tunnukset_model');
 	    $pinnumber = $this->vrl_helper->vrl_to_number($tunnus);
 	    $user = $this->ion_auth->user($this->tunnukset_model->get_users_id($pinnumber))->row();
-
 	    $fields['tunnus'] = $this->vrl_helper->get_vrl($tunnus);
 	    $fields['nimimerkki'] = $user->nimimerkki;
-            
+            $fields['rekisteroitynyt'] =  date("d.m.Y", strtotime($user->hyvaksytty));
+
             if($user->nayta_email == 1)
                 $fields['email'] = $user->email;
             else
