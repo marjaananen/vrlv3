@@ -246,7 +246,22 @@ class Tunnukset_model extends Base_module_model
         }
         
         return array();
-    }   
+    }
+    
+    function get_users_id($pinnumber)
+    {
+        $this->db->select('id');
+        $this->db->from('vrlv3_tunnukset');
+        $this->db->where('tunnus', $pinnumber);
+        $query = $this->db->get();
+        
+        if ($query->num_rows() > 0)
+        {
+            return $query->row_array()['id']; 
+        }
+        
+        return -1;
+    }
     
     //Logins
     function get_latest_failed_logins()
@@ -356,8 +371,16 @@ class Tunnukset_model extends Base_module_model
         $query = $this->db->get();
         return $query->result_array();
     }
-    
-    
+
+    function get_users_public_contacts($pinnumber)
+    {
+        $this->db->select('tyyppi, tieto');
+        $this->db->where('tunnus', $pinnumber);
+        $this->db->where('nayta', 1);
+        $this->db->from('vrlv3_tunnukset_yhteystiedot');
+        $query = $this->db->get();
+        return $query->result_array();
+    }    
     
     //Messages
     function send_message($pinnumber, $recipient, $message)

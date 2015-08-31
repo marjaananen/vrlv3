@@ -6,44 +6,50 @@ class Jasenyys extends CI_Controller
         parent::__construct();
     }
 
-    function tunnus($tunnus, $tila = ""){
-	
+    function tunnus($tunnus, $tila = "")
+    {
+	if(!$this->ion_auth->logged_in())
+            $this->fuel->pages->render('misc/showmessage', array('msg' => 'Profiilit näkyvät vain kirjautuneille käyttäjille.'));
+        
 	$this->load->library('Vrl_helper');
-	 
 	$fields = array();
 
-	if (!($this->vrl_helper->check_vrl_syntax($tunnus) && $this->ion_auth->identity_check($tunnus)))
+                //BUGBUG VRL- tunnuksilla urlissa!!!!!! 
+	if (!($this->vrl_helper->check_vrl_syntax($tunnus) && $this->ion_auth->identity_check($this->vrl_helper->vrl_to_number($tunnus))))
 	{
-	    $this->fuel->pages->render('jasenyys/tunnus', $fields);
+	    $this->fuel->pages->render('misc/showmessage', array('msg' => 'Profiilia ei löytynyt!'));
 	}
 	else
 	{
+            $this->load->model('tunnukset_model');
 	    $pinnumber = $this->vrl_helper->vrl_to_number($tunnus);
-	    
-	    $user = $this->ion_auth->user()->row();
-	    $this->load->model('Tunnukset_model');
+	    $user = $this->ion_auth->user($this->tunnukset_model->get_users_id($pinnumber))->row();
 
 	    $fields['tunnus'] = $this->vrl_helper->get_vrl($tunnus);
 	    $fields['nimimerkki'] = $user->nimimerkki;
-            $fields['email'] = $user->email;
-            $fields['nayta_email'] = $user->nayta_email;
             
+            if($user->nayta_email == 1)
+                $fields['email'] = $user->email;
+            else
+                $fields['email'] = "Ei saatavilla";            
 	    
-	    $dateofbirth = date("d.m.Y", strtotime($user->syntymavuosi));
-            $fields['syntymavuosi'] = $dateofbirth;
-            $fields['sijainti'] = $user->laani;
-            $fields['nayta_vuosilaani'] = $user->nayta_vuosilaani;
-	    //TODO: Tarkasta onko yli 16v vai oliko se 15v??
-           
-	    $fields['muut_yhteystiedot'] = $this->tunnukset_model->get_users_contacts($pinnumber);
-	    
-	    
-	    
+            if($user->nayta_vuosilaani == 1 && strtotime($user->syntymavuosi) < strtotime('-16 year'))
+            {
+                $fields['syntymavuosi'] = date("d.m.Y", strtotime($user->syntymavuosi));
+                $fields['sijainti'] = $this->tunnukset_model->get_location($user->laani);
+                $fields['muut_yhteystiedot'] = $this->tunnukset_model->get_users_public_contacts($pinnumber);
+            }
+            else
+            {
+                $fields['syntymavuosi'] = "Ei saatavilla";
+                $fields['sijainti'] = "Ei saatavilla";
+                $fields['muut_yhteystiedot'] = array();
+            }
 	    
 	    $this->fuel->pages->render('jasenyys/tunnus', $fields);
 	}
-	
     }
+    
     function liity()
     {
 	$this->load->library('form_validation');
@@ -138,9 +144,5 @@ class Jasenyys extends CI_Controller
         else
             return false;
     }
-    
-    
-    
-    
 }
 ?>
