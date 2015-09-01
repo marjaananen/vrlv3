@@ -159,7 +159,7 @@ class Tunnukset_model extends Base_module_model
         
         $this->db->select('id, maakunta');
         $this->db->from('vrlv3_lista_maakunnat');
-		$this->db->order_by("maakunta", "asc"); 
+	$this->db->order_by("maakunta", "asc"); 
         $query = $this->db->get();
         
         if ($query->num_rows() > 0)
@@ -200,6 +200,23 @@ class Tunnukset_model extends Base_module_model
         $this->db->insert('vrlv3_tunnukset_nimimerkit', $data);
         
         return true;
+    }
+    
+    function get_previous_nicknames($pinnumber)
+    {
+        $this->db->select('nimimerkki');
+        $this->db->from('vrlv3_tunnukset_nimimerkit');
+        $this->db->where('tunnus', $pinnumber);
+        $this->db->where('piilotettu', 0);
+        $this->db->order_by("vaihtanut", "desc");
+        $query = $this->db->get();
+        
+        if ($query->num_rows() > 0)
+        {
+            return $query->result_array(); 
+        }
+        
+        return array();
     }
     
     function get_latest_approvals()

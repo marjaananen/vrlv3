@@ -1,57 +1,25 @@
 <?php
-class Jasenyys extends CI_Controller
+class Tallit extends CI_Controller
 {
     function __construct()
     {
         parent::__construct();
     }
-
-    function tunnus($tunnus, $sivu = "")
-    {
-
-	$this->load->library('Vrl_helper');
-	$fields = array();
-	$fields['logged_in'] = $this->ion_auth->logged_in();
-	$fields['sivu'] = $sivu;	
-	if (!($this->vrl_helper->check_vrl_syntax($tunnus) && $this->ion_auth->identity_check($this->vrl_helper->vrl_to_number($tunnus))))
-	{
-	    $this->fuel->pages->render('misc/showmessage', array('msg' => 'Profiilia ei löytynyt!'));
-	}
-	else
-	{
-            $this->load->model('tunnukset_model');
-	    $pinnumber = $this->vrl_helper->vrl_to_number($tunnus);
-	    $user = $this->ion_auth->user($this->tunnukset_model->get_users_id($pinnumber))->row();
-	    $fields['tunnus'] = $this->vrl_helper->get_vrl($tunnus);
-	    $fields['nimimerkki'] = $user->nimimerkki;
-            $fields['rekisteroitynyt'] = date("d.m.Y", strtotime($user->hyvaksytty));
-
-            if($user->nayta_email == 1)
-                $fields['email'] = $user->email;
-            else
-                $fields['email'] = "Ei saatavilla";            
-	    
-            if($user->nayta_vuosilaani == 1 && strtotime($user->syntymavuosi) < strtotime('-16 year'))
-            {
-                $fields['syntymavuosi'] = date("d.m.Y", strtotime($user->syntymavuosi));
-                $fields['sijainti'] = $this->tunnukset_model->get_location($user->laani);
-                $fields['muut_yhteystiedot'] = $this->tunnukset_model->get_users_public_contacts($pinnumber);
-            }
-            else
-            {
-                $fields['syntymavuosi'] = "Ei saatavilla";
-                $fields['sijainti'] = "Ei saatavilla";
-                $fields['muut_yhteystiedot'] = array();
-            }
-            
-            $fields['nimimerkit'] = $this->tunnukset_model->get_previous_nicknames($pinnumber);
-	    
-	    $this->fuel->pages->render('jasenyys/tunnus', $fields);
-	}
-    }
     
-    function liity()
+    function index()
     {
+	$this->fuel->pages->render('misc/showmessage', array('msg' => 'Tää on kesken'));
+    }
+
+    function rekisteroi()
+    {
+	$this->load->library('form_validation');
+	$this->load->library('form_collection');
+	$vars['form'] = $this->form_collection->get_stable_form('application');
+	$this->fuel->pages->render('tallit/rekisteroi', $vars);
+	return null;
+	
+	//////
 	$this->load->library('form_validation');
         
         if($this->input->server('REQUEST_METHOD') == 'GET')
@@ -80,7 +48,7 @@ class Jasenyys extends CI_Controller
         {
             if($this->input->post('roskapostitarkastus') == '4')
             {
-		$this->load->helper(array('form', 'url'));
+				$this->load->helper(array('form', 'url'));
                 $this->load->model('tunnukset_model');
                 $this->load->library('email');
                 
@@ -120,29 +88,6 @@ class Jasenyys extends CI_Controller
         }
         else
             redirect('/', 'refresh');
-    }
-    
-    function vahvista()
-    {
-        $this->load->model('tunnukset_model');
-        
-        $email = $this->input->get('email', TRUE);
-        $code = $this->input->get('code', TRUE);
-        
-        if($email != false && $code != false && $this->tunnukset_model->validate_application($email, $code) == true)
-            $vars['msg'] = "Sähköpostiosoitteesi vahvistaminen onnistui!<br /><br />Hakemuksesi siirtyy nyt tunnusjonoon, josta VRL:n työntekijä hyväksyy sen.<br />Saat tämän jälkeen sähköpostilla tunnuksen ja salasanan, joilla pääset kirjautumaan sisään.";
-        else
-            $vars['msg'] = "Jotain meni pieleen!<br /><br />Varmista, ettei sähköpostiisi tullut osoite katkennut osoitepalkille siirrettäessä ja yritä uudelleen.";
-            
-        $this->fuel->pages->render('misc/showmessage', $vars);
-    }
-    
-    function _date_valid($date)
-    {
-        if($date == '' || preg_match('/^(?:(?:31(\.)(?:0?[13578]|1[02]))\1|(?:(?:29|30)(\.)(?:0?[1,3-9]|1[0-2])\2))(?:(?:1[6-9]|[2-9]\d)?\d{2})$|^(?:29(\.)0?2\3(?:(?:(?:1[6-9]|[2-9]\d)?(?:0[48]|[2468][048]|[13579][26])|(?:(?:16|[2468][048]|[3579][26])00))))$|^(?:0?[1-9]|1\d|2[0-8])(\.)(?:(?:0?[1-9])|(?:1[0-2]))\4(?:(?:1[6-9]|[2-9]\d)?\d{2})$/', $date) == 1)
-            return true;
-        else
-            return false;
     }
 }
 ?>

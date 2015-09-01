@@ -4,36 +4,46 @@
     <p><b>Nimimerkki:</b> <?=$nimimerkki?></p>
     <p><b>Rekisteröitynyt:</b> <?=$rekisteroitynyt?></p>
     
-    
-
-    
     <?php if ($logged_in){ ?>
-    <p><b>Sähköpostiosoite:</b> <?=$email?></p>
-    <p><b>Syntymäaika:</b> <?=$syntymavuosi?></p>
-    <p><b>Sijainti:</b> <?=$sijainti?></p>
-    <p>
-        <b>Muut yhteystiedot:</b>
-        <?php
-            if(empty($muut_yhteystiedot))
-                echo "-";
+        <p><b>Sähköpostiosoite:</b> <?=$email?></p>
+        <p><b>Syntymäaika:</b> <?=$syntymavuosi?></p>
+        <p><b>Sijainti:</b> <?=$sijainti?></p>
+        <p>
+            <b>Muut yhteystiedot:</b>
+            <?php
+                if(empty($muut_yhteystiedot))
+                    echo "-";
+                    
+                echo "<ul>";
                 
-            echo "<ul>";
-            
-            foreach($muut_yhteystiedot as $my)
-            {
-                echo "<li><b>" . $my['tyyppi'] . ": </b>" . $my['tieto'] . "</li>";
-            }
-            
-            echo "</ul>";
-        ?>
-    </p>
-    
+                foreach($muut_yhteystiedot as $my)
+                {
+                    echo "<li><b>" . $my['tyyppi'] . ": </b>" . $my['tieto'] . "</li>";
+                }
+                
+                echo "</ul>";
+            ?>
+        </p>
+        <p>
+            <b>Vanhat nimimerkit:</b>
+            <?php
+                if(empty($nimimerkit))
+                    echo "-";
+                    
+                echo "<ul>";
+                
+                foreach($nimimerkit as $n)
+                {
+                    echo "<li>" . $n['nimimerkki'] . "</li>";
+                }
+                
+                echo "</ul>";
+            ?>
+        </p>
     <?php } else {?>
-        
         <div class="alert alert-success" role="alert">
             Näet enemmän profiilitietoja sisäänkirjautuneena!
         </div>
-        
     <?php }?>
     
     <ul class="nav nav-tabs">

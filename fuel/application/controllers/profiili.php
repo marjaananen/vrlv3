@@ -6,8 +6,8 @@ class Profiili extends Loggedin_Controller
         parent::__construct();
     }
     
-    function index (){
-	
+    function index()
+    {
 	$user = $this->ion_auth->user()->row();
 	
 	$vars = array();
@@ -20,9 +20,7 @@ class Profiili extends Loggedin_Controller
 	$vars['hyvaksytty'] = $dateofaccept;
 	
 	$this->fuel->pages->render('profiili/index', $vars);
-
     }
-    
     
     function tiedot()
     {

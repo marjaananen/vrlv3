@@ -173,6 +173,7 @@ class Yllapito extends CI_Controller
         
         if($this->input->server('REQUEST_METHOD') == 'POST')
         {
+            $this->load->model('tallit_model');
             $vars['view_status'] = "next_queue_item";
             $qitem = $this->queue_manager->get_next();
             
@@ -186,7 +187,7 @@ class Yllapito extends CI_Controller
             $raw_data = array();
             $raw_data['Nimi'] = $qitem['nimi'];
             $raw_data['Lyhenne'] = $qitem['lyhenne'];
-            $raw_data['Kategoria'] = $qitem['kategoria'];
+            $raw_data['Kategoria'] = $this->tallit_model->get_category($qitem['kategoria']);
             $raw_data['URL'] = $qitem['url'];
             $raw_data['Kuvaus'] = $qitem['kuvaus'];
             $raw_data['Anottu'] = $qitem['lisatty'];
