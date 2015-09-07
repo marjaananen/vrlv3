@@ -9,6 +9,17 @@ class Tallit_model extends Base_module_model
         parent::__construct();
     }
     
+    //Hakemus
+    function add_new_application($name, $desc, $url, $category, $abbreviation)
+    {
+        $data = array('nimi' => $name, 'kuvaus' => $desc, 'url' => $url, 'kategoria' => $category, 'lyhenne' => $abbreviation);
+
+        $data['lisatty'] = date("Y-m-d H:i:s");
+        $data['lisaaja'] = $this->ion_auth->user()->row()->tunnus;
+        
+        $this->db->insert('vrlv3_tallirekisteri_jonossa', $data);
+    }
+    
     //Kategoria
     function get_category($kat)
     {
@@ -40,12 +51,29 @@ class Tallit_model extends Base_module_model
         if ($query->num_rows() > 0)
         {
             foreach ($query->result_array() as $row)
-			{
-			   $data[$row['kat']] = $row['kategoria'];
-			}
+            {
+               $data[$row['kat']] = $row['kategoria'];
+            }
         }
         
         return $data;
     }
+    
+    //Sekalaisia
+    function is_tnro_in_use($tnro)
+    {
+        $this->db->select('tnro');
+        $this->db->from('vrlv3_tallirekisteri');
+        $this->db->where('tnro', $tnro);
+        $query = $this->db->get();
+        
+        if ($query->num_rows() > 0)
+        {
+            return true;
+        }
+        
+        return false;
+    }
+    
 }
 

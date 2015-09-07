@@ -212,6 +212,7 @@ class Yllapito extends CI_Controller
         $this->load->library('queue_manager', array('db_table' => 'vrlv3_tallirekisteri_jonossa'));
         $this->session->set_flashdata('return_status', '');
         $rej_reason = $this->input->post('rejection_reason');
+        $tnro_alpha = $this->input->post('tnro_alpha');
         $insert_data = array();
         $msg = "";
         
@@ -230,7 +231,16 @@ class Yllapito extends CI_Controller
             }
             
             if($approved == 'hyvaksy')
-            {   
+            {
+                if(empty($tnro_alpha) || strlen($tnro_alpha) < 2 || strlen($tnro_alpha) > 4 || !ctype_alpha($tnro_alpha))
+                {
+                    $this->session->set_flashdata('return_info', 'Anomuksen käsittely epäonnistui, koska annoit virheellisen tallilyhenteen kirjainosan!');
+                    $this->session->set_flashdata('return_status', 'danger');
+                    redirect('/yllapito/tallirekisteri/hyvaksy');
+                }
+                
+                $this->load->model('tallit_model');
+                
                 $approved = true;
                 $this->session->set_flashdata('return_info', 'Anomus hyväksytty.');
                 $this->session->set_flashdata('return_status', 'success');
@@ -244,6 +254,12 @@ class Yllapito extends CI_Controller
                 $insert_data['url'] = $qitem['url'];
                 $insert_data['kuvaus'] = $qitem['kuvaus'];
                 $insert_data['perustettu'] = $date->format('Y-m-d H:i:s');
+                $insert_data['tnro'] = strtoupper($tnro_alpha) . rand(1000, 9999);
+                
+                while($this->tallit_model->is_tnro_in_use($insert_data['tnro']))
+                {
+                    $insert_data['tnro'] = strtoupper($tnro_alpha) . rand(1000, 9999);
+                }
             }
             else
             {
