@@ -126,11 +126,7 @@ class Queue_manager
         }
         else
         {
-            $data['html'] = "<p>Jono on tyhjä.</p><p>";
-            $this->CI->load->library('form_builder', array('submit_value' => 'Hae seuraava'));
-            $this->CI->form_builder->form_attrs = array('method' => 'post', 'action' => current_url());
-            $data['html'] .= $this->CI->form_builder->render();
-            $data['html'] .= "</p>";
+            $data['html'] = "<p>Jono on tyhjä.</p>";
         }
         
         return $data;

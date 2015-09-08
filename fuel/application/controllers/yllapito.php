@@ -209,6 +209,7 @@ class Yllapito extends CI_Controller
     
     function kasittele_talli($approved, $id)
     {
+        $this->load->model('tallit_model');
         $this->load->library('queue_manager', array('db_table' => 'vrlv3_tallirekisteri_jonossa'));
         $this->session->set_flashdata('return_status', '');
         $rej_reason = $this->input->post('rejection_reason');
@@ -238,8 +239,6 @@ class Yllapito extends CI_Controller
                     $this->session->set_flashdata('return_status', 'danger');
                     redirect('/yllapito/tallirekisteri/hyvaksy');
                 }
-                
-                $this->load->model('tallit_model');
                 
                 $approved = true;
                 $this->session->set_flashdata('return_info', 'Anomus hyväksytty.');
@@ -271,6 +270,12 @@ class Yllapito extends CI_Controller
             }
             
             $this->queue_manager->process_queue_item($id, $approved, $insert_data, $qitem['lisaaja'], $msg);
+            
+            if($approved)
+            {
+                $this->tallit_model->add_category_to_stable($insert_data['tnro'], $qitem['kategoria'], $qitem['lisaaja']);
+                $this->tallit_model->add_owner_to_stable($insert_data['tnro'], $qitem['lisaaja'], 1);
+            }
         }
             
         redirect('/yllapito/tallirekisteri/hyvaksy');

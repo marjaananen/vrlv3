@@ -10,12 +10,16 @@ class Form_collection
     }
 
     //moodit ovat: application, edit, admin
-    public function get_stable_form($mode)
+    public function get_stable_form($mode, $tnro=-1)
     {
+        if($mode != 'application' && $mode != 'edit' && $mode != 'admin')
+            return "";
+        
+        $this->CI->load->model('tallit_model');
+        
         if($mode == 'application')
         {
             $this->CI->load->library('form_builder', array('submit_value' => 'Rekisteröi talli', 'required_text' => '*Pakollinen kenttä'));
-            $this->CI->load->model('tallit_model');
     
             $fields['nimi'] = array('type' => 'text', 'required' => TRUE, 'class'=>'form-control');
             $fields['kategoria'] = array('type' => 'select', 'required' => TRUE, 'options' => $this->CI->tallit_model->get_category_option_list(), 'after_html' => '<span class="form_comment">Valitse tallin pääkategoria. Voit lisätä kategorioita lisää myöhemmin.</span>', 'class'=>'form-control');
@@ -25,21 +29,49 @@ class Form_collection
             
             $this->CI->form_builder->form_attrs = array('method' => 'post', 'action' => site_url('/profiili/omat-tallit/rekisteroi'));
         }
+        
+        if($mode == 'edit' || $mode == 'admin')
+        {
+            $this->CI->load->library('form_builder', array('submit_value' => 'Muokkaa', 'required_text' => '*Pakollinen kenttä'));
+            $stable = $this->CI->tallit_model->get_stable($tnro);
+    
+            if($mode == 'admin')
+            {
+                $fields['tallinumero'] = array('type' => 'text', 'required' => TRUE, 'value' => $stable['tnro'], 'class'=>'form-control');
+            }
+    
+            $fields['nimi'] = array('type' => 'text', 'required' => TRUE, 'value' => $stable['nimi'], 'class'=>'form-control');
+            $fields['kuvaus'] = array('type' => 'textarea', 'value' => $stable['kuvaus'], 'cols' => 40, 'rows' => 3, 'class'=>'form-control');
+            $fields['osoite'] = array('type' => 'text', 'required' => TRUE, 'value' => $stable['url'], 'value' => 'http://', 'class'=>'form-control');
+            
+            $this->CI->form_builder->form_attrs = array('method' => 'post', 'action' => site_url('/profiili/omat-tallit/muokkaa'));
+            //onko oikea url ylläpito muokkaukselle?
+        }
 
         return $this->CI->form_builder->render_template('_layouts/basic_form_template', $fields);
     }
     
     public function validate_stable_form($mode)
     {
-        $this->CI->load->library('form_validation');
+        if($mode != 'application' && $mode != 'edit' && $mode != 'admin')
+            return false;
         
+        $this->CI->load->library('form_validation');
+
+        $this->CI->form_validation->set_rules('nimi', 'Nimi', "required|min_length[1]|max_length[128]|regex_match[/^[A-Za-z0-9_\-.:,; *~#&'@()]*$/]");
+        $this->CI->form_validation->set_rules('kuvaus', 'Kuvaus', "max_length[1024]|regex_match[/^[A-Za-z0-9_\-.:,; *~#&'@()]*$/]");
+        $this->CI->form_validation->set_rules('osoite', 'Osoite', "required|min_length[4]|max_length[1024]|regex_match[/^[A-Za-z0-9_\-.:,; \/*~#&'@()]*$/]");
+
         if($mode == 'application')
         {
-            $this->CI->form_validation->set_rules('nimi', 'Nimi', "required|min_length[1]|max_length[128]|regex_match[/^[A-Za-z0-9_\-.:,; *~#&'@()]*$/]");
-            $this->CI->form_validation->set_rules('kuvaus', 'Kuvaus', "max_length[1024]|regex_match[/^[A-Za-z0-9_\-.:,; *~#&'@()]*$/]");
-            $this->CI->form_validation->set_rules('osoite', 'Osoite', "required|min_length[4]|max_length[1024]|regex_match[/^[A-Za-z0-9_\-.:,; \/*~#&'@()]*$/]");
             $this->CI->form_validation->set_rules('kategoria', 'Kategoria', 'required|min_length[1]|max_length[2]|numeric');
             $this->CI->form_validation->set_rules('lyhehd', 'Lyhenne ehdotus', "min_length[2]|max_length[4]|alpha");
+        }
+        
+        if($mode == 'admin')
+        {
+            $this->CI->form_validation->set_rules('tallinumero', 'Tallinumero', "required|min_length[6]|max_length[8]|alphanumeric");
+            //ei täydellinen check
         }
         
         return $this->CI->form_validation->run();
