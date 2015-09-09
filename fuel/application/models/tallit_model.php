@@ -21,6 +21,22 @@ class Tallit_model extends Base_module_model
     }
     
     //Tallit
+    function get_users_stables($pinnumber)
+    {
+        $this->db->select('vrlv3_tallirekisteri.tnro, nimi');
+        $this->db->from('vrlv3_tallirekisteri');
+        $this->db->join('vrlv3_tallirekisteri_omistajat', 'vrlv3_tallirekisteri.tnro = vrlv3_tallirekisteri_omistajat.tnro');
+        $this->db->where('omistaja', $pinnumber);
+        $query = $this->db->get();
+        
+        if ($query->num_rows() > 0)
+        {
+            return $query->result_array(); 
+        }
+        
+        return array();
+    }
+    
     function get_stable($tnro)
     {
         $this->db->from('vrlv3_tallirekisteri');
@@ -66,6 +82,37 @@ class Tallit_model extends Base_module_model
         }
         
         return false;
+    }
+    
+    function get_users_stable_stats($pinnumber)
+    {
+        $data = array();
+        
+        $this->db->select('lopettanut');
+        $this->db->from('vrlv3_tallirekisteri');
+        $this->db->join('vrlv3_tallirekisteri_omistajat', 'vrlv3_tallirekisteri.tnro = vrlv3_tallirekisteri_omistajat.tnro');
+        $this->db->where('omistaja', $pinnumber);
+        $query = $this->db->get();
+        
+        $data['all'] = $query->num_rows();
+        $data['active'] = 0;
+        
+        if ($query->num_rows() > 0)
+        {
+            $result = $query->result_array();
+            
+            foreach($result as $r)
+            {
+                if($r['lopettanut'] == 0)
+                    $data['active']++;
+            }
+        }
+        
+        $this->db->where('lisaaja', $pinnumber);
+        $this->db->from('vrlv3_tallirekisteri_jonossa');
+        $data['queued'] = $this->db->count_all_results();
+        
+        return $data;
     }
     
     //Kategoria

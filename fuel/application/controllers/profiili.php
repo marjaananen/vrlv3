@@ -8,6 +8,7 @@ class Profiili extends Loggedin_Controller
     
     function index()
     {
+        $this->load->model('tallit_model');
 	$user = $this->ion_auth->user()->row();
 	
 	$vars = array();
@@ -18,6 +19,8 @@ class Profiili extends Loggedin_Controller
 	$vars['syntymavuosi'] =  $dateofbirth;
 	$vars['sijainti'] = $user->laani;
 	$vars['hyvaksytty'] = $dateofaccept;
+        
+        $vars['stable_stats'] = $this->tallit_model->get_users_stable_stats($user->tunnus);
 	
 	$this->fuel->pages->render('profiili/index', $vars);
     }

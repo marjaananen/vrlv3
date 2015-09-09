@@ -8,7 +8,11 @@ class Tallit extends CI_Controller
     
     function index()
     {
-	$this->fuel->pages->render('misc/showmessage', array('msg' => 'Tätä ei oo tehty'));
+	$this->load->model('tallit_model');
+	
+	$vars['stables'] = $this->tallit_model->get_users_stables($this->ion_auth->user()->row()->tunnus);
+	
+	$this->fuel->pages->render('tallit/index', $vars);
     }
 
     function rekisteroi()
@@ -44,13 +48,16 @@ class Tallit extends CI_Controller
             redirect('/', 'refresh');
     }
     
+    //sisältää sekä käyttäjän että ylläpidon muokkauslogiikan riippuen modesta (edit tai admin)
     function muokkaa($tnro, $mode)
     {
+	$this->load->model('tallit_model');
+	
 	if(empty($tnro) || empty($mode))
 	    redirect('/');
 	
 	//vain ylläpito tai omistaja saa muokata
-	if(!($this->ion_auth->logged_in() && $this->ion_auth->in_group('yllapito')) && !$this->tallit_model->is_stable_owner($this->ion_auth->user()->row()->tunnus, $tnro))
+	if(!($this->ion_auth->logged_in() && $this->ion_auth->in_group('yllapito') && $mode == 'admin') && !($this->tallit_model->is_stable_owner($this->ion_auth->user()->row()->tunnus, $tnro) && $mode == 'edit'))
 	    redirect('/');
 	
 	$this->load->library('form_validation');
@@ -58,7 +65,10 @@ class Tallit extends CI_Controller
         
         if($this->input->server('REQUEST_METHOD') == 'GET')
         {
-	    $vars['form'] = $this->form_collection->get_stable_form('edit'); //pyydetään lomake muokkausmoodissa
+	    $vars['form'] = $this->form_collection->get_stable_form($mode, $tnro); //pyydetään lomake muokkausmoodissa
+	    
+	    if($vars['form'] == "")
+		redirect('/');
 	    
 	    $this->fuel->pages->render('tallit/muokkaa', $vars);
         }
@@ -81,8 +91,13 @@ class Tallit extends CI_Controller
 		else
 		    $this->tallit_model->edit_stable($this->input->post('nimi'), $this->input->post('kuvaus'), $this->input->post('osoite'), $tnro, $this->input->post('tallinumero'));
 	    }
+	    
+	    $vars['form'] = $this->form_collection->get_stable_form($mode, $tnro);
             
-            redirect($this->input->server('HTTP_REFERER'));
+	    if($mode == 'edit')
+		$this->fuel->pages->render('tallit/muokkaa', $vars);
+	    else
+		redirect($this->input->server('HTTP_REFERER'));
         }
         else
             redirect('/', 'refresh');

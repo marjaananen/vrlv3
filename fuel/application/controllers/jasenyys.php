@@ -8,7 +8,6 @@ class Jasenyys extends CI_Controller
 
     function tunnus($tunnus, $sivu = "")
     {
-
 	$this->load->library('Vrl_helper');
 	$fields = array();
 	$fields['logged_in'] = $this->ion_auth->logged_in();

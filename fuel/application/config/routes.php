@@ -47,7 +47,7 @@ $route['yllapito/tallirekisteri/hyvaksy_kasittele/(:any)/(:num)'] = "yllapito/ka
 
 $route['profiili/omat-tallit'] = "tallit/index";
 $route['profiili/omat-tallit/rekisteroi'] = "tallit/rekisteroi";
-$route['profiili/omat-tallit/muokkaa'] = "tallit/muokkaa";
+$route['profiili/omat-tallit/muokkaa/(:any)/(:any)'] = "tallit/muokkaa/$1/$2";
 
 
 $route['tunnus/(:any)'] = "jasenyys/tunnus/$1";
