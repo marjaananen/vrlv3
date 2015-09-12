@@ -102,5 +102,48 @@ class Tallit extends CI_Controller
         else
             redirect('/', 'refresh');
     }
+    
+    function haku()
+    {
+	$this->load->model('tallit_model');
+	$this->load->library('form_validation');
+	$this->load->library('form_builder', array('submit_value' => 'Hae'));
+	$vars['title'] = 'Tallihaku';
+	$vars['msg'] = 'Hae talleja tallirekisteristä.';
+	
+	$options = $this->tallit_model->get_category_option_list();
+	$options[-1] = 'Mikä tahansa';
+	
+	$fields['nimi'] = array('type' => 'text', 'class'=>'form-control');
+	$fields['kategoria'] = array('type' => 'select', 'options' => $options, 'value' => '-1', 'class'=>'form-control');
+	$fields['tallitunnus'] = array('type' => 'text', 'class'=>'form-control');
+
+	$this->form_builder->form_attrs = array('method' => 'post', 'action' => site_url('/tallit/haku'));
+	$vars['form'] = $this->form_builder->render_template('_layouts/basic_form_template', $fields);
+	
+	if($this->input->server('REQUEST_METHOD') == 'POST')
+	{
+	    $this->form_validation->set_rules('nimi', 'Nimi', "min_length[4]|regex_match[/^[A-Za-z0-9_\-.:,; *~#&'@()]*$/]");
+	    $this->form_validation->set_rules('kategoria', 'Kategoria', 'min_length[1]|max_length[2]');
+	    $this->form_validation->set_rules('tallitunnus', 'Tallitunnus', "min_length[6]|max_length[8]|regex_match[/^[A-Z0-9]*$/]");
+
+	    if($this->form_validation->run() == true && !(empty($this->input->post('nimi')) && empty($this->input->post('tallitunnus')) && $this->input->post('kategoria') == "-1"))
+	    {
+		$vars['headers'][1] = array('title' => 'Tallitunnus', 'key' => 'tallitunnus');
+		$vars['headers'][2] = array('title' => 'Kategoria', 'key' => 'kategoria');
+		$vars['headers'][3] = array('title' => 'Nimi', 'key' => 'nimi');
+		$vars['headers'] = json_encode($vars['headers']);
+		
+		$vars['data'] = json_encode($this->tallit_model->search_stables($this->input->post('nimi'), $this->input->post('kategoria'), $this->input->post('tallitunnus')));
+	    }
+	}
+	
+	$this->fuel->pages->render('misc/haku', $vars);
+    }
 }
 ?>
+
+
+
+
+

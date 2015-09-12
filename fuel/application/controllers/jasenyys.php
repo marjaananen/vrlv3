@@ -10,9 +10,11 @@ class Jasenyys extends CI_Controller
     {
 	$this->load->library('Vrl_helper');
 	$fields = array();
+        
 	$fields['logged_in'] = $this->ion_auth->logged_in();
-	$fields['sivu'] = $sivu;	
-	if (!($this->vrl_helper->check_vrl_syntax($tunnus) && $this->ion_auth->identity_check($this->vrl_helper->vrl_to_number($tunnus))))
+	$fields['sivu'] = $sivu;
+        
+	if(!($this->vrl_helper->check_vrl_syntax($tunnus) && $this->ion_auth->identity_check($this->vrl_helper->vrl_to_number($tunnus))))
 	{
 	    $this->fuel->pages->render('misc/showmessage', array('msg' => 'Profiilia ei löytynyt!'));
 	}
@@ -21,7 +23,8 @@ class Jasenyys extends CI_Controller
             $this->load->model('tunnukset_model');
 	    $pinnumber = $this->vrl_helper->vrl_to_number($tunnus);
 	    $user = $this->ion_auth->user($this->tunnukset_model->get_users_id($pinnumber))->row();
-	    $fields['tunnus'] = $this->vrl_helper->get_vrl($tunnus);
+	    
+            $fields['tunnus'] = $this->vrl_helper->get_vrl($tunnus);
 	    $fields['nimimerkki'] = $user->nimimerkki;
             $fields['rekisteroitynyt'] = date("d.m.Y", strtotime($user->hyvaksytty));
 
@@ -45,6 +48,12 @@ class Jasenyys extends CI_Controller
             
             $fields['nimimerkit'] = $this->tunnukset_model->get_previous_nicknames($pinnumber);
 	    
+            if($sivu == 'tallit')
+            {
+                $this->load->model('tallit_model');
+                $fields['stables'] = $this->tallit_model->get_users_stables($pinnumber);
+            }
+            
 	    $this->fuel->pages->render('jasenyys/tunnus', $fields);
 	}
     }
@@ -60,7 +69,6 @@ class Jasenyys extends CI_Controller
             $this->load->model('tunnukset_model');
 	    $options = $this->tunnukset_model->get_location_option_list();
 
-             
             // create fields
             $fields['nimimerkki'] = array('type' => 'text', 'required' => TRUE, 'after_html' => '<span class="form_comment">Nimimerkit eivät ole yksilöllisiä</span>', 'class'=>'form-control');
             $fields['email'] = array('type' => 'text', 'required' => TRUE, 'label' => 'Sähköpostiosoite', 'after_html' => '<span class="form_comment">esimerkki@osoite.fi</span>', 'class'=>'form-control');
@@ -71,7 +79,7 @@ class Jasenyys extends CI_Controller
             $this->form_builder->form_attrs = array('method' => 'post', 'action' => site_url('/jasenyys/liity'));
     
             // render the page
-            $vars['join_form'] = $this->form_builder->render_template('_layouts/basic_form_template', $fields );
+            $vars['join_form'] = $this->form_builder->render_template('_layouts/basic_form_template', $fields);
             
             $this->fuel->pages->render('jasenyys/liity', $vars);
         }

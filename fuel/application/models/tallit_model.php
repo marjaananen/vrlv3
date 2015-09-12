@@ -115,6 +115,31 @@ class Tallit_model extends Base_module_model
         return $data;
     }
     
+    function search_stables($name, $category, $tnro)
+    {
+        $this->db->select('vrlv3_tallirekisteri.tnro, nimi, perustettu');
+        $this->db->from('vrlv3_tallirekisteri');
+        $this->db->join('vrlv3_tallirekisteri_kategoriat', 'vrlv3_tallirekisteri.tnro = vrlv3_tallirekisteri_kategoriat.tnro');
+        
+        if(!empty($name))
+            $this->db->where('nimi', $name);
+            
+        if($category != '-1')
+            $this->db->where('kategoria', $category);
+            
+        if(!empty($tnro))
+            $this->db->where('vrlv3_tallirekisteri.tnro', $tnro);
+   
+        $query = $this->db->get();
+        
+        if ($query->num_rows() > 0)
+        {
+            return $query->row_array(); 
+        }
+        
+        return array();
+    }
+    
     //Kategoria
     function add_category_to_stable($tnro, $category, $applicant)
     {

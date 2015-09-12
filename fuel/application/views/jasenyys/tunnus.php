@@ -47,10 +47,24 @@
     <?php }?>
     
     <ul class="nav nav-tabs">
-    <li role="presentation" class="<?php if ($sivu == 'hevoset'){echo "active";}?>"><a href="<?php echo base_url('tunnus/'. $tunnus . '/hevoset')?>">Hevoset</a></li>
-    <li role="presentation" class="<?php if ($sivu == 'tallit'){echo "active";}?>"><a href="<?php echo base_url('tunnus/'. $tunnus . '/tallit')?>">Tallit</a></li>
-    <li role="presentation" class="<?php if ($sivu == 'kasvatit'){echo "active";}?>"><a href="<?php echo base_url('tunnus/'. $tunnus . '/kasvatit')?>">Kasvatit ja kasvattajanimet</a></li>
-    <li role="presentation" class="<?php if ($sivu == 'kilpailut'){echo "active";}?>"><a href="<?php echo base_url('tunnus/'. $tunnus . '/kilpailut')?>">Kilpailut ja näyttelyt</a></li>
-</ul>
+        <li role="presentation" class="<?php if ($sivu == 'hevoset'){echo "active";}?>"><a href="<?php echo base_url('tunnus/'. $tunnus . '/hevoset')?>">Hevoset</a></li>
+        <li role="presentation" class="<?php if ($sivu == 'tallit'){echo "active";}?>"><a href="<?php echo base_url('tunnus/'. $tunnus . '/tallit')?>">Tallit</a></li>
+        <li role="presentation" class="<?php if ($sivu == 'kasvatit'){echo "active";}?>"><a href="<?php echo base_url('tunnus/'. $tunnus . '/kasvatit')?>">Kasvatit ja kasvattajanimet</a></li>
+        <li role="presentation" class="<?php if ($sivu == 'kilpailut'){echo "active";}?>"><a href="<?php echo base_url('tunnus/'. $tunnus . '/kilpailut')?>">Kilpailut ja näyttelyt</a></li>
+    </ul>
+    
+    <?php
+        if($sivu == 'tallit')
+        {
+            echo "<p><ul>";
+            
+            foreach($stables as $s)
+            {
+                echo "<li><b>" . $s['tnro'] . ": </b>" . $s['nimi'] . "</li>";
+            }
+            
+            echo "</ul></p>";
+        }
+    ?>
 </div>
 
