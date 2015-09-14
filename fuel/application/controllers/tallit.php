@@ -129,9 +129,11 @@ class Tallit extends CI_Controller
 
 	    if($this->form_validation->run() == true && !(empty($this->input->post('nimi')) && empty($this->input->post('tallitunnus')) && $this->input->post('kategoria') == "-1"))
 	    {
-		$vars['headers'][1] = array('title' => 'Tallitunnus', 'key' => 'tallitunnus');
-		$vars['headers'][2] = array('title' => 'Kategoria', 'key' => 'kategoria');
-		$vars['headers'][3] = array('title' => 'Nimi', 'key' => 'nimi');
+		$vars['headers'][1] = array('title' => 'Tallitunnus', 'key' => 'tnro');
+		$vars['headers'][2] = array('title' => 'Nimi', 'key' => 'nimi');
+		$vars['headers'][3] = array('title' => 'Kategoria', 'key' => 'katelyh', 'aggregated_by' => 'tnro');
+		$vars['headers'][4] = array('title' => 'Perustettu', 'key' => 'perustettu');
+		
 		$vars['headers'] = json_encode($vars['headers']);
 		
 		$vars['data'] = json_encode($this->tallit_model->search_stables($this->input->post('nimi'), $this->input->post('kategoria'), $this->input->post('tallitunnus')));
