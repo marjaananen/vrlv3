@@ -14,6 +14,11 @@ class Tallit extends CI_Controller
 	
 	$this->fuel->pages->render('tallit/index', $vars);
     }
+    
+    function talliprofiili($tnro)
+    {
+	$this->fuel->pages->render('misc/showmessage', array('msg' => $tnro));
+    }
 
     function rekisteroi()
     {
@@ -109,7 +114,7 @@ class Tallit extends CI_Controller
 	$this->load->library('form_validation');
 	$this->load->library('form_builder', array('submit_value' => 'Hae'));
 	$vars['title'] = 'Tallihaku';
-	$vars['msg'] = 'Hae talleja tallirekisteristä.';
+	$vars['msg'] = 'Hae talleja tallirekisteristä. Voit käyttää tähteä * jokerimerkkinä.';
 	
 	$options = $this->tallit_model->get_category_option_list();
 	$options[-1] = 'Mikä tahansa';
@@ -129,7 +134,7 @@ class Tallit extends CI_Controller
 
 	    if($this->form_validation->run() == true && !(empty($this->input->post('nimi')) && empty($this->input->post('tallitunnus')) && $this->input->post('kategoria') == "-1"))
 	    {
-		$vars['headers'][1] = array('title' => 'Tallitunnus', 'key' => 'tnro');
+		$vars['headers'][1] = array('title' => 'Tallitunnus', 'key' => 'tnro', 'profile_link' => site_url('talli/') . '/');
 		$vars['headers'][2] = array('title' => 'Nimi', 'key' => 'nimi');
 		$vars['headers'][3] = array('title' => 'Kategoria', 'key' => 'katelyh', 'aggregated_by' => 'tnro');
 		$vars['headers'][4] = array('title' => 'Perustettu', 'key' => 'perustettu');

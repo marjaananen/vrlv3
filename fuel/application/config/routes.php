@@ -49,6 +49,7 @@ $route['profiili/omat-tallit'] = "tallit/index";
 $route['profiili/omat-tallit/rekisteroi'] = "tallit/rekisteroi";
 $route['profiili/omat-tallit/muokkaa/(:any)/(:any)'] = "tallit/muokkaa/$1/$2";
 
+$route['talli/(:any)'] = "tallit/talliprofiili/$1";
 
 $route['tunnus/(:any)'] = "jasenyys/tunnus/$1";
 $route['tunnus/(:any)/(:any)'] = "jasenyys/tunnus/$1/$2";

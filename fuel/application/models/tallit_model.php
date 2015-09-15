@@ -123,13 +123,23 @@ class Tallit_model extends Base_module_model
         $this->db->join('vrlv3_lista_tallikategoriat', 'vrlv3_lista_tallikategoriat.kat = vrlv3_tallirekisteri_kategoriat.kategoria');
         
         if(!empty($name))
-            $this->db->where('nimi', $name);
+        {
+            if(strpos($name, '*') !== false)
+                $this->db->where('nimi LIKE "' . str_replace('*', '%', $name) . '"');
+            else
+                $this->db->where('nimi', $name);
+        }
             
         if($category != '-1')
             $this->db->where('vrlv3_tallirekisteri_kategoriat.kategoria', $category);
             
         if(!empty($tnro))
-            $this->db->where('vrlv3_tallirekisteri.tnro', $tnro);
+        {
+            if(strpos($tnro, '*') !== false)
+                $this->db->where('vrlv3_tallirekisteri.tnro LIKE "' . str_replace('*', '%', $tnro) . '"');
+            else
+                $this->db->where('vrlv3_tallirekisteri.tnro', $tnro);
+        }
    
         $query = $this->db->get();
         

@@ -19,13 +19,13 @@
             $(document).ready(function() {
                 var headers = JSON.parse('<?=$headers?>');
                 var data = JSON.parse('<?=$data?>');
-                var numrows = 0;
+                var numcolumns = 0;
                 var table = "<table id='result_table'><thead><tr>";
 
                 for(i in headers)
                 {
                     table += "<th>" + headers[i]['title'] + "</th>";
-                    numrows++;
+                    numcolumns++;
                 }
                 
                 table += "</tr></thead><tbody>";
@@ -37,14 +37,17 @@
                     
                     table += "<tr>";
                     
-                    for(var i=1; i<=numrows; i++)
+                    for(var i=1; i<=numcolumns; i++)
                     {
                         //Jos pitää koota kaikki saman hakukohteen useat arvot yhteen arvoon, mennään iffiin
                         //esim. tallihaussa kootaan yhteen muuttujaan kaikki tallin kategoriat
-                        if(data[d][headers[i]['aggregated_by']] != undefined)
+                        if(headers[i]['aggregated_by'] != undefined)
                         {
                             for(agr in data) //etsitään muut aggregoitavat rivit
                             {
+                                if (data[agr] == null)
+                                    continue;
+                                
                                 //eihän ole sama rivi kuin mitä tulostetaan && vastaahan yksilöivät ID:t toisiaan (aggregated_by:t siis kertovat ID:n keyn)
                                 if (d != agr && data[agr][headers[i]['aggregated_by']] == data[d][headers[i]['aggregated_by']])
                                 {
@@ -54,8 +57,10 @@
                             }
                         }
                         
-                            //normaali arvon tulostus soluunsa
-                        table += "<td>" + data[d][headers[i]['key']] + "</td>";
+                        if (headers[i]['profile_link'] != undefined)
+                            table += "<td><a href='" + headers[i]['profile_link'] + data[d][headers[i]['key']] + "'>" + data[d][headers[i]['key']] + "</a></td>"; //profiili linkatun arvon tulostus soluunsa
+                        else
+                            table += "<td>" + data[d][headers[i]['key']] + "</td>"; //normaali arvon tulostus soluunsa
                     }
                         
                     table += "</tr>";
