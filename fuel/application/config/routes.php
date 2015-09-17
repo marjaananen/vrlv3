@@ -43,7 +43,7 @@ $route['yllapito/tunnukset/hyvaksy'] = "yllapito/hakemusjono";
 
 $route['yllapito/tallirekisteri/hyvaksy'] = "yllapito/tallijono";
 $route['yllapito/tallirekisteri/hyvaksy_kasittele/(:any)/(:num)'] = "yllapito/kasittele_talli/$1/$2";
-
+$route['yllapito/tallit/muokkaa/(:any)/(:any)'] = "tallit/muokkaa/$1/$2";
 
 $route['profiili/omat-tallit'] = "tallit/index";
 $route['profiili/omat-tallit/rekisteroi'] = "tallit/rekisteroi";

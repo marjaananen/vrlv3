@@ -64,6 +64,8 @@
 				<div class="well"> 
 					<?php if (!empty($sidemenu)) { echo $sidemenu;} else {echo $main_quickmenu;} ?>
   				</div>
+				
+				<div id="infoMessage"><b><?php echo fuel_var('message', '');?></b></div>
 <?php
 //kirjautumislomake / profiili ja logout
 	if(!empty($this->ion_auth))

@@ -24,12 +24,14 @@ class Tallit extends CI_Controller
     {
 	$this->load->library('form_validation');
 	$this->load->library('form_collection');
+	$vars['title'] = 'Rekisteröi talli';
         
         if($this->input->server('REQUEST_METHOD') == 'GET')
         {
 	    $vars['form'] = $this->form_collection->get_stable_form('application'); //pyydetään lomake hakemusmoodissa
+	    $vars['msg'] = 'Tähdellä merkityt kentät ovat pakollisia! Rekisteröimisen jälkeen ylläpito käsittelee anomuksesi. Muista, että tallin kaikilta pääsivuilta tulee olla löydettävissä sana "virtuaalitalli"! Tallin omistajaksi merkitään rekisteröintihakemuksen lähettäjä. Voit lisätä tallille lisää omistajia rekisteröinnin jälkeen.';
 	    
-	    $this->fuel->pages->render('tallit/rekisteroi', $vars);
+	    $this->fuel->pages->render('misc/jonorekisterointi', $vars);
         }
         else if($this->input->server('REQUEST_METHOD') == 'POST')
         {
@@ -47,7 +49,7 @@ class Tallit extends CI_Controller
 		$this->tallit_model->add_new_application($this->input->post('nimi'), $this->input->post('kuvaus'), $this->input->post('osoite'), $this->input->post('kategoria'), strtoupper($this->input->post('lyhehd')));
 	    }
             
-            $this->fuel->pages->render('tallit/rekisteroi', $vars);
+            $this->fuel->pages->render('misc/jonorekisterointi', $vars);
         }
         else
             redirect('/', 'refresh');
@@ -57,6 +59,7 @@ class Tallit extends CI_Controller
     function muokkaa($tnro, $mode)
     {
 	$this->load->model('tallit_model');
+	$vars['title'] = 'Muokkaa tallin tietoja';
 	
 	if(empty($tnro) || empty($mode))
 	    redirect('/');
@@ -74,8 +77,17 @@ class Tallit extends CI_Controller
 	    
 	    if($vars['form'] == "")
 		redirect('/');
+		
+	    if($mode == 'admin')
+	    {
+		if(!empty($this->session->flashdata('msg')))
+		{
+		    $vars['msg'] = $this->session->flashdata('msg');
+		    $vars['msg_type'] = $this->session->flashdata('msg_type');
+		}
+	    }
 	    
-	    $this->fuel->pages->render('tallit/muokkaa', $vars);
+	    $this->fuel->pages->render('misc/lomakemuokkaus', $vars);
         }
         else if($this->input->server('REQUEST_METHOD') == 'POST')
         {
@@ -100,9 +112,13 @@ class Tallit extends CI_Controller
 	    $vars['form'] = $this->form_collection->get_stable_form($mode, $tnro);
             
 	    if($mode == 'edit')
-		$this->fuel->pages->render('tallit/muokkaa', $vars);
+		$this->fuel->pages->render('misc/lomakemuokkaus', $vars);
 	    else
+	    {
+		$this->session->set_flashdata('msg', $vars['msg']);
+		$this->session->set_flashdata('msg_type', $vars['msg_type']);
 		redirect($this->input->server('HTTP_REFERER'));
+	    }
         }
         else
             redirect('/', 'refresh');

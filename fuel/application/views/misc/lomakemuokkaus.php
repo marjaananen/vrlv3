@@ -1,4 +1,4 @@
-<h2>Muokkaa tallin tietoja</h2>
+<h2><?=$title?></h2>
 
 <p>
     <div class="alert alert-<?php echo fuel_var('msg_type', 'info')?>" role="alert">   

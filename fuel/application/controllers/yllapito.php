@@ -170,6 +170,7 @@ class Yllapito extends CI_Controller
     {
         $this->load->library('queue_manager', array('db_table' => 'vrlv3_tallirekisteri_jonossa'));
         $this->session->set_flashdata('return_status', '');
+        $vars['title'] = "Tallijono";
         
         if($this->input->server('REQUEST_METHOD') == 'POST')
         {
@@ -204,7 +205,7 @@ class Yllapito extends CI_Controller
             $vars['queue_status_html'] = $frontpage['html'];
         }
             
-        $this->fuel->pages->render('yllapito/tallijono', $vars);
+        $this->fuel->pages->render('misc/jonokasittely', $vars);
     }
     
     function kasittele_talli($approved, $id)

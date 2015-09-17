@@ -61,6 +61,8 @@ class Jasenyys extends CI_Controller
     function liity()
     {
 	$this->load->library('form_validation');
+        $vars['title'] = 'Liity jäseneksi';
+        $vars['msg'] = 'Tähdellä merkityt kentät ovat pakollisia! Rekisteröitymisen jälkeen saat sähköpostilla salasanan ja koodin, jolla aktivoida tunnuksesi. Huomaathan, että ylläpidon tulee tarkastaa hakemuksesi ennen kuin voit kirjautua!';
         
         if($this->input->server('REQUEST_METHOD') == 'GET')
         {
@@ -79,9 +81,9 @@ class Jasenyys extends CI_Controller
             $this->form_builder->form_attrs = array('method' => 'post', 'action' => site_url('/jasenyys/liity'));
     
             // render the page
-            $vars['join_form'] = $this->form_builder->render_template('_layouts/basic_form_template', $fields);
+            $vars['form'] = $this->form_builder->render_template('_layouts/basic_form_template', $fields);
             
-            $this->fuel->pages->render('jasenyys/liity', $vars);
+            $this->fuel->pages->render('misc/jonorekisterointi', $vars);
         }
         else if($this->input->server('REQUEST_METHOD') == 'POST')
         {
@@ -98,12 +100,13 @@ class Jasenyys extends CI_Controller
 
 		if ($this->form_validation->run() == FALSE)
                 {
-		    $vars['join_msg'] = "Lomakkeen lähetys epäonnistui!";
-		    $vars['join_msg_type'] = "danger";
+		    $vars['msg'] = "Lomakkeen lähetys epäonnistui!";
+		    $vars['msg_type'] = "danger";
                 }
 		else
 		{
-		    $vars['join_msg'] = "Lomakkeen lähetys onnistui!<br />Tarkasta antamasi sähköpostin postilaatikko (jos ei näy, katso roskapostikansio) ja seuraa lähetettyjä ohjeita.";
+		    $vars['msg'] = "Lomakkeen lähetys onnistui!<br />Tarkasta antamasi sähköpostin postilaatikko (jos ei näy, katso roskapostikansio) ja seuraa lähetettyjä ohjeita.";
+                    $vars['msg_type'] = "success";
                     
                     $return_data = $this->tunnukset_model->add_new_application($this->input->post('nimimerkki'), $this->input->post('email'), $this->input->post('syntymavuosi'), $this->input->post('sijainti'));
                     
@@ -119,11 +122,11 @@ class Jasenyys extends CI_Controller
             }
             else
             {
-                $vars['join_msg'] = "Roskapostitarkastus epäonnistui. Olet botti.";
-		$vars['join_msg_type'] = "danger";
+                $vars['msg'] = "Roskapostitarkastus epäonnistui. Olet botti.";
+		$vars['msg_type'] = "danger";
             }
             
-            $this->fuel->pages->render('jasenyys/liity', $vars);
+            $this->fuel->pages->render('misc/jonorekisterointi', $vars);
         }
         else
             redirect('/', 'refresh');
