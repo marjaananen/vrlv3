@@ -17,7 +17,21 @@ class Tallit extends CI_Controller
     
     function talliprofiili($tnro)
     {
-	$this->fuel->pages->render('misc/showmessage', array('msg' => $tnro));
+	$this->load->model('tallit_model');
+	
+	if(!$this->tallit_model->is_tnro_in_use($tnro))
+	    redirect('/');
+	    
+	$vars['stable'] = $this->tallit_model->get_stable($tnro);
+	$vars['categories'] = $this->tallit_model->get_stables_categories($tnro);
+	$vars['owners'] = $this->tallit_model->get_stables_owners($tnro);
+	
+	if($this->ion_auth->logged_in() && $this->tallit_model->is_stable_owner($this->ion_auth->user()->row()->tunnus, $tnro))
+	    $vars['catreglink'] = true;
+	else
+	    $vars['catreglink'] = false;
+	
+	$this->fuel->pages->render('tallit/profiili', $vars);
     }
 
     function rekisteroi()
@@ -93,7 +107,7 @@ class Tallit extends CI_Controller
         {
 	    $this->load->model('tallit_model');
 	    
-	    if ($this->form_collection->validate_stable_form($mode) == FALSE)
+	    if($this->form_collection->validate_stable_form($mode) == FALSE)
 	    {
 		$vars['msg'] = "Muokkaus epäonnistui!";
 		$vars['msg_type'] = "danger";
@@ -119,6 +133,43 @@ class Tallit extends CI_Controller
 		$this->session->set_flashdata('msg_type', $vars['msg_type']);
 		redirect($this->input->server('HTTP_REFERER'));
 	    }
+        }
+        else
+            redirect('/', 'refresh');
+    }
+    
+    function rekisteroi_kategoria($tnro)
+    {
+	$this->load->library('form_validation');
+	$this->load->library('form_collection');
+	$this->load->model('tallit_model');
+	$vars['title'] = 'Ano tallille uusi kategoria';
+	
+	if(empty($tnro) || !$this->tallit_model->is_stable_owner($this->ion_auth->user()->row()->tunnus, $tnro))
+	    redirect('/');
+        
+        if($this->input->server('REQUEST_METHOD') == 'GET')
+        {
+	    $vars['form'] = $this->form_collection->get_stable_category_form($tnro);
+	    $vars['msg'] = 'Tähdellä merkityt kentät ovat pakollisia! Rekisteröimisen jälkeen ylläpito käsittelee anomuksesi.';
+	    
+	    $this->fuel->pages->render('misc/jonorekisterointi', $vars);
+        }
+        else if($this->input->server('REQUEST_METHOD') == 'POST')
+        {
+	    if($this->form_collection->validate_stable_category_form($tnro) == FALSE)
+	    {
+		$vars['msg'] = "Anomuksen lähetys epäonnistui!";
+		$vars['msg_type'] = "danger";
+	    }
+	    else
+	    {
+		$vars['msg'] = "Anomuksen lähetys onnistui!";
+		$vars['msg_type'] = "success";
+		$this->tallit_model->add_new_category_application($this->input->post('tallinumero'), $this->input->post('kategoria'));
+	    }
+            
+            $this->fuel->pages->render('misc/jonorekisterointi', $vars);
         }
         else
             redirect('/', 'refresh');

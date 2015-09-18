@@ -69,6 +69,22 @@ class Tallit_model extends Base_module_model
         $this->db->insert('vrlv3_tallirekisteri_omistajat', $data);
     }
     
+    function get_stables_owners($tnro)
+    {
+        $this->db->select('omistaja, nimimerkki');
+        $this->db->from('vrlv3_tallirekisteri_omistajat');
+        $this->db->join('vrlv3_tunnukset', 'vrlv3_tunnukset.tunnus = vrlv3_tallirekisteri_omistajat.omistaja');
+        $this->db->where('tnro', $tnro);
+        $query = $this->db->get();
+        
+        if ($query->num_rows() > 0)
+        {
+            return $query->result_array();
+        }
+        
+        return array();
+    }
+    
     function is_stable_owner($pinnumber, $tnro)
     {
         $this->db->from('vrlv3_tallirekisteri_omistajat');
@@ -160,6 +176,38 @@ class Tallit_model extends Base_module_model
         $data['kasitelty'] = $data['lisatty'];
         
         $this->db->insert('vrlv3_tallirekisteri_kategoriat', $data);
+    }
+    
+    function stable_has_category($tnro, $category)
+    {
+        $this->db->select('kategoria');
+        $this->db->from('vrlv3_tallirekisteri_kategoriat');
+        $this->db->where('tnro', $tnro);
+        $this->db->where('kategoria', $category);
+        $query = $this->db->get();
+        
+        if ($query->num_rows() > 0)
+        {
+            return true;
+        }
+        
+        return false;
+    }
+    
+    function get_stables_categories($tnro)
+    {
+        $this->db->select('katelyh');
+        $this->db->from('vrlv3_tallirekisteri_kategoriat');
+        $this->db->join('vrlv3_lista_tallikategoriat', 'vrlv3_lista_tallikategoriat.kat = vrlv3_tallirekisteri_kategoriat.kategoria');
+        $this->db->where('tnro', $tnro);
+        $query = $this->db->get();
+        
+        if ($query->num_rows() > 0)
+        {
+            return $query->result_array();
+        }
+        
+        return array();
     }
     
     function get_category($kat)

@@ -75,6 +75,39 @@ class Form_collection
         
         return $this->CI->form_validation->run();
     }
+    
+    public function get_stable_category_form($tnro)
+    {
+        $this->CI->load->model('tallit_model');
+
+        $this->CI->load->library('form_builder', array('submit_value' => 'Ano kategoria', 'required_text' => '*Pakollinen kenttä'));
+
+        $fields['tallinumero'] = array('type' => 'text', 'required' => TRUE, 'readonly' => true, 'value' => $tnro, 'class'=>'form-control');
+        $fields['kategoria'] = array('type' => 'select', 'required' => TRUE, 'options' => $this->CI->tallit_model->get_category_option_list(), 'class'=>'form-control');
+
+        $this->CI->form_builder->form_attrs = array('method' => 'post', 'action' => site_url('/tallit/rekisteroi_kategoria') . '/' . $tnro);
+
+        return $this->CI->form_builder->render_template('_layouts/basic_form_template', $fields);
+    }
+    
+    public function validate_stable_category_form($tnro)
+    {
+        $this->CI->load->model('tallit_model');
+        $this->CI->load->library('form_validation');
+
+        $this->CI->form_validation->set_rules('kategoria', 'Kategoria', 'required|min_length[1]|max_length[2]|numeric');
+        
+        if($this->CI->input->post('tallinumero') != $tnro)
+            return false;
+        
+        if(!$this->CI->tallit_model->is_stable_owner($this->CI->ion_auth->user()->row()->tunnus, $tnro))
+            return false;
+        
+        if($this->CI->tallit_model->stable_has_category($tnro, $this->CI->input->post('kategoria')))
+            return false;
+        
+        return $this->CI->form_validation->run();
+    }
 }
 
 

@@ -60,7 +60,7 @@
             
             foreach($stables as $s)
             {
-                echo "<li><b>" . $s['tnro'] . ": </b>" . $s['nimi'] . "</li>";
+                echo "<li><b>" . $s['tnro'] . ": </b><a href='" . site_url('/tallit/talliprofiili') . '/' . $s['tnro'] . "'>" . $s['nimi'] . "</a></li>";
             }
             
             echo "</ul></p>";
