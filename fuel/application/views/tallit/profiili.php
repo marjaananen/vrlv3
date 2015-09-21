@@ -10,13 +10,26 @@
             $first = true;
             foreach($categories as $c)
             {
-                if($first)
+                if(count($categories) == 1 || $loggedin_owner == false)
                 {
-                    echo $c['katelyh'];
-                    $first = false;
+                    if($first)
+                    {
+                        echo $c['katelyh'];
+                        $first = false;
+                    }
+                    else
+                        echo ", " . $c['katelyh'];
                 }
                 else
-                    echo ", " . $c['katelyh'];
+                {
+                    if($first)
+                    {
+                        echo $c['katelyh'] . "<a href='" . site_url("tallit/poista_kategoria") . "/" . $c['id'] . "'>(Poista kategoria)</a>";
+                        $first = false;
+                    }
+                    else
+                        echo ", " . $c['katelyh'] . "<a href='" . site_url("tallit/poista_kategoria") . "/" . $c['id'] . "'>(Poista kategoria)</a>";
+                }
             }
         ?>
     </p>
@@ -38,7 +51,7 @@
     
     <p>
         <?php
-            if($catreglink)
+            if($loggedin_owner)
             {
                 echo "<br />";
                 echo "<a href='" . site_url('tallit/rekisteroi_kategoria') . "/" . $stable['tnro'] . "'>Ano uutta kategoriaa tallille</a>";

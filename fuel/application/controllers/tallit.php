@@ -27,9 +27,9 @@ class Tallit extends CI_Controller
 	$vars['owners'] = $this->tallit_model->get_stables_owners($tnro);
 	
 	if($this->ion_auth->logged_in() && $this->tallit_model->is_stable_owner($this->ion_auth->user()->row()->tunnus, $tnro))
-	    $vars['catreglink'] = true;
+	    $vars['loggedin_owner'] = true;
 	else
-	    $vars['catreglink'] = false;
+	    $vars['loggedin_owner'] = false;
 	
 	$this->fuel->pages->render('tallit/profiili', $vars);
     }
@@ -175,6 +175,21 @@ class Tallit extends CI_Controller
             redirect('/', 'refresh');
     }
     
+    function poista_kategoria($id)
+    {
+	$this->load->model('tallit_model');
+	
+	if(empty($id))
+	    redirect('/', 'refresh');
+	
+	if(!$this->tallit_model->is_category_owner($id, $this->ion_auth->user()->row()->tunnus))
+	    redirect('/', 'refresh');
+	
+	$this->tallit_model->delete_category($id);
+	
+	redirect($_SERVER['HTTP_REFERER'], 'refresh'); 
+    }
+    
     function haku()
     {
 	$this->load->model('tallit_model');
@@ -188,7 +203,7 @@ class Tallit extends CI_Controller
 	
 	$fields['nimi'] = array('type' => 'text', 'class'=>'form-control');
 	$fields['kategoria'] = array('type' => 'select', 'options' => $options, 'value' => '-1', 'class'=>'form-control');
-	$fields['tallitunnus'] = array('type' => 'text', 'class'=>'form-control');
+	$fields['tallinumero'] = array('type' => 'text', 'class'=>'form-control');
 
 	$this->form_builder->form_attrs = array('method' => 'post', 'action' => site_url('/tallit/haku'));
 	$vars['form'] = $this->form_builder->render_template('_layouts/basic_form_template', $fields);
@@ -197,18 +212,18 @@ class Tallit extends CI_Controller
 	{
 	    $this->form_validation->set_rules('nimi', 'Nimi', "min_length[4]|regex_match[/^[A-Za-z0-9_\-.:,; *~#&'@()]*$/]");
 	    $this->form_validation->set_rules('kategoria', 'Kategoria', 'min_length[1]|max_length[2]');
-	    $this->form_validation->set_rules('tallitunnus', 'Tallitunnus', "min_length[6]|max_length[8]|regex_match[/^[A-Z0-9]*$/]");
+	    $this->form_validation->set_rules('tallinumero', 'Tallinumero', "min_length[6]|max_length[8]|regex_match[/^[A-Z0-9]*$/]");
 
-	    if($this->form_validation->run() == true && !(empty($this->input->post('nimi')) && empty($this->input->post('tallitunnus')) && $this->input->post('kategoria') == "-1"))
+	    if($this->form_validation->run() == true && !(empty($this->input->post('nimi')) && empty($this->input->post('tallinumero')) && $this->input->post('kategoria') == "-1"))
 	    {
-		$vars['headers'][1] = array('title' => 'Tallitunnus', 'key' => 'tnro', 'profile_link' => site_url('talli/') . '/');
+		$vars['headers'][1] = array('title' => 'Tallinumero', 'key' => 'tnro', 'profile_link' => site_url('talli/') . '/');
 		$vars['headers'][2] = array('title' => 'Nimi', 'key' => 'nimi');
 		$vars['headers'][3] = array('title' => 'Kategoria', 'key' => 'katelyh', 'aggregated_by' => 'tnro');
 		$vars['headers'][4] = array('title' => 'Perustettu', 'key' => 'perustettu');
 		
 		$vars['headers'] = json_encode($vars['headers']);
 		
-		$vars['data'] = json_encode($this->tallit_model->search_stables($this->input->post('nimi'), $this->input->post('kategoria'), $this->input->post('tallitunnus')));
+		$vars['data'] = json_encode($this->tallit_model->search_stables($this->input->post('nimi'), $this->input->post('kategoria'), $this->input->post('tallinumero')));
 	    }
 	}
 	
