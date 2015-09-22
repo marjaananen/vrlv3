@@ -147,6 +147,47 @@ class Jasenyys extends CI_Controller
         $this->fuel->pages->render('misc/showmessage', $vars);
     }
     
+    function haku() //Näyttää vielä iät ja läänit ihmisiltä joilta se on piilotettu
+    {
+        $this->load->library('Vrl_helper');
+	$this->load->model('tunnukset_model');
+	$this->load->library('form_validation');
+	$this->load->library('form_builder', array('submit_value' => 'Hae'));
+	$vars['title'] = 'Jäsenhaku';
+	$vars['msg'] = 'Hae VRL:n jäseniä. Voit käyttää tähteä * jokerimerkkinä. Sijainnin perusteella tehdyssä haussa näkyvät vain yli 16-vuotiaat jäsenet, jotka ovat merkinneet sijaintinsa näkyväksi kaikille.';
+	
+	$options = $this->tunnukset_model->get_location_option_list();
+	$options[-1] = 'Mikä tahansa';
+	
+	$fields['tunnus'] = array('type' => 'text', 'label' => 'VRL-tunnus', 'class'=>'form-control');
+	$fields['nimimerkki'] = array('type' => 'text', 'class'=>'form-control');
+	$fields['sijainti'] = array('type' => 'select', 'options' => $options, 'value' => '-1', 'class'=>'form-control');
+
+	$this->form_builder->form_attrs = array('method' => 'post', 'action' => site_url('/jasenyys/haku'));
+	$vars['form'] = $this->form_builder->render_template('_layouts/basic_form_template', $fields);
+	
+	if($this->input->server('REQUEST_METHOD') == 'POST')
+	{
+            $this->form_validation->set_rules('tunnus', 'VRL-tunnus', "min_length[5]|max_length[9]|regex_match[/^[VRL*\-0-9]*$/]");
+	    $this->form_validation->set_rules('nimimerkki', 'Nimimerkki', "min_length[4]|regex_match[/^[A-Za-z0-9_\-.:,; *~#&'@()]*$/]");
+	    $this->form_validation->set_rules('sijainti', 'Sijainti', 'min_length[1]|max_length[2]');
+
+	    if($this->form_validation->run() == true && !(empty($this->input->post('tunnus')) && empty($this->input->post('nimimerkki')) && $this->input->post('sijainti') == "-1"))
+	    {
+		$vars['headers'][1] = array('title' => 'VRL-tunnus', 'key' => 'tunnus', 'profile_link' => site_url('tunnus/') . '/');
+		$vars['headers'][2] = array('title' => 'Nimimerkki', 'key' => 'nimimerkki');
+		$vars['headers'][3] = array('title' => 'Ikä', 'key' => 'syntymavuosi', 'date_to_age' => true);
+		$vars['headers'][4] = array('title' => 'Sijainti', 'key' => 'maakunta');
+		
+		$vars['headers'] = json_encode($vars['headers']);
+		
+		$vars['data'] = json_encode($this->tunnukset_model->search_users($this->vrl_helper->vrl_to_number($this->input->post('tunnus')), $this->input->post('nimimerkki'), $this->input->post('sijainti')));
+	    }
+	}
+	
+	$this->fuel->pages->render('misc/haku', $vars);
+    }
+    
     function _date_valid($date)
     {
         if($date == '' || preg_match('/^(?:(?:31(\.)(?:0?[13578]|1[02]))\1|(?:(?:29|30)(\.)(?:0?[1,3-9]|1[0-2])\2))(?:(?:1[6-9]|[2-9]\d)?\d{2})$|^(?:29(\.)0?2\3(?:(?:(?:1[6-9]|[2-9]\d)?(?:0[48]|[2468][048]|[13579][26])|(?:(?:16|[2468][048]|[3579][26])00))))$|^(?:0?[1-9]|1\d|2[0-8])(\.)(?:(?:0?[1-9])|(?:1[0-2]))\4(?:(?:1[6-9]|[2-9]\d)?\d{2})$/', $date) == 1)

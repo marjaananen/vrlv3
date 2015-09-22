@@ -280,6 +280,48 @@ class Tunnukset_model extends Base_module_model
         return -1;
     }
     
+    function search_users($pinnumber, $nick, $location)
+    {
+        $this->db->select('tunnus, nimimerkki, syntymavuosi, maakunta');
+        $this->db->from('vrlv3_tunnukset');
+        $this->db->join('vrlv3_lista_maakunnat', 'vrlv3_tunnukset.laani = vrlv3_lista_maakunnat.id');
+        
+        if(!empty($pinnumber))
+        {
+            if(strpos($pinnumber, '*') !== false)
+                $this->db->where('tunnus LIKE "' . str_replace('*', '%', $pinnumber) . '"');
+            else
+                $this->db->where('tunnus', $pinnumber);
+        }
+        
+        if(!empty($nick))
+        {
+            if(strpos($nick, '*') !== false)
+                $this->db->where('nimimerkki LIKE "' . str_replace('*', '%', $nick) . '"');
+            else
+                $this->db->where('nimimerkki', $nick);
+        }
+            
+        if($location != '-1')
+        {
+            $this->db->where('vrlv3_tunnukset.laani', $location);
+            
+            $date = new DateTime();
+            $date->setTimestamp(time() - 16*365*24*60*60); //vain yli 16 vuotiaita jos etsitään sijainnilla
+            $this->db->where('syntymavuosi < "' . $date->format('Y-m-d') . '"');
+            $this->db->where('nayta_vuosilaani', 1);
+        }
+   
+        $query = $this->db->get();
+        
+        if ($query->num_rows() > 0)
+        {
+            return $query->result_array(); 
+        }
+        
+        return array();
+    }
+    
     //Logins
     function get_latest_failed_logins()
     {

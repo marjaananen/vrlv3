@@ -39,19 +39,27 @@
 */
 
 
+
+//Profiilikontrollerin lisaa yhteystietoja ei ole menuissa
+
 $route['yllapito/tunnukset/hyvaksy'] = "yllapito/hakemusjono";
 
-$route['yllapito/tallirekisteri/hyvaksy'] = "yllapito/tallijono";
-$route['yllapito/tallirekisteri/hyvaksy_kasittele/(:any)/(:num)'] = "yllapito/kasittele_talli/$1/$2";
-$route['yllapito/tallit/muokkaa/(:any)/(:any)'] = "tallit/muokkaa/$1/$2";
-$route['yllapito/tallirekisteri_kategoria/hyvaksy'] = "yllapito/tallikategoriajono";
-$route['yllapito/tallirekisteri_kategoria/hyvaksy_kasittele/(:any)/(:num)'] = "yllapito/kasittele_tallikategoria/$1/$2";
+$route['yllapito/tallirekisteri/tallijono/hyvaksy'] = "yllapito/tallijono";
+$route['yllapito/tallirekisteri/tallijono/hyvaksy_kasittele/(:any)/(:num)'] = "yllapito/kasittele_talli/$1/$2";
+$route['yllapito/tallirekisteri/tallijono/muokkaa/(:any)/(:any)'] = "tallit/muokkaa/$1/$2";
+
+$route['yllapito/tallirekisteri/kategoriajono/hyvaksy'] = "yllapito/tallikategoriajono";
+$route['yllapito/tallirekisteri/kategoriajono/hyvaksy_kasittele/(:any)/(:num)'] = "yllapito/kasittele_tallikategoria/$1/$2";
+
 
 $route['profiili/omat-tallit'] = "tallit/index";
 $route['profiili/omat-tallit/rekisteroi'] = "tallit/rekisteroi";
 $route['profiili/omat-tallit/muokkaa/(:any)/(:any)'] = "tallit/muokkaa/$1/$2";
 
-$route['talli/(:any)'] = "tallit/talliprofiili/$1";
+
+$route['tallirekisteri/talli/(:any)'] = "tallit/talliprofiili/$1";
+$route['tallirekisteri/haku'] = "tallit/haku";
+
 
 $route['tunnus/(:any)'] = "jasenyys/tunnus/$1";
 $route['tunnus/(:any)/(:any)'] = "jasenyys/tunnus/$1/$2";

@@ -59,6 +59,16 @@
                         
                         if (headers[i]['profile_link'] != undefined)
                             table += "<td><a href='" + headers[i]['profile_link'] + data[d][headers[i]['key']] + "'>" + data[d][headers[i]['key']] + "</a></td>"; //profiili linkatun arvon tulostus soluunsa
+                        else if (headers[i]['date_to_age'] != undefined) {
+                            if (data[d][headers[i]['key']] == "0000-00-00") {
+                                table += "<td>-</td>";
+                            }
+                            else {
+                                var t = data[d][headers[i]['key']].split(/[-]/);
+                                var date = new Date(t[0], t[1]-1, t[2]);
+                                table += "<td>" + _calculateAge(date) + "</td>";
+                            }
+                        }
                         else
                             table += "<td>" + data[d][headers[i]['key']] + "</td>"; //normaali arvon tulostus soluunsa
                     }
@@ -70,6 +80,12 @@
                 $("#result_div").append(table);
                 $('#result_table').DataTable();
             });
+            
+            function _calculateAge(birthday) { // birthday is a date
+                var ageDifMs = Date.now() - birthday.getTime();
+                var ageDate = new Date(ageDifMs); // miliseconds from epoch
+                return Math.abs(ageDate.getUTCFullYear() - 1970);
+            }
         </script>
     <?php endif; ?>
 </p>

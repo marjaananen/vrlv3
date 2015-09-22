@@ -227,7 +227,7 @@ class Profiili extends Loggedin_Controller
         if($this->input->server('REQUEST_METHOD') == 'POST')
         {
             $this->form_validation->set_rules('vastaanottaja', 'Vastaanottaja', "required|min_length[5]|max_length[9]|callback__pinnumber_check");
-            $this->form_validation->set_rules('viesti', 'Viesti', "required|min_length[1]|max_length[360]|regex_match[/^[A-Za-z0-9_\-.:,; *~#&'@()]*$/]");
+            $this->form_validation->set_rules('viesti', 'Viesti', "required|min_length[1]|max_length[360]|regex_match[/^[A-Za-zÄäÖöÅå0-9_\-.:,; *~#&'@()]*$/]");
             
             if ($this->form_validation->run() == true)
             {
