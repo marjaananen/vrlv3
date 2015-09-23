@@ -21,6 +21,7 @@
                 var data = JSON.parse('<?=$data?>');
                 var numcolumns = 0;
                 var table = "<table id='result_table'><thead><tr>";
+                var prepend_text;
 
                 for(i in headers)
                 {
@@ -39,6 +40,11 @@
                     
                     for(var i=1; i<=numcolumns; i++)
                     {
+                        if (headers[i]['prepend_text'] != undefined)
+                            prepend_text = headers[i]['prepend_text'];
+                        else
+                            prepend_text = "";
+                        
                         //Jos pitää koota kaikki saman hakukohteen useat arvot yhteen arvoon, mennään iffiin
                         //esim. tallihaussa kootaan yhteen muuttujaan kaikki tallin kategoriat
                         if(headers[i]['aggregated_by'] != undefined)
@@ -58,19 +64,19 @@
                         }
                         
                         if (headers[i]['profile_link'] != undefined)
-                            table += "<td><a href='" + headers[i]['profile_link'] + data[d][headers[i]['key']] + "'>" + data[d][headers[i]['key']] + "</a></td>"; //profiili linkatun arvon tulostus soluunsa
+                            table += "<td><a href='" + headers[i]['profile_link'] + data[d][headers[i]['key']] + "'>" + prepend_text + data[d][headers[i]['key']] + "</a></td>"; //profiili linkatun arvon tulostus soluunsa
                         else if (headers[i]['date_to_age'] != undefined) {
                             if (data[d][headers[i]['key']] == "0000-00-00") {
-                                table += "<td>-</td>";
+                                table += "<td>Ei saatavilla</td>";
                             }
                             else {
-                                var t = data[d][headers[i]['key']].split(/[-]/);
+                                var t = data[d][headers[i]['key']].split(/[-]/); //date iäksi
                                 var date = new Date(t[0], t[1]-1, t[2]);
                                 table += "<td>" + _calculateAge(date) + "</td>";
                             }
                         }
                         else
-                            table += "<td>" + data[d][headers[i]['key']] + "</td>"; //normaali arvon tulostus soluunsa
+                            table += "<td>" + prepend_text + data[d][headers[i]['key']] + "</td>"; //normaali arvon tulostus soluunsa
                     }
                         
                     table += "</tr>";

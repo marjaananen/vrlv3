@@ -25,13 +25,30 @@ class Tallit extends CI_Controller
 	$vars['stable'] = $this->tallit_model->get_stable($tnro);
 	$vars['categories'] = $this->tallit_model->get_stables_categories($tnro);
 	$vars['owners'] = $this->tallit_model->get_stables_owners($tnro);
+	$vars['likes'] = $this->tallit_model->get_stables_likes($tnro);
 	
-	if($this->ion_auth->logged_in() && $this->tallit_model->is_stable_owner($this->ion_auth->user()->row()->tunnus, $tnro))
-	    $vars['loggedin_owner'] = true;
+	if($this->ion_auth->logged_in())
+	    $vars['liked_status'] = $this->tallit_model->get_stables_like_by_user($tnro, $this->ion_auth->user()->row()->tunnus);
 	else
-	    $vars['loggedin_owner'] = false;
+	    $vars['liked_status'] = "notset";
+	
 	
 	$this->fuel->pages->render('tallit/profiili', $vars);
+    }
+    
+    function tykkaa($tnro, $yesno)
+    {
+	$this->load->model('tallit_model');
+	
+	if(empty($tnro) || empty($yesno) || !$this->ion_auth->logged_in())
+	    redirect('/');
+	    
+	if($yesno == 1)
+	    $this->tallit_model->add_stable_like($tnro);
+	else if($yesno == -1)
+	    $this->tallit_model->delete_stable_like($tnro);
+	    
+	redirect($this->input->server('HTTP_REFERER'));
     }
 
     function rekisteroi()
@@ -84,6 +101,27 @@ class Tallit extends CI_Controller
 	
 	$this->load->library('form_validation');
 	$this->load->library('form_collection');
+	
+	$vars['append'] = '<p><b>Kategoriat: </b>';
+	$categories = $this->tallit_model->get_stables_categories($tnro);
+	$first = true;
+	foreach($categories as $c)
+	{
+	    if(count($categories) == 1)
+		$vars['append'] .= $c['katelyh'];
+	    else
+	    {
+		if($first)
+		{
+		    $vars['append'] .= $c['katelyh'] . "<a href='" . site_url("tallit/poista_kategoria") . "/" . $c['id'] . "'>(Poista kategoria)</a>";
+		    $first = false;
+		}
+		else
+		    $vars['append'] .= ", " . $c['katelyh'] . "<a href='" . site_url("tallit/poista_kategoria") . "/" . $c['id'] . "'>(Poista kategoria)</a>";
+	    }
+	}
+	
+	$vars['append'] .= "</p><p><a href='" . site_url('tallit/rekisteroi_kategoria') . "/" . $tnro . "'>Ano uutta kategoriaa tallille</a></p>";
         
         if($this->input->server('REQUEST_METHOD') == 'GET')
         {

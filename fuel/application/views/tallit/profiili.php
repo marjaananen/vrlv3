@@ -10,26 +10,13 @@
             $first = true;
             foreach($categories as $c)
             {
-                if(count($categories) == 1 || $loggedin_owner == false)
+                if($first)
                 {
-                    if($first)
-                    {
-                        echo $c['katelyh'];
-                        $first = false;
-                    }
-                    else
-                        echo ", " . $c['katelyh'];
+                    echo $c['katelyh'];
+                    $first = false;
                 }
                 else
-                {
-                    if($first)
-                    {
-                        echo $c['katelyh'] . "<a href='" . site_url("tallit/poista_kategoria") . "/" . $c['id'] . "'>(Poista kategoria)</a>";
-                        $first = false;
-                    }
-                    else
-                        echo ", " . $c['katelyh'] . "<a href='" . site_url("tallit/poista_kategoria") . "/" . $c['id'] . "'>(Poista kategoria)</a>";
-                }
+                    echo ", " . $c['katelyh'];
             }
         ?>
     </p>
@@ -48,14 +35,19 @@
             }
         ?>
     </p>
+    <p><b>Tykkäykset:</b> <?=$likes?></p>
     
+    <br />
     <p>
-        <?php
-            if($loggedin_owner)
-            {
-                echo "<br />";
-                echo "<a href='" . site_url('tallit/rekisteroi_kategoria') . "/" . $stable['tnro'] . "'>Ano uutta kategoriaa tallille</a>";
-            }
-        ?>
+        <?php if($liked_status === 'notset') : ?>
+            Kirjaudu sisään tykätäksesi tallista.
+        <?php elseif($liked_status == false) : ?>
+            <a href="<?php echo site_url('tallit/tykkaa') . '/' . $stable['tnro'] . '/' . '1'; ?>">Tykkää tallista</a>
+        <?php else : ?>
+            <a href="<?php echo site_url('tallit/tykkaa') . '/' . $stable['tnro'] . '/' . '-1'; ?>">Vedä tykkäyksesi pois</a>
+        <?php endif; ?>
     </p>
 </div>
+
+
+

@@ -282,7 +282,7 @@ class Tunnukset_model extends Base_module_model
     
     function search_users($pinnumber, $nick, $location)
     {
-        $this->db->select('tunnus, nimimerkki, syntymavuosi, maakunta');
+        $this->db->select('tunnus, nimimerkki, syntymavuosi, maakunta, nayta_vuosilaani');
         $this->db->from('vrlv3_tunnukset');
         $this->db->join('vrlv3_lista_maakunnat', 'vrlv3_tunnukset.laani = vrlv3_lista_maakunnat.id');
         

@@ -70,6 +70,10 @@ class Tallit_model extends Base_module_model
 
         $this->db->where('tnro', $tnro);
         $this->db->update('vrlv3_tallirekisteri', $data);
+        
+        //päivityksestä jää jälki
+        $data = array('tnro' => $tnro, 'paivitti' => $this->ion_auth->user()->row()->tunnus, 'aika' => date("Y-m-d H:i:s"));
+        $this->db->insert('vrlv3_tallirekisteri_paivitetty', $data);
     }
     
     function add_owner_to_stable($tnro, $applicant, $level)
@@ -178,6 +182,46 @@ class Tallit_model extends Base_module_model
         return array();
     }
     
+    function get_stables_likes($tnro)
+    {  
+        $this->db->where('tnro', $tnro);
+        $this->db->where('aani', 1);
+        $this->db->from('vrlv3_tallirekisteri_yesno');
+        return $this->db->count_all_results();
+    }
+    
+    function get_stables_like_by_user($tnro, $pinnumber)
+    {
+        $this->db->select('tnro');
+        $this->db->where('tnro', $tnro);
+        $this->db->where('tunnus', $pinnumber);
+        $this->db->from('vrlv3_tallirekisteri_yesno');
+
+        $query = $this->db->get();
+        
+        if ($query->num_rows() > 0)
+        {
+            return true;
+        }
+        
+        return false;
+    }
+    
+    function add_stable_like($tnro)
+    {
+        $data = array('tnro' => $tnro, 'aani' => 1);
+
+        $data['aika'] = date("Y-m-d H:i:s");
+        $data['tunnus'] = $this->ion_auth->user()->row()->tunnus;
+        
+        $this->db->insert('vrlv3_tallirekisteri_yesno', $data);
+    }
+    
+    function delete_stable_like($tnro)
+    {
+        $this->db->delete('vrlv3_tallirekisteri_yesno', array('tunnus' => $this->ion_auth->user()->row()->tunnus, 'tnro' => $tnro));
+    }
+    
     //Kategoriat
     function add_category_to_stable($tnro, $category, $applicant)
     {
@@ -187,10 +231,23 @@ class Tallit_model extends Base_module_model
         $data['kasitelty'] = $data['lisatty'];
         
         $this->db->insert('vrlv3_tallirekisteri_kategoriat', $data);
+        
+        //päivityksestä jää jälki
+        $data = array('tnro' => $tnro, 'paivitti' => $this->ion_auth->user()->row()->tunnus, 'aika' => date("Y-m-d H:i:s"));
+        $this->db->insert('vrlv3_tallirekisteri_paivitetty', $data);
     }
     
     function delete_category($id)
     {
+        $this->db->select('tnro');
+        $this->db->from('vrlv3_tallirekisteri_kategoriat');
+        $this->db->where('id', $id);
+        $query = $this->db->get();
+        
+        //päivityksestä jää jälki
+        $data = array('tnro' => $query->row()->tnro, 'paivitti' => $this->ion_auth->user()->row()->tunnus, 'aika' => date("Y-m-d H:i:s"));
+        $this->db->insert('vrlv3_tallirekisteri_paivitetty', $data);
+        
         $this->db->delete('vrlv3_tallirekisteri_kategoriat', array('id' => $id));
     }
     

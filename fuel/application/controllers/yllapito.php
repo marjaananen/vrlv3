@@ -182,7 +182,7 @@ class Yllapito extends CI_Controller
             {
                 $this->session->set_flashdata('return_info', 'Tallianomuksen tietojen noutaminen epäonnistui!<br />Joku saattaa olla jo hyväksymässä haettua tallia, tai tapahtui muu virhe.');
                 $this->session->set_flashdata('return_status', 'danger');
-                redirect('/yllapito/tallirekisteri/hyvaksy');
+                redirect('/yllapito/tallirekisteri/tallijono/hyvaksy');
             }
             
             $raw_data = array();
@@ -229,7 +229,7 @@ class Yllapito extends CI_Controller
             {
                 $this->session->set_flashdata('return_info', 'Anomuksen käsittely epäonnistui!');
                 $this->session->set_flashdata('return_status', 'danger');
-                redirect('/yllapito/tallirekisteri/hyvaksy');
+                redirect('/yllapito/tallirekisteri/tallijono/hyvaksy');
             }
             
             if($approved == 'hyvaksy')
@@ -238,7 +238,7 @@ class Yllapito extends CI_Controller
                 {
                     $this->session->set_flashdata('return_info', 'Anomuksen käsittely epäonnistui, koska annoit virheellisen tallilyhenteen kirjainosan!');
                     $this->session->set_flashdata('return_status', 'danger');
-                    redirect('/yllapito/tallirekisteri/hyvaksy');
+                    redirect('/yllapito/tallirekisteri/tallijono/hyvaksy');
                 }
                 
                 $approved = true;
@@ -279,7 +279,7 @@ class Yllapito extends CI_Controller
             }
         }
             
-        redirect('/yllapito/tallirekisteri/hyvaksy');
+        redirect('/yllapito/tallirekisteri/tallijono/hyvaksy');
     }
     
     //TALLIKATEGORIAJONO-OSUUS
@@ -300,7 +300,7 @@ class Yllapito extends CI_Controller
             {
                 $this->session->set_flashdata('return_info', 'Tallikategoria-anomuksen tietojen noutaminen epäonnistui!<br />Joku saattaa olla jo hyväksymässä haettua tallikategoria-anomusta, tai tapahtui muu virhe.');
                 $this->session->set_flashdata('return_status', 'danger');
-                redirect('/yllapito/tallirekisteri_kategoria/hyvaksy');
+                redirect('/yllapito/tallirekisteri/kategoriajono/hyvaksy');
             }
             
             $raw_data = array();
@@ -343,7 +343,7 @@ class Yllapito extends CI_Controller
             {
                 $this->session->set_flashdata('return_info', 'Anomuksen käsittely epäonnistui!');
                 $this->session->set_flashdata('return_status', 'danger');
-                redirect('/yllapito/tallirekisteri_kategoria/hyvaksy');
+                redirect('/yllapito/tallirekisteri/kategoriajono/hyvaksy');
             }
             
             if($approved == 'hyvaksy')
@@ -374,7 +374,7 @@ class Yllapito extends CI_Controller
             $this->queue_manager->process_queue_item($id, $approved, $insert_data, $qitem['lisaaja'], $msg);
         }
             
-        redirect('/yllapito/tallirekisteri_kategoria/hyvaksy');
+        redirect('/yllapito/tallirekisteri/kategoriajono/hyvaksy');
     }
 }
 ?>

@@ -147,7 +147,7 @@ class Jasenyys extends CI_Controller
         $this->fuel->pages->render('misc/showmessage', $vars);
     }
     
-    function haku() //Näyttää vielä iät ja läänit ihmisiltä joilta se on piilotettu
+    function haku()
     {
         $this->load->library('Vrl_helper');
 	$this->load->model('tunnukset_model');
@@ -174,14 +174,25 @@ class Jasenyys extends CI_Controller
 
 	    if($this->form_validation->run() == true && !(empty($this->input->post('tunnus')) && empty($this->input->post('nimimerkki')) && $this->input->post('sijainti') == "-1"))
 	    {
-		$vars['headers'][1] = array('title' => 'VRL-tunnus', 'key' => 'tunnus', 'profile_link' => site_url('tunnus/') . '/');
+		$vars['headers'][1] = array('title' => 'VRL-tunnus', 'key' => 'tunnus', 'profile_link' => site_url('tunnus/') . '/', 'prepend_text' => 'VRL-');
 		$vars['headers'][2] = array('title' => 'Nimimerkki', 'key' => 'nimimerkki');
 		$vars['headers'][3] = array('title' => 'Ikä', 'key' => 'syntymavuosi', 'date_to_age' => true);
 		$vars['headers'][4] = array('title' => 'Sijainti', 'key' => 'maakunta');
-		
 		$vars['headers'] = json_encode($vars['headers']);
-		
-		$vars['data'] = json_encode($this->tunnukset_model->search_users($this->vrl_helper->vrl_to_number($this->input->post('tunnus')), $this->input->post('nimimerkki'), $this->input->post('sijainti')));
+                
+                $vars['data'] = $this->tunnukset_model->search_users($this->vrl_helper->vrl_to_number($this->input->post('tunnus')), $this->input->post('nimimerkki'), $this->input->post('sijainti'));
+                
+                foreach($vars['data'] as $key => $data)
+                {
+                    //jos piilotettu tai alle 16v niin ei lähetetä oikeita tietoja
+                    if($data['nayta_vuosilaani'] != 1 || intval(substr(date('Ymd') - date('Ymd', strtotime($data['syntymavuosi'])), 0, -4)) < 16)
+                    {
+                        $vars['data'][$key]['syntymavuosi'] = '0000-00-00';
+                        $vars['data'][$key]['maakunta'] = 'Ei saatavilla';
+                    }
+                }
+                
+		$vars['data'] = json_encode($vars['data']);		
 	    }
 	}
 	

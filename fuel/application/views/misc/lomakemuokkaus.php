@@ -8,5 +8,7 @@
     
     <?php
         echo fuel_var('form', '');
+        echo "<br />";
+        echo fuel_var('append', '');
     ?>
 </p>
