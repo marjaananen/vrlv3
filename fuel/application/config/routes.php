@@ -58,7 +58,7 @@ $route['profiili/omat-tallit/muokkaa/(:any)/(:any)'] = "tallit/muokkaa/$1/$2";
 
 
 $route['tallirekisteri/talli/(:any)'] = "tallit/talliprofiili/$1";
-$route['tallirekisteri/haku'] = "tallit/haku";
+$route['virtuaalitallit'] = "tallit/haku";
 
 
 $route['tunnus/(:any)'] = "jasenyys/tunnus/$1";

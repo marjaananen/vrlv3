@@ -225,7 +225,7 @@ class Tallit_model extends Base_module_model
     //Kategoriat
     function add_category_to_stable($tnro, $category, $applicant)
     {
-        $data = array('tnro' => $tnro, 'kategoria' => $category, 'anoi' => $applicant, 'tarkistaja' => $this->ion_auth->user()->row()->tunnus);
+        $data = array('tnro' => $tnro, 'kategoria' => $category, 'anoi' => $applicant, 'hyvaksyi' => $this->ion_auth->user()->row()->tunnus);
 
         $data['lisatty'] = date("Y-m-d H:i:s");
         $data['kasitelty'] = $data['lisatty'];

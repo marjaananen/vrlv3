@@ -4,6 +4,12 @@ class Profiili extends Loggedin_Controller
     function __construct()
     {
         parent::__construct();
+        
+        //Kaikki funktiot täällä vaativat kirjautuneen käyttäjän, joten:
+        if(!($this->ion_auth->logged_in()))
+        {
+            redirect('/');
+        }
     }
     
     function index()
@@ -212,8 +218,6 @@ class Profiili extends Loggedin_Controller
 	$this->load->library('form_validation');
         $this->load->model('tunnukset_model');
         $user = $this->ion_auth->user()->row();
-        
-    
      
         // load form_builder
         $this->load->library('form_builder', array('submit_value' => 'Lähetä'));

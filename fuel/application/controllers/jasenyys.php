@@ -16,7 +16,7 @@ class Jasenyys extends CI_Controller
         
 	if(!($this->vrl_helper->check_vrl_syntax($tunnus) && $this->ion_auth->identity_check($this->vrl_helper->vrl_to_number($tunnus))))
 	{
-	    $this->fuel->pages->render('misc/showmessage', array('msg' => 'Profiilia ei löytynyt!'));
+	    $this->fuel->pages->render('misc/naytaviesti', array('msg' => 'Profiilia ei löytynyt!'));
 	}
 	else
 	{
@@ -45,9 +45,14 @@ class Jasenyys extends CI_Controller
                 
                 if($user->nayta_vuosi == 1)
                     $fields['syntymavuosi'] = date("d.m.Y", strtotime($user->syntymavuosi));
+                else
+                    $fields['syntymavuosi'] = "Ei saatavilla";
                 
                 if($user->nayta_laani == 1)
                     $fields['sijainti'] = $this->tunnukset_model->get_location($user->laani);
+                else
+                    $fields['sijainti'] = "Ei saatavilla";
+                    
             }
             
             $fields['nimimerkit'] = $this->tunnukset_model->get_previous_nicknames($pinnumber);
@@ -148,7 +153,7 @@ class Jasenyys extends CI_Controller
         else
             $vars['msg'] = "Jotain meni pieleen!<br /><br />Varmista, ettei sähköpostiisi tullut osoite katkennut osoitepalkille siirrettäessä ja yritä uudelleen.";
             
-        $this->fuel->pages->render('misc/showmessage', $vars);
+        $this->fuel->pages->render('misc/naytaviesti', $vars);
     }
     
     function haku()
