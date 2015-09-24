@@ -32,8 +32,23 @@ class Migraatio_model extends Base_module_model
             $data['active'] = 1;
             $data['tunnus'] = $row->tunnus;
             $data['nimimerkki'] = $row->nimimerkki;
-            $data['nayta_email'] = $row->nayta_email;
-            $data['nayta_vuosilaani'] = $row->nayta_vuosilaani; //MUUTA UUTEEN MUOTOON
+
+            if($row->nayta_email == 1 || $row->nayta_email == 2)
+                $data['nayta_email'] = 0;
+            else
+                $data['nayta_email'] = 1;
+
+            if($row->nayta_vuosilaani == 1 || $row->nayta_vuosilaani == 2)
+            {
+                $data['nayta_vuosi'] = 0;
+                $data['nayta_laani'] = 0;
+            }
+            else
+            {
+                $data['nayta_vuosi'] = 1;
+                $data['nayta_laani'] = 1;
+            }
+            
             
             
             $this->db->where('id', $row->laani);
