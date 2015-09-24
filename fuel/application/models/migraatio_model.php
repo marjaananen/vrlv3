@@ -122,10 +122,10 @@ class Migraatio_model extends Base_module_model
         {
             if ($this->onko_tunnus($row->vastaanottaja)) {                           
                 if (!$this->onko_tunnus($row->lahettaja)){
-                    $data['lahettaja'] = 00000;
+                    $data_message['lahettaja'] = 00000;
                 }
                 else {
-                    $data['lahettaja'] = $row->hyvaksyi;
+                    $data_message['lahettaja'] = $row->hyvaksyi;
                 }
                 $data_message['vastaanottaja'] = $row->vastaanottaja;
                 $data_message['aika'] = $row->aika;
@@ -138,7 +138,7 @@ class Migraatio_model extends Base_module_model
                 $amount = $this->db->count_all_results();
         
                 if ($amount == 0){
-                    $this->db->insert('vrlv3_tunnukset_nimimerkit', $data_message);              
+                    $this->db->insert('vrlv3_tunnukset_pikaviestit', $data_message);              
                 }
             }
         }
