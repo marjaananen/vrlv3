@@ -33,7 +33,7 @@ class Migraatio_model extends Base_module_model
             $data['tunnus'] = $row->tunnus;
             $data['nimimerkki'] = $row->nimimerkki;
             $data['nayta_email'] = $row->nayta_email;
-            $data['nayta_vuosilaani'] = $row->nayta_vuosilaani;
+            $data['nayta_vuosilaani'] = $row->nayta_vuosilaani; //MUUTA UUTEEN MUOTOON
             
             
             $this->db->where('id', $row->laani);

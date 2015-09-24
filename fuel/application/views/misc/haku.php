@@ -17,8 +17,8 @@
     <?php if(!empty($headers)) : ?>
         <script>
             $(document).ready(function() {
-                var headers = JSON.parse('<?=$headers?>');
-                var data = JSON.parse('<?=$data?>');
+                var headers = <?=$headers?>;
+                var data = <?=$data?>;
                 var numcolumns = 0;
                 var table = "<table id='result_table'><thead><tr>";
                 var prepend_text;

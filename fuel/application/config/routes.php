@@ -40,7 +40,7 @@
 
 
 
-//Profiilikontrollerin lisaa yhteystietoja ei ole menuissa
+//Profiilikontrollerin muokkaa yhteystietoja ei ole menuissa
 
 $route['yllapito/tunnukset/hyvaksy'] = "yllapito/hakemusjono";
 

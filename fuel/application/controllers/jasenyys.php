@@ -33,17 +33,21 @@ class Jasenyys extends CI_Controller
             else
                 $fields['email'] = "Ei saatavilla";            
 	    
-            if($user->nayta_vuosilaani == 1 && strtotime($user->syntymavuosi) < strtotime('-16 year'))
-            {
-                $fields['syntymavuosi'] = date("d.m.Y", strtotime($user->syntymavuosi));
-                $fields['sijainti'] = $this->tunnukset_model->get_location($user->laani);
-                $fields['muut_yhteystiedot'] = $this->tunnukset_model->get_users_public_contacts($pinnumber);
-            }
-            else
+            if(strtotime($user->syntymavuosi) >= strtotime('-16 year'))
             {
                 $fields['syntymavuosi'] = "Ei saatavilla";
                 $fields['sijainti'] = "Ei saatavilla";
                 $fields['muut_yhteystiedot'] = array();
+            }
+            else
+            {
+                $fields['muut_yhteystiedot'] = $this->tunnukset_model->get_users_public_contacts($pinnumber);
+                
+                if($user->nayta_vuosi == 1)
+                    $fields['syntymavuosi'] = date("d.m.Y", strtotime($user->syntymavuosi));
+                
+                if($user->nayta_laani == 1)
+                    $fields['sijainti'] = $this->tunnukset_model->get_location($user->laani);
             }
             
             $fields['nimimerkit'] = $this->tunnukset_model->get_previous_nicknames($pinnumber);
@@ -185,10 +189,18 @@ class Jasenyys extends CI_Controller
                 foreach($vars['data'] as $key => $data)
                 {
                     //jos piilotettu tai alle 16v niin ei lähetetä oikeita tietoja
-                    if($data['nayta_vuosilaani'] != 1 || intval(substr(date('Ymd') - date('Ymd', strtotime($data['syntymavuosi'])), 0, -4)) < 16)
+                    if(intval(substr(date('Ymd') - date('Ymd', strtotime($data['syntymavuosi'])), 0, -4)) < 16)
                     {
                         $vars['data'][$key]['syntymavuosi'] = '0000-00-00';
                         $vars['data'][$key]['maakunta'] = 'Ei saatavilla';
+                    }
+                    else
+                    {
+                        if($data['nayta_vuosi'] == 0)
+                            $vars['data'][$key]['syntymavuosi'] = '0000-00-00';
+                            
+                        if($data['nayta_laani'] == 0)
+                            $vars['data'][$key]['maakunta'] = 'Ei saatavilla';
                     }
                 }
                 

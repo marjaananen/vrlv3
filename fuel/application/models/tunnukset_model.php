@@ -282,7 +282,7 @@ class Tunnukset_model extends Base_module_model
     
     function search_users($pinnumber, $nick, $location)
     {
-        $this->db->select('tunnus, nimimerkki, syntymavuosi, maakunta, nayta_vuosilaani');
+        $this->db->select('tunnus, nimimerkki, syntymavuosi, maakunta, nayta_vuosi, nayta_laani');
         $this->db->from('vrlv3_tunnukset');
         $this->db->join('vrlv3_lista_maakunnat', 'vrlv3_tunnukset.laani = vrlv3_lista_maakunnat.id');
         
@@ -309,7 +309,7 @@ class Tunnukset_model extends Base_module_model
             $date = new DateTime();
             $date->setTimestamp(time() - 16*365*24*60*60); //vain yli 16 vuotiaita jos etsitään sijainnilla
             $this->db->where('syntymavuosi < "' . $date->format('Y-m-d') . '"');
-            $this->db->where('nayta_vuosilaani', 1);
+            $this->db->where('nayta_laani', 1);
         }
    
         $query = $this->db->get();
