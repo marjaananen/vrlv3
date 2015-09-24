@@ -36,7 +36,7 @@ class Yllapito extends CI_Controller
                 $vars['msg'] = "Kämmäsit parametrit";
         }
 
-        $this->fuel->pages->render('misc/showmessage', $vars);
+        $this->fuel->pages->render('misc/naytaviesti', $vars);
     }
     
     //HAKEMUSJONO-OSUUS

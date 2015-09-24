@@ -1,7 +1,7 @@
 <h2>Talliprofiili: <?=$stable['nimi']?></h2>
 
 <div class="container">
-    <p><b>Tallitunnus:</b> <?=$stable['tnro']?></p>
+    <p><b>Tallinumero:</b> <?=$stable['tnro']?></p>
     <p><b>Rekisteröity:</b> <?=$stable['perustettu']?></p>
     <p><b>Kotisivu:</b> <a href="<?=$stable['url']?>"><?=$stable['url']?></a></p>
     <p><b>Kuvaus:</b> <?=$stable['kuvaus']?></p>

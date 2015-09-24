@@ -1,4 +1,4 @@
-﻿<h2>Hakemusjono</h2>
+<h2>Hakemusjono</h2>
 
 <?php if($this->session->flashdata('return_status') != '') : ?>
     <div class="alert alert-<?php echo $this->session->flashdata('return_status'); ?>" role="alert">
