@@ -13,5 +13,13 @@ class Migraatiot extends CI_Controller
         $vars['msg'] = $this->migraatio_model->migrate_tunnukset();
         $this->fuel->pages->render('misc/showmessage', $vars);
     }
+    
+    function tiedotukset()
+    {
+        $this->load->model('migraatio_model');
+        $vars = array();
+        $vars['msg'] = $this->migraatio_model->migrate_tiedotukset();
+        $this->fuel->pages->render('misc/showmessage', $vars);
+    }
 }
 ?>

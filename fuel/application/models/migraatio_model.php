@@ -8,6 +8,95 @@ class Migraatio_model extends Base_module_model
     {
         parent::__construct();
     }
+    
+    
+    
+     //Applications
+    function migrate_tiedotukset()
+    {
+        $this->db->select("kategoria");
+        $this->db->distinct();
+        $query = $this->db->get('tiedotukset_kategoriat');
+        
+        foreach ($query->result() as $row){
+            
+            $this->db->where('kategoria', $row->kategoria);
+            $this->db->from('vrlv3_lista_tiedotuskategoriat');
+            $amount = $this->db->count_all_results();
+            
+            if (!$this->it_is_there_already('vrlv3_lista_tiedotuskategoriat', array('kategoria'=> $row->kategoria))){
+                $this->db->insert('vrlv3_lista_tiedotuskategoriat', array("kategoria" => $row->kategoria ));
+            }
+        }
+        
+        $query = $this->db->get('tiedotukset');
+        foreach ($query->result() as $row)
+        {
+        
+            if (!$this->it_is_there_already('vrlv3_tiedotukset', array('aika' => $row->aika, 'otsikko' => $row->otsikko, 'lahettaja' => $row->lahettaja))){
+                
+                $data_tiedotus['aika']= $row->aika;
+                $data_tiedotus['otsikko']= $row->otsikko;
+                $data_tiedotus['teksti']= $row->teksti;
+                $data_tiedotus['lahettaja']= $row->lahettaja;
+                $data_tiedotus['julkinen']= $row->julkinen;
+                $data_tiedotus['muokkaaja']= $row->muokkaaja;
+                $data_tiedotus['muokpvm']= $row->muokpvm;
+                
+                if (!$this->onko_tunnus($row->lahettaja)){
+                    $data_tiedotus['lahettaja'] = 00000;
+                }
+                else {
+                    $data_tiedotus['lahettaja'] = $row->lahettaja;
+                }
+            
+                if (!$this->onko_tunnus($row->muokkaaja)){
+                    $data_tiedotus['muokkaaja'] = 00000;
+                }
+                else {
+                    $data_tiedotus['muokkaaja'] = $row->muokkaaja;
+                }
+                
+                $this->db->insert('vrlv3_tiedotukset', $data_tiedotus);
+            }
+            
+            
+            //haetaan sen käsitellyn tid
+            $this->db->select("tid");
+            $this->db->where(array('aika' => $row->aika, 'otsikko' => $row->otsikko, 'lahettaja' => $row->lahettaja));
+            $tid_query = $this->db->get('vrlv3_tiedotukset');
+            $tid = $tid_query->row()->tid;
+                
+            //Insertataan kaikki kys. tiedotuksen kategoriat
+            $this->db->select("kategoria");
+            $this->db->where('tid', $row->tid);
+            $query2 = $this->db->get('tiedotukset_kategoriat');
+                
+            foreach ($query2->result() as $row2)
+            {
+                //haetaan jokaiselle kategorialle ID
+                $this->db->select("kid");
+                $this->db->where('kategoria', $row2->kategoria);
+                $query3 = $this->db->get('vrlv3_lista_tiedotuskategoriat');
+                
+                $data_tiedotus_kategoria = array();
+                $data_tiedotus_kategoria['kid'] = $query3->row()->kid;
+                $data_tiedotus_kategoria['tid'] = $tid;
+                
+                if (!$this->it_is_there_already('vrlv3_tiedotukset_kategoriat', $data_tiedotus_kategoria)){
+                    $this->db->insert('vrlv3_tiedotukset_kategoriat', $data_tiedotus_kategoria);
+                }
+                
+            }               
+                             
+
+        }
+        
+       
+        
+        
+        
+    }
  
     //Applications
     function migrate_tunnukset()
@@ -90,13 +179,17 @@ class Migraatio_model extends Base_module_model
             
         }
         
+        /*
+        
         //VRLV3_TUNNUKSET_KIRJAUTUMISET
         $query = $this->db->get('tunnukset_epa');
         $this->vrlv3_tunnukset_kirjautumiset($query);
         $query = $this->db->get('tunnukset_kirjautumiset');
         $this->vrlv3_tunnukset_kirjautumiset($query);
+        
+        */
             
-        //VRLV3_TUNNUKSET_KIRJAUTUMISET       
+        //VRLV3_TUNNUKSET_NIKIT     
         $query = $this->db->get('tunnukset_nimimerkit');
         foreach ($query->result() as $row)
         {
@@ -125,7 +218,7 @@ class Migraatio_model extends Base_module_model
                     $data_message['lahettaja'] = 00000;
                 }
                 else {
-                    $data_message['lahettaja'] = $row->hyvaksyi;
+                    $data_message['lahettaja'] = $row->lahettaja;
                 }
                 $data_message['vastaanottaja'] = $row->vastaanottaja;
                 $data_message['aika'] = $row->aika;
@@ -169,6 +262,22 @@ class Migraatio_model extends Base_module_model
         $this->db->from('vrlv3_tunnukset');
         $amount = $this->db->count_all_results();
         
+        if ($amount != 1){
+            return false;
+        }
+        
+        else {
+            return true;
+        }
+        
+    }
+    
+    
+    public function it_is_there_already ($taulu, $array){
+        $this->db->where($array);
+        $this->db->from($taulu);
+        $amount = $this->db->count_all_results();
+            
         if ($amount != 1){
             return false;
         }
