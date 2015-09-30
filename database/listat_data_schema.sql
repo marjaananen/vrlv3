@@ -87,3 +87,50 @@ INSERT INTO `vrlv3_lista_tallikategoriat` (`kat`, `kategoria`, `katelyh`, `katnr
 (11, 'muu kilpatalli', 'KT', 'KAT4'),
 (12, 'tamma-asema', 'TA', 'KAT6'),
 (13, 'harrastetalli', 'HT', 'KAT0');
+
+
+
+--
+-- Rakenne taululle `vrlv3_lista_tiedotuskategoriat`
+--
+
+CREATE TABLE IF NOT EXISTS `vrlv3_lista_tiedotuskategoriat` (
+  `kid` int(11) NOT NULL AUTO_INCREMENT,
+  `kategoria` varchar(25) NOT NULL,
+  PRIMARY KEY (`kid`)
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=30 ;
+
+--
+-- Vedos taulusta `vrlv3_lista_tiedotuskategoriat`
+--
+
+INSERT INTO `vrlv3_lista_tiedotuskategoriat` (`kid`, `kategoria`) VALUES
+(1, 'VVJ'),
+(2, 'kilpailut'),
+(3, 'kasvattajanimet'),
+(4, 'kantakirjat'),
+(5, 'sivusto'),
+(6, 'rotuyhdistykset'),
+(7, 'ERJ'),
+(8, 'Vippos'),
+(9, 'KERJ'),
+(10, 'VRL-tunnukset'),
+(11, 'seurat'),
+(12, 'KRJ'),
+(13, 'tallit'),
+(14, 'VMJ'),
+(15, 'PKK'),
+(16, 'laatuarvostelut'),
+(17, 'työpaikat'),
+(18, 'ranking'),
+(19, 'porrastetut kilpailut'),
+(20, 'rekisteri'),
+(21, 'kasvattajaklubi'),
+(22, 'ARJ'),
+(23, 'opisto'),
+(24, 'WRJ'),
+(25, 'hallitus'),
+(26, 'näyttelyt'),
+(27, 'hevosrekisteri'),
+(28, 'VRL'),
+(29, 'adoptointi');

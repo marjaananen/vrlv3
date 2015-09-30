@@ -16,6 +16,7 @@ ci_sessions_schema.sql
 ion_auth.sql
 listat_data_schema.sql 
 tunnukset_schema.sql
+tiedotukset_schema.sql
 tallirekisteri_schema.sql
 
 

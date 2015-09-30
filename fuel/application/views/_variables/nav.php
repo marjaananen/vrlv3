@@ -16,7 +16,7 @@ $nav['about/what-they-say'] = array('label' => 'What They Say', 'parent_id' => '
 $nav = array();
 
 //Ylämenu
-$nav['liitto'] = array('label' => 'Liitto', 'active' => 'liitto$|liitto/:any');
+$nav['liitto'] = array('label' => 'Liitto', 'active' => 'liitto$|liitto/:any|tiedotukset$|tiedotukset/:any');
 $nav['jasenyys'] = array('label' => 'Jäsenyys', 'active' => 'jasenyys$|jasenyys/:any');
 $nav['virtuaalitallit'] = array('label' => 'Virtuaalitallit', 'active' => 'virtuaalitallit$|virtuaalitallit/:any'); //Koodattavaa: Tallihaku
 $nav['virtuaalihevoset'] = 'Virtuaalihevoset'; //Koodattavaa: Hevoshaku
@@ -29,7 +29,7 @@ $nav['yllapito'] = array('label'=>'Ylläpito', 'hidden'=> TRUE, 'active' => 'yll
 $nav['profiili'] = array('label'=>'Profiili', 'hidden'=> TRUE, 'active' => 'profiili');
 
 //Liitto alamenu
-$nav['liitto/uutiset'] = array('label' => 'Uutiset', 'parent_id' => 'liitto', 'active' => 'liitto/uutiset'); //Koodattavaa:uutisten esitystapa
+$nav['tiedotukset'] = array('label' => 'Tiedotukset', 'parent_id' => 'liitto', 'active' => 'tiedotukset'); //Koodattavaa:uutisten esitystapa
 $nav['liitto/yllapito'] = array('label' => 'Ylläpito ja yhteydenotto', 'parent_id' => 'liitto', 'active' => 'liitto/yllapito'); //Koodattavaa: työntekijöiden listaus
 $nav['liitto/vapaaehtoistyot'] = array('label' => 'Vapaaehtoiseksi VRL:ään?', 'parent_id' => 'liitto', 'active' => 'liitto/vapaaehtoistyot');
 $nav['liitto/wiki'] = array('label' => 'Virtuaaliwiki', 'parent_id' => 'liitto', 'active' => 'liitto/wiki');

@@ -31,8 +31,9 @@
 		<link rel="stylesheet" type="text/css" href="//cdn.datatables.net/1.10.9/css/jquery.dataTables.css">
 		<!-- DataTables -->
 		<script type="text/javascript" charset="utf8" src="//cdn.datatables.net/1.10.9/js/jquery.dataTables.js"></script>
-
 		
+		<?php echo js('jqcloud.min.js'); ?>
+		<?php echo css('jqcloud.min.css'); ?>
 		<?php echo css('vrl.css'); ?>
 	</head>
 	<body>

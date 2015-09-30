@@ -19,7 +19,6 @@ $vars['main_quickmenu'] = '<li><a href="http://vf.marsupieni.net/viewtopic.php?f
 <li><a href="http://www.virtuaalihevoset.net/wiki/index.php/Etusivu">VirtuaaliWiki</a></li>    
 ';
 
-
 $vars['yllapito_nimet'] = "<b>Marsupieni</b> (VRL-01026) ja <b>pipariina</b> (VRL-00050)";
 
 // page specific variables
