@@ -38,47 +38,7 @@ class Profiili extends Loggedin_Controller
         $this->load->model('tunnukset_model');
         $user = $this->ion_auth->user()->row();
         
-        if($this->input->server('REQUEST_METHOD') == 'GET')
-        {
-            // load form_builder
-            $this->load->library('form_builder', array('submit_value' => 'Päivitä tiedot'));
-
-            $dateofbirth = date("d.m.Y", strtotime($user->syntymavuosi));
-            $options = $this->tunnukset_model->get_location_option_list();
-            $contacts_html = '';
-            
-            foreach($this->tunnukset_model->get_users_contacts($user->tunnus) as $row)
-            {
-                if(empty($contacts_html))
-                    $contacts_html .= "<ul>";
-                    
-                $contacts_html .= "<li><b>" . $row['tyyppi'] . ": </b>" . $row['tieto'] . "</li>";
-            }
-        
-            if(!empty($contacts_html))
-                $contacts_html .= "</ul><br />";
-            
-            // create fields
-            $fields['nimimerkki'] = array('type' => 'text', 'value' => $user->nimimerkki, 'class'=>'form-control');
-            $fields['email'] = array('type' => 'text', 'value' => $user->email, 'label' => 'Sähköpostiosoite', 'after_html' => '<span class="form_comment">Anna toimiva osoite tai saatat menettää tunnuksesi!</span>', 'class'=>'form-control');
-            $fields['nayta_email'] = array('type' => 'checkbox', 'checked' => $user->nayta_email, 'label' => 'Näytetäänkö sähköposti julkisesti?', 'after_html' => '<span class="form_comment">Näytetäänkö sähköposti julkisesti profiilissasi.</span>', 'class'=>'form-control');
-            $fields['muut_yhteystiedot'] = array('type' => 'section', 'tag' => 'label', 'value' => 'Muut yhteystiedot', 'display_label' => false, 'after_html' => $contacts_html . '<span class="form_comment"><a href="' . site_url('/profiili/muokkaa_yhteystietoja') . '">Muokkaa yhteystietoja</a></span>');
-            $fields['syntymavuosi'] = array('type' => 'text', 'label' => 'Syntymäaika', 'disabled' => 'disabled', 'size' => '10', 'value' => $dateofbirth, 'class'=>'form-control');
-            $fields['sijainti'] = array('type' => 'select', 'options' => $options, 'value' => $user->laani, 'class'=>'form-control');
-            $fields['nayta_vuosi'] = array('type' => 'checkbox', 'checked' => $user->nayta_vuosi, 'label' => 'Näytetäänkö ikä julkisesti?', 'after_html' => '<span class="form_comment">Näytetäänkö tiedot julkisesti profiilissasi. Huom! Vain yli 16-vuotiaiden tiedot voidaan näyttää profiilissa.</span>', 'class'=>'form-control');
-            $fields['nayta_laani'] = array('type' => 'checkbox', 'checked' => $user->nayta_laani, 'label' => 'Näytetäänkö sijainti julkisesti?', 'after_html' => '<span class="form_comment">Näytetäänkö tiedot julkisesti profiilissasi. Huom! Vain yli 16-vuotiaiden tiedot voidaan näyttää profiilissa.</span>', 'class'=>'form-control');
-            $fields['salasana'] = array('type' => 'password', 'class'=>'form-control');
-            $fields['uusi_salasana1'] = array('type' => 'password', 'label' => 'Uusi salasana', 'class'=>'form-control');
-            $fields['uusi_salasana2'] = array('type' => 'password', 'label' => 'Toista uusi salasana', 'after_html' => '<span class="form_comment">Täytä salasanakentät vain jos haluat vaihtaa salasanasi. Salasanassa tulee olla vähintään 6 merkkiä. Salasana tulee voimaan heti, eikä sinun tarvitse kirjautua sisään uudelleen.</span>', 'class'=>'form-control');
-            
-            $this->form_builder->form_attrs = array('method' => 'post', 'action' => site_url('profiili/tiedot'));
-    
-            // render the page
-            $vars['profile_form'] = $this->form_builder->render_template('_layouts/basic_form_template', $fields );
-            
-            $this->fuel->pages->render('profiili/tiedot', $vars);
-        }
-        else if($this->input->server('REQUEST_METHOD') == 'POST')
+        if($this->input->server('REQUEST_METHOD') == 'POST')
         {
             $valid = true;
             $change_password = false;
@@ -153,11 +113,46 @@ class Profiili extends Loggedin_Controller
                         $vars['success'] = false;
                 }
             }
-            
-            $this->fuel->pages->render('profiili/tiedot', $vars);
         }
-        else
-            redirect('/', 'refresh');
+        
+        // load form_builder
+        $this->load->library('form_builder', array('submit_value' => 'Päivitä tiedot'));
+        $user = $this->ion_auth->user()->row();
+
+        $dateofbirth = date("d.m.Y", strtotime($user->syntymavuosi));
+        $options = $this->tunnukset_model->get_location_option_list();
+        $contacts_html = '';
+        
+        foreach($this->tunnukset_model->get_users_contacts($user->tunnus) as $row)
+        {
+            if(empty($contacts_html))
+                $contacts_html .= "<ul>";
+                
+            $contacts_html .= "<li><b>" . $row['tyyppi'] . ": </b>" . $row['tieto'] . "</li>";
+        }
+    
+        if(!empty($contacts_html))
+            $contacts_html .= "</ul><br />";
+        
+        // create fields
+        $fields['nimimerkki'] = array('type' => 'text', 'value' => $user->nimimerkki, 'class'=>'form-control');
+        $fields['email'] = array('type' => 'text', 'value' => $user->email, 'label' => 'Sähköpostiosoite', 'after_html' => '<span class="form_comment">Anna toimiva osoite tai saatat menettää tunnuksesi!</span>', 'class'=>'form-control');
+        $fields['nayta_email'] = array('type' => 'checkbox', 'checked' => $user->nayta_email, 'label' => 'Näytetäänkö sähköposti julkisesti?', 'after_html' => '<span class="form_comment">Näytetäänkö sähköposti julkisesti profiilissasi.</span>', 'class'=>'form-control');
+        $fields['muut_yhteystiedot'] = array('type' => 'section', 'tag' => 'label', 'value' => 'Muut yhteystiedot', 'display_label' => false, 'after_html' => $contacts_html . '<span class="form_comment"><a href="' . site_url('/profiili/muokkaa_yhteystietoja') . '">Muokkaa yhteystietoja</a></span>');
+        $fields['syntymavuosi'] = array('type' => 'text', 'label' => 'Syntymäaika', 'disabled' => 'disabled', 'size' => '10', 'value' => $dateofbirth, 'class'=>'form-control');
+        $fields['sijainti'] = array('type' => 'select', 'options' => $options, 'value' => $user->laani, 'class'=>'form-control');
+        $fields['nayta_vuosi'] = array('type' => 'checkbox', 'checked' => $user->nayta_vuosi, 'label' => 'Näytetäänkö ikä julkisesti?', 'after_html' => '<span class="form_comment">Näytetäänkö tiedot julkisesti profiilissasi. Huom! Vain yli 16-vuotiaiden tiedot voidaan näyttää profiilissa.</span>', 'class'=>'form-control');
+        $fields['nayta_laani'] = array('type' => 'checkbox', 'checked' => $user->nayta_laani, 'label' => 'Näytetäänkö sijainti julkisesti?', 'after_html' => '<span class="form_comment">Näytetäänkö tiedot julkisesti profiilissasi. Huom! Vain yli 16-vuotiaiden tiedot voidaan näyttää profiilissa.</span>', 'class'=>'form-control');
+        $fields['salasana'] = array('type' => 'password', 'class'=>'form-control');
+        $fields['uusi_salasana1'] = array('type' => 'password', 'label' => 'Uusi salasana', 'class'=>'form-control');
+        $fields['uusi_salasana2'] = array('type' => 'password', 'label' => 'Toista uusi salasana', 'after_html' => '<span class="form_comment">Täytä salasanakentät vain jos haluat vaihtaa salasanasi. Salasanassa tulee olla vähintään 6 merkkiä. Salasana tulee voimaan heti, eikä sinun tarvitse kirjautua sisään uudelleen.</span>', 'class'=>'form-control');
+        
+        $this->form_builder->form_attrs = array('method' => 'post', 'action' => site_url('profiili/tiedot'));
+
+        // render the page
+        $vars['profile_form'] = $this->form_builder->render_template('_layouts/basic_form_template', $fields );
+        
+        $this->fuel->pages->render('profiili/tiedot', $vars);
     }
     
     function muokkaa_yhteystietoja()

@@ -34,7 +34,7 @@
                 
                 foreach($nimimerkit as $n)
                 {
-                    echo "<li>" . $n['nimimerkki'] . "</li>";
+                    echo "<li>" . $n['nimimerkki'] . " (vaihdettu " . date("d.m.Y", strtotime($n['vaihtanut'])) . ")</li>";
                 }
                 
                 echo "</ul>";

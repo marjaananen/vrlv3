@@ -65,7 +65,7 @@ $route['tunnus/(:any)'] = "jasenyys/tunnus/$1";
 $route['tunnus/(:any)/(:any)'] = "jasenyys/tunnus/$1/$2";
 
 
-$route['jasenyys/jasenet'] = "jasenyys/haku";
+$route['jasenyys'] = "jasenyys/haku";
 
 //////////////////////////////////////
 

@@ -15,9 +15,12 @@ class Tallit extends CI_Controller
 	$this->fuel->pages->render('tallit/index', $vars);
     }
     
-    function talliprofiili($tnro)
+    function talliprofiili($tnro="")
     {
 	$this->load->model('tallit_model');
+	
+	if(empty($tnro))
+	    redirect('/');
 	
 	if(!$this->tallit_model->is_tnro_in_use($tnro))
 	    redirect('/');
@@ -28,9 +31,9 @@ class Tallit extends CI_Controller
 	$vars['likes'] = $this->tallit_model->get_stables_likes($tnro);
 	
 	if($this->ion_auth->logged_in())
-	    $vars['liked_status'] = $this->tallit_model->get_stables_like_by_user($tnro, $this->ion_auth->user()->row()->tunnus);
+	    $vars['liked_date'] = $this->tallit_model->get_stables_like_by_user($tnro, $this->ion_auth->user()->row()->tunnus);
 	else
-	    $vars['liked_status'] = "notset";
+	    $vars['liked_date'] = "notset";
 	
 	
 	$this->fuel->pages->render('tallit/profiili', $vars);
@@ -235,6 +238,7 @@ class Tallit extends CI_Controller
 	$this->load->library('form_builder', array('submit_value' => 'Hae'));
 	$vars['title'] = 'Tallihaku';
 	$vars['msg'] = 'Hae talleja tallirekisteristä. Voit käyttää tähteä * jokerimerkkinä.';
+	$vars['text_view'] = $this->load->view('tallit/etusivu_teksti', NULL, TRUE);
 	
 	$options = $this->tallit_model->get_category_option_list();
 	$options[-1] = 'Mikä tahansa';

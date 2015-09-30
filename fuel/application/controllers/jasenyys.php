@@ -6,10 +6,13 @@ class Jasenyys extends CI_Controller
         parent::__construct();
     }
 
-    function tunnus($tunnus, $sivu = "")
+    function tunnus($tunnus="", $sivu = "")
     {
 	$this->load->library('Vrl_helper');
 	$fields = array();
+        
+	if(empty($tunnus))
+	    redirect('/');
         
 	$fields['logged_in'] = $this->ion_auth->logged_in();
 	$fields['sivu'] = $sivu;

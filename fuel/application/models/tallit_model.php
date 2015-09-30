@@ -192,7 +192,7 @@ class Tallit_model extends Base_module_model
     
     function get_stables_like_by_user($tnro, $pinnumber)
     {
-        $this->db->select('tnro');
+        $this->db->select('aika');
         $this->db->where('tnro', $tnro);
         $this->db->where('tunnus', $pinnumber);
         $this->db->from('vrlv3_tallirekisteri_yesno');
@@ -201,10 +201,10 @@ class Tallit_model extends Base_module_model
         
         if ($query->num_rows() > 0)
         {
-            return true;
+            return $query->result_array()[0]['aika'];
         }
         
-        return false;
+        return "0000-00-00";
     }
     
     function add_stable_like($tnro)
