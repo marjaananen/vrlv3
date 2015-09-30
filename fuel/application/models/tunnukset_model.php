@@ -204,7 +204,7 @@ class Tunnukset_model extends Base_module_model
     
     function get_previous_nicknames($pinnumber)
     {
-        $this->db->select('nimimerkki');
+        $this->db->select('nimimerkki, vaihtanut');
         $this->db->from('vrlv3_tunnukset_nimimerkit');
         $this->db->where('tunnus', $pinnumber);
         $this->db->where('piilotettu', 0);

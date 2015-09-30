@@ -39,12 +39,12 @@
     
     <br />
     <p>
-        <?php if($liked_status === 'notset') : ?>
+        <?php if($liked_date === 'notset') : ?>
             Kirjaudu sisään tykätäksesi tallista.
-        <?php elseif($liked_status == false) : ?>
+        <?php elseif($liked_date == '0000-00-00') : ?>
             <a href="<?php echo site_url('tallit/tykkaa') . '/' . $stable['tnro'] . '/' . '1'; ?>">Tykkää tallista</a>
         <?php else : ?>
-            <a href="<?php echo site_url('tallit/tykkaa') . '/' . $stable['tnro'] . '/' . '-1'; ?>">Vedä tykkäyksesi pois</a>
+            <a href="<?php echo site_url('tallit/tykkaa') . '/' . $stable['tnro'] . '/' . '-1'; ?>">Vedä tykkäyksesi pois</a> (tykkäsit tallista <?php echo date("d.m.Y", strtotime($liked_date)); ?>)
         <?php endif; ?>
     </p>
 </div>

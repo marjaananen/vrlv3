@@ -194,6 +194,8 @@ class Yllapito extends CI_Controller
             $raw_data['Anottu'] = $qitem['lisatty'];
             $raw_data['Anoja'] = "VRL-" . $qitem['lisaaja'];
             
+            $raw_data['__extra_param'] = $qitem['lyhenne'];
+            
             $vars['queue_item_html'] = $this->queue_manager->format_html('Tallianomus', $raw_data, $qitem['id']);
         }
         else

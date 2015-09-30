@@ -7,6 +7,7 @@
             <?php
                 echo validation_errors();
                 echo $fail_msg;
+                $error_showed = true;
             ?>
         </div>
     <?php endif; ?>
@@ -15,13 +16,13 @@
         <div class="alert alert-success" role="alert">
             <p>Tietojen päivitys onnistui.</p>
         </div>
-    <?php elseif(!empty($success) && $success == false) : ?>
+    <?php elseif(!empty($success) && $success == false && !isset($error_showed)) : ?>
         <div class="alert alert-danger" role="alert">
             <p>Tietojen päivitys epäonnistui! Tarkasta tietosi uudelleen profiilistasi.</p>
         </div>
     <?php endif; ?>
     
     <?php
-        echo fuel_var('profile_form', '<a href="">Takaisin profiilin muokkaukseen</a>');
+        echo fuel_var('profile_form', '');
     ?>
 </p>
