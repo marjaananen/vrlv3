@@ -48,12 +48,11 @@
     <br />
     
     <p>
-        Jonossa on <?php echo $queue_length; ?> hakemusta.
+        Jonossa on <?php echo $queue_length; ?> hakemusta, joista <?php echo $queue_length-$queue_unlocked_num; ?> on lukittuna.
         <?php
             if($queue_length > 0)
             {
                 echo "Vanhin hakemus on lähetetty " . $oldest_application . ".</p><p>";
-                echo fuel_var('get_next_application', '');
             }
         ?>
     </p>

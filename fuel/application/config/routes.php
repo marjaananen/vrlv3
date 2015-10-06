@@ -40,9 +40,11 @@
 
 
 
-//Profiilikontrollerin muokkaa yhteystietoja ei ole menuissa
-
+$route['yllapito/tunnukset'] = "yllapito/hakemusjono_etusivu";
 $route['yllapito/tunnukset/hyvaksy'] = "yllapito/hakemusjono";
+
+
+$route['yllapito/tallirekisteri'] = "yllapito/tallirekisteri_etusivu";
 
 $route['yllapito/tallirekisteri/tallijono/hyvaksy'] = "yllapito/tallijono";
 $route['yllapito/tallirekisteri/tallijono/hyvaksy_kasittele/(:any)/(:num)'] = "yllapito/kasittele_talli/$1/$2";

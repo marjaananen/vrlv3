@@ -93,11 +93,13 @@ $nav['yllapito/tunnukset/hyvaksy'] = array('label' => 'Hyväksy VRL-tunnuksia', 
 $nav['yllapito/tunnukset/muokkaa'] = array('label' => 'Muokkaa tunnuksen tietoja', 'parent_id' => 'yllapito/tunnukset', 'active' => 'yllapito/tunnukset/muokkaa');
 $nav['yllapito/tunnukset/haku'] = array('label' => 'Tee hakuja tunnuksista', 'parent_id' => 'yllapito/tunnukset', 'active' => 'yllapito/tunnukset/haku');
 
-// ylläpito/tallirekisteri alamenu
-$nav['yllapito/tallirekisteri/hyvaksy'] = array('label' => 'Hyväksy talleja', 'parent_id' => 'yllapito/tallirekisteri', 'active' => 'yllapito/tallirekisteri/hyvaksy');
-$nav['yllapito/tallirekisteri/muokkaa'] = array('label' => 'Muokkaa tallin tietoja', 'parent_id' => 'yllapito/tallirekisteri', 'active' => 'yllapito/tallirekisteri/muokkaa');
-$nav['yllapito/tallirekisteri/haku'] = array('label' => 'Tee hakuja talleista', 'parent_id' => 'yllapito/tallirekisteri', 'active' => 'yllapito/tallirekisteri/haku');
+// ylläpito/tallirekisteri/tallijono alamenu
+$nav['yllapito/tallirekisteri/tallijono/hyvaksy'] = array('label' => 'Hyväksy talleja', 'parent_id' => 'yllapito/tallirekisteri', 'active' => 'yllapito/tallirekisteri/tallijono/hyvaksy');
+$nav['yllapito/tallirekisteri/tallijono/muokkaa'] = array('label' => 'Muokkaa tallin tietoja', 'parent_id' => 'yllapito/tallirekisteri', 'active' => 'yllapito/tallirekisteri/tallijono/muokkaa');
+$nav['yllapito/tallirekisteri/tallijono/haku'] = array('label' => 'Tee hakuja talleista', 'parent_id' => 'yllapito/tallirekisteri', 'active' => 'yllapito/tallirekisteri/tallijono/haku');
 
+// ylläpito/tallirekisteri/kategoriajono alamenu
+$nav['yllapito/tallirekisteri/kategoriajono/hyvaksy'] = array('label' => 'Hyväksy kategorioita', 'parent_id' => 'yllapito/tallirekisteri', 'active' => 'yllapito/tallirekisteri/kategoriajono/hyvaksy');
 
 // profiili alamenu
 $nav['profiili/tiedot'] = array('label' => 'Omat tiedot', 'parent_id' => 'profiili', 'active' => 'profiili/tiedot');

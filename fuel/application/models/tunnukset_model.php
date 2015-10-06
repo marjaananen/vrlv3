@@ -67,6 +67,20 @@ class Tunnukset_model extends Base_module_model
         return $this->db->count_all_results();
     }
     
+    function get_application_queue_unlocked_num()
+    {
+        $date = new DateTime();
+        $date->setTimestamp(time() - 60*15); //nykyhetki miinus 15min, eli ei saa ottaa samaa hakemusta uudestaan käsittelyyn 15 minuuttiin
+        
+        $this->db->select('id');
+        $this->db->from('vrlv3_tunnukset_jonossa');
+        $this->db->where('vahvistettu', 1);
+        $this->db->where('kasitelty IS NULL OR kasitelty < "' . $date->format('Y-m-d H:i:s') . '"');
+        $query = $this->db->get();
+        
+        return $query->num_rows();
+    }
+    
     function get_oldest_application()
     {
         $data = 0;

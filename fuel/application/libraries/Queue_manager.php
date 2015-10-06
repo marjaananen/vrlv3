@@ -1,5 +1,22 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed'); 
 
+//KÄYTTÖOHJEET - MITEN LUODAAN UUSI JONO
+
+//Kirjasto olettaa, että jonotaulu *_jonossa on jo olemassa tietokannassa ja jokin muu kontrolleri hoitaa lisäykset jonoon.
+//Katso mallia esim. tallien rekisteröinnistä. Hyödynnä rekisteröintiin Form_collectionia.
+
+//Tätä kirjastoa käytetään siis vain ylläpidon puolella. Ylläpito-kontrolleriin pitää lisätä:
+//  -etusivufunktio
+//  -jonofunktio
+//  -käsittelyfunktio
+
+//Esim. talleille nämä ovat: tallirekisteri_etusivu (yhdistettynä kategorioihin), tallijono, kasittele_talli.
+//Uutta jonoa luotaessa on nopeinta kopioida nämä funktiot uutta jonoa varten muokattavaksi, erot ovat pieniä.
+
+//...
+
+
+
 class Queue_manager
 {
     private $CI = 0;
@@ -67,7 +84,8 @@ class Queue_manager
         
         foreach($raw_data as $key => $value)
         {
-            $html .= "<p>" . $key . ": " . $value . "</p>";
+            if($key != '__extra_param')
+                $html .= "<p>" . $key . ": " . $value . "</p>";
         }
         
         $html .= '</div>';
@@ -118,11 +136,15 @@ class Queue_manager
             $this->CI->db->from($this->db_table);
             $data['queue_length'] = $this->CI->db->count_all_results();
             
-            $data['html'] = "<p>Jonon pituus on " . $data['queue_length'] . ". Vanhin jonottaja on lisätty " . $data['oldest'] . ".</p><p>";
-            $this->CI->load->library('form_builder', array('submit_value' => 'Hae seuraava'));
-            $this->CI->form_builder->form_attrs = array('method' => 'post', 'action' => current_url());
-            $data['html'] .= $this->CI->form_builder->render();
-            $data['html'] .= "</p>";
+            $date = new DateTime();
+            $date->setTimestamp(time() - 60*15); //nykyhetki miinus 15min, eli ei saa ottaa samaa hakemusta uudestaan käsittelyyn 15 minuuttiin
+            
+            $this->CI->db->from($this->db_table);
+            $this->CI->db->where('kasitelty IS NULL OR kasitelty < "' . $date->format('Y-m-d H:i:s') . '"');
+            $query = $this->CI->db->get();
+            $data['queue_locked_num'] = $data['queue_length'] - $query->num_rows();
+            
+            $data['html'] = "<p>Jonon pituus on " . $data['queue_length'] . ", joista " . $data['queue_locked_num'] . " on lukittuna. Vanhin jonottaja on lisätty " . $data['oldest'] . ".</p>";
         }
         else
         {
@@ -130,6 +152,12 @@ class Queue_manager
         }
         
         return $data;
+    }
+    
+    //jos samassa funktiossa pitää käsitellä useaa jonoa, jonoja voi vaihtaa tällä
+    public function set_db_table($table)
+    {
+        $this->db_table = $table;
     }
 }
 

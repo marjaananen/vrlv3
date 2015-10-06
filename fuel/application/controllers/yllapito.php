@@ -41,54 +41,54 @@ class Yllapito extends CI_Controller
     
     //HAKEMUSJONO-OSUUS
     
+    function hakemusjono_etusivu()
+    {
+        $this->load->model('tunnukset_model');
+        $this->session->set_flashdata('return_status', '');
+        
+        $vars['view_status'] = "queue_status";
+        
+        $vars['queue_length'] = $this->tunnukset_model->get_application_queue_length();
+        if($vars['queue_length'] > 0)
+            $vars['oldest_application'] = $this->tunnukset_model->get_oldest_application();
+            
+        $vars['queue_unlocked_num'] = $this->tunnukset_model->get_application_queue_unlocked_num();
+        $vars['latest_approvals'] = $this->tunnukset_model->get_latest_approvals();
+        $vars['latest_logins'] = $this->tunnukset_model->get_latest_logins();
+        $vars['latest_failed_logins'] = $this->tunnukset_model->get_latest_failed_logins();
+            
+        $this->fuel->pages->render('yllapito/hakemusjono', $vars);
+    }
+    
     function hakemusjono()
     {
         $this->load->model('tunnukset_model');
         $this->session->set_flashdata('return_status', '');
         
-        if($this->input->server('REQUEST_METHOD') == 'POST')
+        $vars['view_status'] = "next_join_application";
+        
+        $vars['application_data'] = $this->tunnukset_model->get_next_application();
+        
+        if($vars['application_data']['success'] == false)
         {
-            $vars['view_status'] = "next_join_application";
-            
-            $vars['application_data'] = $this->tunnukset_model->get_next_application();
-            
-            if($vars['application_data']['success'] == false)
-            {
-                $this->session->set_flashdata('return_info', 'Hakemustietojen noutaminen epäonnistui!<br />Joku saattaa olla jo hyväksymässä haettua hakemusta, tai tapahtui muu virhe.');
-                $this->session->set_flashdata('return_status', 'danger');
-                redirect('/yllapito/tunnukset/hyvaksy');
-            }
-            
-            $vars['same_ip_logins'] = $this->tunnukset_model->get_logins_by_ip($vars['application_data']['ip']);
-            $vars['same_nicknames'] = $this->tunnukset_model->get_pinnumbers_by_nickname($vars['application_data']['nimimerkki']);
-            if($vars['application_data']['syntymavuosi'] != '0000-00-00')
-                $vars['same_dateofbirths'] = $this->tunnukset_model->get_users_by_dateofbirth($vars['application_data']['syntymavuosi']);
-            else
-                $vars['same_dateofbirths'] = array();
-            
-            $vars['application_data']['rekisteroitynyt'] = date('d.m.Y H:i',strtotime($vars['application_data']['rekisteroitynyt']));
-            $vars['application_data']['sijainti'] = $this->tunnukset_model->get_location($vars['application_data']['sijainti']);
-            if($vars['application_data']['syntymavuosi'] == '0000-00-00')
-                $vars['application_data']['syntymavuosi'] = 'Ei saatavilla';
-            else
-                $vars['application_data']['syntymavuosi'] = date("d.m.Y", strtotime($vars['application_data']['syntymavuosi']));
+            $this->session->set_flashdata('return_info', 'Uuden hakemuksen noutaminen epäonnistui!<br />Joku saattaa olla jo hyväksymässä loppuja hakemuksia, hakemukset loppuivat, tai tapahtui muu virhe.');
+            $this->session->set_flashdata('return_status', 'danger');
+            redirect('/yllapito/tunnukset');
         }
+        
+        $vars['same_ip_logins'] = $this->tunnukset_model->get_logins_by_ip($vars['application_data']['ip']);
+        $vars['same_nicknames'] = $this->tunnukset_model->get_pinnumbers_by_nickname($vars['application_data']['nimimerkki']);
+        if($vars['application_data']['syntymavuosi'] != '0000-00-00')
+            $vars['same_dateofbirths'] = $this->tunnukset_model->get_users_by_dateofbirth($vars['application_data']['syntymavuosi']);
         else
-        {
-            $vars['view_status'] = "queue_status";
-            
-            $vars['queue_length'] = $this->tunnukset_model->get_application_queue_length();
-            if($vars['queue_length'] > 0)
-                $vars['oldest_application'] = $this->tunnukset_model->get_oldest_application();
-                
-            $vars['latest_approvals'] = $this->tunnukset_model->get_latest_approvals();
-            $vars['latest_logins'] = $this->tunnukset_model->get_latest_logins();
-            $vars['latest_failed_logins'] = $this->tunnukset_model->get_latest_failed_logins();
-            
-            $this->load->library('form_builder', array('submit_value' => 'Hae seuraava hakemus'));
-            $this->form_builder->form_attrs = array('method' => 'post', 'action' => site_url('/yllapito/tunnukset/hyvaksy'));
-            $vars['get_next_application'] = $this->form_builder->render();
-        }
+            $vars['same_dateofbirths'] = array();
+        
+        $vars['application_data']['rekisteroitynyt'] = date('d.m.Y H:i',strtotime($vars['application_data']['rekisteroitynyt']));
+        $vars['application_data']['sijainti'] = $this->tunnukset_model->get_location($vars['application_data']['sijainti']);
+        if($vars['application_data']['syntymavuosi'] == '0000-00-00')
+            $vars['application_data']['syntymavuosi'] = 'Ei saatavilla';
+        else
+            $vars['application_data']['syntymavuosi'] = date("d.m.Y", strtotime($vars['application_data']['syntymavuosi']));
             
         $this->fuel->pages->render('yllapito/hakemusjono', $vars);
     }
@@ -164,7 +164,25 @@ class Yllapito extends CI_Controller
         redirect('/yllapito/tunnukset/hyvaksy');
     }
     
-    //TALLIJONO-OSUUS
+    //TALLIREKISTERI-OSUUS
+    
+    function tallirekisteri_etusivu()
+    {
+        $this->load->library('queue_manager', array('db_table' => 'vrlv3_tallirekisteri_jonossa'));
+        $this->session->set_flashdata('return_status', '');
+        $vars['title'] = "Tallirekisteri";
+        
+        $vars['view_status'] = "queue_status";
+        
+        $frontpage = $this->queue_manager->get_queue_frontpage();
+        $vars['queue_status_html'] = "<h3>Tallijono</h3>" . $frontpage['html'];
+        
+        $this->queue_manager->set_db_table('vrlv3_tallirekisteri_kategoriat_jonossa');
+        $frontpage = $this->queue_manager->get_queue_frontpage();
+        $vars['queue_status_html'] .= "<h3>Kategoriajono</h3>" . $frontpage['html'];
+            
+        $this->fuel->pages->render('misc/jonokasittely', $vars);
+    }
     
     function tallijono()
     {
@@ -172,40 +190,29 @@ class Yllapito extends CI_Controller
         $this->session->set_flashdata('return_status', '');
         $vars['title'] = "Tallijono";
         
-        if($this->input->server('REQUEST_METHOD') == 'POST')
+        $this->load->model('tallit_model');
+        $vars['view_status'] = "next_queue_item";
+        $qitem = $this->queue_manager->get_next();
+        
+        if($qitem['success'] == false)
         {
-            $this->load->model('tallit_model');
-            $vars['view_status'] = "next_queue_item";
-            $qitem = $this->queue_manager->get_next();
-            
-            if($qitem['success'] == false)
-            {
-                $this->session->set_flashdata('return_info', 'Tallianomuksen tietojen noutaminen epäonnistui!<br />Joku saattaa olla jo hyväksymässä haettua tallia, tai tapahtui muu virhe.');
-                $this->session->set_flashdata('return_status', 'danger');
-                redirect('/yllapito/tallirekisteri/tallijono/hyvaksy');
-            }
-            
-            $raw_data = array();
-            $raw_data['Nimi'] = $qitem['nimi'];
-            $raw_data['Lyhenne'] = $qitem['lyhenne'];
-            $raw_data['Kategoria'] = $this->tallit_model->get_category($qitem['kategoria']);
-            $raw_data['URL'] = $qitem['url'];
-            $raw_data['Kuvaus'] = $qitem['kuvaus'];
-            $raw_data['Anottu'] = $qitem['lisatty'];
-            $raw_data['Anoja'] = "VRL-" . $qitem['lisaaja'];
-            
-            $raw_data['__extra_param'] = $qitem['lyhenne'];
-            
-            $vars['queue_item_html'] = $this->queue_manager->format_html('Tallianomus', $raw_data, $qitem['id']);
+            $this->session->set_flashdata('return_info', 'Seuraavan tallianomuksen noutaminen epäonnistui!<br />Joku saattaa olla jo hyväksymässä haettua tallia, tai tapahtui muu virhe.');
+            $this->session->set_flashdata('return_status', 'danger');
+            redirect('/yllapito/tallirekisteri');
         }
-        else
-        {
-            $vars['view_status'] = "queue_status";
-            
-            $frontpage = $this->queue_manager->get_queue_frontpage();
-            
-            $vars['queue_status_html'] = $frontpage['html'];
-        }
+        
+        $raw_data = array();
+        $raw_data['Nimi'] = $qitem['nimi'];
+        $raw_data['Lyhenne'] = $qitem['lyhenne'];
+        $raw_data['Kategoria'] = $this->tallit_model->get_category($qitem['kategoria']);
+        $raw_data['URL'] = $qitem['url'];
+        $raw_data['Kuvaus'] = $qitem['kuvaus'];
+        $raw_data['Anottu'] = $qitem['lisatty'];
+        $raw_data['Anoja'] = "VRL-" . $qitem['lisaaja'];
+        
+        $raw_data['__extra_param'] = $qitem['lyhenne'];
+        
+        $vars['queue_item_html'] = $this->queue_manager->format_html('Tallianomus', $raw_data, $qitem['id']);
             
         $this->fuel->pages->render('misc/jonokasittely', $vars);
     }
@@ -284,44 +291,31 @@ class Yllapito extends CI_Controller
         redirect('/yllapito/tallirekisteri/tallijono/hyvaksy');
     }
     
-    //TALLIKATEGORIAJONO-OSUUS
-    
     function tallikategoriajono()
     {
         $this->load->library('queue_manager', array('db_table' => 'vrlv3_tallirekisteri_kategoriat_jonossa'));
         $this->session->set_flashdata('return_status', '');
         $vars['title'] = "Tallikategoriajono";
         
-        if($this->input->server('REQUEST_METHOD') == 'POST')
+        $this->load->model('tallit_model');
+        $vars['view_status'] = "next_queue_item";
+        $qitem = $this->queue_manager->get_next();
+        
+        if($qitem['success'] == false)
         {
-            $this->load->model('tallit_model');
-            $vars['view_status'] = "next_queue_item";
-            $qitem = $this->queue_manager->get_next();
-            
-            if($qitem['success'] == false)
-            {
-                $this->session->set_flashdata('return_info', 'Tallikategoria-anomuksen tietojen noutaminen epäonnistui!<br />Joku saattaa olla jo hyväksymässä haettua tallikategoria-anomusta, tai tapahtui muu virhe.');
-                $this->session->set_flashdata('return_status', 'danger');
-                redirect('/yllapito/tallirekisteri/kategoriajono/hyvaksy');
-            }
-            
-            $raw_data = array();
-            $raw_data['Tallinumero'] = $qitem['tnro'];
-            $raw_data['Kategoria'] = $this->tallit_model->get_category($qitem['kategoria']);
-            $raw_data['Anottu'] = $qitem['lisatty'];
-            $raw_data['Anoja'] = "VRL-" . $qitem['lisaaja'];
-            
-            $vars['queue_item_html'] = $this->queue_manager->format_html('Tallikategoria-anomus', $raw_data, $qitem['id']);
+            $this->session->set_flashdata('return_info', 'Seuraavan tallikategoria-anomuksen noutaminen epäonnistui!<br />Joku saattaa olla jo hyväksymässä haettua tallikategoria-anomusta, tai tapahtui muu virhe.');
+            $this->session->set_flashdata('return_status', 'danger');
+            redirect('/yllapito/tallirekisteri');
         }
-        else
-        {
-            $vars['view_status'] = "queue_status";
-            
-            $frontpage = $this->queue_manager->get_queue_frontpage();
-            
-            $vars['queue_status_html'] = $frontpage['html'];
-        }
-            
+        
+        $raw_data = array();
+        $raw_data['Tallinumero'] = $qitem['tnro'];
+        $raw_data['Kategoria'] = $this->tallit_model->get_category($qitem['kategoria']);
+        $raw_data['Anottu'] = $qitem['lisatty'];
+        $raw_data['Anoja'] = "VRL-" . $qitem['lisaaja'];
+        
+        $vars['queue_item_html'] = $this->queue_manager->format_html('Tallikategoria-anomus', $raw_data, $qitem['id']);
+
         $this->fuel->pages->render('misc/jonokasittely', $vars);
     }
     
