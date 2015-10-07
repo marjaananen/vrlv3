@@ -134,6 +134,8 @@ class Yllapito extends CI_Controller
             }
             else
             {
+                $this->tunnukset_model->add_rejected_user(); //Hylkäys muistiin
+                
                 $this->session->set_flashdata('return_info', 'Hakemus hylätty.');
                 $this->session->set_flashdata('return_status', 'success');
             }
@@ -272,6 +274,8 @@ class Yllapito extends CI_Controller
             }
             else
             {
+                $this->tallit_model->add_rejected_stable(); //Hylkäys muistiin
+                
                 $approved = false;
                 $this->session->set_flashdata('return_info', 'Anomus hylätty.');
                 $this->session->set_flashdata('return_status', 'success');
@@ -360,6 +364,8 @@ class Yllapito extends CI_Controller
             }
             else
             {
+                $this->tallit_model->add_rejected_category(); //Hylkäys muistiin
+                
                 $approved = false;
                 $this->session->set_flashdata('return_info', 'Anomus hylätty.');
                 $this->session->set_flashdata('return_status', 'success');

@@ -30,6 +30,26 @@ class Tallit_model extends Base_module_model
         $this->db->insert('vrlv3_tallirekisteri_kategoriat_jonossa', $data);
     }
     
+    function add_rejected_stable()
+    {
+        $data = array('tyyppi' => 'talli');
+        
+        $data['pvm'] = date("Y-m-d H:i:s");
+        $data['tunnus'] = $this->ion_auth->user()->row()->tunnus;
+        
+        $this->db->insert('vrlv3_hylatyt_hakemukset', $data);
+    }
+    
+    function add_rejected_category()
+    {
+        $data = array('tyyppi' => 'kategoria');
+        
+        $data['pvm'] = date("Y-m-d H:i:s");
+        $data['tunnus'] = $this->ion_auth->user()->row()->tunnus;
+        
+        $this->db->insert('vrlv3_hylatyt_hakemukset', $data);
+    }
+    
     //Tallit
     function get_users_stables($pinnumber)
     {

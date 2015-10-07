@@ -153,6 +153,19 @@ CREATE TABLE IF NOT EXISTS `vrlv3_tunnukset_pikaviestit` (
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='Tunnusten pikaviestit';
 
 --
+-- Rakenne taululle `vrlv3_hylatyt_hakemukset`
+--
+
+CREATE TABLE IF NOT EXISTS `vrlv3_hylatyt_hakemukset` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `tyyppi` varchar(25) NOT NULL,
+  `tunnus` int(5) unsigned zerofill NOT NULL,
+  `pvm` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `id` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
 -- Rajoitteet vedostauluille
 --
 

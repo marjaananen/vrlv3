@@ -85,7 +85,7 @@ class Form_collection
         $fields['tallinumero'] = array('type' => 'text', 'required' => TRUE, 'readonly' => true, 'value' => $tnro, 'class'=>'form-control');
         $fields['kategoria'] = array('type' => 'select', 'required' => TRUE, 'options' => $this->CI->tallit_model->get_category_option_list(), 'class'=>'form-control');
 
-        $this->CI->form_builder->form_attrs = array('method' => 'post', 'action' => site_url('/tallit/rekisteroi_kategoria') . '/' . $tnro);
+        $this->CI->form_builder->form_attrs = array('method' => 'post', 'action' => site_url('/profiili/rekisteroi_kategoria') . '/' . $tnro);
 
         return $this->CI->form_builder->render_template('_layouts/basic_form_template', $fields);
     }

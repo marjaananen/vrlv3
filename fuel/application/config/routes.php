@@ -43,7 +43,6 @@
 $route['yllapito/tunnukset'] = "yllapito/hakemusjono_etusivu";
 $route['yllapito/tunnukset/hyvaksy'] = "yllapito/hakemusjono";
 
-
 $route['yllapito/tallirekisteri'] = "yllapito/tallirekisteri_etusivu";
 
 $route['yllapito/tallirekisteri/tallijono/hyvaksy'] = "yllapito/tallijono";
@@ -54,9 +53,9 @@ $route['yllapito/tallirekisteri/kategoriajono/hyvaksy'] = "yllapito/tallikategor
 $route['yllapito/tallirekisteri/kategoriajono/hyvaksy_kasittele/(:any)/(:num)'] = "yllapito/kasittele_tallikategoria/$1/$2";
 
 
-$route['profiili/omat-tallit'] = "tallit/index";
-$route['profiili/omat-tallit/rekisteroi'] = "tallit/rekisteroi";
-$route['profiili/omat-tallit/muokkaa/(:any)/(:any)'] = "tallit/muokkaa/$1/$2";
+$route['profiili/omat-tallit'] = "profiili/tallit_index";
+$route['profiili/omat-tallit/rekisteroi'] = "profiili/rekisteroi_talli";
+$route['profiili/omat-tallit/muokkaa/(:any)/(:any)'] = "profiili/muokkaa_talli/$1/$2";
 
 
 $route['tallirekisteri/talli/(:any)'] = "tallit/talliprofiili/$1";
