@@ -18,6 +18,8 @@ listat_data_schema.sql
 tunnukset_schema.sql
 tiedotukset_schema.sql
 tallirekisteri_schema.sql
+seurarekisteri_schema.sql
+kasvattajanimet_schema.sql
 
 
 
