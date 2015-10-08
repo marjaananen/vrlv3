@@ -1,5 +1,9 @@
 <h2>Talliprofiili: <?=$stable['nimi']?></h2>
 
+<?php if($stable['lopettanut']) : ?>
+    <h3>Tämä talli on lopettanut</h3>
+<?php endif; ?>
+
 <div class="container">
     <p><b>Tallinumero:</b> <?=$stable['tnro']?></p>
     <p><b>Rekisteröity:</b> <?=$stable['perustettu']?></p>

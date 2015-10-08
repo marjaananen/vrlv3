@@ -295,6 +295,11 @@ class Yllapito extends CI_Controller
         redirect('/yllapito/tallirekisteri/tallijono/hyvaksy');
     }
     
+    function muokkaa_talli()
+    {
+        //näytä lomake jolle annetaan tallitunnus. se redirectaa muokkaukseen
+    }
+    
     function tallikategoriajono()
     {
         $this->load->library('queue_manager', array('db_table' => 'vrlv3_tallirekisteri_kategoriat_jonossa'));

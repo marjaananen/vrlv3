@@ -54,7 +54,7 @@ CREATE TABLE IF NOT EXISTS `vrlv3_kasvattajanimet_jonossa` (
   KEY `rotu` (`rotu`),
   KEY `tallinid` (`tallinid`),
   KEY `lisaaja` (`lisaaja`),
-  KEY `kasittelija` (`kasittelija`)
+  KEY `kasittelija` (`kasittelija`),
   FULLTEXT KEY `kasvattajanimi` (`kasvattajanimi`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
 
@@ -111,7 +111,7 @@ CREATE TABLE IF NOT EXISTS `vrlv3_kasvattajanimet_rodut_jonossa` (
   `kasittelija` int(5) unsigned zerofill DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `kid` (`kid`),
-  KEY `lisaaja` (`lisaaja`)
+  KEY `lisaaja` (`lisaaja`),
   KEY `kasittelija` (`kasittelija`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
 
@@ -140,7 +140,7 @@ ALTER TABLE `vrlv3_kasvattajanimet_jonossa`
 --
 ALTER TABLE `vrlv3_kasvattajanimet_omistajat`
   ADD CONSTRAINT `vrlv3_kasvattajanimet_omistajat_ibfk_2` FOREIGN KEY (`omistaja`) REFERENCES `vrlv3_tunnukset` (`tunnus`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `vrlv3_kasvattajanimet_omistajat_ibfk_1` FOREIGN KEY (`knro`) REFERENCES `vrlv3_kasvattajanimet` (`kid`) ON DELETE CASCADE ON UPDATE CASCADE;
+  ADD CONSTRAINT `vrlv3_kasvattajanimet_omistajat_ibfk_1` FOREIGN KEY (`kid`) REFERENCES `vrlv3_kasvattajanimet` (`kid`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Rajoitteet taululle `vrlv3_kasvattajanimet_rodut`

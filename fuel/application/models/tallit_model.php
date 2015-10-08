@@ -96,6 +96,28 @@ class Tallit_model extends Base_module_model
         $this->db->insert('vrlv3_tallirekisteri_paivitetty', $data);
     }
     
+    function is_stable_active($tnro)
+    {
+        $this->db->select('tnro');
+        $this->db->from('vrlv3_tallirekisteri');
+        $this->db->where('tnro', $tnro);
+        $this->db->where('lopettanut', 0);
+        $query = $this->db->get();
+        
+        if ($query->num_rows() > 0)
+        {
+            return true;
+        }
+        
+        return false;
+    }
+
+    function mark_stable_inactive($tnro)
+    {
+        $this->db->where('tnro', $tnro);
+        $this->db->update('vrlv3_tallirekisteri', array('lopettanut' => 1));
+    }
+    
     function add_owner_to_stable($tnro, $applicant, $level)
     {
         $data = array('tnro' => $tnro, 'omistaja' => $applicant, 'taso' => $level);

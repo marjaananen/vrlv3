@@ -361,6 +361,9 @@ class Profiili extends Loggedin_Controller
 	
 	$vars['append'] .= "</p><p><a href='" . site_url('profiili/rekisteroi_kategoria') . "/" . $tnro . "'>Ano uutta kategoriaa tallille</a></p>";
         
+        if($this->tallit_model->is_stable_active($tnro))
+            $vars['append'] .= "<p><a href='" . site_url('profiili/lopeta_talli') . "/" . $tnro . "'>Lopeta talli</a></p>";
+        
         if($this->input->server('REQUEST_METHOD') == 'GET')
         {
 	    $vars['form'] = $this->form_collection->get_stable_form($mode, $tnro); //pyydetään lomake muokkausmoodissa
@@ -412,6 +415,18 @@ class Profiili extends Loggedin_Controller
         }
         else
             redirect('/', 'refresh');
+    }
+    
+    function lopeta_talli($tnro)
+    {
+        $this->load->model('tallit_model');
+        
+        if(!isset($tnro) || !$this->tallit_model->is_stable_owner($this->ion_auth->user()->row()->tunnus, $tnro))
+            redirect('/');
+        
+        $this->tallit_model->mark_stable_inactive($tnro);
+            
+        $this->fuel->pages->render('misc/naytaviesti', array('msg' => 'Tallisi on merkattu lopettaneeksi.'));
     }
     
     function rekisteroi_kategoria($tnro)
