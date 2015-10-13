@@ -56,13 +56,15 @@ CREATE TABLE IF NOT EXISTS `vrlv3_tallirekisteri_jonossa` (
   `url` text NOT NULL,
   `kuvaus` text NOT NULL,
   `lisatty` datetime NOT NULL,
-  `lisaaja` smallint(5) unsigned zerofill NOT NULL,
+  `lisaaja` int(5) unsigned zerofill NOT NULL,
   `kategoria` smallint(2) NOT NULL,
   `kasitelty` datetime DEFAULT NULL,
   `kasittelija` int(5) unsigned zerofill DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `id` (`id`),
-  KEY `kategoria` (`kategoria`)
+  KEY `kategoria` (`kategoria`),
+  KEY `kasittelija` (`kasittelija`),
+  KEY `lisaaja` (`lisaaja`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=5660 ;
 
 -- --------------------------------------------------------
@@ -76,14 +78,16 @@ CREATE TABLE IF NOT EXISTS `vrlv3_tallirekisteri_kategoriat` (
   `tnro` varchar(8) NOT NULL,
   `kategoria` smallint(2) NOT NULL,
   `anoi` int(5) unsigned zerofill NOT NULL,
-  `hyvaksyi` smallint(5) unsigned zerofill NOT NULL,
+  `hyvaksyi` int(5) unsigned zerofill NOT NULL,
   `lisatty` datetime NOT NULL,
   `tila` int(1) NOT NULL DEFAULT '0',
   `kasitelty` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `tnro` (`tnro`),
   KEY `tnro_2` (`tnro`),
-  KEY `kategoria` (`kategoria`)
+  KEY `kategoria` (`kategoria`),
+  KEY `kasittelija` (`anoi`),
+  KEY `lisaaja` (`hyvaksyi`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
@@ -97,13 +101,15 @@ CREATE TABLE IF NOT EXISTS `vrlv3_tallirekisteri_kategoriat_jonossa` (
   `tnro` varchar(8) NOT NULL,
   `kategoria` smallint(2) NOT NULL,
   `lisatty` datetime NOT NULL,
-  `lisaaja` smallint(5) unsigned zerofill NOT NULL,
+  `lisaaja` int(5) unsigned zerofill NOT NULL,
   `kasitelty` datetime DEFAULT NULL,
   `kasittelija` int(5) unsigned zerofill DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `tnro` (`tnro`),
   KEY `tnro_2` (`tnro`),
-  KEY `kategoria` (`kategoria`)
+  KEY `kategoria` (`kategoria`),
+  KEY `kasittelija` (`kasittelija`),
+  KEY `lisaaja` (`lisaaja`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
@@ -116,12 +122,13 @@ CREATE TABLE IF NOT EXISTS `vrlv3_tallirekisteri_omistajamuutokset` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `tnro` varchar(8) NOT NULL,
   `omistaja` int(5) unsigned zerofill NOT NULL,
-  `muokkasi` smallint(5) unsigned zerofill NOT NULL,
+  `muokkasi` int(5) unsigned zerofill NOT NULL,
   `aika` datetime NOT NULL,
   PRIMARY KEY (`id`),
   KEY `tnro` (`tnro`),
   KEY `omistaja` (`omistaja`),
-  KEY `tnro_2` (`tnro`)
+  KEY `tnro_2` (`tnro`),
+  KEY `muokkasi` (`muokkasi`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
@@ -213,27 +220,34 @@ ALTER TABLE `vrlv3_tallirekisteri`
 -- Rajoitteet taululle `vrlv3_tallirekisteri_jonossa`
 --
 ALTER TABLE `vrlv3_tallirekisteri_jonossa`
-  ADD CONSTRAINT `vrlv3_tallirekisteri_jonossa_ibfk_1` FOREIGN KEY (`kategoria`) REFERENCES `vrlv3_lista_tallikategoriat` (`kat`) ON UPDATE CASCADE;
+  ADD CONSTRAINT `vrlv3_tallirekisteri_jonossa_ibfk_1` FOREIGN KEY (`kategoria`) REFERENCES `vrlv3_lista_tallikategoriat` (`kat`) ON UPDATE CASCADE,
+  ADD CONSTRAINT `vrlv3_tallirekisteri_jonossa_ibfk_2` FOREIGN KEY (`lisaaja`) REFERENCES `vrlv3_tunnukset` (`tunnus`) ON UPDATE CASCADE,
+  ADD CONSTRAINT `vrlv3_tallirekisteri_jonossa_ibfk_3` FOREIGN KEY (`kasittelija`) REFERENCES `vrlv3_tunnukset` (`tunnus`) ON UPDATE CASCADE;
 
 --
 -- Rajoitteet taululle `vrlv3_tallirekisteri_kategoriat`
 --
 ALTER TABLE `vrlv3_tallirekisteri_kategoriat`
   ADD CONSTRAINT `vrlv3_tallirekisteri_kategoriat_ibfk_2` FOREIGN KEY (`kategoria`) REFERENCES `vrlv3_lista_tallikategoriat` (`kat`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `vrlv3_tallirekisteri_kategoriat_ibfk_1` FOREIGN KEY (`tnro`) REFERENCES `vrlv3_tallirekisteri` (`tnro`) ON DELETE CASCADE ON UPDATE CASCADE;
+  ADD CONSTRAINT `vrlv3_tallirekisteri_kategoriat_ibfk_1` FOREIGN KEY (`tnro`) REFERENCES `vrlv3_tallirekisteri` (`tnro`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `vrlv3_tallirekisteri_kategoriat_ibfk_3` FOREIGN KEY (`anoi`) REFERENCES `vrlv3_tunnukset` (`tunnus`) ON UPDATE CASCADE,
+  ADD CONSTRAINT `vrlv3_tallirekisteri_kategoriat_ibfk_4` FOREIGN KEY (`hyvaksyi`) REFERENCES `vrlv3_tunnukset` (`tunnus`) ON UPDATE CASCADE;
 
 --
 -- Rajoitteet taululle `vrlv3_tallirekisteri_kategoriat_jonossa`
 --
 ALTER TABLE `vrlv3_tallirekisteri_kategoriat_jonossa`
-  ADD CONSTRAINT `vrlv3_tallirekisteri_kategoriat_jonossa_ibfk_1` FOREIGN KEY (`kategoria`) REFERENCES `vrlv3_lista_tallikategoriat` (`kat`) ON UPDATE CASCADE;
+  ADD CONSTRAINT `vrlv3_tallirekisteri_kategoriat_jonossa_ibfk_1` FOREIGN KEY (`kategoria`) REFERENCES `vrlv3_lista_tallikategoriat` (`kat`) ON UPDATE CASCADE,
+  ADD CONSTRAINT `vrlv3_tallirekisteri_kategoriat_jonossa_ibfk_2` FOREIGN KEY (`lisaaja`) REFERENCES `vrlv3_tunnukset` (`tunnus`) ON UPDATE CASCADE,
+  ADD CONSTRAINT `vrlv3_tallirekisteri_kategoriat_jonossa_ibfk_3` FOREIGN KEY (`kasittelija`) REFERENCES `vrlv3_tunnukset` (`tunnus`) ON UPDATE CASCADE;
 
 --
 -- Rajoitteet taululle `vrlv3_tallirekisteri_omistajamuutokset`
 --
 ALTER TABLE `vrlv3_tallirekisteri_omistajamuutokset`
   ADD CONSTRAINT `vrlv3_tallirekisteri_omistajamuutokset_ibfk_1` FOREIGN KEY (`tnro`) REFERENCES `vrlv3_tallirekisteri` (`tnro`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `vrlv3_tallirekisteri_omistajamuutokset_ibfk_2` FOREIGN KEY (`omistaja`) REFERENCES `vrlv3_tunnukset` (`tunnus`) ON UPDATE CASCADE;
+  ADD CONSTRAINT `vrlv3_tallirekisteri_omistajamuutokset_ibfk_2` FOREIGN KEY (`omistaja`) REFERENCES `vrlv3_tunnukset` (`tunnus`) ON UPDATE CASCADE,
+  ADD CONSTRAINT `vrlv3_tallirekisteri_omistajamuutokset_ibfk_3` FOREIGN KEY (`muokkasi`) REFERENCES `vrlv3_tunnukset` (`tunnus`) ON UPDATE CASCADE;
 
 --
 -- Rajoitteet taululle `vrlv3_tallirekisteri_omistajat`

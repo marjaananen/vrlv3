@@ -77,7 +77,7 @@ CREATE TABLE IF NOT EXISTS `vrlv3_seurarekisteri_jasentallit` (
 --
 
 CREATE TABLE IF NOT EXISTS `vrlv3_seurarekisteri_jonossa` (
-  `id` smallint(6) NOT NULL AUTO_INCREMENT,
+  `id` int(6) NOT NULL AUTO_INCREMENT,
   `slyh` varchar(10) NOT NULL,
   `nimi` text NOT NULL,
   `kuvaus` text NOT NULL,

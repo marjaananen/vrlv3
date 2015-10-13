@@ -148,16 +148,6 @@ class Tunnukset_model extends Base_module_model
         return $data;
     }
     
-    function add_rejected_user()
-    {
-        $data = array('tyyppi' => 'tunnus');
-        
-        $data['pvm'] = date("Y-m-d H:i:s");
-        $data['tunnus'] = $this->ion_auth->user()->row()->tunnus;
-        
-        $this->db->insert('vrlv3_hylatyt_hakemukset', $data);
-    }
-    
     //Location
     function get_location($id)
     {

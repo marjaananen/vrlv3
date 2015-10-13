@@ -69,6 +69,8 @@
                         
                         if (headers[i]['profile_link'] != undefined)
                             table += "<td><a href='" + headers[i]['profile_link'] + data[d][headers[i]['key']] + "'>" + prepend_text + data[d][headers[i]['key']] + "</a></td>"; //profiili linkatun arvon tulostus soluunsa
+                        else if (headers[i]['admin_edit'] != undefined)
+                            table += "<td><a href='" + headers[i]['admin_edit'] + data[d][headers[i]['key']] + "/admin'>" + prepend_text + "Muokkaa</a></td>"; //profiili linkatun arvon tulostus soluunsa
                         else if (headers[i]['date_to_age'] != undefined) {
                             if (data[d][headers[i]['key']] == "0000-00-00") {
                                 table += "<td>Ei saatavilla</td>";
