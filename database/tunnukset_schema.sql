@@ -77,7 +77,8 @@ CREATE TABLE IF NOT EXISTS `vrlv3_tunnukset_jonossa` (
   `ip` text NOT NULL,
   `kasitelty` datetime DEFAULT NULL,
   `kasittelija` int(5) unsigned zerofill DEFAULT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `kasittelija` (`kasittelija`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='Hyväksyntää tai vahvistusta odottavat tunnukset';
 
 -- --------------------------------------------------------
@@ -134,7 +135,6 @@ CREATE TABLE IF NOT EXISTS `vrlv3_tunnukset_yhteystiedot` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Tunnusten yhteystiedot';
 
 
-
 --
 -- Rakenne taululle `vrlv3_tunnukset_pikaviestit`
 --
@@ -152,6 +152,7 @@ CREATE TABLE IF NOT EXISTS `vrlv3_tunnukset_pikaviestit` (
   KEY `vastaanottaja` (`vastaanottaja`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='Tunnusten pikaviestit';
 
+
 --
 -- Rakenne taululle `vrlv3_hylatyt_hakemukset`
 --
@@ -162,7 +163,8 @@ CREATE TABLE IF NOT EXISTS `vrlv3_hylatyt_hakemukset` (
   `tunnus` int(5) unsigned zerofill NOT NULL,
   `pvm` datetime NOT NULL,
   PRIMARY KEY (`id`),
-  KEY `id` (`id`)
+  KEY `id` (`id`),
+  KEY `tunnus` (`tunnus`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
@@ -170,19 +172,16 @@ CREATE TABLE IF NOT EXISTS `vrlv3_hylatyt_hakemukset` (
 --
 
 --
--- Rajoitteet taululle `tunnukset_pikaviestit`
---
-ALTER TABLE `vrlv3_tunnukset_pikaviestit`
-  ADD CONSTRAINT `tunnukset_pikaviestit_ibfk_2` FOREIGN KEY (`lahettaja`) REFERENCES `vrlv3_tunnukset` (`tunnus`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `tunnukset_pikaviestit_ibfk_1` FOREIGN KEY (`vastaanottaja`) REFERENCES `vrlv3_tunnukset` (`tunnus`) ON DELETE CASCADE ON UPDATE CASCADE;
-
-
---
---
 -- Rajoitteet taululle `vrlv3_tunnukset`
 --
  ALTER TABLE `vrlv3_tunnukset` 
   ADD CONSTRAINT `vrlv3_tunnukset_ibfk_1` FOREIGN KEY (`laani`) REFERENCES `vrlv3`.`vrlv3_lista_maakunnat`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+
+--
+-- Rajoitteet taululle `vrlv3_tunnukset_jonossa`
+--
+ ALTER TABLE `vrlv3_tunnukset_jonossa` 
+  ADD CONSTRAINT `vrlv3_tunnukset_jonossa_ibfk_1` FOREIGN KEY (`kasittelija`) REFERENCES `vrlv3_tunnukset` (`tunnus`) ON UPDATE CASCADE;
 
 --
 -- Rajoitteet taululle `vrlv3_tunnukset_kirjautumiset`
@@ -202,4 +201,17 @@ ALTER TABLE `vrlv3_tunnukset_nimimerkit`
 ALTER TABLE `vrlv3_tunnukset_yhteystiedot`
   ADD CONSTRAINT `vrlv3_tunnukset_yhteystiedot_ibfk_1` FOREIGN KEY (`tunnus`) REFERENCES `vrlv3_tunnukset` (`tunnus`) ON DELETE CASCADE ON UPDATE CASCADE;
   
- 
+--
+-- Rajoitteet taululle `tunnukset_pikaviestit`
+--
+ALTER TABLE `vrlv3_tunnukset_pikaviestit`
+  ADD CONSTRAINT `tunnukset_pikaviestit_ibfk_2` FOREIGN KEY (`lahettaja`) REFERENCES `vrlv3_tunnukset` (`tunnus`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `tunnukset_pikaviestit_ibfk_1` FOREIGN KEY (`vastaanottaja`) REFERENCES `vrlv3_tunnukset` (`tunnus`) ON DELETE CASCADE ON UPDATE CASCADE;
+  
+--
+-- Rajoitteet taululle `vrlv3_hylatyt_hakemukset`
+--
+ ALTER TABLE `vrlv3_hylatyt_hakemukset` 
+  ADD CONSTRAINT `vrlv3_hylatyt_hakemukset_ibfk_1` FOREIGN KEY (`tunnus`) REFERENCES `vrlv3_tunnukset` (`tunnus`) ON UPDATE CASCADE;
+  
+  

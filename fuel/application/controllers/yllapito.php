@@ -136,7 +136,8 @@ class Yllapito extends CI_Controller
             }
             else
             {
-                $this->tunnukset_model->add_rejected_user(); //Hylkäys muistiin
+                $this->load->model('misc_model');
+                $this->misc_model->add_rejected_queue_item('tunnus'); //Hylkäys muistiin
                 
                 $this->session->set_flashdata('return_info', 'Hakemus hylätty.');
                 $this->session->set_flashdata('return_status', 'success');
@@ -276,7 +277,8 @@ class Yllapito extends CI_Controller
             }
             else
             {
-                $this->tallit_model->add_rejected_stable(); //Hylkäys muistiin
+                $this->load->model('misc_model');
+                $this->misc_model->add_rejected_queue_item('talli'); //Hylkäys muistiin
                 
                 $approved = false;
                 $this->session->set_flashdata('return_info', 'Anomus hylätty.');
@@ -299,7 +301,67 @@ class Yllapito extends CI_Controller
     
     function muokkaa_talli()
     {
-        //näytä lomake jolle annetaan tallitunnus. se redirectaa muokkaukseen
+        $this->load->library('form_validation');
+        $this->load->model('tallit_model');
+
+        if($this->input->server('REQUEST_METHOD') == 'POST' && $this->input->post('tallinumero') != null && !empty($this->tallit_model->get_stable($this->input->post('tallinumero'))))
+           redirect('/profiili/muokkaa_talli/' . $this->input->post('tallinumero') . '/admin');
+        else
+        {
+            //näytä lomake jolle annetaan tallitunnus, lomake redirectaa muokkaukseen
+            $this->load->library('form_builder', array('submit_value' => 'Muokkaa', 'required_text' => '*Pakollinen kenttä'));
+            
+            $fields['tallinumero'] = array('type' => 'text', 'class'=>'form-control');  
+            $this->form_builder->form_attrs = array('method' => 'post', 'action' => '');
+            $vars['form'] = $this->form_builder->render_template('_layouts/basic_form_template', $fields);
+            
+            $vars['title'] = 'Tallin muokkaus';
+            $vars['msg'] = 'Anna muokattavan tallin tallinumero.';
+            
+            $this->fuel->pages->render('misc/jonorekisterointi', $vars);
+        }
+    }
+    
+    function talli_haku()
+    {
+	$this->load->model('tallit_model');
+	$this->load->library('form_validation');
+	$this->load->library('form_builder', array('submit_value' => 'Hae'));
+	$vars['title'] = 'Tallihaku';
+	$vars['msg'] = 'Hae talleja tallirekisteristä. Voit käyttää tähteä * jokerimerkkinä.';
+	$vars['text_view'] = $this->load->view('tallit/etusivu_teksti', NULL, TRUE);
+	
+	$options = $this->tallit_model->get_category_option_list();
+	$options[-1] = 'Mikä tahansa';
+	
+	$fields['nimi'] = array('type' => 'text', 'class'=>'form-control');
+	$fields['kategoria'] = array('type' => 'select', 'options' => $options, 'value' => '-1', 'class'=>'form-control');
+	$fields['tallinumero'] = array('type' => 'text', 'class'=>'form-control');
+
+	$this->form_builder->form_attrs = array('method' => 'post', 'action' => site_url('/yllapito/talli_haku'));
+	$vars['form'] = $this->form_builder->render_template('_layouts/basic_form_template', $fields);
+	
+	if($this->input->server('REQUEST_METHOD') == 'POST')
+	{
+	    $this->form_validation->set_rules('nimi', 'Nimi', "min_length[4]|regex_match[/^[A-Za-z0-9_\-.:,; *~#&'@()]*$/]");
+	    $this->form_validation->set_rules('kategoria', 'Kategoria', 'min_length[1]|max_length[2]');
+	    $this->form_validation->set_rules('tallinumero', 'Tallinumero', "min_length[6]|max_length[8]|regex_match[/^[A-Z0-9]*$/]");
+
+	    if($this->form_validation->run() == true && !(empty($this->input->post('nimi')) && empty($this->input->post('tallinumero')) && $this->input->post('kategoria') == "-1"))
+	    {
+		$vars['headers'][1] = array('title' => 'Tallinumero', 'key' => 'tnro', 'profile_link' => site_url('talli/') . '/');
+		$vars['headers'][2] = array('title' => 'Nimi', 'key' => 'nimi');
+		$vars['headers'][3] = array('title' => 'Kategoria', 'key' => 'katelyh', 'aggregated_by' => 'tnro');
+		$vars['headers'][4] = array('title' => 'Perustettu', 'key' => 'perustettu');
+                $vars['headers'][5] = array('title' => 'Muokkaa', 'key' => 'tnro', 'admin_edit' => site_url('profiili/muokkaa_talli') . '/');
+		
+		$vars['headers'] = json_encode($vars['headers']);
+		
+		$vars['data'] = json_encode($this->tallit_model->search_stables($this->input->post('nimi'), $this->input->post('kategoria'), $this->input->post('tallinumero')));
+	    }
+	}
+	
+	$this->fuel->pages->render('misc/haku', $vars);
     }
     
     function tallikategoriajono()
@@ -371,7 +433,8 @@ class Yllapito extends CI_Controller
             }
             else
             {
-                $this->tallit_model->add_rejected_category(); //Hylkäys muistiin
+                $this->load->model('misc_model');
+                $this->misc_model->add_rejected_queue_item('kategoria'); //Hylkäys muistiin
                 
                 $approved = false;
                 $this->session->set_flashdata('return_info', 'Anomus hylätty.');
