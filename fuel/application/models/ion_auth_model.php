@@ -2268,4 +2268,23 @@ class Ion_auth_model extends CI_Model
 		// just return the string IP address now for better compatibility
 		return $ip_address;
 	}
+        
+        
+        
+        
+        
+        ///Omat funktiot
+        public function group_exists($group_name){
+            
+            $existing_group = $this->db->get_where($this->tables['groups'], array('name' => $group_name))->row();
+	    if(isset($existing_group->id))
+            {
+                    return TRUE;
+            }
+            
+            else {
+                return false;
+            }
+        }
+
 }

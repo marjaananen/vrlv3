@@ -84,7 +84,6 @@ CREATE TABLE IF NOT EXISTS `vrlv3_kasvattajanimet_rodut` (
   `id` int(11) NOT NULL,
   `kid` int(11) NOT NULL,
   `rotunro` smallint(3) NOT NULL,
-  `rekisteroity` datetime NOT NULL DEFAULT '2010-01-01 00:00:00',
   `hyvaksyi` int(5) unsigned zerofill NOT NULL,
   `hyvaksytty` datetime NOT NULL,
   PRIMARY KEY (`id`),

@@ -1,14 +1,16 @@
 <?php
 class Yllapito extends CI_Controller
 {
+    
+    private $allowed_user_groups = array('admin');
+    
     function __construct()
     {
         parent::__construct();
-        
-        //Kaikki funktiot täällä vaativat kirjautuneen ylläpitäjän, joten:
-        if(!($this->ion_auth->logged_in() && $this->ion_auth->in_group('yllapito')))
-        {
-            redirect('/');
+              
+        $this->load->library('user_rights', array('groups' => $this->allowed_user_groups));
+        if (!$this->user_rights->is_allowed()){       
+            redirect($this->user_rights->redirect());
         }
     }
 
