@@ -2,12 +2,11 @@
 
 //Käyttöohje:
 
-//Jokainen käyttäjäoikeuksia vaativa luokka tarvitsee tällaisen privaattimuuttujan,
-//jossa esimerkki1, esimerkki2 ja esimerkki3 ovat käyttäjäryhmiä, joille luokan toiminnot ovat sallittuja.
-//ryhmiä saa olla yksi tai useampi, jos listan jättää tyhjäksi array(), vain admin pääsee toimintoihin.
-
 //Luokka tarkastaa, onko käyttäjä kirjautunut, ja onko hän admin vai kuuluuko johonkin vaadituista ryhmistä
 
+//Jokainen käyttäjäoikeuksia vaativa luokka (controller) tarvitsee tällaisen privaattimuuttujan,
+//jossa esimerkki1, esimerkki2 ja esimerkki3 ovat käyttäjäryhmiä, joille luokan toiminnot ovat sallittuja.
+//ryhmiä saa olla yksi tai useampi. Jos listan jättää tyhjäksi array(), vain admin pääsee toimintoihin.
 
 //    private $allowed_user_groups = array('esimerkki', 'esimerkki2', 'esimerkki3');
 
