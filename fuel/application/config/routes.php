@@ -40,18 +40,18 @@
 
 
 
-$route['yllapito/tunnukset'] = "yllapito/hakemusjono_etusivu";
-$route['yllapito/tunnukset/hyvaksy'] = "yllapito/hakemusjono";
+$route['yllapito/tunnukset'] = "yllapito_tunnukset/hakemusjono_etusivu";
+$route['yllapito/tunnukset/hyvaksy'] = "yllapito_tunnukset/hakemusjono";
 
-$route['yllapito/tallirekisteri'] = "yllapito/tallirekisteri_etusivu";
+$route['yllapito/tallirekisteri'] = "yllapito_tallirekisteri/tallirekisteri_etusivu";
 
-$route['yllapito/tallirekisteri/tallijono/hyvaksy'] = "yllapito/tallijono";
-$route['yllapito/tallirekisteri/tallijono/hyvaksy_kasittele/(:any)/(:num)'] = "yllapito/kasittele_talli/$1/$2";
-$route['yllapito/tallirekisteri/tallijono/muokkaa'] = "yllapito/muokkaa_talli";
-$route['yllapito/tallirekisteri/tallijono/haku'] = "yllapito/talli_haku";
+$route['yllapito/tallirekisteri/tallijono/hyvaksy'] = "yllapito_tallirekisteri/tallijono";
+$route['yllapito/tallirekisteri/tallijono/hyvaksy_kasittele/(:any)/(:num)'] = "yllapito_tallirekisteri/kasittele_talli/$1/$2";
+$route['yllapito/tallirekisteri/tallijono/muokkaa'] = "yllapito_tallirekisteri/muokkaa_talli";
+$route['yllapito/tallirekisteri/tallijono/haku'] = "yllapito_tallirekisteri/talli_haku";
 
-$route['yllapito/tallirekisteri/kategoriajono/hyvaksy'] = "yllapito/tallikategoriajono";
-$route['yllapito/tallirekisteri/kategoriajono/hyvaksy_kasittele/(:any)/(:num)'] = "yllapito/kasittele_tallikategoria/$1/$2";
+$route['yllapito/tallirekisteri/kategoriajono/hyvaksy'] = "yllapito_tallirekisteri/tallikategoriajono";
+$route['yllapito/tallirekisteri/kategoriajono/hyvaksy_kasittele/(:any)/(:num)'] = "yllapito_tallirekisteri/kasittele_tallikategoria/$1/$2";
 
 
 $route['profiili/omat-tallit'] = "profiili/tallit_index";
