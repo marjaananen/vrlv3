@@ -33,17 +33,17 @@ class User_rights
     public function is_allowed()
     {
         //Jos ei ole kirjautunut sisään, ei voi kuulua mihinkään, ja heitetään vain etusivulle
-        if (!$this->ion_auth->logged_in()){
+        if (!$this->CI->ion_auth->logged_in()){
             $this->redirect_address ="/";
             return false;
         }
         //Admin pääsee kaikkialle.
-        else if ($this->ion_auth->is_admin()){
+        else if ($this->CI->ion_auth->is_admin()){
             return true;            
         }
         
         else {
-            $this->load->model('ion_auth_model');
+            $this->CI->load->model('ion_auth_model');
             
             $user_is_in_one_of_the_groups = false;
             
@@ -51,9 +51,9 @@ class User_rights
             foreach ($this->req_user_groups as $group){
                 
                 //Onko ryhmä olemassa?
-                if($this->ion_auth_model->group_exists($group)){
+                if($this->CI->ion_auth_model->group_exists($group)){
                     //Onko käyttäjä kys. ryhmässä
-                    if($this->ion_auth->in_group($group)){                        
+                    if($this->CI->ion_auth->in_group($group)){                        
                         $user_is_in_one_of_the_groups = true;
                         break;
                     }
