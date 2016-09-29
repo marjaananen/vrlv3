@@ -42,7 +42,7 @@
 
 <nav>
   <ul class="pagination">
-    <li <?php if ($pagination['page'] == 1){ echo 'class="disabled"';}?>><a href="?sivu=<?php echo      ['page']-1; ?>" aria-label="Previous"><span aria-hidden="true">&laquo;</span></a></li>
+    <li <?php if ($pagination['page'] == 1){ echo 'class="disabled"';}?>><a href="?sivu=<?php echo $pagination['page']-1; ?>" aria-label="Previous"><span aria-hidden="true">&laquo;</span></a></li>
     
     <?php    
         $i=0;

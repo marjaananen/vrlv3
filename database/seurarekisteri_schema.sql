@@ -134,9 +134,8 @@ CREATE TABLE IF NOT EXISTS `vrlv3_seurarekisteri_omistajat` (
 --
 ALTER TABLE `vrlv3_seurarekisteri`
   ADD CONSTRAINT `vrlv3_seurarekisteri_ibfk_4` FOREIGN KEY (`lopetti_tunnus`) REFERENCES `vrlv3_tunnukset` (`tunnus`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `vrlv3_seurarekisteri_ibfk_1` FOREIGN KEY (`hyvaksyi`) REFERENCES `vrlv3_tunnukset` (`tunnus`) ON UPDATE CASCADE,
-  ADD CONSTRAINT `vrlv3_seurarekisteri_ibfk_2` FOREIGN KEY (`hyvaksyi`) REFERENCES `vrlv3_tunnukset` (`tunnus`) ON UPDATE CASCADE,
-  ADD CONSTRAINT `vrlv3_seurarekisteri_ibfk_3` FOREIGN KEY (`hyvaksyi`) REFERENCES `vrlv3_tunnukset` (`tunnus`) ON UPDATE CASCADE;
+  ADD CONSTRAINT `vrlv3_seurarekisteri_ibfk_1` FOREIGN KEY (`hyvaksyi`) REFERENCES `vrlv3_tunnukset` (`tunnus`) ON UPDATE CASCADE;
+
 
 --
 -- Rajoitteet taululle `vrlv3_seurarekisteri_jasenet`
@@ -158,8 +157,7 @@ ALTER TABLE `vrlv3_seurarekisteri_jasentallit`
 --
 ALTER TABLE `vrlv3_seurarekisteri_jonossa`
   ADD CONSTRAINT `vrlv3_seurarekisteri_jonossa_ibfk_3` FOREIGN KEY (`lisaaja`) REFERENCES `vrlv3_tunnukset` (`tunnus`) ON UPDATE CASCADE,
-  ADD CONSTRAINT `vrlv3_seurarekisteri_jonossa_ibfk_1` FOREIGN KEY (`kasittelija`) REFERENCES `vrlv3_tunnukset` (`tunnus`) ON UPDATE CASCADE,
-  ADD CONSTRAINT `vrlv3_seurarekisteri_jonossa_ibfk_2` FOREIGN KEY (`kasittelija`) REFERENCES `vrlv3_tunnukset` (`tunnus`) ON UPDATE CASCADE;
+  ADD CONSTRAINT `vrlv3_seurarekisteri_jonossa_ibfk_1` FOREIGN KEY (`kasittelija`) REFERENCES `vrlv3_tunnukset` (`tunnus`) ON UPDATE CASCADE;
 
 --
 -- Rajoitteet taululle `vrlv3_seurarekisteri_omistajamuutokset`
