@@ -8,7 +8,7 @@
  *
  * @package		FUEL CMS
  * @author		David McReynolds @ Daylight Studio
- * @copyright	Copyright (c) 2015, Run for Daylight LLC.
+ * @copyright	Copyright (c) 2018, Daylight Studio LLC.
  * @license		http://docs.getfuelcms.com/general/license
  * @link		http://www.getfuelcms.com
  */
@@ -30,12 +30,15 @@
 class Fuel_notification extends Fuel_base_library {
 
 	public $to = ''; // the to address to send the notification
+	public $cc = ''; // the CC address to send the notification
+	public $reply_to = ''; // the reply to address to send the notification
 	public $from = ''; // the from address of the sender
 	public $from_name = ''; // the from name of the sender
 	public $subject = ''; // the subject line of the notification
 	public $message = ''; // the message
 	public $attachments = array(); // attachments
 	public $use_dev_mode = TRUE; // whether to use dev mode or not which means it will send to the dev_email address in the config
+	public $mailtype = 'text';
 
 	// --------------------------------------------------------------------
 	
@@ -85,6 +88,8 @@ class Fuel_notification extends Fuel_base_library {
 		$this->CI->email->from($this->from, $this->from_name);
 		$this->CI->email->subject($this->subject);
 		$this->CI->email->message($this->message);
+		$this->CI->email->set_mailtype($this->mailtype);
+
 		if (!empty($this->attachments))
 		{
 			if (is_array($this->attachments))
@@ -109,7 +114,17 @@ class Fuel_notification extends Fuel_base_library {
 		{
 			$this->CI->email->to($this->to);
 		}
+
+		if ($this->cc)
+		{
+			$this->CI->email->cc($this->cc);
+		}
 		
+		if ($this->reply_to)
+		{
+			$this->CI->email->reply_to($this->reply_to);
+		}
+
 		if (!$this->CI->email->send())
 		{
 			$this->_errors[] = $this->CI->email->print_debugger();
@@ -160,32 +175,6 @@ class Fuel_notification extends Fuel_base_library {
 	public function is_dev_mode()
 	{
 		return $this->use_dev_mode == TRUE AND (is_dev_mode());
-	}
-	
-	// --------------------------------------------------------------------
-	
-	/**
-	 * Returns an array of error messages if any were set
-	 *
-	 * @access	public
-	 * @return	array
-	 */	
-	public function errors()
-	{
-		return $this->_errors;
-	}
-	
-	// --------------------------------------------------------------------
-	
-	/**
-	 * Determines whether there are any errors on the object
-	 *
-	 * @access	public
-	 * @return	boolean
-	 */	
-	public function has_errors()
-	{
-		return (count($this->_errors) > 0);
 	}
 
 }

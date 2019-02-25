@@ -1,5 +1,5 @@
 <?php
-require_once('module.php');
+require_once('Module.php');
 
 class Assets extends Module {
 	
@@ -10,12 +10,12 @@ class Assets extends Module {
 		parent::__construct();
 	}
 	
-	public function items($inline = FALSE)
+	public function items()
 	{
 		$dirs = $this->fuel->assets->dirs();
 		$this->filters['group_id']['options'] = $dirs;
 
-		parent::items($inline);
+		parent::items();
 	}
 
 	public function create($dir = NULL, $inline = FALSE)
@@ -32,12 +32,14 @@ class Assets extends Module {
 		{
 			if (( ! empty($_FILES['userfile']) AND $_FILES['userfile']['error'] != 4) OR ( ! empty($_FILES['userfile___0']) AND $_FILES['userfile___0']['error'] != 4))
 			{
+
+				// cleanup $dir name with any trailing slashes
+				$dir = trim($this->input->post_get('asset_folder', TRUE), '/');
+
 				$this->model->on_before_post();
 
 				if ($this->input->post('asset_folder')) 
 				{
-					$dir = $this->input->get_post('asset_folder', TRUE);
-
 					if ( ! in_array($dir, array_keys($this->fuel->assets->dirs())))
 					{
 						show_404();
@@ -48,18 +50,18 @@ class Assets extends Module {
 				$upload_path = $this->config->item('assets_server_path').$this->fuel->assets->dir($dir).DIRECTORY_SEPARATOR.$subfolder; //assets_server_path is in assets config
 
 				$posted['upload_path'] = $upload_path;
-				$posted['overwrite'] = ($this->input->get_post('overwrite')) ? TRUE : FALSE;
-				$posted['create_thumb'] = ($this->input->get_post('create_thumb')) ? TRUE : FALSE;
-				$posted['resize_method'] = ($this->input->get_post('resize_method')) ? $this->input->get_post('resize_method', TRUE) : 'maintain_ratio';
-				$posted['resize_and_crop'] = $this->input->get_post('resize_and_crop', TRUE);
-				$posted['width'] = $this->input->get_post('width', TRUE);
-				$posted['height'] = $this->input->get_post('height', TRUE);
-				$posted['master_dim'] = $this->input->get_post('master_dim', TRUE);
-				$posted['file_name'] = $this->input->get_post('userfile_file_name', TRUE);
-				$posted['unzip'] = ($this->input->get_post('unzip')) ? TRUE : FALSE;
-				$posted['remove_subfolder'] = $this->input->get_post('remove_subfolder', TRUE);
+				$posted['overwrite'] = ($this->input->post_get('overwrite')) ? TRUE : FALSE;
+				$posted['create_thumb'] = ($this->input->post_get('create_thumb')) ? TRUE : FALSE;
+				$posted['resize_method'] = ($this->input->post_get('resize_method')) ? $this->input->post_get('resize_method', TRUE) : 'maintain_ratio';
+				$posted['resize_and_crop'] = $this->input->post_get('resize_and_crop', TRUE);
+				$posted['width'] = $this->input->post_get('width', TRUE);
+				$posted['height'] = $this->input->post_get('height', TRUE);
+				$posted['master_dim'] = $this->input->post_get('master_dim', TRUE);
+				$posted['file_name'] = $this->input->post_get('userfile_file_name', TRUE);
+				$posted['unzip'] = ($this->input->post_get('unzip')) ? TRUE : FALSE;
+				$posted['remove_subfolder'] = $this->input->post_get('remove_subfolder', TRUE);
 				
-				$redirect_to = uri_safe_decode($this->input->get_post('redirect_to'));
+				$redirect_to = uri_safe_decode($this->input->post_get('redirect_to'));
 				$id = $posted['file_name'];
 
 				// run before_create hook
@@ -103,7 +105,7 @@ class Assets extends Module {
 							$uploaded_path = $uploaded_path .'/'.$subfolder;
 						}
 						$uploaded_file_name_arr[] = trim(str_replace($uploaded_path, '', $ud['full_path']), '/');
-						$uploaded_file_webpath_arr[] = assets_server_to_web_path($ud['full_path']);
+						$uploaded_file_webpath_arr[] = trim(assets_server_to_web_path($ud['full_path'], TRUE), '/');
 					}
 
 					// set the uploaded file name to a concatenated string separated by commas
@@ -239,27 +241,45 @@ class Assets extends Module {
 
 		$options = options_list($this->model->list_items(NULL, 0, $order, $by), 'name', 'name');
 		$redirect_to = uri_safe_encode(fuel_uri(fuel_uri_string(), TRUE)); // added back to make it refresh
-		$preview = ' OR <a href="'.fuel_url('assets/inline_create?asset_folder='.urlencode($dir).'&redirect_to='.$redirect_to).'" class="btn_field">Upload</a><div id="asset_preview"></div>';
+		// $allowed_q = array(
+		// 		'subfolder', 
+		// 		'userfile_file_name', 
+		// 		'overwrite', 
+		// 		'unzip',
+		// 		'create_thumb', 
+		// 		'maintain_ration', 
+		// 		'width', 
+		// 		'height', 
+		// 		'master_dim', 
+		// 		'resize_and_crop', 
+		// 		'resize_method', 
+		// 		'hide_options',
+		// 		'accept',
+		// 		'multiple', 
+		// 		'remove_subfolder'
+		// 		);
+		$query_str = query_str(array(), FALSE, FALSE);
+		$preview = ' OR <a href="'.fuel_url('assets/inline_create?asset_folder='.urlencode($dir).'&redirect_to='.$redirect_to.'&'.$query_str).'" class="btn_field">Upload</a><div id="asset_preview"></div>';
 
 		$field_values['asset_folder']['value'] = $dir;
 		$fields['asset_select'] = array('value' => $value, 'label' => lang('assets_select_action'), 'type' => 'select', 'options' => $options, 'after_html' => $preview);
 
-		if (isset($_GET['width']))
+		if (!empty($_GET['width']))
 		{
 			$fields['width'] = array('value' => $this->input->get_post('width', TRUE), 'label' => lang('form_label_width'), 'size' => 5, 'row_class' => 'img_only');
 		}
 
-		if (isset($_GET['height']))
+		if (!empty($_GET['height']))
 		{
 			$fields['height'] = array('value' => $this->input->get_post('height', TRUE), 'label' => lang('form_label_height'), 'size' => 5, 'row_class' => 'img_only');
 		}
 
-		if (isset($_GET['alt']))
+		if (!empty($_GET['alt']))
 		{
 			$fields['alt'] = array('value' => $this->input->get_post('alt', TRUE), 'label' => lang('form_label_alt'), 'row_class' => 'img_only');
 		}
 
-		if (isset($_GET['align']))
+		if (!empty($_GET['align']))
 		{
 			$alignment_options = array(
 				'' => '',
@@ -274,7 +294,7 @@ class Assets extends Module {
 			$fields['align'] = array('value' => $this->input->get_post('align', TRUE), 'label' => lang('form_label_align'), 'type' => 'select', 'options' => $alignment_options, 'row_class' => 'img_only');
 		}
 
-		if (isset($_GET['class']))
+		if (!empty($_GET['class']))
 		{
 			$fields['class'] = array('value' => $this->input->get_post('class', TRUE), 'label' => lang('form_label_class'), 'size' => 6, 'row_class' => 'img_only');
 		}

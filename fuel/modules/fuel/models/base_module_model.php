@@ -8,7 +8,7 @@
  *
  * @package		FUEL CMS
  * @author		David McReynolds @ Daylight Studio
- * @copyright	Copyright (c) 2015, Run for Daylight LLC.
+ * @copyright	Copyright (c) 2018, Daylight Studio LLC.
  * @license		http://docs.getfuelcms.com/general/license
  * @link		http://www.getfuelcms.com
  */
@@ -24,7 +24,7 @@
  * 	<code>
  * 	&lt;?php  if (!defined('BASEPATH')) exit('No direct script access allowed');
  * 	
- * 	require_once(FUEL_PATH.'models/base_module_model.php');
+ * 	require_once(FUEL_PATH.'models/Base_module_model.php');
  * 	
  * 	class My_super_model extends Base_module_model {
  * 	...
@@ -38,7 +38,7 @@
  */
 
 require_once(APPPATH.'core/MY_Model.php');
-require_once('base_model_helpers.php');
+require_once('Base_model_helpers.php');
 
 class Base_module_model extends MY_Model {
 	
@@ -96,6 +96,7 @@ class Base_module_model extends MY_Model {
 															'camelize',
 															'upper'			=> 'strtoupper',
 															'lower'			=> 'strtolower',
+															'nl2br',
 															),
 								'number'			=> array(
 															'currency',
@@ -293,26 +294,48 @@ class Base_module_model extends MY_Model {
 	{
 		if (!empty($this->list_items))
 		{
+			$filter_params = array('limit', 'offset', 'col', 'order');
+			foreach ($filter_params as $param)
+			{
+				$this->list_items->$param = $$param;
+			}
 			$this->list_items->run();
+
+			 // in case it changed with run method
+			$col = $this->list_items->col;
+			$order = $this->list_items->order;
 		}
 
 		$this->_list_items_query();
-		
+
+		$this->_limit_to_user();
+
 		if ($just_count)
 		{
-			return $this->db->count_all_results();
-		}
+			$has_have = FALSE;
+			foreach($this->filters as $k => $v)
+			{
+				if (preg_match('#.+_having$#', $k))
+				{
+					$has_have = TRUE;
+					break;
+				}
+			}
 
-		if (empty($this->db->ar_select))
+			if (!$has_have)
+			{
+				return $this->db->count_all_results();
+			}
+		}
+		
+		if (!$this->db->has_select())
 		{
 			$this->db->select($this->table_name.'.*'); // make select table specific
 		}
 
-		if (!empty($col) AND !empty($order)) $this->db->order_by($col, $order);
+		if (!empty($col)) $this->db->order_by($col, $order, FALSE);
 		if (!empty($limit)) $this->db->limit($limit);
 		$this->db->offset($offset);
-		
-		$this->_limit_to_user();
 
 		$query = $this->db->get();
 		$data = $query->result_array();
@@ -322,7 +345,12 @@ class Base_module_model extends MY_Model {
 			$data = $this->list_items->process($data);
 		}
 
-		//$this->debug_query();
+		// has have statement
+		if ($just_count)
+		{
+			return count($data);
+		}
+		
 		return $data;
 	}
 
@@ -399,6 +427,8 @@ class Base_module_model extends MY_Model {
 					$key_with_comparison_operator = preg_replace(array('#_from$#', '#_fromequal$#', '#_to$#', '#_toequal$#', '#_equal$#'), array(' >', ' >=', ' <', ' <=', ' ='), $key);
 					//$this->db->where(array($key => $val));
 					//$where_or[] = $key.'='.$this->db->escape($val);
+
+
 					array_push($$joiner_arr, $key_with_comparison_operator.$this->db->escape($val));
 				}
 				else if (is_array($val))
@@ -408,7 +438,7 @@ class Base_module_model extends MY_Model {
 					{
 						if (strlen($v))
 						{
-							array_push($arrjoiner, $key.'='.$v);
+							array_push($arrjoiner, $key.'='.$this->db->escape($v));
 						}
 					}
 					if (!empty($arrjoiner))
@@ -421,7 +451,7 @@ class Base_module_model extends MY_Model {
 				{
 					//$method = ($joiner == 'or') ? 'or_like' : 'like';
 					//$this->db->$method('LOWER('.$key.')', strtolower($val), 'both');
-					array_push($$joiner_arr, 'LOWER('.$key.') LIKE "%'.strtolower($val).'%"');
+					array_push($$joiner_arr, 'LOWER('.$key.') LIKE "%'.mb_strtolower(addslashes($val)).'%"');
 				}
 			}
 		}
@@ -509,6 +539,12 @@ class Base_module_model extends MY_Model {
 		$form_filters = $this->CI->filters;
 
 		$filters = array();
+		$joiner = '';
+
+		$find = array('#_from$#', '#_fromequal$#', '#_to$#', '#_toequal$#', '#_equal$#');
+		$operators = array('>', '>=', '<', '<=', '=');
+
+		$i = 1;
 		foreach($values as $key => $val)
 		{
 			if (!empty($val) AND isset($form_filters[$key]))
@@ -526,7 +562,7 @@ class Base_module_model extends MY_Model {
 						$options = $form_filters[$key]['options'];
 					}
 					
-					$replace = array('#_from$#', '#_fromequal$#', '#_to$#', '#_toequal$#', '#_equal$#');
+
 					if (is_array($val))
 					{
 						foreach($val as $k => $v)
@@ -536,7 +572,8 @@ class Base_module_model extends MY_Model {
 								$val[$k] = $options[$v];
 							}
 
-							$val[$k] = preg_replace($replace, '', $val[$k]);
+							$val[$k] = preg_replace($find, '', $val[$k]);
+
 						}
 						$val = implode(', ', $val);
 					}
@@ -547,22 +584,52 @@ class Base_module_model extends MY_Model {
 							$val = $options[$val];
 						}
 
-						$val = preg_replace($replace, '', $val);
+						$val = preg_replace($find, '', $val);
+					}
+				}
+
+				$operator = '=';
+				foreach($find as $j => $f)
+				{
+					if (preg_match($f, $key))
+					{
+						$operator = $operators[$j];
+						break;
+					}
+				}
+				
+				$joiner = $this->filter_join;
+				if (is_array($joiner))
+				{
+					if (isset($joiner[$key]))
+					{
+						$joiner = strtoupper($joiner[$key]);
+					}
+					else
+					{
+						$joiner = 'OR';
 					}
 				}
 
 				$label = (isset($form_filters[$key]['label'])) ? $form_filters[$key]['label'] : ucfirst(str_replace('_', ' ', $key));
-				$filters[] = $label.'="'.$val.'"';
+				$filter = str_replace(':', '', $label).' '.$operator.' "'.$val.'"';
+				$filter .= ' '.strtoupper($joiner).' ';
+				$filters[] = $filter;
 			}
+
+			$i++;
 		}
 
 		$str = '';
 		if (!empty($filters))
 		{
-			$str = '<strong>Filters:</strong> '.$str .= implode(', ', $filters);
+			$str = '<strong>Filters:</strong> ';
+			$filters_str = implode(' ', $filters);
+			$str .= substr($filters_str, 0, - strlen($joiner) -1);
 		}
 		return $str;
 	}
+	
 	// --------------------------------------------------------------------
 	
 	/**
@@ -570,7 +637,7 @@ class Base_module_model extends MY_Model {
 	 *
 	 * @access	protected
 	 * @param	string The name of the model's property to use to generate the tree. Options are 'foreign_keys', 'has_many' or 'belongs_to'
-	 * @return	array An array that can be used by the Menu class to create a hierachical structure
+	 * @return	array An array that can be used by the Menu class to create a hierarchical structure
 	 */	
 	protected function _tree($prop = NULL)
 	{
@@ -630,7 +697,7 @@ class Base_module_model extends MY_Model {
 			if ($prop == 'foreign_keys')
 			{
 				$groups = $rel_model->find_all_array(array(), $rel_model->key_field().' asc');
-				$children = $this->find_all_array(array(), $key_field.' asc');
+				$children = $this->find_all_array(array(), $model->table_name().'.'.$key_field.' asc');
 				$g_key_field = $rel_model->key_field();
 				$loc_field = $g_key_field;
 			}
@@ -660,7 +727,7 @@ class Base_module_model extends MY_Model {
 			{
 				$used_groups[$child[$key_field]] = $child[$key_field];
 				$attributes = ((isset($child['published']) AND $child['published'] == 'no') OR (isset($child['active']) AND $child['active'] == 'no')) ? array('class' => 'unpublished', 'title' => 'unpublished') : NULL;
-				$return['g'.$child[$g_key_field].'_c_'.$child[$key_field]] = array('parent_id' => $child[$key_field], 'label' => $child[$display_field], 'location' => fuel_url($module_obj->info('module_uri').'/edit/'.$child[$loc_field]), 'attributes' => $attributes);
+				$return['g'.$child[$g_key_field].'_c_'.$child[$key_field]] = array('parent_id' => $child[$key_field], 'label' => $child[$display_field], 'location' => fuel_url($module_obj->info('module_uri').'/edit/'.$child[$g_key_field]), 'attributes' => $attributes);
 			}
 
 			foreach($groups as $group)
@@ -887,7 +954,7 @@ class Base_module_model extends MY_Model {
 		}
 		if (strpos($field, '.') === FALSE) $field = $this->table_name.'.'.$field;
 		$where[$field.' !='] = '';
-		$options = $this->options_list($field, $field, $where, TRUE, FALSE);
+		$options = $this->options_list($field, $field, $where, TRUE);
 		return $options;
 	}
 	
@@ -964,8 +1031,18 @@ class Base_module_model extends MY_Model {
 			}
 		}
 		
+		$data = array();
 		$items = $this->list_items(NULL, NULL, $params['col'], $params['order']);
-		$data = $this->csv($items);
+
+		// clean up any HTML
+		foreach($items as $key => $val)
+		{
+			foreach($val as $k => $v)
+			{
+				$data[$key][$k] = strip_tags($v);
+			}
+		}
+		$data = $this->csv($data);
 		return $data;
 	}
 
@@ -1003,7 +1080,7 @@ class Base_module_model extends MY_Model {
 	 * @access	public
 	 * @param	string	the column to use for the value (optional)
 	 * @param	string	the column to use for the label (optional)
-	 * @param	mixed	an array or string containg the where paramters of a query (optional)
+	 * @param	mixed	an array or string containing the where parameters of a query (optional)
 	 * @param	mixed	the order by of the query. Defaults to TRUE which means it will sort by $val asc (optional)
 	 * @return	array
 	 */	
@@ -1056,8 +1133,11 @@ class Base_module_model extends MY_Model {
 			}
 		}
 
-		unset($where['first_option']);
-		$options = $this->options_list(NULL, NULL, $where);
+		$__key__ = (!empty($where['__key__'])) ? $where['__key__'] : NULL;
+		$__label__ = (!empty($where['__label__'])) ? $where['__label__'] : NULL;
+		unset($where['__key__'], $where['__label__'], $where['first_option']);
+
+		$options = $this->options_list($__key__, $__label__, $where);
 
 		foreach($options as $key => $val)
 		{
@@ -1077,7 +1157,7 @@ class Base_module_model extends MY_Model {
 	 */
 	public function get_embedded_list_items($params, $list_cols = array(), $actions = array('edit'))
 	{
-		$module =& $this->get_module();
+		$module = $this->get_module();
 
 		if (empty($list_cols) AND is_string($this->key_field()))
 		{
@@ -1092,6 +1172,8 @@ class Base_module_model extends MY_Model {
 		
 		$data_table =& $this->CI->data_table;
 		$data_table->clear();
+
+		$wherein = FALSE;
 		if (!empty($params['where']))
 		{
 			if (is_array($params['where']))
@@ -1100,12 +1182,48 @@ class Base_module_model extends MY_Model {
 				{
 					unset($params['where'][$k]);
 					$k = str_replace(':', '.', $k);
-					$params['where'][$k] = str_replace(':', '.', $v);
+					if (is_string($v))
+					{
+						$params['where'][$k] = str_replace(':', '.', $v);	
+					}
+
+					$method = (is_array($v)) ? 'where_in' : 'where';
+					$this->db->$method($k, $v);
 				}
 			}
-			$this->db->where($params['where']);
+			else
+			{
+				$this->db->where($params['where']);
+			}
 		}
 
+		if (!empty($params['like']))
+		{
+			$this->db->group_start();
+			if (is_array($params['like']))
+			{
+				foreach($params['like'] as $k => $v)
+				{
+					unset($params['like'][$k]);
+					$k = str_replace(':', '.', $k);
+					if (is_string($v))
+					{
+						$params['like'][$k] = str_replace(':', '.', $v);
+					}
+
+					$this->db->or_like($k, $v, 'both');
+				}
+			}
+			else
+			{
+				$key = key($params['like']);
+				$val = current($params['like']);
+				$this->db->like($key, $val, 'both');
+			}
+
+			$this->db->group_end();
+		}
+		
 		$list_items = $this->list_items();
 		if (empty($list_items))
 		{
@@ -1121,20 +1239,20 @@ class Base_module_model extends MY_Model {
 			foreach($params['tooltip_char_limit'] as $field => $limit)
 			{
 				$limit = (int) $limit;
-				$tooltip_func_str = ' 
-						$value = strip_tags($values["'.$field.'"]);
- 						if (strlen($value) > '.$limit.')
+				$tooltip_func = function($values) use ($field, $limit) {
+					$value = strip_tags($values[$field]);
+ 						if (strlen($value) > $limit)
 						{
 							// display tooltip for long notes
-							$trimmed = character_limiter($value, '.$limit.');
+							$trimmed = character_limiter($value, $limit);
 							$data = "<span title=\"" . $value . "\" class=\"tooltip\">" . $trimmed . "</span>";
 						}
 						else
 						{
 							$data = $value;
 						}
-						return $data;';
-				$tooltip_func = create_function('$values', $tooltip_func_str);
+						return $data;
+				};
 				$data_table->add_field_formatter($field, $tooltip_func);
 			}
 			
@@ -1147,12 +1265,15 @@ class Base_module_model extends MY_Model {
 				$actions = array('edit');
 			}
 
+			$valid_actions = array();
+		
 			foreach($actions as $action => $label)
 			{
 				if (is_int($action))
 				{
 					$action = $label;
 				}
+
 				if (is_string($action) AND $this->fuel->auth->has_permission($module->info('permission'), $action) OR $action == 'custom')
 				{
 					switch(strtolower($action))
@@ -1176,17 +1297,20 @@ class Base_module_model extends MY_Model {
 								$action_url .= '?'. $params['edit_url_params'];
 							}
 							$data_table->add_action(lang('table_action_edit'), $action_url, 'url');
+							$valid_actions[] = $action;
 							break;
 						case 'view':
 							if ($module->info('preview_path'))
 							{
 								$action_url = fuel_url($module->info('module_uri').'/view/{'.$this->key_field().'}');
 								$data_table->add_action(lang('table_action_view'), $action_url, 'url');
+								$valid_actions[] = $action;
 							}
 							break;
 						case 'delete':
 							$action_url = fuel_url($module->info('module_uri').'/inline_delete/{'.$this->key_field().'}');
 							$data_table->add_action(lang('table_action_delete'), $action_url, 'url');
+							$valid_actions[] = $action;
 							break;
 						case 'custom':
 							if (is_array($label))
@@ -1197,6 +1321,7 @@ class Base_module_model extends MY_Model {
 									{
 										$action_url = fuel_url($key);
 										$data_table->add_action($val, $action_url, 'url');
+										$valid_actions[] = $action;
 									}
 								}
 							}
@@ -1205,6 +1330,8 @@ class Base_module_model extends MY_Model {
 				}
 			}
 		}
+		
+		$data_table->row_action = (!empty($valid_actions)) ? TRUE : FALSE;
 
 		$data_table->assign_data($list_items, $list_cols);
 		return $data_table->render();
@@ -1216,7 +1343,7 @@ class Base_module_model extends MY_Model {
 	 * The ajax method to be called for the embedded list view
 	 *
 	 * @access	public
-	 * @param  	array  GET and POST arams that will be used for filtering
+	 * @param  	array  GET and POST params that will be used for filtering
 	 * @return	string The HTML to display
 	 */	
 	public function ajax_embedded_list_items($params)
@@ -1279,7 +1406,7 @@ class Base_module_model extends MY_Model {
 	 */	
 	public function get_module()
 	{
-		return $this->fuel->modules->get(strtolower(get_class($this)));
+		return $this->fuel->modules->get(strtolower(get_class($this)), FALSE);
 	}
 
 	// --------------------------------------------------------------------
@@ -1289,7 +1416,7 @@ class Base_module_model extends MY_Model {
 	 *
 	 * @access	public
 	 * @param	array 	An array of data (optional)
-	 * @return	void
+	 * @return	array
 	 */	
 	public function vars($data = array())
 	{
@@ -1346,7 +1473,7 @@ class Base_module_model extends MY_Model {
 	protected function _publish_status()
 	{
 		//$fields = $this->fields();
-		$fields = $fields = array_keys($this->table_info()); // used to prevent an additional query that the fields() method would create
+		$fields = array_keys($this->table_info()); // used to prevent an additional query that the fields() method would create
 
 		if (in_array('published', $fields))
 		{
@@ -1390,24 +1517,8 @@ class Base_module_model extends MY_Model {
 	{
 		if (defined('FUEL_ADMIN') AND !empty($this->limit_to_user_field) AND !$this->fuel->auth->is_super_admin())
 		{
-			$join = TRUE;
-			if (!empty($this->db->ar_join))
-			{
-				foreach($this->db->ar_join as $joiner)
-				{
-					if (strncmp('LEFT JOIN `fuel_users`', $joiner, 22) === 0)
-					{
-						$join = FALSE;
-						break;
-					}
-				}
-			}
-
-			if ($join)
-			{
-				$this->db->join($this->_tables['fuel_users'], $this->_tables['fuel_users'].'.id = '.$this->limit_to_user_field, 'left');	
-			}
-			$this->db->where($this->_tables['fuel_users'].'.id = '.$this->fuel->auth->user_data('id'));
+			$this->db->join($this->_tables['fuel_users'].' AS fuser', 'fuser.id = '.$this->limit_to_user_field, 'left');	
+			$this->db->where('fuser.id = '.$this->fuel->auth->user_data('id'));
 		}
 	}
 
@@ -1426,7 +1537,7 @@ class Base_module_model extends MY_Model {
 			$rec = $this->find_one_array($this->_tables['fuel_users'].'.id = '.$this->limit_to_user_field);
 			if (!empty($rec) AND ($rec[$this->limit_to_user_field] != $this->fuel->auth->user_data('id')))
 			{
-				$this->add_error(lang('error_no_permissions'));
+				$this->add_error(lang('error_no_permissions', fuel_url()));
 				return FALSE;
 			}
 		}
@@ -1435,6 +1546,30 @@ class Base_module_model extends MY_Model {
 	
 	// --------------------------------------------------------------------
 	
+	/**
+	* Function to return the display name as defined by the display_field in MY_fuel_modules
+	* @param  array $values The values of the current record
+	* @return string
+	*/
+	public function display_name($values)
+	{
+		$module = $this->get_module();
+
+		$key = $module->info('display_field');
+
+		if(isset($values[$key]))
+		{
+			return (is_array($values[$key])) ? json_encode($values[$key]) : $values[$key];
+		}
+		else
+		{
+			return "";
+		}
+	}
+
+	// --------------------------------------------------------------------
+
+
 	/**
 	 * Model hook executed right before saving
 	 *
@@ -1501,7 +1636,7 @@ class Base_module_record extends Data_record {
 	protected $_fuel = NULL;
 	
 	/**
-	 * Constructor - overwritten to add _fuel object for reference for convinience
+	 * Constructor - overwritten to add _fuel object for reference for convenience
 	 * @param	object	parent object
 	 */
 	public function __construct(&$parent = NULL)
@@ -1583,8 +1718,22 @@ class Base_module_record extends Data_record {
 	protected function _parse($output)
 	{
 		$vars = $this->values();
-		$output = $this->_CI->fuel->parser->parse_string($output, $vars, TRUE);
-		return $output;
+		if (is_array($output))
+		{
+			foreach($output as $key => $val)
+			{
+				if (is_string($val))
+				{
+					$output[$key] = $this->_CI->fuel->parser->parse_string($val, $vars, TRUE);
+				}
+			}
+			return $output;
+		}
+		elseif(is_string($output))
+		{
+			$output = $this->_CI->fuel->parser->parse_string($output, $vars, TRUE);	
+			return $output;
+		}
 	}
 	
 }

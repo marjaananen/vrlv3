@@ -43,6 +43,8 @@ class Form_collection
             $fields['nimi'] = array('type' => 'text', 'required' => TRUE, 'value' => $stable['nimi'], 'class'=>'form-control');
             $fields['kuvaus'] = array('type' => 'textarea', 'value' => $stable['kuvaus'], 'cols' => 40, 'rows' => 3, 'class'=>'form-control');
             $fields['osoite'] = array('type' => 'text', 'required' => TRUE, 'value' => $stable['url'], 'class'=>'form-control');
+            $fields['kategoria'] = array('type' => 'multi', 'mode' => 'checkbox', 'required' => TRUE, 'options' => $this->CI->tallit_model->get_category_option_list(), 'class'=>'form-control', 'wrapper_tag' => 'li');
+
             
             $this->CI->form_builder->form_attrs = array('method' => 'post', 'action' => site_url('/profiili/omat-tallit/muokkaa') . '/' . $tnro . '/' . $mode);
         }
@@ -57,8 +59,8 @@ class Form_collection
         
         $this->CI->load->library('form_validation');
 
-        $this->CI->form_validation->set_rules('nimi', 'Nimi', "required|min_length[1]|max_length[128]|regex_match[/^[A-Za-z0-9_\-.:,; *~#&'@()]*$/]");
-        $this->CI->form_validation->set_rules('kuvaus', 'Kuvaus', "max_length[1024]|regex_match[/^[A-Za-z0-9_\-.:,; *~#&'@()]*$/]");
+        $this->CI->form_validation->set_rules('nimi', 'Nimi', "required|min_length[1]|max_length[128]");
+        $this->CI->form_validation->set_rules('kuvaus', 'Kuvaus', "max_length[1024]");
         $this->CI->form_validation->set_rules('osoite', 'Osoite', "required|min_length[4]|max_length[1024]|regex_match[/^[A-Za-z0-9_\-.:,; \/*~#&'@()]*$/]");
 
         if($mode == 'application')

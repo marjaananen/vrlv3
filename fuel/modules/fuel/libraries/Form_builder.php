@@ -8,7 +8,7 @@
  *
  * @package		FUEL CMS
  * @author		David McReynolds @ Daylight Studio
- * @copyright	Copyright (c) 2015, Run for Daylight LLC.
+ * @copyright	Copyright (c) 2018, Daylight Studio LLC.
  * @license		http://docs.getfuelcms.com/general/license
  * @link		http://www.getfuelcms.com
  */
@@ -76,7 +76,7 @@ class Form_builder {
 	public $tooltip_labels = TRUE; // use tooltip labels?
 	public $single_select_mode = 'auto'; // auto will use enum if 2 or less and a single select if greater than 2. Other values are enum or select 
 	public $multi_select_mode = 'auto'; // auto will use a series of checkboxes if 5 or less and a multiple select if greater than 5. Other values are multi or checkbox 
-	public $boolean_mode = 'checkbox'; // booleon mode can be checkbox or enum (which will display radio inputs)
+	public $boolean_mode = 'checkbox'; // boolean mode can be checkbox or enum (which will display radio inputs)
 	public $display_errors_func = 'display_errors'; // the function used to generate errors... usually display_errors is the name
 	public $display_errors = FALSE; // displays errors at the top of the form if TRUE
 	public $question_keys = array('how', 'do', 'when', 'what', 'why', 'where', 'how', 'is', 'which', 'did', 'any','would', 'should', 'could'); // adds question marks to the label if has these words in the label
@@ -89,7 +89,7 @@ class Form_builder {
 	public $row_id_prefix = ''; // the row id prefix
 	public $lang_prefix = 'form_label_'; // language prefix to be applied before a label
 	public $custom_fields = array(); // custom fields
-	public $auto_execute_js = TRUE; // autmoatically execute the javascript for the form
+	public $auto_execute_js = TRUE; // automatically execute the javascript for the form
 	public $html_prepend = ''; // prepended HTML to the form HINT: Can include JS script tags
 	public $html_append = ''; // appended HTML to the form HINT: Can include JS script tags
 	public $representatives = array(); // an array of fields that have arrays or regular expression values to match against different field types (e.g. 'number'=>'bigint|smallint|tinyint|int')
@@ -154,7 +154,7 @@ class Form_builder {
 		if (is_null($this->form))
 		{
 			$this->CI->load->library('form');
-			$this->CI->load->library('encrypt');
+			$this->CI->load->library('encryption');
 			$this->form = new Form();
 			
 			// load localization helper if not already
@@ -507,7 +507,7 @@ class Form_builder {
 	{
 		if (!empty($fields)) $this->set_fields($fields);
 
-		// reoarder
+		// reorder
 		$this->set_field_order();
 		
 		// pre process field values
@@ -528,7 +528,7 @@ class Form_builder {
 
 		$colspan = ($this->label_layout == 'top') ? '1' : '2';
 		
-		$first = reset($this->_fields);
+		$first = $this->_find_first_renderable_field();;
 
 		$is_fieldset_first = FALSE;
 		if ($first['type'] != 'fieldset')
@@ -584,7 +584,7 @@ class Form_builder {
 			if ($val['type'] == 'section')
 			{
 				$str .= "<div".$this->_open_row_attrs($val).'>';
-				$str .= "<span class=\"section\">".$this->create_section($val)."</span>\n";
+				$str .= "<div class=\"section\">".$this->create_section($val)."</div>\n";
 				$str .= "</div>\n";
 				continue;
 			}
@@ -596,14 +596,14 @@ class Form_builder {
 			if ($val['type'] == 'copy')
 			{
 				$str .= "<div".$this->_open_row_attrs($val).'>';
-				$str .= "<span class=\"copy\">".$this->create_copy($val)."</span>\n";
+				$str .= "<div class=\"copy\">".$this->create_copy($val)."</div>\n";
 				$str .= "</div>\n";
 				continue;
 			}
 			else if (!empty($val['copy']))
 			{
 				$str .= "<div".$this->_open_row_attrs($val).'>';
-				$str .= "<span class=\"copy\"><".$this->copy_tag.">".$val['copy']."</".$this->copy_tag."></span>\n";
+				$str .= "<div class=\"copy\"><".$this->copy_tag.">".$val['copy']."</".$this->copy_tag."></div>\n";
 				$str .= "</div>\n";
 			}
 			
@@ -624,21 +624,29 @@ class Form_builder {
 			}
 			else if ((is_array($val['name']) AND in_array($val['name'], $this->displayonly)) OR  $val['displayonly'] OR  (is_string($this->displayonly) AND strtolower($this->displayonly) == 'all'))
 			{
-				$display_value = (is_array($val['value'])) ? print_r($val['value'], TRUE) : $val['value'];
+				if (isset($val['displayonly']) AND !is_bool($val['displayonly']))
+				{
+					$display_value = $val['displayonly'];
+				}
+				else
+				{
+					$display_value = (is_array($val['value'])) ? print_r($val['value'], TRUE) : $val['value'];	
+				}
+
 				$str .= "<div".$this->_open_row_attrs($val).'>';
 				$str .= "<span class=\"label\">";
 				$str .= $val['before_label'].$this->create_label($val, FALSE).$val['after_label'];
 				$str .= "</span>";
-				$str .= "<span".$this->_open_field_attrs($val).">";
+				$str .= "<span".$this->_open_field_attrs($val)."><span class=\"displayonly noclone\">";
 				$str .= $val['before_html'].$display_value.$val['after_html'];
-				$str .= "</span>";
+				$str .= "</span></span>";
 				$str .= "</div>\n";
 			}
 			else if (!in_array($val['name'], $this->exclude))
 			{
 				$str .= "<div".$this->_open_row_attrs($val).'>';
 				$str .= "<span class=\"label\">";
-				$str .= $this->create_label($val, TRUE);
+				$str .= $val['before_label'].$this->create_label($val, TRUE).$val['after_label'];
 				$str .= "</span>";
 				$str .= "<span".$this->_open_field_attrs($val).">";
 				$str .= $this->create_field($val, FALSE);
@@ -667,7 +675,7 @@ class Form_builder {
 			$str .= "</div></div>\n";
 		}
 		
-		if ($this->has_required AND $this->show_required)
+		if ($this->has_required AND ($this->show_required AND strtolower($this->show_required) != 'top'))
 		{
 			$str .= "<div class=\"required\">";
 			$str .= str_replace('{required_indicator}', $this->required_indicator, $this->required_text);
@@ -693,7 +701,7 @@ class Form_builder {
 	{
 		if (!empty($fields)) $this->set_fields($fields);
 
-		// reoarder
+		// reorder
 		$this->set_field_order();
 		
 		// pre process field values
@@ -713,7 +721,8 @@ class Form_builder {
 		}
 
 		$colspan = ($this->label_layout == 'top') ? '1' : '2';
-		$first = reset($this->_fields);
+
+		$first = $this->_find_first_renderable_field();
 
 		$is_fieldset_first = FALSE;
 		if ($first['type'] != 'fieldset')
@@ -724,6 +733,7 @@ class Form_builder {
 		{
 			$is_fieldset_first = TRUE;
 		}
+
 
 		$fieldset_on = FALSE;
 		foreach($this->_fields as $key => $val)
@@ -799,7 +809,7 @@ class Form_builder {
 					if ($this->label_layout != 'top')
 					{
 						$str .= $this->create_label($val, TRUE);
-						$str .= "</td>\n\t<td".$this->_open_field_attrs($val).">".$this->_open_field_attrs($val).$val['custom']."</td>\n</tr>\n";
+						$str .= "</td>\n\t<td".$this->_open_field_attrs($val).">".$val['custom']."</td>\n</tr>\n";
 					}
 					else
 					{
@@ -821,11 +831,19 @@ class Form_builder {
 			{
 				$str .= "<tr".$this->_open_row_attrs($val);
 				$str .= ">\n\t<td class=\"label\">";
-				$display_value = (is_array($val['value'])) ? print_r($val['value'], TRUE) : $val['value'];
+				if (isset($val['displayonly']) AND !is_bool($val['displayonly']))
+				{
+					$display_value = $val['displayonly'];
+				}
+				else
+				{
+					$display_value = (is_array($val['value'])) ? print_r($val['value'], TRUE) : $val['value'];	
+				}
+				
 				if ($this->label_layout != 'top')
 				{
 					$str .= $val['before_label'].$this->create_label($val, FALSE).$val['after_label'];
-					$str .= "</td>\n\t<td".$this->_open_field_attrs($val).">".$val['before_html'].$display_value.$val['after_html']."\n".$this->create_hidden($val)."</td>\n</tr>\n";
+					$str .= "</td>\n\t<td".$this->_open_field_attrs($val)."><span class=\"displayonly noclone\">".$val['before_html'].$display_value.$val['after_html']."\n".$this->create_hidden($val)."</span></td>\n</tr>\n";
 				}
 				else
 				{
@@ -893,7 +911,7 @@ class Form_builder {
 			$str .= "</div></td>\n</tr>\n";
 		}
 
-		if ($this->has_required AND $this->show_required)
+		if ($this->has_required AND ($this->show_required AND strtolower($this->show_required) != 'top'))
 		{
 			$str .= "<tr>\n\t<td colspan=\"".$colspan."\" class=\"required\">";
 			$str .= str_replace('{required_indicator}', $this->required_indicator, $this->required_text);
@@ -922,7 +940,7 @@ class Form_builder {
 	{
 		if (!empty($fields)) $this->set_fields($fields);
 
-		// reoarder
+		// reorder
 		$this->set_field_order();
 		
 		// pre process field values
@@ -987,9 +1005,31 @@ class Form_builder {
 	// --------------------------------------------------------------------
 
 	/**
+	 * Finds the first field that is not hidden and renderable
+	 * 
+	 * @access	protected
+	 * @return	array
+	 */
+	protected function _find_first_renderable_field()
+	{
+		foreach($this->_fields as $key => $field)
+		{
+			$invalid_types = array('hidden');
+			if ( ! in_array($field['type'], $invalid_types) AND ! in_array($key, $this->hidden))
+			{
+				return $field;
+			}
+		}
+		return reset($this->_fields);
+	}
+
+
+	// --------------------------------------------------------------------
+
+	/**
 	 * Creates the opening div element that contains the form fields
 	 * 
-	 * @access	public
+	 * @access	protected
 	 * @return	string
 	 */
 	protected function _open_div()
@@ -1004,13 +1044,17 @@ class Form_builder {
 	/**
 	 * Creates the opening table element
 	 * 
-	 * @access	public
+	 * @access	protected
 	 * @return	string
 	 */
 	protected function _open_table()
 	{
 		$str = '';
 		$str .= "<table>\n";
+		$str .= "<colgroup>\n";
+		$str .= "<col class=\"label_column\">\n";
+		$str .= "<col class=\"field_column\">\n";
+		$str .= "</colgroup>\n";
 		$str .= "<tbody>\n";
 		return $str;
 	}
@@ -1020,7 +1064,7 @@ class Form_builder {
 	/**
 	 * Creates the closing element
 	 * 
-	 * @access	public
+	 * @access	protected
 	 * @return	string
 	 */
 	protected function _close_div()
@@ -1035,7 +1079,7 @@ class Form_builder {
 	/**
 	 * Creates the closing table elements
 	 * 
-	 * @access	public
+	 * @access	protected
 	 * @return	string
 	 */
 	protected function _close_table()
@@ -1051,7 +1095,7 @@ class Form_builder {
 	/**
 	 * Creates the opening row TR or div with attrs
 	 * 
-	 * @access	public
+	 * @access	protected
 	 * @param	array fields parameters
 	 * @return	string
 	 */
@@ -1078,7 +1122,7 @@ class Form_builder {
 	/**
 	 * Creates the opening field td.value or div.value with attrs
 	 * 
-	 * @access	public
+	 * @access	protected
 	 * @param	array fields parameters
 	 * @return	string
 	 */
@@ -1101,9 +1145,9 @@ class Form_builder {
 	/**
 	 * Outputs the actions for the form
 	 * 
-	 * @access	public
+	 * @access	protected
 	 * @param	string	
-	 * @return	void
+	 * @return	string
 	 */
 	protected function _render_actions()
 	{
@@ -1168,9 +1212,9 @@ class Form_builder {
 	/**
 	 * Outputs the last part of the form rendering for both a table and div
 	 * 
-	 * @access	public
+	 * @access	protected
 	 * @param	string	
-	 * @return	void
+	 * @return	string
 	 */
 	protected function _close_form($str)
 	{
@@ -1227,7 +1271,7 @@ class Form_builder {
 	/**
 	 * Normalize the fields so that the other methods can expect certain field attributes
 	 * 
-	 * @access	public
+	 * @access	protected
 	 * @param	array fields values... will overwrite anything done with the set_fields method previously
 	 * @return	array
 	 */
@@ -1242,7 +1286,7 @@ class Form_builder {
 			'type' => '', // the type attribute of the field (e.g. text, select, password, etc.)
 			'default' => '', // the default value of the field
 			'max_length' => 0, // the maxlength parameter to associate with the field
-			'comment' => '', // a comment to assicate with the field's label'
+			'comment' => '', // a comment to associate with the field's label
 			'label' => '', // the label to associate with the field
 			'before_label' => '', // for HTML before the label
 			'after_label' => '', // for HTML after the label
@@ -1267,8 +1311,9 @@ class Form_builder {
 			'represents' => '', // specifies what other types of fields that this field should represent
 			'ignore_representative' => FALSE, // ignores any representative
 			'data' => array(), // data attributes
-			'attributes' => '', // a generic string value of attributes for the form field (e.g. 'class="myclass"'
-			'__DEFAULTS__' => TRUE // set so that we no that the array has been processed and we can check it so it won't process it again'
+			'title' => NULL, // the title attribute
+			'attributes' => '', // a generic string value of attributes for the form field (e.g. 'class="myclass"')
+			'__DEFAULTS__' => TRUE // set so that we no that the array has been processed and we can check it so it won't process it again
 		);
 		
 		$params = array_merge($defaults, $val);
@@ -1457,7 +1502,7 @@ class Form_builder {
 	/**
 	 * Renders the custom field
 	 * 
-	 * @access	public
+	 * @access	protected
 	 * @param	array fields values... will overwrite anything done with the set_fields method previously
 	 * @return	array
 	 */
@@ -1521,7 +1566,7 @@ class Form_builder {
 	/**
 	 * Checks to see if the array to initialize a field is normalized or not
 	 *
-	 * @access	public
+	 * @access	protected
 	 * @param	array fields parameters
 	 * @return	string
 	 */
@@ -1539,7 +1584,7 @@ class Form_builder {
 	 * 
 	 * @access	public
 	 * @param	array fields parameters
-	 * @param	boolean shoud the normalization be ran again?
+	 * @param	boolean should the normalization be ran again?
 	 * @return	string
 	 */
 	public function create_field($params, $normalize = TRUE)
@@ -1558,7 +1603,7 @@ class Form_builder {
 			{
 				$matched = FALSE;
 				
-				// if the represntative is an associative array with keys being parameters to match (e.g. type and name), then we loop through those parameters to find a match
+				// if the representative is an associative array with keys being parameters to match (e.g. type and name), then we loop through those parameters to find a match
 				if (is_array($val) AND is_string(key($val)))
 				{
 					foreach($val as $k => $v)
@@ -1602,7 +1647,7 @@ class Form_builder {
 					$str = '';
 					break;
 				case 'custom':
-					$func = (isset($params['func'])) ? $params['func'] : create_function('$params', 'return (isset($params["value"])) ? $params["value"] : "" ;');
+					$func = (isset($params['func'])) ? $params['func'] : function($params) { return (isset($params["value"])) ? $params["value"] : "" ; };
 					$str = $this->create_custom($func, $params);
 					break;
 				default : 
@@ -1640,7 +1685,7 @@ class Form_builder {
 	 * 
 	 * @access	public
 	 * @param	array fields parameters
-	 * @param	boolean shoud the label be displayed?
+	 * @param	boolean should the label be displayed?
 	 * @return	string
 	 */
 	public function create_label($params, $use_label = TRUE)
@@ -1674,6 +1719,7 @@ class Form_builder {
 			
 		}
 		$mode = (!empty($params['mode'])) ? $params['mode'] : $this->single_select_mode;
+
 		if (($params['type'] == 'enum' OR $params['type'] == 'multi' OR $params['type'] == 'array') AND ($mode == 'radios' OR ($mode == 'auto' AND count($params['options']) <= 2)))
 		{
 			$use_label = FALSE;
@@ -1681,7 +1727,11 @@ class Form_builder {
 
 		if ($use_label)
 		{
-			if (!empty($this->name_prefix))
+			if (!empty($params['id']))
+			{
+				$id_name = $params['id'];
+			}
+			elseif (!empty($this->name_prefix))
 			{
 				$name_parts = explode($this->name_prefix.'--', $params['name']);
 				$id_name = $this->name_prefix.'--'.end($name_parts); // ugly... bug needed for nested repeatable fields
@@ -1690,8 +1740,14 @@ class Form_builder {
 			{
 				$id_name = $params['orig_name'];
 			}
+			
+			$class = '';
+			if (isset($params['label_class']) AND !empty($params['label_class']))
+			{
+				$class = ' class="'.$params['label_class'].'"';
+			}
 			$styles = (isset($params['nowrap']) AND $params['nowrap'] === TRUE) ? ' style="white-space: nowrap;"' : '';
-			$str .= "<label for=\"".Form::create_id($id_name)."\" id=\"label_".Form::create_id($id_name)."\"".$styles.">";
+			$str .= "<label for=\"".Form::create_id($id_name)."\"".$class." id=\"label_".Form::create_id($id_name)."\"".$styles.">";
 		}
 		if ($this->tooltip_labels)
 		{
@@ -1707,7 +1763,8 @@ class Form_builder {
 			$this->has_required = TRUE;
 		}
 		if ($params['label_colons']) $str .= ':';
-		if ($use_label AND ($params['type'] != 'enum' AND $params['type'] != 'multi' AND $params['type'] != 'array'))
+
+		if ($use_label)
 		{
 			$str .= "</label>";
 		}
@@ -1750,7 +1807,6 @@ class Form_builder {
 			'maxlength' => $params['max_length'], 
 			'size' => $size, 
 			'readonly' => $params['readonly'], 
-			'disabled' => $params['disabled'],
 			'autocomplete' => (!empty($params['autocomplete']) ? $params['autocomplete'] : NULL),
 			'placeholder' => (!empty($params['placeholder']) ? $params['placeholder'] : NULL),
 			'required' => (!empty($params['required']) ? TRUE : NULL),
@@ -1759,6 +1815,7 @@ class Form_builder {
 			'tabindex' => $params['tabindex'],
 			'attributes' => $params['attributes'],
 			'disabled' => $params['disabled'],
+			'pattern' => (!empty($params['pattern']) ? $params['pattern'] : NULL),
 		);
 		
 		if (isset($params['attrs']))
@@ -1813,6 +1870,7 @@ class Form_builder {
 			'tabindex' => $params['tabindex'],
 			'attributes' => $params['attributes'],
 			'placeholder' => (!empty($params['placeholder']) ? $params['placeholder'] : NULL),
+			'autocomplete' => (!empty($params['autocomplete']) ? $params['autocomplete'] : NULL),
 		);
 		$name = $params['name'];
 		if (!empty($params['multiple']))
@@ -1821,7 +1879,7 @@ class Form_builder {
 			$name = $params['name'].'[]';
 		}
 		
-		if (!empty($params['options']) AND !empty($params['equalize_key_value']))
+		if (!empty($params['options']) AND !empty($params['equalize_key_value']) AND is_array($params['options']))
 		{
 			$options = array_values($params['options']);
 			$options = array_combine($options, $options);
@@ -1856,6 +1914,7 @@ class Form_builder {
 			'style' => $params['style'],
 			'tabindex' => $params['tabindex'],
 			'attributes' => $params['attributes'],
+			'required' => (!empty($params['required']) ? TRUE : NULL),
 		);
 		if ($params['checked'])
 		{
@@ -1895,6 +1954,7 @@ class Form_builder {
 			'style' => $params['style'],
 			'tabindex' => $params['tabindex'],
 			'attributes' => $params['attributes'],
+			'required' => (!empty($params['required']) ? TRUE : NULL),
 		);
 		if ($params['checked'])
 		{
@@ -1934,6 +1994,7 @@ class Form_builder {
 			'tabindex' => $params['tabindex'],
 			'attributes' => $params['attributes'],
 			'disabled' => $params['disabled'],
+			'maxlength' => (!empty($params['max_length']) ? $params['max_length'] : NULL),
 		);
 		return $this->form->textarea($params['name'], $params['value'], $attrs);
 	}
@@ -2102,7 +2163,7 @@ class Form_builder {
 	// --------------------------------------------------------------------
 
 	/**
-	 * Creates the multi select input for the form (this is overwritten by the Fuel_custom_fields to give more functionaltity)
+	 * Creates the multi select input for the form (this is overwritten by the Fuel_custom_fields to give more functionality)
 	 *
 	 * @access	public
 	 * @param	array fields parameters
@@ -2237,11 +2298,11 @@ class Form_builder {
 		{
 			if (isset($params['folder']))
 			{
-				$upload_path = $this->CI->encrypt->encode(assets_server_path($params['folder']));
+				$upload_path = $this->CI->encryption->encrypt(assets_server_path($params['folder']));
 			}
 			else
 			{
-				$upload_path = $this->CI->encrypt->encode($params['upload_path']);
+				$upload_path = $this->CI->encryption->encrypt($params['upload_path']);
 			}
 			$file .= $this->form->hidden($params['name'].'_upload_path', $upload_path, 'class="noclear"');
 		}
@@ -2369,7 +2430,7 @@ class Form_builder {
 			$hour_format = ($params['ampm']) ? 'g' : 'G';
 			$time_params['value'] = date($hour_format, strtotime($params['value']));
 		}
-		$time_params['size'] = 2;
+		$time_params['size'] = 3;
 		$time_params['maxlength'] = 2;
 		$field_name = (empty($params['is_datetime'])) ? $params[$key] : $params[$key].'_hour';
 		$time_params['name'] = str_replace($params[$key], $field_name, $params['orig_name']);
@@ -2414,15 +2475,52 @@ class Form_builder {
 
 		$process_key = $params[$key];
 
-		// create post processer to recreate date value
-		$func_str = '
-			if (is_array($value))
-			{
-				foreach($value as $key => $val)
+		
+		// needed for post processing
+		if (!empty($_POST) AND !isset($_POST[$params['key']]))
+		{
+			$_POST[$time_params['name']] = '';
+		}
+
+		if (empty($params['is_datetime']))
+		{
+			// create post processer to recreate date value
+			$func = function($value) use ($process_key){
+				if (is_array($value))
 				{
-					$hr   = (isset($val["'.$process_key.'"]) AND (int)$val["'.$process_key.'"] > 0 AND (int)$val["'.$process_key.'"] < 24) ? $val["'.$process_key.'"] : "";
-					$min  = (isset($val["'.$process_key.'_min"]) AND is_numeric($val["'.$process_key.'_min"]))  ? $val["'.$process_key.'_min"] : "00";
-					$ampm = (isset($val["'.$process_key.'_am_pm"]) AND $hr AND $min) ? $val["'.$process_key.'_am_pm"] : "";
+					foreach($value as $key => $val)
+					{
+						$hr   = (isset($val[$process_key]) AND (int)$val[$process_key] > 0 AND (int)$val[$process_key] < 24) ? $val[$process_key] : "";
+						$min  = (isset($val[$process_key.'_min']) AND is_numeric($val[$process_key.'_min']))  ? $val[$process_key.'_min'] : "00";
+						$ampm = (isset($val[$process_key.'_am_pm']) AND $hr AND $min) ? $val[$process_key.'_am_pm'] : "";
+						if (!empty($ampm) AND !empty($hr) AND $hr > 12)
+						{
+							if ($hr > 24) 
+							{
+								$hr = "00";
+							}
+							else
+							{
+								$hr = (int) $hr - 12;
+								$ampm = "pm";
+							}
+						}
+
+						if (empty($hr))
+						{
+							$hr = "00";
+						}
+
+						$dateval = $hr.":".$min.$ampm;
+						$value[$key][$process_key] = date("H:i:s", strtotime($dateval));
+					}
+					return $value;
+				}
+				else
+				{
+					$hr    = (isset($_POST[$process_key]) AND (int)$_POST[$process_key] > 0 AND (int)$_POST[$process_key] < 24) ? $_POST[$process_key] : "";
+					$min   = (isset($_POST[$process_key.'_min']) AND is_numeric($_POST[$process_key.'_min']))  ? $_POST[$process_key.'_min'] : "00";
+					$ampm  = (isset($_POST[$process_key.'_am_pm']) AND $hr AND $min) ? $_POST[$process_key.'_am_pm'] : "";
 					if (!empty($ampm) AND !empty($hr) AND $hr > 12)
 					{
 						if ($hr > 24) 
@@ -2435,52 +2533,17 @@ class Form_builder {
 							$ampm = "pm";
 						}
 					}
-					if ($hr !== "")
-					{
-						$dateval = $hr.":".$min.$ampm;
-						$value[$key]["'.$process_key.'"] = date("H:i:s", strtotime($dateval));
-					}
-				}
-				return $value;
-			}
-			else
-			{
-				$hr    = (isset($_POST["'.$process_key.'"]) AND (int)$_POST["'.$process_key.'"] > 0 AND (int)$_POST["'.$process_key.'"] < 24) ? $_POST["'.$process_key.'"] : "";
-				$min   = (isset($_POST["'.$process_key.'_min"]) AND is_numeric($_POST["'.$process_key.'_min"]))  ? $_POST["'.$process_key.'_min"] : "00";
-				$ampm  = (isset($_POST["'.$process_key.'_am_pm"]) AND $hr AND $min) ? $_POST["'.$process_key.'_am_pm"] : "";
-				if (!empty($ampm) AND !empty($hr) AND $hr > 12)
-				{
-					if ($hr > 24) 
+
+					if (empty($hr))
 					{
 						$hr = "00";
 					}
-					else
-					{
-						$hr = (int) $hr - 12;
-						$ampm = "pm";
-					}
-				}
 
-				$dateval = "";
-				if ($hr !== "")
-				{
 					$dateval = $hr.":".$min.$ampm;
 					$dateval = date("H:i:s", strtotime($dateval));
+					return $dateval;
 				}
-
-				return $dateval;
-			}
-		';
-
-		// needed for post processing
-		if (!isset($_POST[$params['key']]))
-		{
-			$_POST[$time_params['name']] = '';
-		}
-
-		if (empty($params['is_datetime']))
-		{
-			$func = create_function('$value', $func_str);
+			};
 			$this->set_post_process($params['key'], $func);
 		}
 		return $str;
@@ -2519,27 +2582,26 @@ class Form_builder {
 
 		$process_key = (isset($params['subkey'])) ? $params['subkey'] : $params['key'];
 
-		$func_str = '
-				
-				if (is_array($value))
+		$func = function($value) use ($process_key) {
+			if (is_array($value))
 				{
 					foreach($value as $key => $val)
 					{
-						if (isset($val["'.$process_key.'"]))
+						if (isset($val[$process_key]))
 						{
 
-							$date = (!empty($val["'.$process_key.'"]) AND is_date_format($val["'.$process_key.'"])) ? current(explode(" ", $val["'.$process_key.'"])) : "";
-							$hr   = (!empty($val["'.$process_key.'_hour"]) AND  (int)$val["'.$process_key.'_hour"] > 0 AND (int)$val["'.$process_key.'_hour"] < 24) ? $val["'.$process_key.'_hour"] : "";
-							$min  = (!empty($val["'.$process_key.'_min"]) AND is_numeric($val["'.$process_key.'_min"]))  ? $val["'.$process_key.'_min"] : "00";
-							$ampm = (isset($val["'.$process_key.'_am_pm"]) AND $hr AND $min) ? $val["'.$process_key.'_am_pm"] : "";
+							$date = (!empty($val[$process_key]) AND is_date_format($val[$process_key])) ? current(explode(" ", $val[$process_key])) : "";
+							$hr   = (!empty($val[$process_key.'_hour']) AND  (int)$val[$process_key.'_hour'] > 0 AND (int)$val[$process_key.'_hour'] < 24) ? $val[$process_key.'_hour'] : "";
+							$min  = (!empty($val[$process_key.'_min']) AND is_numeric($val[$process_key.'_min']))  ? $val[$process_key.'_min'] : "00";
+							$ampm = (isset($val[$process_key.'_am_pm']) AND $hr AND $min) ? $val[$process_key.'_am_pm'] : "";
 							
 
-							if (is_string($val["'.$process_key.'"]))
+							if (is_string($val[$process_key]))
 							{
-								$date = (!empty($val["'.$process_key.'"]) AND is_date_format($val["'.$process_key.'"])) ? current(explode(" ", $val["'.$process_key.'"])) : "";
-								$hr   = (!empty($val["'.$process_key.'_hour"]) AND  (int)$val["'.$process_key.'_hour"] > 0 AND (int)$val["'.$process_key.'_hour"] < 24) ? $val["'.$process_key.'_hour"] : "";
-								$min  = (!empty($val["'.$process_key.'_min"]) AND is_numeric($val["'.$process_key.'_min"]))  ? $val["'.$process_key.'_min"] : "00";
-								$ampm = (isset($val["'.$process_key.'_am_pm"]) AND $hr AND $min) ? $val["'.$process_key.'_am_pm"] : "";
+								$date = (!empty($val[$process_key]) AND is_date_format($val[$process_key])) ? current(explode(" ", $val[$process_key])) : "";
+								$hr   = (!empty($val[$process_key.'_hour']) AND  (int)$val[$process_key.'_hour'] > 0 AND (int)$val[$process_key.'_hour'] < 24) ? $val[$process_key.'_hour'] : "";
+								$min  = (!empty($val[$process_key.'_min']) AND is_numeric($val[$process_key.'_min']))  ? $val[$process_key.'_min'] : "00";
+								$ampm = (isset($val[$process_key.'_am_pm']) AND $hr AND $min) ? $val[$process_key.'_am_pm'] : "";
 
 								if (!empty($ampm) AND !empty($hr) AND $hr > 12)
 								{
@@ -2554,22 +2616,22 @@ class Form_builder {
 									}
 								}
 
-								$dateval = current(explode(" ", $value[$key]["'.$process_key.'"]));
+								$dateval = current(explode(" ", $value[$key][$process_key]));
 								if ($date != "")
 								{
 									if (!empty($hr)) $dateval .= " ".$hr.":".$min.$ampm;
 								}
 								if (!empty($dateval))
 								{
-									$value[$key]["'.$process_key.'"] = $dateval;	
+									$value[$key][$process_key] = $dateval;	
 								}
 							}
-							else if (is_array($val["'.$process_key.'"]) AND isset($val["'.$process_key.'"]["'.$params['name'].'"]))
+							else if (is_array($val[$process_key]) AND isset($val[$process_key][$params['name']]))
 							{
-								$date = (!empty($val["'.$process_key.'"]["'.$params['name'].'"]) AND is_date_format($val["'.$process_key.'"]["'.$params['name'].'"])) ? current(explode(" ", $val["'.$process_key.'"]["'.$params['name'].'"])) : "";
-								$hr   = (isset($val["'.$process_key.'"]["'.$params['name'].'_hour"]) AND  (int)$val["'.$process_key.'"]["'.$params['name'].'_hour"] >= 0 AND (int)$val["'.$process_key.'"]["'.$params['name'].'_hour"] < 24) ? $val["'.$process_key.'"]["'.$params['name'].'_hour"] : "";
-								$min  = (!empty($val["'.$process_key.'"]["'.$params['name'].'_min"]) AND is_numeric($val["'.$process_key.'"]["'.$params['name'].'_min"]))  ? $val["'.$process_key.'"]["'.$params['name'].'_min"] : "00";
-								$ampm = (isset($val["'.$process_key.'"]["'.$params['name'].'_am_pm"]) AND $hr AND $min) ? $val["'.$process_key.'"]["'.$params['name'].'_am_pm"] : "";
+								$date = (!empty($val[$process_key][$params['name']]) AND is_date_format($val[$process_key][$params['name']])) ? current(explode(" ", $val[$process_key][$params['name']])) : "";
+								$hr   = (isset($val[$process_key][$params['name'].'_hour']) AND  (int)$val[$process_key][$params['name'].'_hour'] >= 0 AND (int)$val[$process_key][$params['name'].'_hour'] < 24) ? $val[$process_key][$params['name'].'_hour'] : "";
+								$min  = (!empty($val[$process_key][$params['name'].'_min']) AND is_numeric($val[$process_key][$params['name'].'_min']))  ? $val[$process_key][$params['name'].'_min'] : "00";
+								$ampm = (isset($val[$process_key][$params['name'].'_am_pm']) AND $hr AND $min) ? $val[$process_key][$params['name'].'_am_pm'] : "";
 
 								if (!empty($ampm) AND !empty($hr) AND $hr > 12)
 								{
@@ -2590,14 +2652,14 @@ class Form_builder {
 									$ampm = "am";
 								}
 
-								$dateval = current(explode(" ", $value[$key]["'.$process_key.'"]["'.$params['name'].'"]));
+								$dateval = current(explode(" ", $value[$key][$process_key][$params['name']]));
 								if ($date != "")
 								{
 									if ($hr !== "") $dateval .= " ".$hr.":".$min.$ampm;
 								}
 								if (!empty($dateval))
 								{
-									$value[$key]["'.$process_key.'"]["'.$params['name'].'"] = $dateval;	
+									$value[$key][$process_key][$params['name']] = $dateval;	
 								}
 							}
 						}
@@ -2607,10 +2669,10 @@ class Form_builder {
 				}
 				else
 				{
-					$date  = (!empty($_POST["'.$process_key.'"]) AND is_date_format($_POST["'.$process_key.'"])) ? current(explode(" ", $_POST["'.$process_key.'"])) : "";
-					$hr    = (isset($_POST["'.$process_key.'_hour"]) AND (int)$_POST["'.$process_key.'_hour"] >= 0 AND (int)$_POST["'.$process_key.'_hour"] < 24) ? $_POST["'.$process_key.'_hour"] : "";
-					$min   = (!empty($_POST["'.$process_key.'_min"]) AND is_numeric($_POST["'.$process_key.'_min"]))  ? $_POST["'.$process_key.'_min"] : "00";
-					$ampm  = (isset($_POST["'.$process_key.'_am_pm"]) AND $hr AND $min) ? $_POST["'.$process_key.'_am_pm"] : "";
+					$date  = (!empty($_POST[$process_key]) AND is_date_format($_POST[$process_key])) ? current(explode(" ", $_POST[$process_key])) : "";
+					$hr    = (isset($_POST[$process_key.'_hour']) AND (int)$_POST[$process_key.'_hour'] >= 0 AND (int)$_POST[$process_key.'_hour'] < 24) ? $_POST[$process_key.'_hour'] : "";
+					$min   = (!empty($_POST[$process_key.'_min']) AND is_numeric($_POST[$process_key.'_min']))  ? $_POST[$process_key.'_min'] : "00";
+					$ampm  = (isset($_POST[$process_key.'_am_pm']) AND $hr AND $min) ? $_POST[$process_key.'_am_pm'] : "";
 
 					if (!empty($ampm) AND !empty($hr) AND $hr > 12)
 					{
@@ -2646,9 +2708,8 @@ class Form_builder {
 
 					return $dateval;
 				}
-			';
 
-		$func = create_function('$value', $func_str);
+		};
 		$this->set_post_process($params['key'], $func);
 		return $str;
 	}
@@ -2680,8 +2741,8 @@ class Form_builder {
 			'readonly' => $params['readonly'], 
 			'disabled' => $params['disabled'],
 			'required' => (!empty($params['required']) ? TRUE : NULL),
-			'min' => (isset($params['min']) ? $params['min'] : '0'),
-			'max' => (isset($params['max']) ? $params['max'] : '10000'),
+			'min' => (isset($params['min']) ? $params['min'] : NULL),
+			'max' => (isset($params['max']) ? $params['max'] : NULL),
 			'step' => (isset($params['step']) ? $params['step'] : NULL),
 			'data' => $params['data'],
 			'style' => $params['style'],
@@ -2903,7 +2964,7 @@ class Form_builder {
 	public function create_readonly($params)
 	{
 		$params = $this->normalize_params($params);
-		$str = $params['value']."\n".$this->create_hidden($val);
+		$str = $params['value']."\n".$this->create_hidden($params);
 		return $str;
 	}
 	
@@ -3119,7 +3180,7 @@ class Form_builder {
 				if (is_array($custom_field['class']))
 				{
 					$module = key($custom_field['class']);
-					$library = strtolower(current($custom_field['class']));
+					$library = current($custom_field['class']);
 					$this->CI->load->module_library($module, $library);
 				}
 				else
@@ -3441,7 +3502,7 @@ class Form_builder {
 	 * Alters all the field post values that have post_process attribute specified
 	 *
 	 * @access	public
-	 * @return	void
+	 * @return	array
 	 */
 	public function post_process_field_values($posted = array(), $set_post = TRUE)
 	{
@@ -3530,7 +3591,7 @@ class Form_builder {
 		// shorthand if the function name is remove or clear, then we return an empty string
 		if ($func == 'remove' OR $func == 'clear')
 		{
-			$func = create_function('$value', 'return "";');
+			$func = function($value){ return ""; };
 		}
 		
 		return array('func' => $func, 'params' => $params);
@@ -3766,6 +3827,14 @@ class Form_builder {
 	 */
 	public function options_from_model($model, $params = array())
 	{
+		// can't think of a good reason to grab options when post processing 
+		// so will just return an empty array to speed things up on post processing
+		if ($this->is_post_processing)
+		{
+			return array();
+		}
+
+
 		if (is_array($model))
 		{
 			$val = current($model);
@@ -4049,6 +4118,10 @@ class Form_builder {
 		$out = '';
 		$to_add = array();
 
+		if (is_string($files))
+		{
+			$files = array($files);
+		}
 		foreach($files as $module => $asset)
 		{
 			if (is_string($asset))
@@ -4123,15 +4196,33 @@ class Form_builder {
 			}
 			elseif ($type == 'js')
 			{
+				// $out .= ';
+				// var file = files[n].split("?")[0];
+				// var script = document.createElement("script");
+				// script.src = file;
+				// script.async = false;
+				
+				// // var attachElement = document.getElementsByTagName("head");
+				// // if (!attachElement.length){
+				// // 	attachElement = document.getElementsByTagName("body");
+				// // }
+				// // attachElement[0].appendChild(script);
+
+				// // Strangely doesn\'t appear in the DOM... would like to know why... oh... well here we go:
+				// // http://stackoverflow.com/questions/610995/cant-append-script-element
+				// $("head").append(script);
+
+				// $.ajaxSetup({cache: currentCacheSetting});
+				// ';
+
 				$out .= ';
 				var file = files[n].split("?")[0];
 				var script = document.createElement("script");
 				script.src = file;
-
-				//document.getElementsByTagName("head")[0].appendChild(script);
-
-				// Strangely doesn\'t appear in the DOM... would like to know why
+				script.async = false;
+				
 				$("head").append(script);
+
 				$.ajaxSetup({cache: currentCacheSetting});
 				';
 			}
@@ -4216,7 +4307,7 @@ class Form_builder_field {
 	 *
 	 * @access	public
 	 * @param	array
-	 * @return	void
+	 * @return	string
 	 */
 	public function render($params = array())
 	{

@@ -11,6 +11,8 @@ class Migraatiot extends CI_Controller
         $this->load->model('migraatio_model');
         $vars = array();
         $vars['msg'] = $this->migraatio_model->migrate_tunnukset();
+                echo "Valmis";
+
         $this->fuel->pages->render('misc/showmessage', $vars);
     }
     
@@ -19,6 +21,8 @@ class Migraatiot extends CI_Controller
         $this->load->model('migraatio_model');
         $vars = array();
         $vars['msg'] = $this->migraatio_model->migrate_tiedotukset();
+                echo "Valmis";
+
         $this->fuel->pages->render('misc/showmessage', $vars);
     }
 }

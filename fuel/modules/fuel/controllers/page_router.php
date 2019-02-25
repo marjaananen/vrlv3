@@ -10,7 +10,12 @@ class Page_router extends CI_Controller {
 		parent::__construct();
 	}
 
-	public function _remap($method)
+	public function index()
+	{
+		$this->_remap();
+	}
+
+	public function _remap($method = NULL)
 	{
 		$this->location = uri_path(TRUE);
 

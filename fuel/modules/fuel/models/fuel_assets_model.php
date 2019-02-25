@@ -8,7 +8,7 @@
  *
  * @package		FUEL CMS
  * @author		David McReynolds @ Daylight Studio
- * @copyright	Copyright (c) 2015, Run for Daylight LLC.
+ * @copyright	Copyright (c) 2018, Daylight Studio LLC.
  * @license		http://docs.getfuelcms.com/general/license
  * @link		http://www.getfuelcms.com
  */
@@ -18,7 +18,7 @@
 /**
  * Extends CI_Model
  *
- * <strong>Fuel_assets_model</strong> is used for managing asset data with the file system which includes retrieving and deleting images, pdfs, etc.
+ * <strong>Fuel_assets_model</strong> is used for managing asset data with the file system which includes retrieving and deleting images, PDFs, etc.
  * 
  * @package		FUEL CMS
  * @subpackage	Models
@@ -52,12 +52,23 @@ class Fuel_assets_model extends CI_Model {
 		$CI =& get_instance();
 
 		$CI->load->library('validator');
-		$CI->load->helper('directory');
-		$CI->load->helper('file');
+		$CI->load->helper(array('directory', 'file', 'number'));
 		
 		$this->validator = new Validator();
 		$this->validator->register_to_global_errors = FALSE;
 		
+	}
+	
+	/**
+	 * Placeholder function (not used)
+	 *
+	 * @access	public
+	 * @param	array	Search filters
+	 * @return	string
+	 */	
+	public function table_name()
+	{
+		return '';
 	}
 	
 	// --------------------------------------------------------------------
@@ -88,12 +99,12 @@ class Fuel_assets_model extends CI_Model {
 	 *
 	 * @access	public
 	 * @param	int		limit
-	 * @param	string	offset
+	 * @param	int		offset
 	 * @param	string	column
 	 * @param	string	order
-	 * @return	array
+	 * @return	array|int
 	 */	
-	public function list_items($limit = null, $offset = 0, $col = 'name', $order = 'asc')
+	public function list_items($limit = null, $offset = 0, $col = 'name', $order = 'asc', $just_count = FALSE)
 	{
 		$CI =& get_instance();
 		$CI->load->helper('array');
@@ -119,12 +130,14 @@ class Fuel_assets_model extends CI_Model {
 		$exclude = $CI->fuel->config('assets_excluded_dirs');
 		$exclude[] = 'index.html';
 		$tmpfiles = directory_to_array($assets_path, TRUE, $exclude, FALSE);
-		
-		$files = get_dir_file_info($assets_path, FALSE, TRUE);
-
 		$cnt = count($tmpfiles);
+		if ($just_count)
+		{
+			return $cnt;
+		}
+
+		$files = get_dir_file_info($assets_path, FALSE, TRUE);
 		$return = array();
-		
 		$asset_type_path = WEB_PATH.$CI->config->item('assets_path').$asset_dir.'/';
 		
 		//for ($i = $offset; $i < $cnt - 1; $i++)
@@ -137,21 +150,21 @@ class Fuel_assets_model extends CI_Model {
 					(!empty($this->filters['name']) AND 
 					(stripos($files[$key]['name'], $this->filters['name']) !== FALSE || stripos($key, $this->filters['name']) !== FALSE)))
 				{
-
 					$file['id'] = uri_safe_encode(assets_server_to_web_path($files[$tmpfiles[$i]]['server_path'], TRUE));
-
+					
 					//$file['filename'] = $files[$key]['name'];
 					$file['name'] = $key;
-					$file['preview/kb'] = $files[$key]['size'];
+					$file['preview/kb'] = round($files[$key]['size'] / 1024, 2);
 					$file['link'] = NULL;
 					$file['last_updated'] = date('Y-m-d H:i:s', $files[$key]['date']);
 					$return[] = $file;
 				}
 			}
-			
 		}
 		
-		$return = array_sorter($return, $col, $order, TRUE);
+		$order = ($order == 'desc') ? SORT_DESC : SORT_ASC;
+		$return = array_orderby($return, $col, $order);
+		//$return = array_sorter($return, $col, $order, TRUE);
 		
 		// do a check for empty limit values to prevent issues found where an empty $limit value would return nothing in 5.16
 		$return = (empty($limit)) ? array_slice($return, $offset) : array_slice($return, $offset, $limit);
@@ -161,9 +174,8 @@ class Fuel_assets_model extends CI_Model {
 		{
 			if (is_image_file($return[$key]['name']))
 			{
-				$return[$key]['preview/kb'] = $return[$key]['preview/kb'].' kb <div class="img_crop"><a href="'.$asset_type_path.$return[$key]['name'].'" target="_blank"><img src="'.$asset_type_path.($return[$key]['name']).'?c='.time().'" border="0"></a></div>';
+				$return[$key]['preview/kb'] = $return[$key]['preview/kb'].' kB <div class="img_crop"><a href="'.$asset_type_path.$return[$key]['name'].'" target="_blank"><img src="'.$asset_type_path.($return[$key]['name']).'?c='.time().'" border="0"></a></div>';
 				$return[$key]['link'] = '<a href="'.$asset_type_path.$return[$key]['name'].'" target="_blank">'.$asset_dir.'/'.$return[$key]['name'].'</a>';
-				
 			}
 			else
 			{
@@ -173,7 +185,6 @@ class Fuel_assets_model extends CI_Model {
 		}
 		return $return;
 	}
-	
 
 	// --------------------------------------------------------------------
 
@@ -185,7 +196,7 @@ class Fuel_assets_model extends CI_Model {
 	 */	
 	public function list_items_total()
 	{
-		return count($this->list_items());
+		return $this->list_items(NULL, 0, 'name', 'asc', TRUE);
 	}
 
 	// --------------------------------------------------------------------
@@ -209,6 +220,11 @@ class Fuel_assets_model extends CI_Model {
 		
 		$asset_path = $assets_folder.$file;
 		$asset_path = str_replace('/', DIRECTORY_SEPARATOR, $asset_path); // for windows
+
+		// Causes issues in some environments like GoDaddy... was originally changed for the assets to potentially be in a parent folder 
+		// $doc_root = preg_replace("!${_SERVER['SCRIPT_NAME']}$!", '', $_SERVER['SCRIPT_FILENAME']);
+		// $asset_path = $doc_root.$file;
+
 		return get_file_info($asset_path);
 	}
 	
@@ -243,8 +259,7 @@ class Fuel_assets_model extends CI_Model {
 	public function record_count($dir = 'images')
 	{
 		$CI =& get_instance();
-		$assets_path = WEB_ROOT.$CI->config->item('assets_path').$dir.'/';
-		$files = dir_files($assets_path, false, false);
+		$files = $CI->fuel->assets->dir_files($dir, FALSE, FALSE);
 		return count($files);
 	}
 	
@@ -259,8 +274,6 @@ class Fuel_assets_model extends CI_Model {
 	 */	
 	public function delete($file)
 	{
-		$CI =& get_instance();
-
 		if (is_array($file))
 		{
 			$valid = TRUE;
@@ -299,11 +312,14 @@ class Fuel_assets_model extends CI_Model {
 		// cleanup beginning slashes
 		$assets_folder = WEB_ROOT.$CI->config->item('assets_path');
 		$file = trim(str_replace($assets_folder, '', $file), '/');
-		
+	
+		// Causes issues in some environments like GoDaddy... was originally changed for the assets to potentially be in a parent folder 		
+		// $doc_root = preg_replace("!${_SERVER['SCRIPT_NAME']}$!", '', $_SERVER['SCRIPT_FILENAME']);
+		// $filepath = $doc_root.$file;
+
 		// normalize file path
 		$filepath = $assets_folder.$file;
 		$parent_folder = dirname($filepath).'/';
-
 		if (file_exists($filepath))
 		{
 			$deleted = unlink($filepath);
@@ -338,6 +354,7 @@ class Fuel_assets_model extends CI_Model {
 			
 		}
 		$i++;
+
 		if ($max_depth == $i) $end = TRUE;
 		return $deleted;
 	}
@@ -405,7 +422,7 @@ class Fuel_assets_model extends CI_Model {
 		{
 			$fields['subfolder'] = array('label' => lang('form_label_subfolder'), 'comment' => lang('assets_comment_subfolder'));
 		}
-		$fields['overwrite'] = array('label' => lang('form_label_overwrite'), 'type' => 'checkbox', 'comment' => lang('assets_comment_overwrite'), 'checked' => true, 'value' => '1');
+		$fields['overwrite'] = array('label' => lang('form_label_overwrite'), 'type' => 'checkbox', 'comment' => lang('assets_comment_overwrite'), 'checked' => TRUE, 'value' => '1');
 		$fields['unzip'] = array('type' => 'checkbox', 'label' => lang('form_label_unzip'), 'comment' => lang('assets_comment_unzip'), 'value' => 1);
 
 		$fields[lang('assets_heading_image_specific')] = array('type' => 'fieldset', 'class' => 'tab');
@@ -416,10 +433,10 @@ class Fuel_assets_model extends CI_Model {
 		$fields['width'] = array('label' => lang('form_label_width'), 'comment' => lang('assets_comment_width'), 'size' => '3');
 		$fields['height'] = array('label' => lang('form_label_height'), 'comment' => lang('assets_comment_height'), 'size' => '3');
 		$fields['master_dim'] = array('type' => 'select', 'label' => lang('form_label_master_dim'), 'options' => array('auto' => 'auto', 'width' => 'width', 'height' => 'height'), 'comment' => lang('assets_comment_master_dim'));
-		$fields['uploaded_file_name'] = array('type' => 'hidden');
 		$fields['hide_options'] = array('type' => 'hidden');
 		$fields['hide_image_options'] = array('type' => 'hidden');
 		$fields['remove_subfolder'] = array('type' => 'hidden');
+		$fields['uploaded_file_name'] = array('type' => 'hidden');
 		return $fields;
 	}
 	
@@ -451,8 +468,7 @@ class Fuel_assets_model extends CI_Model {
 	 * Placeholder function (not used)
 	 *
 	 * @access	public
-	 * @param   array Posted values
-	 * @return	void
+	 * @return	boolean
 	 */
 	public function has_auto_increment()
 	{
@@ -464,7 +480,7 @@ class Fuel_assets_model extends CI_Model {
 	 *
 	 * @access	public
 	 * @param   array Posted values
-	 * @return	void
+	 * @return	array
 	 */
 	public function filters($values = array())
 	{
@@ -472,7 +488,7 @@ class Fuel_assets_model extends CI_Model {
 	}
 
 	/**
-	 * Displays the most recently uplloaded 
+	 * Displays the most recently uploaded
 	 *
 	 * @access	public
 	 * @param	array View variable data (optional)
@@ -489,7 +505,7 @@ class Fuel_assets_model extends CI_Model {
 			{
 				if (is_image_file($uploaded_image))
 				{
-					$img .= '<a href="'.$uploaded_image.'" target="_blank"><img src="'.$uploaded_image.'?c='.time().'" alt="" style="max-width: 100%;" /></a>';
+					$img .= '<a href="'.assets_path($uploaded_image).'" target="_blank"><img src="'.assets_path($uploaded_image).'?c='.time().'" alt="" style="max-width: 100%;" /></a>';
 				}
 			}
 
@@ -497,5 +513,41 @@ class Fuel_assets_model extends CI_Model {
 			return $img;
 		}
 		return '';
+	}
+
+	// --------------------------------------------------------------------
+	
+	/**
+	 * Returns the module object for this model
+	 *
+	 * @access	public
+	 * @return	object
+	 */	
+	public function get_module()
+	{
+		return $this->fuel->modules->get(strtolower(get_class($this)));
+	}
+
+	// --------------------------------------------------------------------
+	
+	/**
+	* Function to return the display name as defined by the display_field in MY_fuel_modules
+	* @param  array $values The values of the current record
+	* @return string
+	*/
+	public function display_name($values)
+	{
+		$module = $this->get_module();
+
+		$key = $module->info('display_field');
+
+		if(isset($values[$key]))
+		{
+			return (is_array($values[$key])) ? json_encode($values[$key]) : $values[$key];
+		}
+		else
+		{
+			return "";
+		}
 	}
 }

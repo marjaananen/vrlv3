@@ -8,7 +8,7 @@
  *
  * @package		FUEL CMS
  * @author		David McReynolds @ Daylight Studio
- * @copyright	Copyright (c) 2015, Run for Daylight LLC.
+ * @copyright	Copyright (c) 2018, Daylight Studio LLC.
  * @license		http://docs.getfuelcms.com/general/license
  * @link		http://www.getfuelcms.com
  */
@@ -55,7 +55,7 @@ class MY_Model extends CI_Model {
 	public $readonly = FALSE; // sets the model to readonly mode where you can't save or delete data
 	public $hidden_fields = array(); // fields to hide when creating a form
 	public $unique_fields = array(); // fields that are not IDs but are unique. Can also be an array of arrays for compound keys
-	public $linked_fields = array(); // fields that are linked meaning one value helps to determine another. Key is the field, value is a function name to transform it. (e.g. array('slug' => 'title'), or array('slug' => arry('name' => 'strtolower')));
+	public $linked_fields = array(); // fields that are linked meaning one value helps to determine another. Key is the field, value is a function name to transform it. (e.g. array('slug' => 'title'), or array('slug' => array('name' => 'strtolower')));
 	public $serialized_fields = array(); // fields that contain serialized data. This will automatically serialize before saving and unserialize data upon retrieving
 	public $default_serialization_method = 'json'; // the default serialization method. Options are 'json' and 'serialize'
 	public $boolean_fields = array(); // fields that are tinyint and should be treated as boolean
@@ -67,7 +67,11 @@ class MY_Model extends CI_Model {
 	public $custom_fields = array(); // an array of field names/types that map to a specific class
 	public $formatters = array(); // an array of helper formatter functions related to a specific field type (e.g. string, datetime, number), or name (e.g. title, content) that can augment field results
 
-	protected $db; // CI database object
+	/**
+	 * @var CI_DB_query_builder CI database query builder
+	 */
+	protected $db;
+
 	protected $table_name; // the table name to associate the model with
 	protected $key_field = 'id'; // usually the tables primary key(s)... can be an array if compound key
 	protected $normalized_save_data = NULL; // the saved data before it is cleaned
@@ -84,6 +88,7 @@ class MY_Model extends CI_Model {
 	protected $clear_related_on_save = 'AUTO'; // clears related records before saving
 	protected $_tables = array(); // an array of table names with the key being the alias and the value being the actual table
 	protected $_last_saved = NULL; // a reference to the last saved object / ID of record;
+	protected $_nested_errors = array(); // used for capturing errors when saving multiple records (an array of records) on a single save method call
 	
 
 	/**
@@ -245,7 +250,7 @@ class MY_Model extends CI_Model {
 	// --------------------------------------------------------------------
 	
 	/**
-	 * Gets the name of the model object. By default it will be the same as the short_name(FALSE, FALSE) if no "friendly_name" value is specfied on the model
+	 * Gets the name of the model object. By default it will be the same as the short_name(FALSE, FALSE) if no "friendly_name" value is specified on the model
 	 *
 	 <code>
 	echo $this->examples_model->friendly_name(TRUE); 
@@ -274,7 +279,7 @@ class MY_Model extends CI_Model {
 	// --------------------------------------------------------------------
 	
 	/**
-	 * Gets the singular name of the model object. By default it will be the same as the short_name(FALSE, TRUE) if no "singular_name" value is specfied on the model
+	 * Gets the singular name of the model object. By default it will be the same as the short_name(FALSE, TRUE) if no "singular_name" value is specified on the model
 	 *
 	 <code>
 	echo $this->examples_model->singular_name(TRUE); 
@@ -367,7 +372,7 @@ class MY_Model extends CI_Model {
 	 *
 	 * @access	public
 	 * @param	string	the table name (optional)
-	 * @return	string
+	 * @return	string|array|null
 	 */	
 	public function tables($table = NULL)
 	{
@@ -386,7 +391,6 @@ class MY_Model extends CI_Model {
 		{
 			return $this->_tables;
 		}
-		return NULL;
 	}
 
 	// --------------------------------------------------------------------
@@ -468,7 +472,7 @@ class MY_Model extends CI_Model {
 			$this->_common_query();
 		}
 		
-		if (empty($this->db->ar_select))
+		if (!$this->db->has_select())
 		{
 			$this->db->select($this->table_name.'.*'); // make select table specific
 		}
@@ -476,7 +480,7 @@ class MY_Model extends CI_Model {
 		//Get the data out of the database
 		$query = $this->db->get($this->table_name);
 		
-		if (empty($query)) $query = ($this->db->dbdriver == 'mysql') ? new MY_DB_mysql_result() : new MY_DB_mysqli_result();
+		if (empty($query)) $query = ($this->db->dbdriver == 'mysql') ? new MY_DB_mysql_result($this->db) : new MY_DB_mysqli_result($this->db);
 		
 		if ($this->return_method == 'query') 
 		{
@@ -590,7 +594,7 @@ class MY_Model extends CI_Model {
 	 *
 	 * @access	public
 	 * @param	string	the type of find to perform. Options are "key", "one", "options", "all" and find_"{your_method}". By default it will perform a find_all (optional)
-	 * @param	mixed	an array or string containg the where paramters of a query (optional)
+	 * @param	mixed	an array or string containing the where parameters of a query (optional)
 	 * @param	string	the order by of the query (optional)
 	 * @param	int		the number of records to limit in the results (optional)
 	 * @param	int		the offset value for the results (optional)
@@ -696,7 +700,7 @@ class MY_Model extends CI_Model {
 	</code>
 	 *
 	 * @access	public
-	 * @param	mixed	an array or string containg the where paramters of a query (optional)
+	 * @param	mixed	an array or string containing the where parameters of a query (optional)
 	 * @param	string	the order by of the query (optional)
 	 * @param	string	return type (object, array, query, auto) (optional)
 	 * @return	array
@@ -730,7 +734,7 @@ class MY_Model extends CI_Model {
 	</code>
 	 *
 	 * @access	public
-	 * @param	mixed	an array or string containg the where paramters of a query
+	 * @param	mixed	an array or string containing the where parameters of a query
 	 * @param	string	the order by of the query (optional)
 	 * @return	array
 	 */	
@@ -749,7 +753,7 @@ class MY_Model extends CI_Model {
 	</code>
 	 *
 	 * @access	public
-	 * @param	mixed	an array or string containg the where paramters of a query (optional)
+	 * @param	mixed	an array or string containing the where parameters of a query (optional)
 	 * @param	string	the order by of the query (optional)
 	 * @param	int		the number of records to limit in the results (optional)
 	 * @param	int		the offset value for the results (optional)
@@ -803,7 +807,7 @@ class MY_Model extends CI_Model {
 	</code>
 	 *
 	 * @access	public
-	 * @param	mixed	an array or string containg the where paramters of a query (optional)
+	 * @param	mixed	an array or string containing the where parameters of a query (optional)
 	 * @param	string	the order by of the query (optional)
 	 * @param	int		the number of records to limit in the results (optional)
 	 * @param	int		the offset value for the results (optional)
@@ -825,7 +829,7 @@ class MY_Model extends CI_Model {
 	 *
 	 * @access	public
 	 * @param	string	the column to use for an associative key array (optional)
-	 * @param	mixed	an array or string containg the where paramters of a query (optional)
+	 * @param	mixed	an array or string containing the where parameters of a query (optional)
 	 * @param	string	the order by of the query (optional)
 	 * @param	int		the number of records to limit in the results (optional)
 	 * @param	int		the offset value for the results (optional)
@@ -847,7 +851,7 @@ class MY_Model extends CI_Model {
 	 *
 	 * @access	public
 	 * @param	string	the column to use for an associative key array (optional)
-	 * @param	mixed	an array or string containg the where paramters of a query (optional)
+	 * @param	mixed	an array or string containing the where parameters of a query (optional)
 	 * @param	string	the order by of the query (optional)
 	 * @param	int		the number of records to limit in the results (optional)
 	 * @param	int		the offset value for the results (optional)
@@ -869,7 +873,7 @@ class MY_Model extends CI_Model {
 	 *
 	 * @access	public
 	 * @param	group	an array of keys to limit the search results to
-	 * @param	mixed	an array or string containg the where paramters of a query (optional)
+	 * @param	mixed	an array or string containing the where parameters of a query (optional)
 	 * @param	int		the number of records to limit in the results (optional)
 	 * @param	int		the offset value for the results (optional)
 	 * @param	string	return type (object, array, query, auto) (optional)
@@ -886,10 +890,6 @@ class MY_Model extends CI_Model {
 		// setup wherein for the group
 		$this->db->where_in($this->table_name.'.'.$this->key_field(), $group);
 
-		// must set protect identifiers to FALSE in order for order by to work
-		$_protect_identifiers = $this->db->_protect_identifiers;
-		$this->db->_protect_identifiers = FALSE;
-
 		// escape group
 		foreach($group as $key => $val)
 		{
@@ -899,10 +899,7 @@ class MY_Model extends CI_Model {
 		// remove any cached order by
 		$this->db->ar_cache_orderby = array();
 
-		$this->db->order_by('FIELD('.$this->table_name.'.'.$this->key_field().', '.implode(', ', $group).')');
-
-		// set it _protect_identifiers back to original value
-		$this->db->_protect_identifiers = $_protect_identifiers;
+		$this->db->order_by('FIELD('.$this->table_name.'.'.$this->key_field().', '.implode(', ', $group).')', '', FALSE);
 
 		// do a normal find all
 		$data = $this->find_all($where, NULL, $limit, $offset, $return_method, $assoc_key);
@@ -1117,7 +1114,7 @@ class MY_Model extends CI_Model {
 	 * @access	public
 	 * @param	string	the column to use for the value (optional)
 	 * @param	string	the column to use for the label (optional)
-	 * @param	mixed	an array or string containg the where paramters of a query (optional)
+	 * @param	mixed	an array or string containing the where parameters of a query (optional)
 	 * @param	mixed	the order by of the query. Defaults to TRUE which means it will sort by $val asc (optional)
 	 * @return	array
 	 */	
@@ -1189,7 +1186,7 @@ class MY_Model extends CI_Model {
 	</code>
 	 *
 	 * @access	public
-	 * @param	mixed	an array or string containg the where paramters of a query
+	 * @param	mixed	an array or string containing the where parameters of a query
 	 * @return	boolean
 	 */	
 	public function record_exists($where)
@@ -1306,14 +1303,7 @@ class MY_Model extends CI_Model {
 		{
 			$field = $fields[$key];
 
-			if ($field['type'] == 'datetime')
-			{
-				if (empty($values[$key]) OR (int)$values[$key] == 0)
-				{
-					$values[$key] = $this->default_date;
-				}
-			}
-			else if ($field['type'] == 'date')
+			if ($field['type'] == 'date' OR $field['type'] == 'datetime')
 			{
 				if (empty($values[$key]) OR (int)$values[$key] == 0) $values[$key] = $this->default_date;
 				if (!empty($values[$key]) AND !is_date_db_format($values[$key])) $values[$key] = english_date_to_db_format($values[$key]);
@@ -1362,7 +1352,7 @@ class MY_Model extends CI_Model {
 						// set it to an empty string an not a 0 so that it will work with the required validator
 						if (empty($values[$key]))
 						{
-							$values[$key] = '';
+							$values[$key] = NULL;
 						}
 
 					} 
@@ -1444,7 +1434,7 @@ class MY_Model extends CI_Model {
 	 *
 	 <code>
 	$where['published'] = 'yes';
-	echo $this->examples_model->record_count($where); // dislays the number of records
+	echo $this->examples_model->record_count($where); // displays the number of records
 	</code>
 	 *
 	 * @access	public
@@ -1503,8 +1493,15 @@ class MY_Model extends CI_Model {
 				if(!$this->save($rec, $validate, $ignore_on_insert, $clear_related))
 				{
 					$saved = FALSE;
+					$this->_nested_errors = $this->get_errors();
 				}
 			}
+			
+			if (!empty($this->_nested_errors))
+			{
+				$this->add_error($this->_nested_errors);
+			}
+
 			return $saved;
 		}
 		else
@@ -1876,16 +1873,18 @@ class MY_Model extends CI_Model {
 	 * @param	mixed	where condition
 	 * @return	boolean
 	 */	
-	public function update($values, $where)
+	public function update($values, $where = array())
 	{
 		$this->_check_readonly();
 		$values = $this->on_before_update($values);
 		$values = $this->serialize_field_values($values);
-		$this->db->where($where);
+		if (!empty($where))
+		{
+			$this->db->where($where);
+		}
 		$return = $this->db->update($this->table_name, $values);
 		$this->on_after_update($values);
 		return $return;
-		
 	}
 	
 	// --------------------------------------------------------------------
@@ -2288,7 +2287,7 @@ class MY_Model extends CI_Model {
 						{
 							foreach($r_val as $rv)
 							{
-								if (strpos($rv, '{') === 0)
+								if (is_string($rv) AND strpos($rv, '{') === 0)
 								{
 									$val_key = str_replace(array('{', '}'), '', $rv);
 									if (isset($values[$val_key])) $rule[3][$r_key] = $values[$val_key];
@@ -2297,7 +2296,7 @@ class MY_Model extends CI_Model {
 						}
 						else
 						{
-							if (strpos($r_val, '{') === 0)
+							if (is_string($r_val) AND strpos($r_val, '{') === 0)
 							{
 								$val_key = str_replace(array('{', '}'), '', $r_val);
 								if (isset($values[$val_key])) $rule[3][$r_key] = $values[$val_key];
@@ -2710,13 +2709,32 @@ class MY_Model extends CI_Model {
 	}
 	
 	// --------------------------------------------------------------------
+	
+	/**
+	 * Returns the table's comment
+	 *
+	 <code>
+	 $model->comment();
+	</code>
+	 *
+	 * @access	public
+	 * @return	boolean
+	 */	
+	public function comment()
+	{
+		$sql = "SELECT table_comment FROM INFORMATION_SCHEMA.TABLES WHERE table_schema='". $this->db->database ."' AND table_name='" . $this->table_name . "'";
+		$query = $this->db->query($sql);
+		return $query->row()->table_comment;
+	}
+
+	// --------------------------------------------------------------------
 
 	/**
 	 * Returns an array of information that can be used for building a form (e.g. Form_builder). 
 	 *
 	 * Somewhat similar to the table_info method with difference being that the returned array has information for creating a form.
 	 * The related parameter is used to conveniently map other model information with this form to create a many to many multi-select form element.
-	 * This method is usally used with the <a href="<?=user_guide_url('libraries/form_builder')?>">Form_builder</a> class.
+	 * This method is usually used with the <a href="<?=user_guide_url('libraries/form_builder')?>">Form_builder</a> class.
 	 *
 	 <code>
 	$form_info = $this->examples_model->form_fields(); 
@@ -2809,6 +2827,7 @@ class MY_Model extends CI_Model {
 			{
 				$where = NULL;
 				$order = TRUE;
+				$label = NULL;
 				$model = $this->load_model($val);
 				if (is_array($val))
 				{
@@ -2823,9 +2842,14 @@ class MY_Model extends CI_Model {
 						$order = $val['order'];	
 						unset($val['order']);
 					}
+					if (!empty($val['label']))
+					{
+						$label = $val['label'];	
+						unset($val['label']);
+					}
 				}
 				$fields[$key]['type'] = 'select';
-				$fields[$key]['options'] = $CI->$model->options_list(NULL, NULL, $where, $order);
+				$fields[$key]['options'] = $CI->$model->options_list(NULL, $label, $where, $order);
 				$fields[$key]['first_option'] = lang('label_select_one');
 				$fields[$key]['label'] = ucfirst(str_replace('_', ' ', $CI->$model->singular_name(FALSE)));
 				$fields[$key]['module'] = $CI->$model->short_name(TRUE, FALSE);
@@ -2868,6 +2892,7 @@ class MY_Model extends CI_Model {
 				$related_model = $this->load_related_model($rel_config);
 				$where = NULL;
 				$order = TRUE;
+				$label = NULL;
 				if (is_array($rel_config))
 				{
 					if (!empty($rel_config['where']))
@@ -2880,9 +2905,14 @@ class MY_Model extends CI_Model {
 					{
 						$order = $rel_config['order'];	
 					}
+
+					if (!empty($rel_config['label']))
+					{
+						$label = $val['label'];
+					}
 				}
-				$related_options = $CI->$related_model->options_list(NULL, NULL, $where, $order);
-				$related_vals = ( ! empty($values['id'])) ? $this->get_related_keys($related_field, $values, $related_model, 'has_many', $rel_config) : array();
+				$related_options = $CI->$related_model->options_list(NULL, $label, $where, $order);
+				$related_vals = ( ! empty($values[$this->key_field])) ? $this->get_related_keys($related_field, $values, $related_model, 'has_many', $rel_config) : array();
 				$fields[$related_field] = array('label' => humanize($related_field), 'type' => 'multi', 'options' => $related_options, 'value' => $related_vals, 'mode' => 'multi', 'module' => $CI->$related_model->short_name(TRUE));
 			}
 		}
@@ -2893,6 +2923,7 @@ class MY_Model extends CI_Model {
 			{
 				$where = NULL;
 				$order = TRUE;
+				$label = NULL;
 				if (is_array($rel_config))
 				{
 					if (!empty($rel_config['where']))
@@ -2905,10 +2936,15 @@ class MY_Model extends CI_Model {
 					{
 						$order = $rel_config['order'];	
 					}
+
+					if (!empty($rel_config['label']))
+					{
+						$label = $val['label'];
+					}
 				}
 				$related_model = $this->load_related_model($rel_config);
-				$related_options = $CI->$related_model->options_list(NULL, NULL, $where, $order);
-				$related_vals = ( ! empty($values['id'])) ? $this->get_related_keys($related_field, $values, $related_model, 'belongs_to', $rel_config, $related_field) : array();
+				$related_options = $CI->$related_model->options_list(NULL, $label, $where, $order);
+				$related_vals = ( ! empty($values[$this->key_field])) ? $this->get_related_keys($related_field, $values, $related_model, 'belongs_to', $rel_config) : array();
 				$fields[$related_field] = array('label' => lang('label_belongs_to').'<br />' . humanize($related_field), 'type' => 'multi', 'options' => $related_options, 'value' => $related_vals, 'mode' => 'multi', 'module' => $CI->$related_model->short_name(TRUE));
 			}
 		}
@@ -3168,7 +3204,7 @@ class MY_Model extends CI_Model {
 	// --------------------------------------------------------------------
 	
 	/**
-	 * Normailzes the data passed to it so that it becomes an array (used by the normalize_save_values)
+	 * Normalizes the data passed to it so that it becomes an array (used by the normalize_save_values)
 	 *
 	 <code>
 	$record = $this->examples_model->create(); 
@@ -3340,7 +3376,7 @@ class MY_Model extends CI_Model {
 					// remove pre-existing relationships
 					if (!empty($fields['foreign_table']))
 					{
-						$del_where = array($fields['candidate_table'] => $CI->$related_models[$related_field]->table_name, $fields['foreign_table'] => $this->table_name, $fields['foreign_key'] => $id);
+						$del_where = array($fields['candidate_table'] => $CI->{$related_models[$related_field]}->table_name, $fields['foreign_table'] => $this->table_name, $fields['foreign_key'] => $id);
 					}
 					else
 					{
@@ -3359,6 +3395,7 @@ class MY_Model extends CI_Model {
 					$fields = $rel_fields[$related_field];
 
 					$related_model = $related_models[$related_field];
+					$relationships_model = $this->load_model($fields['relationships_model']);
 					
 					// create relationships
 					foreach ($this->normalized_save_data[$related_field] as $candidate_id)
@@ -4224,9 +4261,16 @@ class MY_Model extends CI_Model {
 			{
 				$id = $where->$id_field;
 			}
-			else if (is_array($where) AND isset($where[$id_field]))
+			else if (is_array($where))
 			{
-				$id = $where[$id_field];
+				if (isset($where[$id_field]))
+				{
+					$id = $where[$id_field];	
+				}
+				elseif(isset($where[$this->table_name().'.'.$id_field]))
+				{
+					$id = $where[$this->table_name().'.'.$id_field];
+				}
 			}
 			else if (!empty($id) AND is_int($id))
 			{
@@ -4272,7 +4316,7 @@ class MY_Model extends CI_Model {
 				{
 					foreach($values as $key => $val)
 					{
-						if (is_string($val))
+						if (is_string($val) OR is_numeric($val))
 						{
 							$str = str_replace('{'.$key.'}', $val, $str);
 						}	
@@ -4297,7 +4341,7 @@ class MY_Model extends CI_Model {
 					{
 						foreach($values as $k => $v)
 						{
-							if (is_string($v))
+							if ((is_string($val) AND is_string($v)) OR is_numeric($val))
 							{
 								$return[$key] = str_replace('{'.$k.'}', $v, $val);
 							}	
@@ -4352,19 +4396,25 @@ class MY_Model extends CI_Model {
 		$find_where = substr($name, 8);
 
 		$find_and_or = preg_split("/_by_|(_and_)|(_or_)/", $find_where, -1, PREG_SPLIT_DELIM_CAPTURE);
-		if (!empty($find_and_or) AND strncmp($name, 'find', 4) == 0)
+		$find_and_or_cleaned = array_values(array_filter($find_and_or));
+		if (!empty($find_and_or_cleaned) AND strncmp($name, 'find', 4) == 0)
 		{
 			$arg_index = 0;
-			foreach($find_and_or as $key => $find)
+			foreach($find_and_or_cleaned as $key => $find)
 			{
-				if (empty($find) OR $find == '_and_')
+				if ($arg_index == 0)
 				{
-					$this->db->where(array($find_and_or[$key + 1] => $args[$arg_index]));
+					$this->db->where(array($find_and_or_cleaned[0] => $args[0]));
+					$arg_index++;
+				}
+				elseif ($find == '_and_')
+				{
+					$this->db->where(array($find_and_or_cleaned[$key + 1] => $args[$arg_index]));
 					$arg_index++;
 				}
 				else if ($find == '_or_')
 				{
-					$this->db->or_where(array($find_and_or[$key + 1] => $args[$arg_index]));
+					$this->db->or_where(array($find_and_or_cleaned[$key + 1] => $args[$arg_index]));
 					$arg_index++;
 				}
 			}
@@ -4382,7 +4432,7 @@ class MY_Model extends CI_Model {
 			}
 
 			$other_args = array_slice($args, count($find_and_or) -1);
-			
+
 			if (!empty($other_args[0])) $this->db->order_by($other_args[0]);
 			if (!empty($limit)) $this->db->limit($limit);
 			if (!empty($other_args[1])) $this->db->offset($other_args[2]);
@@ -4405,7 +4455,7 @@ class MY_Model extends CI_Model {
  *
  * @package		FUEL CMS
  * @author		David McReynolds @ Daylight Studio
- * @copyright	Copyright (c) 2015, Run for Daylight LLC.
+ * @copyright	Copyright (c) 2018, Daylight Studio LLC.
  * @license		http://docs.getfuelcms.com/general/license
  * @link		http://www.getfuelcms.com
  */
@@ -4559,7 +4609,7 @@ class Data_set {
  *
  * @package		FUEL CMS
  * @author		David McReynolds @ Daylight Studio
- * @copyright	Copyright (c) 2015, Run for Daylight LLC.
+ * @copyright	Copyright (c) 2018, Daylight Studio LLC.
  * @license		http://docs.getfuelcms.com/general/license
  * @link		http://www.getfuelcms.com
  */
@@ -4571,7 +4621,7 @@ class Data_set {
  * 
  * The Data_record class is used to create custom record objects for a Table class (MY_Model). 
  * Data_record objects provides a greater level of flexibility with your models by allowing you to create not only
- * methods on your model to retreive records from your datasource, but also the ability to create
+ * methods on your model to retrieve records from your datasource, but also the ability to create
  * derived attributes and lazy load other objects with each record returned.
  * This class is <strong>optional</strong>. If it it doesn't exist, then the Table Class parent model
  * will use either a standard generic class or an array depending on the return method specified.
@@ -4643,7 +4693,7 @@ class Data_record {
 	// --------------------------------------------------------------------
 	
 	/**
-	 * This method returns either <dfn>TRUE</dfn> or <dfn>FALSE</dfn> depending on if the record class has been properly intialized.
+	 * This method returns either <dfn>TRUE</dfn> or <dfn>FALSE</dfn> depending on if the record class has been properly initialized.
 	 *
 	 <code>
 	$record = $this->examples_model->create(); 
@@ -4732,6 +4782,10 @@ class Data_record {
 					{
 						$this->$key = (float) $val;
 					}
+					else if ($field_info['type'] == 'double')
+					{
+						$this->$key = (double) $val;
+					}
 					else
 					{
 						$this->$key = (int) $val;
@@ -4757,7 +4811,7 @@ class Data_record {
 	</code>
 	 *
 	 * @access	public
-	 * @param	boolean Determins whether to include derived attributes (those starting with get_)
+	 * @param	boolean Determines whether to include derived attributes (those starting with get_)
 	 * @return	array
 	 */	
 	public function values($include_derived = FALSE)
@@ -5132,7 +5186,7 @@ class Data_record {
 	 */	
 	public function is_empty()
 	{
-		return empty($this->_fields) AND get_class_vars(__CLASS_);
+		return empty($this->_fields) AND get_class_vars(__CLASS__);
 	}
 
 	// --------------------------------------------------------------------
@@ -5473,9 +5527,18 @@ class Data_record {
 		}
 		else if (preg_match("/^has_(.*)/", $method, $found))
 		{
+			$foreign_keys = $this->_parent_model->foreign_keys;
+			
 			if (array_key_exists($found[1], $this->_fields))
 			{
-				return !empty($this->_fields[$found[1]]);
+				return !empty($this->_fields[$found[1]]) AND $this->_fields[$found[1]] != '0000-00-00' AND $this->_fields[$found[1]] != '0000-00-00 00:00:00';
+			}
+			// then look in foreign keys, has_many and belongs_to
+			else if (in_array($found[1].'_id', array_keys($foreign_keys)) OR $this->_is_relationship_property($found[1], 'has_many') OR $this->_is_relationship_property($found[1], 'belongs_to'))
+			{
+				$return_object = $this->$found[1];
+				$key_field = $this->_parent_model->key_field();
+				return (isset($return_object->$key_field));
 			}
 		}
 
@@ -5549,6 +5612,9 @@ class Data_record {
 	public function __get($var)
 	{
 		$output = NULL;
+
+		if (!isset($this->_parent_model)) return;
+		
 		$foreign_keys = $this->_parent_model->foreign_keys;
 		$custom_fields = $this->_parent_model->custom_fields;
 		
@@ -5803,7 +5869,7 @@ class Data_record {
 	public function __isset($key)
 	{
 		$obj_vars = get_object_vars($this);
-		return (isset($this->_fields[$key]) OR isset($obj_vars[$key]) OR method_exists($this, 'get_'.$key));
+		return ($this->__get($key) OR isset($this->_fields[$key]) OR isset($obj_vars[$key]) OR method_exists($this, 'get_'.$key));
 	}
 	
 	// --------------------------------------------------------------------
@@ -5844,7 +5910,7 @@ class Data_record {
  *
  * @package		FUEL CMS
  * @author		David McReynolds @ Daylight Studio
- * @copyright	Copyright (c) 2015, Run for Daylight LLC.
+ * @copyright	Copyright (c) 2018, Daylight Studio LLC.
  * @license		http://docs.getfuelcms.com/general/license
  * @link		http://www.getfuelcms.com
  */
@@ -5939,7 +6005,7 @@ class Data_record_field {
 	// --------------------------------------------------------------------
 	
 	/**
-	 * This method returns either <dfn>TRUE</dfn> or <dfn>FALSE</dfn> depending on if the field class has been properly intialized.
+	 * This method returns either <dfn>TRUE</dfn> or <dfn>FALSE</dfn> depending on if the field class has been properly initialized.
 	 *
 	 * @access	public
 	 * @return	boolean
@@ -5994,7 +6060,7 @@ class Data_record_field {
 	 * Placeholder - to execute after a magic method get
 	 *
 	 * @access	public
-	 * @param	string	output from get comand
+	 * @param	string	output from get command
 	 * @param	string	field name
 	 * @return	mixed
 	 */	

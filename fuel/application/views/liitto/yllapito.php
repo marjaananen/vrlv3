@@ -1,6 +1,6 @@
 <h1>Ylläpito & yhteydenotto</h1>
 
-
+<div class="alert alert-danger" role="alert">Tän sivuston sisältö on super muinainen. Kantakirjat tuskin tulee VRL:n alle.</div>
 <p>Virtuaalisen ratsastajainliiton johdossa on yhden tai kaksi henkilöä käsittävä ylläpito, jonka alaisuudessa toimii kourallinen osa-alueiden vastaavia. Kaikilla osa-alueiden vastaavilla on alaisuudessaan vaihteleva määrä työntekijöitä. Koko liittoa pyöritetään täysin vapaaehtoistoimin.</p>
 
 <p>Otathan aina ensisijaisesti yhteyttä tuen kautta <a href="http://virtuaalihevoset.net/tuki">http://virtuaalihevoset.net/tuki</a>, josta eri osa-alueiden työntekijät pääsevät käsittelemään kysymyksesi. Tuessa on useita eri kategorioita, joista voit valita sopivimman. Useamman asian ollessa kyseessä tee niistä erilliset ilmoitukset. Mikäli asiasi ei koske varsinaisesti tukiasioita, ota yhteyttä vastuuhenkilöihin, joiden vastuualueet ja sähköpostiosoitteet löydät alta.</p>

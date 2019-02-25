@@ -39,12 +39,12 @@ class Dashboard extends Fuel_base_controller {
 			$this->load->helper('simplepie');
 			$this->load->module_model(FUEL_FOLDER, 'fuel_pages_model');
 			$this->load->module_model(FUEL_FOLDER, 'fuel_logs_model');
-			$vars['recently_modifed_pages'] = $this->fuel_pages_model->find_all_array(array(), 'last_modified desc', 10);
+			$vars['recently_modified_pages'] = $this->fuel_pages_model->find_all_array(array(), 'last_modified desc', 10);
 			$vars['latest_activity'] = $this->fuel_logs_model->latest_activity(10);
 
 			if (file_exists(APPPATH.'/views/_docs/fuel'.EXT))
 			{
-				$vars['docs'] = $this->load->module_view(NULL, '_docs/fuel', $vars, TRUE);
+				$vars['docs'] = $this->load->module_view('app', '_docs/fuel', $vars, TRUE);
 			}
 
 			$feed = $this->fuel->config('dashboard_rss');

@@ -8,7 +8,7 @@
  *
  * @package		FUEL CMS
  * @author		David McReynolds @ Daylight Studio
- * @copyright	Copyright (c) 2015, Run for Daylight LLC.
+ * @copyright	Copyright (c) 2018, Daylight Studio LLC.
  * @license		http://docs.getfuelcms.com/general/license
  * @link		http://www.getfuelcms.com
  * @filesource
@@ -67,7 +67,7 @@ class Fuel_assets extends Fuel_base_library {
 	 * Also will set the values in the parameters array as properties of this object
 	 *
 	 * @access	public
-	 * @param	array	Array of initalization parameters  (optional)
+	 * @param	array	Array of initialization parameters  (optional)
 	 * @return	void
 	 */	
 	public function initialize($params = array())
@@ -110,7 +110,7 @@ class Fuel_assets extends Fuel_base_library {
 	{
 		$this->CI->load->library('upload');
 		$this->CI->load->library('image_lib');
-		$this->CI->load->library('encrypt');
+		$this->CI->load->library('encryption');
 
 		$valid = array( 'upload_path' => '',
 						'file_name' => '',
@@ -119,6 +119,7 @@ class Fuel_assets extends Fuel_base_library {
 						'encrypt_name' => FALSE,
 						'unzip' => FALSE,
 						'override_post_params' => FALSE,
+						'remove_spaces' => TRUE,
 						'posted' => $_POST,
 						
 						// image manipulation parameters must all be FALSE or NULL or else it will trigger the image_lib image processing
@@ -129,6 +130,7 @@ class Fuel_assets extends Fuel_base_library {
 						'width' => NULL, 
 						'height' => NULL, 
 						'resize_and_crop' => FALSE, 
+						'resize_method' => FALSE,
 						);
 
 		// used later
@@ -145,8 +147,8 @@ class Fuel_assets extends Fuel_base_library {
 		{
 			if ($file['error'] == 0)
 			{
-				$file_parts = explode('.', $file['name']);
-				$ext = end($file_parts);
+				$name_parts = explode('.', $file['name']);
+				$ext = end($name_parts);
 				$field_name = current(explode('___', $key)); // extract out multi file upload infor
 			
 				// loop through all the allowed file types that are accepted for the asset directory
@@ -191,7 +193,7 @@ class Fuel_assets extends Fuel_base_library {
 							{
 								if ($input_key == $field_name.'_upload_path')
 								{
-									$posted['upload_path'] = $this->CI->encrypt->decode($params['posted'][$input_key]);
+									$posted['upload_path'] = $this->CI->encryption->decrypt($params['posted'][$input_key]);
 									foreach($params['posted'] as $k => $p)
 									{
 										if (!is_array($p))
@@ -265,15 +267,18 @@ class Fuel_assets extends Fuel_base_library {
 				// set file name
 				if (!$posted_filename)
 				{
-					if ($has_empty_filename AND !empty($params[$field_name.'_file_name']) )
+					if ($has_empty_filename)
 					{
-						$params['file_name'] = $params[$field_name.'_file_name'];
-					}
-					else if ($has_empty_filename)
-					{
-						$file_name = pathinfo($file['name'], PATHINFO_FILENAME);
-						//$params['file_name'] = url_title($file_name, 'underscore', FALSE);
-						$params['file_name'] = $file_name;
+						if (!empty($params[$field_name.'_file_name']))
+						{
+							$params['file_name'] = $params[$field_name.'_file_name'];	
+						}
+						else if (empty($params['file_name']))
+						{
+							$file_name = pathinfo($file['name'], PATHINFO_FILENAME);
+							//$params['file_name'] = url_title($file_name, 'underscore', FALSE);
+							$params['file_name'] = $file_name;
+						}
 					}
 				}
 
@@ -283,10 +288,9 @@ class Fuel_assets extends Fuel_base_library {
 					$params['file_name'] = preg_replace('#(.*)\{file\}(.*)#U', '$1'.pathinfo($file['name'], PATHINFO_FILENAME).'$2', $params['file_name']);
 				}
 
-
-
-				// set overwrite
+				// explicitly set as booleans because the 1 value will not work
 				$params['overwrite'] = (is_true_val($params['overwrite']));
+				$params['encrypt_name'] = (is_true_val($params['encrypt_name']));
 
 				if (is_image_file($params['file_name']) AND !empty($params['xss_clean']))
 				{
@@ -296,7 +300,7 @@ class Fuel_assets extends Fuel_base_library {
 						$this->_add_error(lang('upload_invalid_filetype'));
 					}
 				}
-			
+				
 				// if errors, then we simply return FALSE at this point and don't continue any further processing'
 				if ($this->has_errors())
 				{
@@ -338,29 +342,32 @@ class Fuel_assets extends Fuel_base_library {
 						}
 					}
 				}
-				
 			}
+
+			// set maintain ratio if it is set to maintain_ratio
+			if ((!empty($params['resize_method']) AND $params['resize_method'] == 'maintain_ratio'))
+			{
+				$params['maintain_ratio'] = TRUE;
+			}
+			
+			$_params[$key] = $params;
 		}
 
-		// set maintain ratio if it is set to maintain_ratio
-		if ((!empty($params['resize_method']) AND $params['resize_method'] == 'maintain_ratio'))
-		{
-			$params['maintain_ratio'] = TRUE;
-		}
 
 		// now loop through the uploaded files to do any further image processing
-		foreach($this->_data as $file)
+		foreach($this->_data as $key => $file)
 		{
 			if (is_image_file($file['file_name']) AND 
-					(isset($params['create_thumb']) OR 
-					isset($params['maintain_ratio']) OR 
-					!empty($params['width']) OR 
-					!empty($params['height']) OR
-					!empty($params['master_dim']) OR
-					!empty($params['resize_and_crop']) OR
-					!empty($params['resize_method'])
+					(isset($_params[$key]['create_thumb']) OR 
+					isset($_params[$key]['maintain_ratio']) OR 
+					!empty($_params[$key]['width']) OR 
+					!empty($_params[$key]['height']) OR
+					!empty($_params[$key]['master_dim']) OR
+					!empty($_params[$key]['resize_and_crop']) OR
+					!empty($_params[$key]['resize_method'])
 					))
 			{
+				$params = $_params[$key];
 
 				$params['source_image']	= $file['full_path'];
 
@@ -409,11 +416,30 @@ class Fuel_assets extends Fuel_base_library {
 		
 		return TRUE;
 	}
+
+	// --------------------------------------------------------------------
+	
+	/**
+	 * Removes periods from the file name to mimic the CI Upload class and 
+	 * runs the security sanitize_filename on the passed string
+	 *
+	 * @access	public
+	 * @param	string	The file name to clean
+	 * @return	string
+	 */	
+	public function sanitize_filename($file_name)
+	{
+		$ext_pos = strrpos($file_name, '.');
+		$ext = substr($file_name, $ext_pos);
+		$filename = substr($file_name, 0, $ext_pos);
+		$file_name = str_replace('.', '_', $filename).$ext;
+		return $this->CI->security->sanitize_filename($file_name);
+	}
 	
 	// --------------------------------------------------------------------
 	
 	/**
-	 * Returns the <a href="http://ellislab.com/codeigniter/user-guide/libraries/file_uploading.html" target="_blank">uploaded file information</a>.
+	 * Returns the <a href="https://www.codeigniter.com/user_guide/libraries/file_uploading.html" target="_blank">uploaded file information</a>.
 	 *
 	 * @access	public
 	 * @param	string	The uploaded $_FILE key value (optional)
@@ -431,7 +457,7 @@ class Fuel_assets extends Fuel_base_library {
 	// --------------------------------------------------------------------
 	
 	/**
-	 * Normalizes the $_FILES array so that the <a href="http://ellislab.com/codeigniter/user-guide/libraries/file_uploading.html" target="_blank">CI File Upload Class</a> will work correctly
+	 * Normalizes the $_FILES array so that the <a href="https://www.codeigniter.com/user_guide/libraries/file_uploading.html" target="_blank">CI File Upload Class</a> will work correctly
 	 *
 	 * @access	public
 	 * @return	void
@@ -704,7 +730,7 @@ class Fuel_assets extends Fuel_base_library {
 		if (is_string($dir))
 		{
 			// if string is a directory path, then we read the directory... 
-			// may be too presumptious but it's convenient'
+			// may be too presumptuous but it's convenient
 			if (is_dir($dir))
 			{
 				$this->CI->zip->read_dir($dir);

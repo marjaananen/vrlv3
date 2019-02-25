@@ -24,10 +24,6 @@ class Yllapito_tallirekisteri extends CI_Controller
         
         $frontpage = $this->queue_manager->get_queue_frontpage();
         $vars['queue_status_html'] = "<h3>Tallijono</h3>" . $frontpage['html'];
-        
-        $this->queue_manager->set_db_table('vrlv3_tallirekisteri_kategoriat_jonossa');
-        $frontpage = $this->queue_manager->get_queue_frontpage();
-        $vars['queue_status_html'] .= "<h3>Kategoriajono</h3>" . $frontpage['html'];
             
         $this->fuel->pages->render('misc/jonokasittely', $vars);
     }
@@ -86,7 +82,7 @@ class Yllapito_tallirekisteri extends CI_Controller
             {
                 $this->session->set_flashdata('return_info', 'Anomuksen käsittely epäonnistui!');
                 $this->session->set_flashdata('return_status', 'danger');
-                redirect('/yllapito/tallirekisteri/tallijono/hyvaksy');
+                redirect('/yllapito/tallirekisteri/hyvaksy');
             }
             
             if($approved == 'hyvaksy')
@@ -95,7 +91,7 @@ class Yllapito_tallirekisteri extends CI_Controller
                 {
                     $this->session->set_flashdata('return_info', 'Anomuksen käsittely epäonnistui, koska annoit virheellisen tallilyhenteen kirjainosan!');
                     $this->session->set_flashdata('return_status', 'danger');
-                    redirect('/yllapito/tallirekisteri/tallijono/hyvaksy');
+                    redirect('/yllapito/tallirekisteri/hyvaksy');
                 }
                 
                 $approved = true;
@@ -138,7 +134,7 @@ class Yllapito_tallirekisteri extends CI_Controller
             }
         }
             
-        redirect('/yllapito/tallirekisteri/tallijono/hyvaksy');
+        redirect('/yllapito/tallirekisteri/hyvaksy');
     }
     
     function muokkaa_talli()

@@ -8,7 +8,7 @@
  *
  * @package		FUEL CMS
  * @author		David McReynolds @ Daylight Studio
- * @copyright	Copyright (c) 2015, Run for Daylight LLC.
+ * @copyright	Copyright (c) 2018, Daylight Studio LLC.
  * @license		http://docs.getfuelcms.com/general/license
  * @link		http://www.getfuelcms.com
  */
@@ -27,7 +27,7 @@
  * @link		http://docs.getfuelcms.com/models/fuel_pagevariables_model
  */
 
-require_once('base_module_model.php');
+require_once('Base_module_model.php');
 
 class Fuel_pagevariables_model extends Base_module_model {
 
@@ -198,7 +198,7 @@ class Fuel_pagevariables_model extends Base_module_model {
 		}
 		
 		$data = $this->find_all_array($where);
-		return $this->_process_casting($data);;
+		return $this->_process_casting($data);
 	}
 	
 	// --------------------------------------------------------------------

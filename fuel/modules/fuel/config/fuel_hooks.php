@@ -9,9 +9,9 @@
 |
 */
 
-$hook['pre_controller'][] = array(
+$hook['post_controller_constructor'][] = array(
 	'class' => 'Fuel_hooks',
-	'function' => 'pre_controller',
+	'function' => 'offline',
 	'filename' => 'Fuel_hooks.php',
 	'filepath' => 'hooks',
 	'params' => array(),
@@ -21,15 +21,6 @@ $hook['pre_controller'][] = array(
 $hook['post_controller_constructor'][] = array(
 	'class' => 'Fuel_hooks',
 	'function' => 'dev_password',
-	'filename' => 'Fuel_hooks.php',
-	'filepath' => 'hooks',
-	'params' => array(),
-	'module' => FUEL_FOLDER
-);
-
-$hook['post_controller_constructor'][] = array(
-	'class' => 'Fuel_hooks',
-	'function' => 'offline',
 	'filename' => 'Fuel_hooks.php',
 	'filepath' => 'hooks',
 	'params' => array(),

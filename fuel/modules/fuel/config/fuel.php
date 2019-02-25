@@ -8,7 +8,7 @@
  *
  * @package		FUEL CMS
  * @author		David McReynolds @ Daylight Studio
- * @copyright	Copyright (c) 2015, Run for Daylight LLC.
+ * @copyright	Copyright (c) 2018, Daylight Studio LLC.
  * @license		http://docs.getfuelcms.com/general/license
  * @link		http://www.getfuelcms.com
  * @filesource
@@ -96,7 +96,7 @@ $config['keyboard_shortcuts'] = array(
 $config['dashboards'] = array('fuel');
 
 // Dashboard rss
-$config['dashboard_rss'] = 'http://www.getfuelcms.com/blog/feed/rss';
+$config['dashboard_rss'] = 'https://www.getfuelcms.com/blog/feed/rss';
 
 // text editor settings  (options are markitup or ckeditor)
 // markitup: allows you to visualize the code in its raw format - not wysiwyg (http://markitup.jaysalvat.com/)
@@ -182,7 +182,7 @@ $config['assets_upload_max_height']  = '768';
 
 // Javascript files (mostly jquery plugins) to be included other then the controller js files
 $config['fuel_javascript'] = array(
-	/*
+	
 	'fuel' => array(
 	'jquery/plugins/jquery-ui-1.8.17.custom.min',
 	'jquery/plugins/jquery.easing',
@@ -215,8 +215,9 @@ $config['fuel_javascript'] = array(
 	'jquery/plugins/chrome_pushstack_fix.js',
 	'jqx/plugins/util.js',
 	'fuel/global')
-	*/
-	'fuel' => 'fuel/fuel.min'
+	
+	// This is actually slower it appears now???
+	//'fuel' => 'fuel/fuel.min'
 );
 
 // CSS other then the fuel.css file which automatically gets loaded
@@ -239,6 +240,21 @@ $config['set_upload_file_perms'] = FALSE;
 
 // Sets the site to offline mode. Uses "offline" view file to render page
 $config['offline'] = FALSE;
+
+// Sets the site password min length. An empty (e.g. NULL/0) value will not require a minimum length
+$config['password_min_length'] = NULL;
+
+// Sets the site password max length. An empty (e.g. NULL/0) value will not require a maximum length
+$config['password_max_length'] = NULL;
+
+// Sets specific patterns that the password must match (e.g. 'upper|lower|numbers|symbols')
+$config['password_pattern_match'] = NULL;
+
+// List of uri allowed to access when site switched to offline mode.
+// Eg.:
+// To allow "www.example.com/UAT"
+// $config['offline_allowed_uri'] = array('UAT');
+$config['offline_allowed_uri'] = array();
 
 // Restrict fuel to only certain ip addresses (can be string or an array of IP addresses)
 $config['restrict_to_remote_ip'] = array();
@@ -333,7 +349,7 @@ $config['page_cache_ttl'] = 0;
 // The name of the group the cache is associated with (so you can just remove the group)
 $config['page_cache_group'] = 'pages';
 
-// Maximum number of paramters that can be passed to the page. Used to cut down on queries to the db.
+// Maximum number of parameters that can be passed to the page. Used to cut down on queries to the db.
 // If it is an array, then it will loop through the array using the keys to match against a regular expression:
 // $config['max_page_params'] = array('about/news/' => 1);
 $config['max_page_params'] = 0;
@@ -406,6 +422,12 @@ $config['double_parse'] = FALSE;
 // The directory to put the parsed compiled files
 $config['parser_compile_dir'] = APPPATH.'cache/dwoo/compiled/';
 
+// The folder permissions to put the parsed compiled files
+$config['parser_compile_dir_perms'] = DIR_WRITE_MODE;
+
+// The file permissions for the parsed compiled files (Dwoo only)
+$config['parser_compile_file_perms'] = FILE_WRITE_MODE;
+
 // The delimiters used by the parsing engine
 $config['parser_delimiters'] = array(
 				'tag_comment'   => array('{#', '#}'), // Twig only
@@ -418,7 +440,7 @@ $config['parser_delimiters'] = array(
 $config['parser_allowed_functions'] = array(
 	'strip_tags', 'date', 
 	'detect_lang','lang',
-	'js', 'css', 'swf', 'img_path', 'css_path', 'js_path', 'swf_path', 'pdf_path', 'media_path', 'cache_path', 'captcha_path', 'assets_path', // assets specific
+	'js', 'css', 'swf', 'img_path', 'css_path', 'js_path', 'swf_path', 'pdf_path', 'media_path', 'cache_path', 'captcha_path', 'assets_path', 'docs_path', // assets specific
 	'fuel_block', 'fuel_model', 'fuel_nav', 'fuel_edit', 'fuel_set_var', 'fuel_var', 'fuel_var_append', 'fuel_form', 'fuel_page', // FUEL specific
 	'quote', 'safe_mailto', // HTML/URL specific
 	'session_flashdata', 'session_userdata', // Session specific
@@ -445,7 +467,7 @@ $config['generate'] = array(
 		'config/{module}.php',
 		'config/{module}_constants.php',
 		'config/{module}_routes.php',
-		'controllers/{module}_module.php',
+		'controllers/{Module}_module.php',
 		'helpers/{module}_helper.php',
 		'install/install.php',
 		'libraries/Fuel_{module}.php',
@@ -459,7 +481,7 @@ $config['generate'] = array(
 	),
 	'simple' => 'MY_fuel_modules.php',
 	'model'  => array(
-		'{model}_model.php',
+		'{Model_name}_model.php',
 		'sql/{table}.sql',
 	)
 );

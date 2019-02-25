@@ -39,8 +39,8 @@ if (typeof(window.fuel.fields) == 'undefined'){
 			region : '',
 			showButtonPanel : false,
 			showOn: 'button',
-		    buttonText: 'Click to show the calendar',
-		    buttonImageOnly: true
+			buttonText: 'Click to show the calendar',
+			buttonImageOnly: true
 		}
 
 		// first look for jqx variable
@@ -89,7 +89,7 @@ if (typeof(window.fuel.fields) == 'undefined'){
 			return comboOpts;
 		}
 		// set up supercomboselects
-		$('select[multiple]', context).not('.no_combo').each(function(i){
+		$('select[multiple]', context).not('.no_combo, .field_type_select2').each(function(i){
 			var comboOpts = comboOptions(this);
 			$(this).supercomboselect(comboOpts);
 		});
@@ -106,16 +106,24 @@ if (typeof(window.fuel.fields) == 'undefined'){
 		var module = fuel.getModule();
 		//var _previewPath = myMarkItUpSettings.previewParserPath;
 
-		var createMarkItUp = function(elem){
+		var createPreviewParams = function(elem){
 			var $elem = $(elem);
 			var q = 'module=' + escape(module) + '&field=' + escape($elem.attr('name'));
 			if ($elem.attr('data-preview')){
 				q += '&preview=' + escape($elem.attr('data-preview'));
 			}
+			return q;
+		}
+
+		var createMarkItUp = function(elem){
+			
+			var $elem = $(elem);
 
 			// add custom configs
 			var editorSet = $elem.data('editor_set');
+			
 			var config = fuel.fields.getElementData($elem.attr('name'), 'editor');
+			
 			if (!config || config.length == 0 || $elem.hasClass('ckeditor_applied')){
 				if ($elem.hasClass('wysiwyg') || $elem.hasClass('ckeditor_applied')){
 					config = myMarkItUpSettings.sets['default'];
@@ -124,7 +132,8 @@ if (typeof(window.fuel.fields) == 'undefined'){
 				}
 			}
 
-			config.previewParserPath = config.previewParserPath + '?' + q;
+			config.previewParserPath = config.previewParserPath + '?' + createPreviewParams(elem);
+
 			var config = myMarkItUpSettings.processConfig(config, editorSet);
 			$elem.not('.markItUpEditor').markItUp(config);
 			
@@ -158,20 +167,25 @@ if (typeof(window.fuel.fields) == 'undefined'){
 				return;
 			}
 
-			
+			// add this here instead to get around instanceReady delay
+			$(elem).addClass('ckeditor_applied');
+
 			// cleanup
 			if (CKEDITOR.instances[ckId]) {
 				CKEDITOR.remove(CKEDITOR.instances[ckId]);
 				//$('#cke_' + ckId).remove();
 				//CKEDITOR.instances[ckId].destroy();
 			}
-			
 
 			// add custom configs
 			var config = {
 				protectedSource: [/\{fuel_\w+\(.+\)\}/g, /<\?[\s\S]*?\?>/g]
 			};
 			config = $.extend(config, fuel.fields.getElementData($(elem).attr('name'), 'editor'));
+			config.previewParserPath = config.previewParserPath + '?' + createPreviewParams(elem);
+
+			// now set it back so that the preview will work
+			fuel.fields.setElementData($(elem).attr('name'), 'editor', config);
 
 			var hasCKEditorImagePlugin = (config.extraPlugins && config.extraPlugins.indexOf('fuelimage') != -1);
 			config.height = $(elem).height();
@@ -232,30 +246,32 @@ if (typeof(window.fuel.fields) == 'undefined'){
 				// process image paths
 				this.dataProcessor.htmlFilter.addRules( {
 					elements : {
-					    $ : function( element ) {
-
+						$ : function( element ) {
 							// // Output dimensions of images as width and height attributes on src
 							if ( element.name == 'img' && hasCKEditorImagePlugin) {
 								//var src = element.attributes['src'];
 								var src = element.attributes['data-cke-saved-src']; // v4.4 fix
-								var regex = "^" + lDelim + "img_path\\('?([^'|\"]+?)'?\\)" + rDelim;
-								img = src.replace(new RegExp(regex), function(match, contents, offset, s) {
-			   										return contents;
-		    								}
-										);
-								img = img.replace(jqx_config.assetsImgPath, '');
-								src = myMarkItUpSettings.parserLeftDelimiter() + "img_path('" + img + "')" + myMarkItUpSettings.parserRightDelimiter();
-								element.attributes.src = src;
-								element.attributes['data-cke-saved-src'] = src;
-					        }
-					    }
+								if (src.substr(0, 4) != 'http') {
+									var regex = "^" + lDelim + "img_path\\('?([^'|\"]+?)'?\\)" + rDelim;
+									img = src.replace(new RegExp(regex), function(match, contents, offset, s) {
+														return contents;
+												}
+											);
+									img = img.replace(jqx_config.assetsImgPath, '');
+									src = myMarkItUpSettings.parserLeftDelimiter() + "img_path('" + img + "')" + myMarkItUpSettings.parserRightDelimiter();
+									element.attributes.src = src;
+									element.attributes['data-cke-saved-src'] = src;
+								}
+							}
+						}
 					}
 				});
 				
 				$elem = $('#' + ckId);
 				
 				// so we can check
-				$elem.addClass('ckeditor_applied');
+				//$elem.addClass('ckeditor_applied');
+				
 				// need so the warning doesn't pop up if you duplicate a value
 				if ($.changeChecksaveValue){
 					//$.changeChecksaveValue('#' + ckId, editor.getData());
@@ -268,6 +284,8 @@ if (typeof(window.fuel.fields) == 'undefined'){
 				if ($elem.get(0).style.width){
 					$elem.after('<div style="width:' + $elem.get(0).style.width+ '"></div>');
 				}
+
+				createPreview(ckId);
 			})
 		
 			// translate image paths
@@ -288,6 +306,8 @@ if (typeof(window.fuel.fields) == 'undefined'){
 				$('#' + ckId).parent().append(sourceButton);
 
 				$('#' + ckId + '_viewsource').click(function(e){
+					var elem = $(e.currentTarget).closest('.field').find('textarea:first');
+					
 					$elem = $(elem);
 					ckInstance = CKEDITOR.instances[ckId];
 
@@ -336,9 +356,11 @@ if (typeof(window.fuel.fields) == 'undefined'){
 		var unTranslateImgPath = function(txt){
 			var regex = lDelim + "img_path\\('?([^'|\"]+?)'?\\)" + rDelim;
 			txt = txt.replace(new RegExp(regex, 'g'), function(match, contents, offset, s) {
-												contents = contents.replace(/'|"/, '');
-		   										return jqx_config.assetsImgPath + contents;
-	    								}
+												if (contents.substr(0, 4) != 'http') {
+													return jqx_config.assetsImgPath + contents;
+												}
+												return contents;
+										}
 									);
 			return txt;
 		}	
@@ -347,7 +369,6 @@ if (typeof(window.fuel.fields) == 'undefined'){
 		var createPreview = function(id){
 
 			var $textarea = $('#' + id);
-
 			if ($textarea.data('preview') !== undefined && $textarea.data('preview').length === 0){
 				return;
 			}
@@ -363,11 +384,11 @@ if (typeof(window.fuel.fields) == 'undefined'){
 					$('#' + id + '_preview').click(function(e){
 						e.preventDefault();
 						var val = (typeof CKEDITOR !== 'undefined' && CKEDITOR.instances[id] !== undefined && $textarea.css('visibility') !== 'visible') ? CKEDITOR.instances[id].getData() : $textarea.val();
-						var csrf = $('#csrf_test_name').val();
 
 						var csrf = $('#csrf_test_name').val() ? $('#csrf_test_name').val() : '';
 
 						var config = fuel.fields.getElementData($textarea.attr('name'), 'editor');
+						
 						if (!config.previewParserPath || config.previewParserPath == 'preview') config.previewParserPath = __FUEL_PATH__ + '/' + myMarkItUpSettings.sets['default'].previewParserPath;
 						if (!config.previewParserVar) config.previewParserVar = 'data'
 
@@ -407,6 +428,7 @@ if (typeof(window.fuel.fields) == 'undefined'){
 
 			} else {
 				createMarkItUp(this);
+				createPreview(ckId);
 			}
 			
 			// setup update of element on save just in case
@@ -415,7 +437,7 @@ if (typeof(window.fuel.fields) == 'undefined'){
 					CKEDITOR.instances[ckId].updateElement();
 				}
 			})
-			createPreview(ckId);
+			
 			
 			
 		});
@@ -437,6 +459,21 @@ if (typeof(window.fuel.fields) == 'undefined'){
 			$multiFile.MultiFile({ namePattern: '$name___$i'});
 		}, 500);
 
+		$('.asset_delete', context).on('click', function(e){
+			e.preventDefault();
+			if (confirm(fuel.lang('confirm_asset_remove'))){
+				var deleteId = $(this).attr('href');
+				$(deleteId).val('');
+				$(this).closest('.asset_upload_preview').remove();
+			}
+		});
+
+		$('.deletable a', context).on('mouseover', function(e){
+			$(this).parent().find('.asset_delete').show();
+		}).on('mouseout', function(e){
+			$(this).parent().find('.asset_delete').hide();
+		});
+
 		fuel.fields.asset_field(context);
 	}
 
@@ -446,10 +483,10 @@ if (typeof(window.fuel.fields) == 'undefined'){
 		var selectedAssetFolder = 'images';
 		var activeField = null;
 
-		var showAssetsSelect = function(){
+		var showAssetsSelect = function(params){
 			var winHeight = 450;
-			var url = jqx_config.fuelPath + '/assets/select/' + selectedAssetFolder + '/?selected=' + escape($('#' + activeField).val());
-			var html = '<iframe src="' + url +'" id="asset_inline_iframe" class="inline_iframe" frameborder="0" scrolling="no" style="border: none; height: ' + winHeight + 'px; width: 850px;"></iframe>';
+			var url = jqx_config.fuelPath + '/assets/select/' + selectedAssetFolder + '/?selected=' + escape($('#' + activeField).val()) + '&' + params;
+			var html = '<iframe src="' + url +'" id="asset_inline_iframe" class="inline_iframe" frameborder="0" scrolling="auto" style="border: none; height: ' + winHeight + 'px; width: 850px;"></iframe>';
 			$modal = fuel.modalWindow(html, 'inline_edit_modal', false);
 			
 			// // bind listener here because iframe gets removed on close so we can't grab the id value on close
@@ -499,6 +536,7 @@ if (typeof(window.fuel.fields) == 'undefined'){
 		
 		var replacePlaceholders = function(folder, context){
 
+			if (! folder) return '';
 			// now replace any placeholder values in the folder... required for new pages that may not have a value
 			var $inputs = $(context).closest('form').find('select, textarea')
 			.add('input').not('input[type="radio"], input[type="checkbox"], input[type="button"]')
@@ -510,27 +548,29 @@ if (typeof(window.fuel.fields) == 'undefined'){
 				if (id){
 					var idArr = id.split('--');
 					id = idArr[idArr.length -1];
-					replaceValues[id] = $(this).val();
-					var regex = new RegExp('\{' + id + '\}', 'g');
-					folder = folder.replace(regex, replaceValues[id]);
+					if (id){
+						replaceValues[id] = $(this).val();
+						var regex = new RegExp('\{' + id + '\}', 'g');
+						folder = folder.replace(regex, replaceValues[id]);
+					}
 				}
 			})
 			return folder;
 		}
 
 		var convertQueryStringToJSON = function(url) {            
-    		var pairs = url.split('&');
-    		var result = {};
+			var pairs = url.split('&');
+			var result = {};
 			pairs.forEach(function(pair) {
-        		pair = pair.split('=');
-        		result[pair[0]] = decodeURIComponent(pair[1] || '');
-    		});
-    		return result;
-    	}
+				pair = pair.split('=');
+				result[pair[0]] = decodeURIComponent(pair[1] || '');
+			});
+			return result;
+		}
 
 		var _this = this;
 		$('.asset_select', context).each(function(i){
-			if ($(this).parent().find('.asset_upload_button').length == 0){
+			if ($(this).closest('.field').find('.asset_select_button').length == 0){
 				var assetFolder = $(this).data('folder');
 				if ($(this).data('subfolder')){
 					assetFolder += '/' + $(this).data('subfolder');
@@ -555,7 +595,7 @@ if (typeof(window.fuel.fields) == 'undefined'){
 					default :
 						btnLabel = fuel.lang('btn_asset');
 				}
-				$(this).after('&nbsp;<a href="'+ jqx_config.fuelPath + '/assets/select/' + assetFolder + '" class="btn_field asset_select_button ' + assetFolder + '" data-folder="' + assetFolder + '">' + fuel.lang('btn_select') + ' ' + btnLabel + '</a>');
+				$(this).after('&nbsp;<a href="'+ jqx_config.fuelPath + '/assets/select/' + assetFolder + '" class="btn_field asset_select_button ' + assetFolder + '" data-folder="' + assetFolder + '" data-params="' + $(this).attr('data-params') + '">' + fuel.lang('btn_select') + ' ' + btnLabel + '</a>');
 			}
 		});
 
@@ -569,15 +609,20 @@ if (typeof(window.fuel.fields) == 'undefined'){
 				selectedAssetFolder = (assetTypeClasses.length > 0) ? assetTypeClasses[(assetTypeClasses.length - 1)] : 'images';
 			}
 
-			selectedAssetFolder = replacePlaceholders(selectedAssetFolder, context);
+			var params = $(this).attr('data-params');
+			var paramsJSON = convertQueryStringToJSON(params);
+			paramsJSON.asset_folder = replacePlaceholders(selectedAssetFolder, context);
+			paramsJSON.subfolder = replacePlaceholders(paramsJSON.subfolder, context);
+			var params = jQuery.param(paramsJSON);
 
-			showAssetsSelect();
+			//selectedAssetFolder = replacePlaceholders(selectedAssetFolder, context);
+			showAssetsSelect(params);
 			return false;
 		});
 		
 		// asset upload 
 		var showAssetUpload = function(url){
-			var html = '<iframe src="' + url +'" id="add_edit_inline_iframe" class="inline_iframe" frameborder="0" scrolling="no" style="border: none; height: 0px; width: 0px;"></iframe>';
+			var html = '<iframe src="' + url +'" id="add_edit_inline_iframe" class="inline_iframe" frameborder="0" scrolling="auto" style="border: none; height: 0px; width: 0px;"></iframe>';
 			$modal = fuel.modalWindow(html, 'inline_edit_modal', true);
 			// // bind listener here because iframe gets removed on close so we can't grab the id value on close
 			$modal.find('iframe#add_edit_inline_iframe').bind('load', function(){
@@ -701,14 +746,17 @@ if (typeof(window.fuel.fields) == 'undefined'){
 		
 		var $modal = null;
 		var selected = null;
+		var csrf = null;
 		var editModule = function(url, onLoadCallback, onCloseCallback){
-			var html = '<iframe src="' + url +'" id="add_edit_inline_iframe" class="inline_iframe" frameborder="0" scrolling="no" style="border: none; height: 0px; width: 0px;"></iframe>';
+			var html = '<iframe src="' + url +'" id="add_edit_inline_iframe" class="inline_iframe" frameborder="0" scrolling="auto" style="border: none; height: 0px; width: 0px;"></iframe>';
 			$modal = fuel.modalWindow(html, 'inline_edit_modal', true, onLoadCallback, onCloseCallback);
 			
 			// bind listener here because iframe gets removed on close so we can't grab the id value on close
 			$modal.find('iframe#add_edit_inline_iframe').bind('load', function(){
 				var iframeContext = this.contentDocument;
 				selected = $('#id', iframeContext).val();
+				csrf = $('#csrf_test_name', iframeContext).val() ? $('#csrf_test_name', iframeContext).val() : '';
+
 			})
 			return false;
 		}
@@ -719,14 +767,15 @@ if (typeof(window.fuel.fields) == 'undefined'){
 			var $form = $field.closest('form');
 			var module = $field.data('module');
 			var addParams = ($field.data('add_params')) ? '?' + $field.data('add_params') : '';
+			var fields = ($field.data('fields')) ? '/' + $field.data('fields') : '';
 
 			var isMulti = ($field.attr('multiple')) ? true : false;
 			
 			var parentModule = fuel.getModuleURI(context);
 			var url = jqx_config.fuelPath + '/' + module + '/inline_';
 			var btnClasses = ($field.attr('multiple')) ? 'btn_field btn_field_right ' : 'btn_field';
-			if (!$field.parent().find('.edit_inline_button').length) $field.after('&nbsp;<a href="' + url + 'edit/" class="' + btnClasses+ ' edit_inline_button">' + fuel.lang('btn_edit') + '</a>');
-			if (!$field.parent().find('.add_inline_button').length) $field.after('&nbsp;<a href="' + url + 'create' + addParams + '" class="' + btnClasses+ ' add_inline_button">' + fuel.lang('btn_add') + '</a>');
+			if (!$field.parent().find('.edit_inline_button').length) $field.after('&nbsp;<a href="' + url + 'edit/" class="' + btnClasses+ ' edit_inline_button" tabindex="-1">' + fuel.lang('btn_edit') + '</a>');
+			if (!$field.parent().find('.add_inline_button').length) $field.after('&nbsp;<a href="' + url + 'create' + fields + addParams + '" class="' + btnClasses+ ' add_inline_button" tabindex="-1">' + fuel.lang('btn_add') + '</a>');
 			
 			var refreshField = function($field){
 
@@ -738,8 +787,7 @@ if (typeof(window.fuel.fields) == 'undefined'){
 				// if no value added,then no need to refresh
 				if (!selected) return;
 				var refreshUrl = jqx_config.fuelPath + '/' + parentModule + '/refresh_field';
-				var params = { field:fieldId, field_id: fieldId, selected:selected};
-
+				var params = { field:fieldId, field_id: fieldId, selected:selected, csrf_test_name: csrf };
 
 				// fix for pages... a bit kludgy
 				if (parentModule == 'pages'){
@@ -765,10 +813,13 @@ if (typeof(window.fuel.fields) == 'undefined'){
 
 				var $form = $field.closest('form');
 
-				$fieldContainer = $('#' + fieldId, context).closest('td.field');
-				$field.closest('form').trigger('form-pre-serialize');
+				var $fieldContainer = $('#' + fieldId, context).closest('td.field');
+
+				// will delete fields if triggered
+				//$field.closest('form').trigger('form-pre-serialize');
 
 				// refresh value
+
 				$field = $(selector);
 				if ($field.length > 1){
 					var val = [];
@@ -798,7 +849,10 @@ if (typeof(window.fuel.fields) == 'undefined'){
 					//console.log($form.formBuilder())
 					//$form.formBuilder().call('inline_edit');
 					// refresh field with formBuilder jquery
-					fuel.fields.multi_field(context)
+					if (!$('#' + fieldId, context).hasClass('select2')){
+						fuel.fields.multi_field(context);
+					}
+
 					$('#form').formBuilder().initialize(context);
 					$('#' + fieldId, context).off('.addedit').on('change.addedit', function(){
 						changeField($(this));
@@ -810,7 +864,7 @@ if (typeof(window.fuel.fields) == 'undefined'){
 			var changeField = function($this){
 				if (!$this.is('[multiple]')){
 					if ($this.val() == '' || $this.find('option').length == 0){
-						if ($this.is('select') && $this.find('option').length == 0){
+						if ($this.is('select') && $this.find('option').length == 0 || $this.is('.select2_applied')){
 							$this.hide();
 						} else {
 							$this.show();
@@ -818,7 +872,7 @@ if (typeof(window.fuel.fields) == 'undefined'){
 						if ($this.is('input, select')) $this.parent().find('.edit_inline_button').hide();
 					} else {
 						$this.parent().find('.edit_inline_button').show();
-						$this.show();
+						if (!$this.is('.select2_applied')) $this.show();
 					}	
 				}
 			}
@@ -860,8 +914,8 @@ if (typeof(window.fuel.fields) == 'undefined'){
 					return false;
 				}
 				var editIds = val.toString().split(',');
+				var fields = ($elem.data('fields')) ? '/' + $elem.data('fields') : '';
 				var $selected = $elem.parent().find('.supercomboselect_right li.selected:first');
-
 				if ((!editIds.length || editIds.length > 1) && (!$selected.length || $selected.length > 1)) {
 					alert(fuel.lang('edit_multi_select_warning'));
 				} else {
@@ -869,12 +923,12 @@ if (typeof(window.fuel.fields) == 'undefined'){
 						var id = $selected.attr('id');
 						var idIndex = id.substr(id.lastIndexOf('_') + 1);
 						var val = $elem.find('option').eq(idIndex).attr('value');
-						var url = $(this).attr('href') + val;
+						var url = $(this).attr('href') + val + fields;
 					} else {
-						var url = $(this).attr('href') + editIds[0];
+						var url = $(this).attr('href') + editIds[0] + fields;
 					}
-					$field = $(this).closest('.field').find('select, input[type="checkbox"], input[type="radio"]:first');
-						editModule(url, null, function(){ refreshField($field)});
+					$field = $elem.filter(':first');
+					editModule(url, null, function(){ refreshField($field)});
 				}
 				return false;
 			});
@@ -984,12 +1038,12 @@ if (typeof(window.fuel.fields) == 'undefined'){
 		$('.numeric', context).each(function(i){
 			var o = {decimal: false, negative: false}
 			o = $.extend(o, options);
-			if ($(this).attr('data-decimal') == "1" || $(this).attr('data-decimal').toLowerCase() == "yes" || $(this).attr('data-decimal').toLowerCase() == "true"){
+			if ($(this).attr('data-decimal') && ($(this).attr('data-decimal') == "1" || $(this).attr('data-decimal').toLowerCase() == "yes" || $(this).attr('data-decimal').toLowerCase() == "true")){
 				o.decimal = '.';
 			} else {
 				o.decimal = false;
 			}
-			if ($(this).attr('data-negative') == "1" || $(this).attr('data-negative').toLowerCase() == "yes" || $(this).attr('data-negative').toLowerCase() == "true"){
+			if ($(this).attr('data-negative') && ($(this).attr('data-negative') == "1" || $(this).attr('data-negative').toLowerCase() == "yes" || $(this).attr('data-negative').toLowerCase() == "true")){
 				o.negative = true;
 			} else {
 
@@ -1007,7 +1061,7 @@ if (typeof(window.fuel.fields) == 'undefined'){
 	// create currency field
 	fuel.fields.currency_field = function(context, options){
 		$('.currency', context).each(function(i){
-			var o = {aSep: ',', aDec: '.',  dGroup: 3, vMin: 0.00, vMax: 999999999.99}
+			var o = {aSep: ',', aDec: '.',  dGroup: 3, vMin: -999999999.99, vMax: 999999999.99}
 			o = $.extend(o, options);
 			if ($(this).attr('data-separator')){
 				o.aSep = $(this).attr('data-separator');
@@ -1130,7 +1184,7 @@ if (typeof(window.fuel.fields) == 'undefined'){
 			if ($activeField.data('filter')){
 				url += '&filter=' + $activeField.data('filter');	;	
 			}
-			var html = '<iframe src="' + url +'" id="url_inline_iframe" class="inline_iframe" frameborder="0" scrolling="no" style="border: none; width: 850px;"></iframe>';
+			var html = '<iframe src="' + url +'" id="url_inline_iframe" class="inline_iframe" frameborder="0" scrolling="auto" style="border: none; width: 850px;"></iframe>';
 			$modal = fuel.modalWindow(html, 'inline_edit_modal', true);
 			
 			// // bind listener here because iframe gets removed on close so we can't grab the id value on close
@@ -1217,7 +1271,8 @@ if (typeof(window.fuel.fields) == 'undefined'){
 				if (layout && layout.length){
 					//layout = layout.split('/').pop();
 					layout = layout.replace('/', ':');
-					url = jqx_config.fuelPath + '/blocks/layout_fields/' + layout + '/' + id+ '/english/';
+					var language = ($('#language').length) ? $('#language').val() : 'english';
+					url = jqx_config.fuelPath + '/blocks/layout_fields/' + layout + '/' + id+ '/' + language + '/';
 				}
 			}
 			
@@ -1263,20 +1318,22 @@ if (typeof(window.fuel.fields) == 'undefined'){
 
 			var selector = ($elem.data('selector')) ? $elem.data('selector') : 'tr';
 			var prefix = ($elem.data('prefix')) ? $elem.data('prefix') : '';
-			var val = $elem.val();
 
 			var $togglers = $(".toggle", context);
 			if (prefix){
 				var regex = new RegExp(' ' + prefix)
-				$togglers.filter(function() { 
+				$togglers.filter(function() {
 					return $(this).attr('class').match(regex); 
 				}).closest(selector).hide();
 
 			} else {
 				$(".toggle", context).closest(selector).hide();	
 			}
-
-			val = val.replace(' ', '.');
+			var val = $elem.val();
+			if (val) {
+				val = val.replace(/ /g, '-');	
+			}
+			
 			$(".toggle." + prefix + val, context).closest(selector).show();
 		}
 		
@@ -1300,10 +1357,12 @@ if (typeof(window.fuel.fields) == 'undefined'){
 			})
 			
 		})
-		$("input[type='radio'].toggler:checked").not('.__applied__').trigger("change");
 
 		// exlude blocks since they get ajaxed in and then run the toggler function
-		$("select.toggler").not('.field_type_block, .__applied__').trigger("change");
+		$("select.toggler", context).not('.field_type_block, .__applied__').trigger("change");
+
+		$("input[type='radio'].toggler:checked", context).not('.__applied__').trigger("change");
+
 	}
 
 
@@ -1341,7 +1400,6 @@ if (typeof(window.fuel.fields) == 'undefined'){
 	}
 
 	fuel.fields.dependent_field = function(context, options){
-		var firstlaunch = true;
 		
 		$('.dependent', context).each(function(i){
 
@@ -1387,19 +1445,19 @@ if (typeof(window.fuel.fields) == 'undefined'){
 				if ($.isEmptyObject(xtraData) === false) {
 					$.extend(data, xtraData);
 				}
-
-				if (val.length){
+				if (val && val.length){
 					$.get(url, data, function(html){
 						var $select = $(replaceSelector);
+
 						$select.html(html);
 						$select.val(origValue);
 						//if ($select.prop("multiple")){
 							fuel.fields.multi_field(context);
 						//}
 
-						if (firstlaunch){
+						if (!$select.data('checksave')){
 							$.changeChecksaveValue($select, $select.val());
-							firstlaunch = false;	
+							$select.data('checksave', true);	
 						}
 					});
 				}
@@ -1416,23 +1474,33 @@ if (typeof(window.fuel.fields) == 'undefined'){
 			var $activeEmbeddedList = $(activeEmbeddedList);
 			var $embeddedListItems = $fuel.find("#"+$activeEmbeddedList.attr("id")+" .embedded_list_items");
 			$embeddedListItems.empty().addClass("loader");
+			$activeEmbeddedList.trigger('refreshEmbedListBegin');
 			var embeddedListAjax = $.post(__FUEL_PATH__ + "/" + $activeEmbeddedList.data("module-url") + "/ajax/embedded_list_items", $activeEmbeddedList.data("embedded-list-params"));
 			embeddedListAjax.done(function(data) {
 				$embeddedListItems.removeClass("loader").html(data);
 				fuel._initToolTips();
+				$activeEmbeddedList.trigger('refreshEmbedListEnd');
 			});
 		};
+
 		var embeddedListModalOpen = function(e) {
 			e.preventDefault();
 			var $activeEmbeddedList = $(this).closest(".embedded_list_container");
-			var iframe_url = $(this).attr("href");
-			var html = '<iframe src="' + iframe_url + '" class="inline_iframe" frameborder="0" scrolling="no" style="border: none; width: 850px;"></iframe>';
+			var href = $(this).attr("href");
+			if (!href){
+				href = $(this).closest('tr').find("td.actions").find("a:first").attr('href');
+			}
+
+			var iframe_url = href;
+			var html = '<iframe src="' + iframe_url + '" class="inline_iframe" frameborder="0" scrolling="auto" style="border: none; width: 850px;"></iframe>';
 			var $modal = fuel.modalWindow(html, "embedded_list_item_modal", true, "", function(){
 				embeddedListModalClose($activeEmbeddedList);
 			});
 		};
-		$fuel.on("click", ".datatable_action", embeddedListModalOpen);
 
+		$fuel.off("click", ".datatable_action, #data_table td[class^='col']:not('.actions')");
+		$fuel.on("click", ".datatable_action, #data_table td[class^='col']:not('.actions')", embeddedListModalOpen);
+		
 		// added refresh event that can be triggered
 		$('.embedded_list_container').on("refreshEmbedList", function(){
 			embeddedListModalClose(this);
@@ -1442,6 +1510,8 @@ if (typeof(window.fuel.fields) == 'undefined'){
 	fuel.fields.select2 = function(context, options){
 		if (options){
 			var options = $.extend({}, options);
+		} else { 
+			options = {};
 		}
 		$('select.select2_applied', context).select2('destroy').removeClass('select2_applied');
 		$('select.select2', context).addClass('select2_applied').select2(options);

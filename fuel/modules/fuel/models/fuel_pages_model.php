@@ -8,7 +8,7 @@
  *
  * @package		FUEL CMS
  * @author		David McReynolds @ Daylight Studio
- * @copyright	Copyright (c) 2015, Run for Daylight LLC.
+ * @copyright	Copyright (c) 2018, Daylight Studio LLC.
  * @license		http://docs.getfuelcms.com/general/license
  * @link		http://www.getfuelcms.com
  */
@@ -27,7 +27,7 @@
  * @link		http://docs.getfuelcms.com/models/fuel_pages_model
  */
 
-require_once('base_module_model.php');
+require_once('Base_module_model.php');
 
 class Fuel_pages_model extends Base_module_model {
 
@@ -124,7 +124,7 @@ class Fuel_pages_model extends Base_module_model {
 	 *
 	 * @access	public
 	 * @param	boolean Determines whether to return just published pages or not (optional... and ignored in the admin)
-	 * @return	array An array that can be used by the Menu class to create a hierachical structure
+	 * @return	array An array that can be used by the Menu class to create a hierarchical structure
 	 */	
 	public function tree($just_published = FALSE)
 	{
@@ -193,8 +193,7 @@ class Fuel_pages_model extends Base_module_model {
 	 */	
 	public function find_by_location($location, $just_published = 'yes')
 	{
-		
-		if (substr($location, 0, 4) == 'http')
+		if (strpos($location, 'http://') === 0 || strpos($location, 'https://') === 0)
 		{
 			$location = substr($location, strlen(site_url()));
 		}
@@ -221,7 +220,6 @@ class Fuel_pages_model extends Base_module_model {
 			{
 				$where .= ' AND published = "yes"';
 			}
-
 		}
 		else
 		{
@@ -231,7 +229,7 @@ class Fuel_pages_model extends Base_module_model {
 		$data = $this->find_one_array($where, 'location desc');
 
 		// case sensitive check
-		if (empty($data) OR $data['location'] != $location)
+		if (empty($data) OR ($data['location'] != $location AND (!empty($wildcard_location) AND $data['location'] != $wildcard_location.'/:any')))
 		{
 			return array();
 		}
@@ -242,11 +240,11 @@ class Fuel_pages_model extends Base_module_model {
 	// --------------------------------------------------------------------
 	
 	/**
-	 * Returns all the children pages basd on the location URI
+	 * Returns all the children pages based on the location URI
 	 *
 	 * @access	public
 	 * @param  string URI path to start from (e.g. about would find about/history, about/contact, etc)
-	 * @return	void
+	 * @return	array
 	 */	
 	function children($root)
 	{
@@ -291,7 +289,7 @@ class Fuel_pages_model extends Base_module_model {
 		}
 
 		// easy add for navigation
-		if (empty($values['id']))
+		if (empty($values['id']) AND $CI->fuel->auth->has_permission('navigation/create'))
 		{
 			$fields['navigation_label'] = array('comment' => lang('navigation_quick_add'));
 		}

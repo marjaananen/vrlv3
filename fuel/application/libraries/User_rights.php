@@ -76,7 +76,7 @@ class User_rights
         
     }
     
-    public function redirect_address(){
+    public function redirect(){
         return $this->redirect_address;
     }
 }

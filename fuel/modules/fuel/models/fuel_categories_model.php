@@ -8,7 +8,7 @@
  *
  * @package		FUEL CMS
  * @author		David McReynolds @ Daylight Studio
- * @copyright	Copyright (c) 2015, Run for Daylight LLC.
+ * @copyright	Copyright (c) 2018, Daylight Studio LLC.
  * @license		http://docs.getfuelcms.com/general/license
  * @link		http://www.getfuelcms.com
  */
@@ -27,7 +27,7 @@
  * @link		http://docs.getfuelcms.com/models/fuel_categories_model
  */
 
-require_once('base_module_model.php');
+require_once('Base_module_model.php');
 
 class Fuel_categories_model extends Base_module_model {
 
@@ -112,7 +112,7 @@ class Fuel_categories_model extends Base_module_model {
 	 *
 	 * @access	public
 	 * @param	boolean Determines whether to return just published pages or not (optional... and ignored in the admin)
-	 * @return	array An array that can be used by the Menu class to create a hierachical structure
+	 * @return	array An array that can be used by the Menu class to create a hierarchical structure
 	 */	
 	public function tree($just_published = FALSE)
 	{
@@ -200,13 +200,13 @@ class Fuel_category_model extends Base_module_record {
 			$model = $module->model();
 			if (!empty($model->foreign_keys))
 			{
-				// loop through the has_many relationships to see if any have a "tags" relationship
+				// loop through the has_many relationships to see if any have a "categories" relationship
 				foreach($model->foreign_keys as $key => $mod)
 				{
 					$mod_name = $module->name();
 					if (is_array($mod) AND isset($mod[FUEL_FOLDER]) AND ($mod[FUEL_FOLDER] == 'fuel_categories_model' OR $mod[FUEL_FOLDER] == 'categories'))
 					{
-						$mod['model'] =& $module->model();
+						$mod['model'] = $module->model();
 						$mod['key'] = $key;
 						$belongs_to[$mod_name] = $mod;
 					}
@@ -267,7 +267,7 @@ class Fuel_category_model extends Base_module_record {
 	// --------------------------------------------------------------------
 	
 	/**
-	 * Magic method that will allow you to return the model object by doing something like $cateogry->get_products(TRUE);
+	 * Magic method that will allow you to return the model object by doing something like $category->get_products(TRUE);
 	 *
 	 * @access	public
 	 * @param	string	field name

@@ -8,7 +8,7 @@
  *
  * @package		FUEL CMS
  * @author		David McReynolds @ Daylight Studio
- * @copyright	Copyright (c) 2015, Run for Daylight LLC.
+ * @copyright	Copyright (c) 2018, Daylight Studio LLC.
  * @license		http://docs.getfuelcms.com/general/license
  * @link		http://www.getfuelcms.com
  * @filesource
@@ -28,6 +28,8 @@
 
 // --------------------------------------------------------------------
 
+require_once('Fuel_modules.php');
+
 class Fuel_navigation extends Fuel_module {
 
 	protected $module = 'navigation'; // value is set to "navigation"
@@ -40,14 +42,14 @@ class Fuel_navigation extends Fuel_module {
 	 * The <a href="[user_guide_url]helpers/fuel_helper">fuel_nav helper</a> function is an alias to this method.
 	 *
 	<ul>
-		<li><strong>items</strong> - the navigation items to use. By default, this is empty and will look for the nav.php file or the records in the Navigation module</li>
-		<li><strong>file</strong> - the name of the file containing the navigation information</li>
-		<li><strong>var</strong> - the variable name in the file to use</li>
-		<li><strong>parent</strong> - the parent id you would like to start rendering from. This is either the database ID or the nav array key of the menu item</li>
-		<li><strong>root</strong> - the equivalent to the root_value attribute in the Menu class. It states what the root value of the menu structure should be. Normally you don't need to worry about this</li>
-		<li><strong>group_id</strong> - the group ID in the database to use. The default is <dfn>1</dfn>. Only applies to navigation items saved in the admin</li>
-		<li><strong>exclude</strong> - nav items to exclude from the menu. Can be an array or a regular expression string</li>
-		<li><strong>return_normalized</strong> - returns the raw normalized array that gets used to generate the menu</li>
+		<li><strong>items</strong>: the navigation items to use. By default, this is empty and will look for the nav.php file or the records in the Navigation module</li>
+		<li><strong>file</strong>: the name of the file containing the navigation information</li>
+		<li><strong>var</strong>: the variable name in the file to use</li>
+		<li><strong>parent</strong>: the parent id you would like to start rendering from. This is either the database ID or the nav array key of the menu item</li>
+		<li><strong>root</strong>: the equivalent to the root_value attribute in the Menu class. It states what the root value of the menu structure should be. Normally you don't need to worry about this</li>
+		<li><strong>group_id</strong>: the group ID in the database to use. The default is <dfn>1</dfn>. Only applies to navigation items saved in the admin</li>
+		<li><strong>exclude</strong>: nav items to exclude from the menu. Can be an array or a regular expression string</li>
+		<li><strong>return_normalized</strong>: returns the raw normalized array that gets used to generate the menu</li>
 		<li><strong>render_type</strong>: options are basic, breadcrumb, page_title, collapsible, delimited, array. Default is 'basic'</li>
 		<li><strong>active_class</strong>: the active css class. Default is 'active'</li>
 		<li><strong>active</strong>: the active menu item</li>
@@ -165,7 +167,7 @@ class Fuel_navigation extends Fuel_module {
 				}
 				else
 				{
-					$$p['var'] = array();
+					${$p['var']} = array();
 				}
 			}
 
@@ -174,7 +176,7 @@ class Fuel_navigation extends Fuel_module {
 			{
 				if ($this->CI->fuel->navigation->mode() != 'cms')
 				{
-					// load in navigation file as a starting poing
+					// load in navigation file as a starting point
 					if (file_exists(APPPATH.'views/_variables/'.$p['file'].'.php'))
 					{
 						$p['root_value'] = NULL;
@@ -210,7 +212,8 @@ class Fuel_navigation extends Fuel_module {
 				// if menu items isn't empty, then we overwrite the variable with those menu items and change any parent value'
 				if (!empty($menu_items)) 
 				{
-					$$p['var'] = $menu_items;
+
+					${$p['var']} = $menu_items;
 
 					// if parent exists, then assume it is a uri location and you need to convert it to a database id value
 					if (!empty($p['parent']) AND is_string($p['parent']))
@@ -237,7 +240,7 @@ class Fuel_navigation extends Fuel_module {
 		}
 		else
 		{
-			$$p['var'] = $p['items'];
+			${$p['var']} = $p['items'];
 		}
 		if (!empty($params['root'])) $p['root_value'] = $params['root'];
 
@@ -245,7 +248,7 @@ class Fuel_navigation extends Fuel_module {
 		$this->CI->menu->initialize($p);
 		
 
-		$items = (!empty($$p['var'])) ? $$p['var'] : array();
+		$items = (!empty(${$p['var']})) ? ${$p['var']} : array();
 		
 		// append additional values
 		if (!empty($p['append']))
@@ -466,10 +469,11 @@ class Fuel_navigation extends Fuel_module {
 			// set default navigation group if it doesn't exist'
 			if (!isset($group->id))
 			{
+				$group = $this->CI->fuel_navigation_groups_model->create();
 				$group->name = 'main';
 				$id = $group->save();
-				$group_id = $group->id;
 			}
+			$group_id = $group->id;
 			
 			// convert string ids to numbers so we can save... must start at last id in db
 			$ids = array();

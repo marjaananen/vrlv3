@@ -19,14 +19,12 @@
 			header {
 				margin-bottom:30px;
 			}
-
 		-->
 		</style>
 		<!-- script references -->
 		<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.2/jquery.min.js"></script>
 		<!-- Latest compiled and minified JavaScript -->
 		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
-
 		<!-- DataTables CSS -->
 		<link rel="stylesheet" type="text/css" href="//cdn.datatables.net/1.10.9/css/jquery.dataTables.css">
 		<!-- DataTables -->
@@ -37,7 +35,6 @@
 		<?php echo css('vrl.css'); ?>
 	</head>
 	<body>
-
 <header class="navbar navbar-default navbar-static-top" role="banner">
   <div class="container">
     <div class="navbar-header">
@@ -51,12 +48,9 @@
     </div>
     <nav class="collapse navbar-collapse" role="navigation">
 	  <?php echo fuel_nav(array('container_tag_id' => 'topmenu', 'container_tag_class' => 'nav navbar-nav', 'item_id_prefix' => 'topmenu_', 'depth'=>'0')); ?>
-
-
     </nav>
   </div>
 </header>
-
 <!-- Begin Body -->
 <div class="container">
 	<div class="row">
@@ -73,8 +67,12 @@
 	{
 		if ($this->ion_auth->logged_in())
 		{
-			echo "Tervetuloa, " . $this->session->userdata( 'username' ) . "<br /> <a href=" . site_url('/auth/logout') . ">Kirjaudu ulos</a> <br /> <a href=" . site_url('/profiili') . ">Profiili</a>";
-			echo "<br />Sinulle on " . $this->tunnukset_model->unread_messages($this->session->userdata('identity')) . " uutta pikaviestiä.";
+			echo "<p>Tervetuloa, " . $this->session->userdata( 'tunnus' ) . "<br /> <a href=" . site_url('/auth/logout') . ">Kirjaudu ulos</a> <br /> <a href=" . site_url('/profiili') . ">Profiili</a>";
+			echo "<br />Sinulle on " . $this->tunnukset_model->unread_messages($this->session->userdata('identity')) . " uutta <a href=" . site_url('/profiili/pikaviestit') . ">pikaviestiä</a>.</p>";
+			if ($this->ion_auth->is_admin()){
+				echo "<p>Olet ylläpitäjä, tästä pääset ylläpitäjähommiin:</p>";
+				echo $adminmainmenu;
+			}
 		}
 		else
 		{
@@ -97,7 +95,5 @@
 	}
 ?>
       		</div>  
-
       		<div class="col-md-9">
-
 	<?php echo fuel_nav(array('render_type' => 'breadcrumb', 'container_tag_class' => 'breadcrumb', 'delimiter' => '&nbsp;', 'order' => 'desc', 'home_link' => 'Etusivu','depth'=>'3'));?>

@@ -346,7 +346,7 @@ myMarkItUpSettings.displayAssetInsert = function (selected, attrs, callback){
 	url += '&order=' + ((attrs.imgOrder) ? attrs.imgOrder : '');
 	var loaded = false;
 	var html = '<iframe src="' + url +'" id="asset_inline_iframe" class="inline_iframe" frameborder="0" scrolling="no" style="border: none; height: 500px; width: 850px;"></iframe>';
-	$modal = fuel.modalWindow(html, 'inline_edit_modal', false);
+	$modal = fuel.modalWindow(html, 'inline_edit_modal', true);
 	
 	$modal.find('iframe#asset_inline_iframe').bind('load', function(){
 		if (loaded) return;
@@ -394,7 +394,11 @@ myMarkItUpSettings.displayAssetInsert = function (selected, attrs, callback){
 					replace += ' class="' + $class.val() + '"';
 				}
 
-				replace += ' alt="' + $alt.val() + '"';
+				if ($alt.length && $alt.val().length){
+					replace += ' alt="' + $alt.val() + '"';
+				} else {
+					replace += ' alt=""';
+				}
 	
 				replace += ' />';
 
@@ -450,10 +454,9 @@ myMarkItUpSettings.markItUpLinkInsert = function (markItUp){
 }
 
 myMarkItUpSettings.displayLinkEditWindow = function(selected, attrs, callback){
-
 	var self = this;
 	var url = jqx.config.fuelPath + '/pages/select/?nocache=' + new Date().getTime();
-	if (selected) url += '&selected=' + escape(selected);
+	if (selected) url += '&selected=' + encodeURIComponent(selected);
 	url += '&input=' + ((attrs.input) ? encodeURIComponent(attrs.input) : '');
 	url += '&target=' + ((attrs.target) ? attrs.target : '');
 	url += '&title=' + ((attrs.title) ? attrs.title : '');
@@ -507,7 +510,7 @@ myMarkItUpSettings.displayLinkEditWindow = function(selected, attrs, callback){
 				if ($class.length && $class.val().length){
 					replace += ' class="' + $class.val() + '"';
 				}
-				replace += '>' + unescape($selected.val()) + '</a>';
+				replace += '>' + decodeURIComponent($selected.val()) + '</a>';
 
 				callback(replace);
 			}

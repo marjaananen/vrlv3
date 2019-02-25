@@ -11,16 +11,13 @@
 	if (typeof jQuery == 'undefined'){
 		document.write('<script type="text/javascript" charset="utf-8" src="<?=js_path('jquery/jquery', 'fuel')?>"><\/script>');
 	}
-</script>
-<script>
 	
-	// must be less then version 1.9 or we will load campatability helper
+	// must be less then version 1.9 or we will load compatibility helper
 	var __jq_version__ = jQuery.fn.jquery.split('.');
-	if (parseInt(__jq_version__[0]) > 1 || (parseInt(__jq_version__[0]) == 1 && parseInt(__jq_version__[1]) >= 9)){
-		jQuery.migrateMute = true;
+		if (parseInt(__jq_version__[0]) > 1 || (parseInt(__jq_version__[0]) == 1 && parseInt(__jq_version__[1]) >= 9)){
+			jQuery.migrateMute = true;
 		document.write('<script type="text/javascript" charset="utf-8" src="<?=js_path('jquery/plugins/jquery-migrate-1.1.1.js', 'fuel')?>"><\/script>');
 	}
-
 </script>
 <?=js('fuel/fuel_inline.min.js', 'fuel', array('ignore_if_loaded' => TRUE, 'output' => $this->fuel->config('fuel_assets_output')))?>
 

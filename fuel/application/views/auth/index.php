@@ -14,8 +14,8 @@
 	</tr>
 	<?php foreach ($users as $user):?>
 		<tr>
-            <td>VRL-<?php echo htmlspecialchars($user->tunnus,ENT_QUOTES,'UTF-8');?></td>
-            <td><?php echo htmlspecialchars($user->nimimerkki,ENT_QUOTES,'UTF-8');?></td>
+            <td><?php echo htmlspecialchars($user->first_name,ENT_QUOTES,'UTF-8');?></td>
+            <td><?php echo htmlspecialchars($user->last_name,ENT_QUOTES,'UTF-8');?></td>
             <td><?php echo htmlspecialchars($user->email,ENT_QUOTES,'UTF-8');?></td>
 			<td>
 				<?php foreach ($user->groups as $group):?>

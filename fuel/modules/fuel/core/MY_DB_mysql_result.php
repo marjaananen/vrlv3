@@ -8,7 +8,7 @@
  *
  * @package		FUEL CMS
  * @author		David McReynolds @ Daylight Studio
- * @copyright	Copyright (c) 2015, Run for Daylight LLC.
+ * @copyright	Copyright (c) 2018, Daylight Studio LLC.
  * @license		http://docs.getfuelcms.com/general/license
  * @link		http://www.getfuelcms.com
  */
@@ -39,7 +39,7 @@ class MY_DB_mysql_result extends CI_DB_mysql_result {
 	 *
 	 * @access	public
 	 * @param	string	field name to use as associative key
-	 * @return	void
+	 * @return	array
 	 */
 	public function result_assoc_array($key)
 	{
@@ -56,7 +56,7 @@ class MY_DB_mysql_result extends CI_DB_mysql_result {
 			return array();
 		}
 
-		$this->_data_seek(0);
+		$this->data_seek(0);
 		
 		while ($row = $this->_fetch_assoc())
 		{
@@ -83,7 +83,7 @@ class MY_DB_mysql_result extends CI_DB_mysql_result {
 	 *
 	 * @access	public
 	 * @param	string	field name to use as associative key
-	 * @return	void
+	 * @return	array
 	 */
 	public function result_assoc($key)
 	{
@@ -100,7 +100,7 @@ class MY_DB_mysql_result extends CI_DB_mysql_result {
 			return array();
 		}
 
-		$this->_data_seek(0);
+		$this->data_seek(0);
 		while ($row = $this->_fetch_object())
 		{
 			$row_arr = get_object_vars($row);

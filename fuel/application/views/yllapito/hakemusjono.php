@@ -114,11 +114,11 @@
     <br />
     
     <p>
-        <form method="post" action="<?=site_url('/yllapito/kasittele_hakemus')?>/hyvaksy/<?=$application_data['id']?>">
+        <form method="post" action="<?=site_url('/yllapito_tunnukset/kasittele_hakemus')?>/hyvaksy/<?=$application_data['id']?>">
             <input type="submit" value="Hyväksy">
         </form>
         
-        <form method="post" action="<?=site_url('/yllapito/kasittele_hakemus')?>/hylkaa/<?=$application_data['id']?>">
+        <form method="post" action="<?=site_url('yllapito/tunnukset/kasittele/')?>/hylkaa/<?=$application_data['id']?>">
             Hylkäyssyy: <input type="text" name="rejection_reason">
             <input type="submit" value="Hylkää">
         </form>

@@ -9,7 +9,7 @@
 $config['fuel_path'] = 'fuel/';
 
 // the name to be displayed on the top left of the admin
-$config['site_name'] = 'My Website';
+$config['site_name'] = 'Virtuaalinen ratsastajainliitto';
 
 // whether the admin backend is enabled or not
 $config['admin_enabled'] = TRUE;
@@ -19,7 +19,7 @@ $config['admin_enabled'] = TRUE;
 // views mode pulls views from the views folder and variables from the _variables folder,
 // and the auto option will first check the database for a page and if it doesn't exist or is 
 // not published, it will then check for the corresponding view file.
-$config['fuel_mode'] = 'auto';
+$config['fuel_mode'] = 'views';
 
 // specifies which modules are allowed to be used in the fuel admin
 $config['modules_allowed'] = array(
@@ -32,7 +32,7 @@ $config['domain'] = '';
 // shows an alert in the admin backend if this is the admin password
 $config['default_pwd'] = 'admin';
 
-// maximum number of paramters that can be passed to the page. Used to cut down on queries to the db.
+// maximum number of parameters that can be passed to the page. Used to cut down on queries to the db.
 // If it is an array, then it will loop through the array using the keys to match against a regular expression:
 // $config['max_page_params'] = array('about/news/' => 1);
 $config['max_page_params'] = 0;
@@ -40,7 +40,7 @@ $config['max_page_params'] = 0;
 // will auto search view files. 
 // If the URI is about/history and the about/history view 
 // does not exist but about does, it will render the about page
-$config['auto_search_views'] = FALSE;
+$config['auto_search_views'] = TRUE;
 
 // max upload files size for assets
 $config['assets_upload_max_size']	= 5000;

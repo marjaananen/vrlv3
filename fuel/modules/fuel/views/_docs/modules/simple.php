@@ -46,7 +46,7 @@ on the key value specified in the config (e.g. example):</p>
 		</tr>
 		<tr>
 			<td><strong>module_name</strong></td>
-			<td>The default value is a <a href="http://ellislab.com/codeigniter/user-guide/helpers/inflector_helper.html" target="_blank">humanized</a> version of the module key (e.g. a key of example = Example)</td>
+			<td>The default value is a <a href="https://www.codeigniter.com/user_guide/helpers/inflector_helper.html" target="_blank">humanized</a> version of the module key (e.g. a key of example = Example)</td>
 			<td>None</td>
 			<td>the friendly name of the module.</td>
 		</tr>
@@ -521,14 +521,14 @@ CREATE TABLE `articles` (
   `category_id` int(10) unsigned NOT NULL,
   `published` enum('yes','no') COLLATE utf8_unicode_ci NOT NULL DEFAULT 'yes',
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=5 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 </pre>
 
 <p>The module's model (note that it inherits from the Base_posts_model):</p>
 <pre class="brush:php">
 &lt;?php  if (!defined('BASEPATH')) exit('No direct script access allowed');
 
-require_once(FUEL_PATH.'models/base_posts_model.php');
+require_once(FUEL_PATH.'models/Base_posts_model.php');
 
 class Articles_model extends Base_posts_model {
 
@@ -551,7 +551,7 @@ class Articles_model extends Base_posts_model {
 	}
 }
 
-class Articles_item_model extends Base_post_item_model {
+class Article_model extends Base_post_item_model {
 
 }
 </pre>
@@ -582,22 +582,22 @@ on your model to generate the data you want to pass to your view and specify a r
 <pre class="brush:php">
 ...
 'pages' => array(
-	'base_uri' => 'media',
+	'base_uri' => 'articles',
 	'per_page' => 10,
 	'layout' => 'posts',
-	'list' => 'media/list',
-	'post' => 'media/detail',
-	'archive' => array('route' => 'media/archive(/$year:\d{4})(/$month:\d{1,2})?(/$day:\d{1,2})?', 'view' => 'media/list', 'layout' => 'main', 'method' => 'my_test_method', 'empty_data_show_404' => TRUE),
-	'tag' => array('view' => 'media/list', 'empty_data_show_404' => TRUE, 'per_page' => 5),
-	'custom' => array('route' => 'media/custom', 'view' => 'media/list', 'method' => 'my_custom_method')
+	'list' => 'articles/list',
+	'post' => 'articles/detail',
+	'archive' => array('route' => 'articles/archive(/$year:\d{4})(/$month:\d{1,2})?(/$day:\d{1,2})?', 'view' => 'articles/list', 'layout' => 'main', 'method' => 'my_test_method', 'empty_data_show_404' => TRUE),
+	'tag' => array('view' => 'articles/list', 'empty_data_show_404' => TRUE, 'per_page' => 5),
+	'custom' => array('route' => 'articles/custom', 'view' => 'articles/list', 'method' => 'my_custom_method')
 ),
 ...
 </pre>
 
 
 <h2 id="custom_model_classes">Separate Classes for Model Logic</h2>
-<p>For larger models, things like the form_fields method and the validation logic and even the related items area can become a bit much to have in one model. FUEL 1.3 added the ability
-to inherit from three new classes to make it easier to separate that logic out. To add this functionality, there are now three new properties that can be utilized on a module model:</p>
+<p>For larger models, the <dfn>list_items</dfn> method <dfn>form_fields</dfn> method, the validation logic and even the related items area can become a bit much to have in one model. FUEL 1.3 added the ability
+to inherit from four new classes to make it easier to separate that logic out. To add this functionality, there are now four new properties that can be utilized on a module model:</p>
 
 <pre class="brush:php">
 public $list_items_class = '';  // a class that can extend Base_model_list_fields and manipulate the list_items method
@@ -609,7 +609,7 @@ public $related_items_class = ''; // a class that can extend Base_model_related_
 <h3>Custom Classes</h3>
 <p>All custom classes come with the following methods that can be used with the class</p>
 <ul>
-	<li><strong>set_parent_model</strong>: Sets the main parent model (done upon initilaization)</li>
+	<li><strong>set_parent_model</strong>: Sets the main parent model (done upon initialization)</li>
 	<li><strong>get_parent_model</strong>: Returns the main parent model</li>
 	<li><strong>set_values</strong>: Sets the current record's values (if any... done upon initialization)</li>
 	<li><strong>append_values</strong>: Appends values to the existing values store.</li>
@@ -627,7 +627,7 @@ public $related_items_class = ''; // a class that can extend Base_model_related_
 <pre class="brush:php">
 &lt;?php  if (!defined('BASEPATH')) exit('No direct script access allowed');
 
-require_once(FUEL_PATH.'models/base_module_model.php');
+require_once(FUEL_PATH.'models/Base_module_model.php');
 
 class Articles_model extends Base_module_model {
 	...
@@ -693,7 +693,7 @@ class Article_fields extends Base_model_list_items {
 <pre class="brush:php">
 &lt;?php  if (!defined('BASEPATH')) exit('No direct script access allowed');
 
-require_once(FUEL_PATH.'models/base_module_model.php');
+require_once(FUEL_PATH.'models/Base_module_model.php');
 
 class Articles_model extends Base_module_model {
 	...
@@ -778,7 +778,7 @@ Below is an example of how to hide multiple fields at once:</p>
 </ul>
 
 <h3>Custom Related Items Class</h3>
-<p>The custom relatd items class can be used to display information that appears to the right of the form fields.</p>
+<p>The custom related items class can be used to display information that appears to the right of the form fields.</p>
 <ul>
 	<li><strong>vars</strong>: By default the following variables are passed to the view file:
 		<ul>

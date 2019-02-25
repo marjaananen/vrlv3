@@ -8,7 +8,7 @@
  *
  * @package		FUEL CMS
  * @author		David McReynolds @ Daylight Studio
- * @copyright	Copyright (c) 2015, Run for Daylight LLC.
+ * @copyright	Copyright (c) 2018, Daylight Studio LLC.
  * @license		http://docs.getfuelcms.com/general/license
  * @link		http://www.getfuelcms.com
  * @filesource
@@ -91,7 +91,7 @@ class Fuel_auth extends Fuel_base_library {
 			else
 			{
 				$this->CI->fuel->logs->write(lang('auth_log_failed_updating_login_info', $valid_user['user_name'], $this->CI->input->ip_address()), 'debug');
-				FALSE;
+				return FALSE;
 			}
 		}
 
@@ -145,8 +145,8 @@ class Fuel_auth extends Fuel_base_library {
 	 * Sets session data for the currently logged in user
 	 *
 	 * @access	public
-	 * @access	string	The array key to associate the session data
-	 * @access	mixed	The session data to save
+	 * @param	string	The array key to associate the session data
+	 * @param	mixed	The session data to save
 	 * @return	void
 	 */	
 	public function set_user_data($key, $value)
@@ -360,6 +360,7 @@ class Fuel_auth extends Fuel_base_library {
 						}
 						else if ($val != $this->CI->module)
 						{
+							$default_key = $val;
 							$permission[$val] = $this->CI->module.'/'.$val;
 						}
 						else
@@ -373,25 +374,33 @@ class Fuel_auth extends Fuel_base_library {
 						unset($permission[$key]);
 					}
 				}
-				
+
 				if (!empty($permission[$type]))
 				{
 					$permission = $permission[$type];
 				}
 				else if (empty($type))
 				{
-					$permission = reset($permission);
+					if (!empty($default_key) AND is_string($default_key))
+					{
+						$permission = $default_key;
+					}
+					else
+					{
+						$permission = reset($permission);
+					}
+					
 				}
 				else
 				{
 					$permission = NULL;
 				}
 			}
+
 			return (!empty($permission) AND !empty($user_perms[$permission]));
 		}
 		return FALSE;
 	}
-	
 
 	// --------------------------------------------------------------------
 	

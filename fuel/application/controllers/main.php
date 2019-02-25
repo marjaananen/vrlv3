@@ -12,5 +12,8 @@ class Main extends CI_Controller
         $vars['message'] = $this->session->flashdata('message');
         $this->fuel->pages->render('index', $vars);
     }
+    
+
+    
 }
 ?>

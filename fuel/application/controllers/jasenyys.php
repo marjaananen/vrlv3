@@ -5,6 +5,92 @@ class Jasenyys extends CI_Controller
     {
         parent::__construct();
     }
+	
+	function rekisteriseloste()
+    {
+        $vars = array();
+        $vars['message'] = $this->session->flashdata('message');
+        $this->fuel->pages->render('jasenyys/rekisteriseloste', $vars);
+    }
+	
+	function index()
+    {
+        $this->haku();
+    }
+	
+	
+	function liity()
+    {
+		$this->load->library('form_validation');
+        $vars['title'] = 'Liity jäseneksi';
+        $vars['msg'] = 'Tähdellä merkityt kentät ovat pakollisia! Rekisteröitymisen jälkeen saat sähköpostilla salasanan ja koodin, jolla aktivoida tunnuksesi. Huomaathan, että ylläpidon tulee tarkastaa hakemuksesi ennen kuin voit kirjautua!';
+        
+        if($this->input->server('REQUEST_METHOD') == 'GET')
+        {
+            // load form_builder
+            $this->load->library('form_builder', array('submit_value' => 'Liity', 'required_text' => '*Pakollinen kenttä'));
+            $this->load->model('tunnukset_model');
+			$options = $this->tunnukset_model->get_location_option_list();
+
+            // create fields
+            $fields['nimimerkki'] = array('type' => 'text', 'required' => TRUE, 'after_html' => '<span class="form_comment">Nimimerkit eivät ole yksilöllisiä</span>', 'class'=>'form-control');
+            $fields['email'] = array('type' => 'text', 'required' => TRUE, 'label' => 'Sähköpostiosoite', 'after_html' => '<span class="form_comment">esimerkki@osoite.fi</span>', 'class'=>'form-control');
+            $fields['syntymavuosi'] = array('type' => 'text', 'label' => 'Syntymäaika', 'size' => '10', 'value' => '', 'after_html' => '<span class="form_comment">esim. 31.12.1999</span>', 'class'=>'form-control');
+            $fields['sijainti'] = array('type' => 'select', 'options' => $options, 'first_option' => 'En halua kertoa', 'after_html' => '<span class="form_comment">Voit halutessasi laittaa iän ja sijainnin näkyväksi rekisteröitymisen jälkeen</span>', 'class'=>'form-control');
+            $fields['roskapostitarkastus'] = array('type' => 'number', 'required' => TRUE, 'after_html' => '<span class="form_comment">Montako kaviota hevosella on? Numerona.</span>', 'class'=>'form-control');
+            
+            $this->form_builder->form_attrs = array('method' => 'post', 'action' => site_url('/jasenyys/liity'));
+    
+            // render the page
+            $vars['form'] = $this->form_builder->render_template('_layouts/basic_form_template', $fields);
+            
+            $this->fuel->pages->render('misc/jonorekisterointi', $vars);
+        }
+        else if($this->input->server('REQUEST_METHOD') == 'POST')
+        {
+            if($this->input->post('roskapostitarkastus') !='4')
+            {
+				$vars['msg'] = "Roskapostitarkastus epäonnistui. Olet botti.";
+				$vars['msg_type'] = "danger";
+			}
+			else {
+				$this->load->helper(array('form', 'url'));
+                $this->load->model('tunnukset_model');
+                $this->load->library('email');
+                
+                $this->form_validation->set_rules('nimimerkki', 'Nimimerkki', "required|min_length[1]|max_length[20]|regex_match[/^[A-Za-z0-9_\-.:,; *~#&'@()]*$/]");
+                $this->form_validation->set_rules('email', 'Sähköpostiosoite', 'required|valid_email|is_unique[vrlv3_tunnukset.email]|is_unique[vrlv3_tunnukset_jonossa.email]');
+                $this->form_validation->set_rules('syntymavuosi', 'Syntymäaika', 'min_length[8]|max_length[10]|callback__date_valid');
+                $this->form_validation->set_rules('sijainti', 'Sijainti', 'min_length[1]|max_length[2]|numeric');
+
+				if ($this->form_validation->run() == FALSE)
+                {
+					$vars['msg'] = "Lomakkeen lähetys epäonnistui!";
+					$vars['msg_type'] = "danger";
+                }
+				else
+				{
+                    $return_data = $this->tunnukset_model->add_new_application($this->input->post('nimimerkki'), $this->input->post('email'), $this->input->post('syntymavuosi'), $this->input->post('sijainti'));
+					
+					$to = $this->input->post('email');
+					$subject = "Varmista VRL-tunnushakemuksesi!";
+					$message = 'Tervetuloa virtuaalisen ratsastajainliiton jäseneksi!\nVarmista lähettämäsi hakemus käymällä seuraavassa osoitteessa:\n\n---------------------------------------\n\n';
+					$message = $message . base_url() . 'jasenyys/vahvista/?email=' . $this->input->post('email') . '&code=' . $return_data['varmistus'] . '\n\n---------------------------------------\n\nÄlä vastaa tähän sähköpostiin!\nJos et ole lähettänyt jäsenhakemusta, ota yhteys VRL:n ylläpitoon osoitteessa yllapito@virtuaalihevoset.net';
+
+					$this->load->library('vrl_email');
+					if ($this->vrl_email->send($to, $subject, $message)){
+						$vars['msg'] = "Lomakkeen lähetys onnistui!<br />Tarkasta antamasi sähköpostin postilaatikko (jos ei näy, katso roskapostikansio) ja seuraa lähetettyjä ohjeita.";
+						$vars['msg_type'] = "success";
+					}
+					//What if sending fails?
+				}
+            }
+            
+            $this->fuel->pages->render('misc/jonorekisterointi', $vars);
+        }
+        else
+            redirect('/', 'refresh');
+    }
 
     function tunnus($tunnus="", $sivu = "")
     {
@@ -70,79 +156,7 @@ class Jasenyys extends CI_Controller
 	}
     }
     
-    function liity()
-    {
-	$this->load->library('form_validation');
-        $vars['title'] = 'Liity jäseneksi';
-        $vars['msg'] = 'Tähdellä merkityt kentät ovat pakollisia! Rekisteröitymisen jälkeen saat sähköpostilla salasanan ja koodin, jolla aktivoida tunnuksesi. Huomaathan, että ylläpidon tulee tarkastaa hakemuksesi ennen kuin voit kirjautua!';
-        
-        if($this->input->server('REQUEST_METHOD') == 'GET')
-        {
-            // load form_builder
-            $this->load->library('form_builder', array('submit_value' => 'Liity', 'required_text' => '*Pakollinen kenttä'));
-            $this->load->model('tunnukset_model');
-	    $options = $this->tunnukset_model->get_location_option_list();
 
-            // create fields
-            $fields['nimimerkki'] = array('type' => 'text', 'required' => TRUE, 'after_html' => '<span class="form_comment">Nimimerkit eivät ole yksilöllisiä</span>', 'class'=>'form-control');
-            $fields['email'] = array('type' => 'text', 'required' => TRUE, 'label' => 'Sähköpostiosoite', 'after_html' => '<span class="form_comment">esimerkki@osoite.fi</span>', 'class'=>'form-control');
-            $fields['syntymavuosi'] = array('type' => 'text', 'label' => 'Syntymäaika', 'size' => '10', 'value' => '', 'after_html' => '<span class="form_comment">esim. 31.12.1999</span>', 'class'=>'form-control');
-            $fields['sijainti'] = array('type' => 'select', 'options' => $options, 'first_option' => 'En halua kertoa', 'after_html' => '<span class="form_comment">Voit halutessasi laittaa iän ja sijainnin näkyväksi rekisteröitymisen jälkeen</span>', 'class'=>'form-control');
-            $fields['roskapostitarkastus'] = array('type' => 'number', 'required' => TRUE, 'after_html' => '<span class="form_comment">Montako kaviota hevosella on? Numerona.</span>', 'class'=>'form-control');
-            
-            $this->form_builder->form_attrs = array('method' => 'post', 'action' => site_url('/jasenyys/liity'));
-    
-            // render the page
-            $vars['form'] = $this->form_builder->render_template('_layouts/basic_form_template', $fields);
-            
-            $this->fuel->pages->render('misc/jonorekisterointi', $vars);
-        }
-        else if($this->input->server('REQUEST_METHOD') == 'POST')
-        {
-            if($this->input->post('roskapostitarkastus') == '4')
-            {
-		$this->load->helper(array('form', 'url'));
-                $this->load->model('tunnukset_model');
-                $this->load->library('email');
-                
-                $this->form_validation->set_rules('nimimerkki', 'Nimimerkki', "required|min_length[1]|max_length[20]|regex_match[/^[A-Za-z0-9_\-.:,; *~#&'@()]*$/]");
-                $this->form_validation->set_rules('email', 'Sähköpostiosoite', 'required|valid_email|is_unique[vrlv3_tunnukset.email]|is_unique[vrlv3_tunnukset_jonossa.email]');
-                $this->form_validation->set_rules('syntymavuosi', 'Syntymäaika', 'min_length[8]|max_length[10]|callback__date_valid');
-                $this->form_validation->set_rules('sijainti', 'Sijainti', 'min_length[1]|max_length[2]|numeric');
-
-		if ($this->form_validation->run() == FALSE)
-                {
-		    $vars['msg'] = "Lomakkeen lähetys epäonnistui!";
-		    $vars['msg_type'] = "danger";
-                }
-		else
-		{
-		    $vars['msg'] = "Lomakkeen lähetys onnistui!<br />Tarkasta antamasi sähköpostin postilaatikko (jos ei näy, katso roskapostikansio) ja seuraa lähetettyjä ohjeita.";
-                    $vars['msg_type'] = "success";
-                    
-                    $return_data = $this->tunnukset_model->add_new_application($this->input->post('nimimerkki'), $this->input->post('email'), $this->input->post('syntymavuosi'), $this->input->post('sijainti'));
-                    
-                    $this->email->from('jasenyys@virtuaalihevoset.net', 'Jäsenyyskone');
-                    $this->email->to($this->input->post('email')); 
-                    
-                    $this->email->subject('Varmista VRL-tunnushakemuksesi!');
-                    $this->email->message('Tervetuloa virtuaalisen ratsastajainliiton jäseneksi!\nVarmista lähettämäsi hakemus käymällä seuraavassa osoitteessa:\n\n---------------------------------------\n\nhttp://www.virtuaalihevoset.net/jasenyys/vahvista/?email=' . $this->input->post('email') . '&code=' . $return_data['varmistus'] . '\n\n---------------------------------------\n\nÄlä vastaa tähän sähköpostiin!\nJos et ole lähettänyt jäsenhakemusta, ota yhteys VRL:n ylläpitoon osoitteessa yllapito@virtuaalihevoset.net');
-                    
-                    //$this->email->send();
-                    //TESTAAMATON --^
-		}
-            }
-            else
-            {
-                $vars['msg'] = "Roskapostitarkastus epäonnistui. Olet botti.";
-		$vars['msg_type'] = "danger";
-            }
-            
-            $this->fuel->pages->render('misc/jonorekisterointi', $vars);
-        }
-        else
-            redirect('/', 'refresh');
-    }
     
     function vahvista()
     {
@@ -161,7 +175,7 @@ class Jasenyys extends CI_Controller
     
     function haku()
     {
-        $this->load->library('Vrl_helper');
+    $this->load->library('Vrl_helper');
 	$this->load->model('tunnukset_model');
 	$this->load->library('form_validation');
 	$this->load->library('form_builder', array('submit_value' => 'Hae'));
@@ -180,7 +194,7 @@ class Jasenyys extends CI_Controller
 	
 	if($this->input->server('REQUEST_METHOD') == 'POST')
 	{
-            $this->form_validation->set_rules('tunnus', 'VRL-tunnus', "min_length[5]|max_length[9]|regex_match[/^[VRL*\-0-9]*$/]");
+        $this->form_validation->set_rules('tunnus', 'VRL-tunnus', "min_length[5]|max_length[9]|regex_match[/^[VRL*\-0-9]*$/]");
 	    $this->form_validation->set_rules('nimimerkki', 'Nimimerkki', "min_length[4]|regex_match[/^[A-Za-z0-9_\-.:,; *~#&'@()]*$/]");
 	    $this->form_validation->set_rules('sijainti', 'Sijainti', 'min_length[1]|max_length[2]');
 

@@ -15,7 +15,7 @@
 //  -käsittelyfunktio (käsittelee hakemuksen ylläpitäjän tuomion jälkeen)
 //Käsittelyfunktion routen tulee olla jonofunktionroute_kasittele
 
-//Esim. talleille nämä funktiot ovat: tallirekisteri_etusivu (yhdistettynä kategoriajonon etusivuun), tallijono, kasittele_talli.
+//Esim. talleille nämä funktiot ovat: tallirekisteri_etusivu, tallijono, kasittele_talli.
 //Uutta jonoa luotaessa on nopeinta kopioida nämä funktiot uutta jonoa varten muokattavaksi, erot jonojen välillä ovat pieniä.
 //Jokainen mainituista kontrollerifunktioista lataa kirjaston ja antaa rakentajalle parametrina jonotaulun nimen *_jonossa
 

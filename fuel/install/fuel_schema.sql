@@ -44,8 +44,8 @@ CREATE TABLE `fuel_blocks` (
 
 CREATE TABLE `fuel_categories` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(100) NOT NULL DEFAULT '',
-  `slug` varchar(100) NOT NULL DEFAULT '',
+  `name` varchar(255) NOT NULL DEFAULT '',
+  `slug` varchar(255) NOT NULL DEFAULT '',
   `description` text NOT NULL,
   `context` varchar(100) NOT NULL DEFAULT '',
   `language` varchar(30) NOT NULL DEFAULT 'english',
@@ -75,7 +75,7 @@ CREATE TABLE `fuel_logs` (
 
 CREATE TABLE `fuel_navigation` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `location` varchar(255) COLLATE utf8_unicode_ci NOT NULL COMMENT 'The part of the path after the domain name that you want the link to go to (e.g. comany/about_us)',
+  `location` varchar(255) COLLATE utf8_unicode_ci NOT NULL COMMENT 'The part of the path after the domain name that you want the link to go to (e.g. company/about_us)',
   `group_id` int(5) unsigned NOT NULL DEFAULT '1',
   `nav_key` varchar(255) COLLATE utf8_unicode_ci NOT NULL COMMENT 'The nav key is a friendly ID that you can use for setting the selected state. If left blank, a default value will be set for you.',
   `label` varchar(255) COLLATE utf8_unicode_ci NOT NULL COMMENT 'The name you want to appear in the menu',
@@ -135,7 +135,7 @@ CREATE TABLE `fuel_pages` (
   `location` varchar(255) COLLATE utf8_unicode_ci NOT NULL COMMENT 'Add the part of the url after the root of your site (usually after the domain name). For the homepage, just put the word ''home''',
   `layout` varchar(50) COLLATE utf8_unicode_ci NOT NULL COMMENT 'The name of the template to associate with this page',
   `published` enum('yes','no') COLLATE utf8_unicode_ci NOT NULL DEFAULT 'yes' COMMENT 'A ''yes'' value will display the page and an ''no'' value will give a 404 error message',
-  `cache` enum('yes','no') COLLATE utf8_unicode_ci NOT NULL DEFAULT 'yes' COMMENT 'Cache controls whether the page will pull from the database or from a saved file which is more effeicent. If a page has content that is dynamic, it''s best to set cache to ''no''',
+  `cache` enum('yes','no') COLLATE utf8_unicode_ci NOT NULL DEFAULT 'yes' COMMENT 'Cache controls whether the page will pull from the database or from a saved file which is more efficient. If a page has content that is dynamic, it''s best to set cache to ''no''',
   `date_added` datetime DEFAULT NULL,
   `last_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `last_modified_by` int(10) unsigned NOT NULL,
@@ -157,9 +157,6 @@ CREATE TABLE `fuel_permissions` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `name` (`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-
-LOCK TABLES `fuel_permissions` WRITE;
-/*!40000 ALTER TABLE `fuel_permissions` DISABLE KEYS */;
 
 INSERT INTO `fuel_permissions` (`id`, `description`, `name`, `active`)
 VALUES
@@ -198,10 +195,6 @@ VALUES
   (NULL,'Logs','logs','yes'),
   (NULL,'Settings','settings','yes'),
   (NULL,'Generate Code','generate','yes');
-	
-
-/*!40000 ALTER TABLE `fuel_permissions` ENABLE KEYS */;
-UNLOCK TABLES;
 
 
 # Dump of table fuel_relationships
@@ -209,11 +202,12 @@ UNLOCK TABLES;
 
 CREATE TABLE `fuel_relationships` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `candidate_table` varchar(100) DEFAULT '',
+  `candidate_table` varchar(100) COLLATE utf8_unicode_ci DEFAULT '',
   `candidate_key` int(11) NOT NULL,
-  `foreign_table` varchar(100) DEFAULT NULL,
+  `foreign_table` varchar(100) COLLATE utf8_unicode_ci DEFAULT NULL,
   `foreign_key` int(11) NOT NULL,
   PRIMARY KEY (`id`),
+  UNIQUE KEY `unique_key` (`candidate_table`,`candidate_key`,`foreign_table`,`foreign_key`),
   KEY `candidate_table` (`candidate_table`,`candidate_key`),
   KEY `foreign_table` (`foreign_table`,`foreign_key`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;

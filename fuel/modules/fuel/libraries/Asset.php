@@ -8,7 +8,7 @@
  *
  * @package		FUEL CMS
  * @author		David McReynolds @ Daylight Studio
- * @copyright	Copyright (c) 2015, Run for Daylight LLC.
+ * @copyright	Copyright (c) 2018, Daylight Studio LLC.
  * @license		http://docs.getfuelcms.com/general/license
  * @link		http://www.getfuelcms.com
  * @filesource
@@ -21,7 +21,7 @@
  *
  * This class allows you to output css, js links and/or files as well as
  * allows you to compress and cache them. It also has convenience methods for 
- * paths to different assets like images, pdfs, javascript css etc.
+ * paths to different assets like images, PDFs, javascript css etc.
  * 
  * Additionally, you can use the <a href="[user_guide_url]helpers/asset">asset helper</a>
  * which provides a shortcut for many of the methods of the Asset class. 
@@ -408,7 +408,7 @@ class Asset {
 	 */	
 	public function cache_path($file = NULL, $module = NULL, $absolute = NULL)
 	{
-		return $this->assets_path($file, 'assets_cache_folder', $module, $absolute);
+		return $this->assets_path($file, trim($this->assets_cache_folder, '/'), $module, $absolute);
 	}
 
 	// --------------------------------------------------------------------
@@ -500,7 +500,8 @@ class Asset {
 
 		if ($absolute)
 		{
-			$path = 'http://'.$_SERVER['HTTP_HOST'].$path;
+			$protocol = ($_SERVER["SERVER_PORT"] == 443) ? "https://" : "http://";
+			$path = $protocol.$_SERVER['HTTP_HOST'].$path;
 		}
 		return $path;
 	}
@@ -554,6 +555,7 @@ class Asset {
 	</code>
 	 * @access	public
 	 * @param	string	server path to asset file
+	 * @param	bool	determines whether to truncate to the asset folder or not
 	 * @return	string
 	 */	
 	public function assets_server_to_web_path($file, $truncate_to_asset_folder = FALSE)
@@ -562,13 +564,18 @@ class Asset {
 		$web_path = str_replace(WEB_ROOT, '', '/'.$file);
 	//	$assets_path = str_replace('/', DIRECTORY_SEPARATOR, $this->assets_path); // for windows
 		$assets_path = str_replace($this->assets_path, '', $web_path);
-		
+
+		// Causes issues in some environments like GoDaddy... was originally changed for the assets to potentially be in a parent folder 
+		// $doc_root = preg_replace("!${_SERVER['SCRIPT_NAME']}$!", '', $_SERVER['SCRIPT_FILENAME']);
+		// $assets_path = str_replace($doc_root, '', $assets_path);
+
 		if ($truncate_to_asset_folder)
 		{
 			if (strncmp($assets_path, '/', 1) === 0) $asset_path = substr($assets_path, 1);  // to remove beginning slash
 			return $assets_path;
 		}
-		return str_replace('//', '/', $this->assets_path($assets_path));
+				
+		return $this->assets_path(str_replace('//', '/', $assets_path));
 	}
 
 	// --------------------------------------------------------------------
@@ -704,11 +711,10 @@ class Asset {
 		// if the path is an associative array, than we assume the key is the module
 		if (is_array($path))
 		{
-			$path_arr = each($path);
-			if (!is_numeric($path_arr['key']))
+			if (!is_numeric(key($path)))
 			{
-				$module = $path_arr['key'];
-				$path = $path_arr['value'];
+				$module = key($path);
+				$path = current($path);
 			}
 		}
 		
@@ -739,7 +745,7 @@ class Asset {
 		if ($options['output'] === 'inline')
 		{
 			$open = "<script>\n";
-			$close .= "\t</script>";
+			$close = "\t</script>";
 		}
 		else
 		{
@@ -749,7 +755,6 @@ class Asset {
 
 		$str = $this->_output('js', $module, $open, $close, $path, $options);
 		if (!empty($options['echo'])) echo $str;
-		$str = $str;
 		return $str;
 	}
 
@@ -804,11 +809,10 @@ class Asset {
 		// if the path is an associative array, than we assume the key is the module
 		if (is_array($path))
 		{
-			$path_arr = each($path);
-			if (!is_numeric($path_arr['key']))
+			if (!is_numeric(key($path)))
 			{
-				$module = $path_arr['key'];
-				$path = $path_arr['value'];
+				$module = key($path);
+				$path = current($path);
 			}
 		}
 		
@@ -1125,8 +1129,7 @@ class Asset {
 		$CI =& get_instance();
 		$files = (array) $files;
 		$cache_file_name = '';
-		$cache_dir = $this->assets_server_path($this->assets_cache_folder, 'cache', $module);
-		
+		$cache_dir = $this->assets_server_path($this->assets_cache_folder, '', $module);
 		$return = array();
 	
 		$default_module = $module;
@@ -1168,8 +1171,7 @@ class Asset {
 		$cache_file_name_md5 = md5($cache_file_name);
 		$ext = ($optimize === TRUE OR $optimize == 'gzip') ? 'php' : $type;
 		$cache_file_name = $cache_file_name_md5.'_'.strtotime($this->assets_last_updated).'.'.$ext;
-		$cache_file = $cache_dir.$cache_file_name;
-
+		$cache_file = rtrim($cache_dir, '/').'/'.$cache_file_name;
 
 
 		// create cache file if it doesn't exist'
@@ -1198,7 +1200,6 @@ class Asset {
 
 			$output = $this->optimize($this->_cacheable_files, $optimize_params);
 
-
 			// try to create directories if not there
 			if (!is_dir($cache_dir) AND is_writable($cache_dir))
 			{
@@ -1212,11 +1213,12 @@ class Asset {
 			{
 				if (strncmp($dir_file, $cache_file_name_md5, 10) === 0)
 				{
-					 unlink($cache_dir.$dir_file);
+					 unlink(rtrim($cache_dir, '/').'/'.$dir_file);
 				}
 			}
 			write_file($cache_file, $output); // write cache file
 		}
+
 		return $this->cache_path($cache_file_name, $module);
 	}
 
@@ -1302,8 +1304,8 @@ class Asset {
 			$params['type'] = 'js';
 			foreach($files as $file)
 			{
-				$file_parts = explode('.', $files[0]);
-				$ext =  end($file_parts);
+				$file_parts = explode('.', $files[0]); 
+				$ext = end($file_parts);
 				if (in_array($ext, $valid_exts))
 				{
 					$params['type'] = $ext;
@@ -1425,18 +1427,19 @@ class Asset {
 					}
 				}
 
-				$callback = create_function('$matches', '
+				$callback = function($matches) {
 					if (isset($matches[2]))
 					{
 						return $GLOBALS["__TMP_CSS_IMPORT__"][$matches[2]];	
 					} else {
 						return "";
-					}');
+					}
+				};
 
 				// remove calls to the import since they are combined into the same css
 				if (!empty($import_files))
 				{
-					// temporarily put it in the global space so the anonymoous function can grab it
+					// temporarily put it in the global space so the anonymous function can grab it
 					$GLOBALS["__TMP_CSS_IMPORT__"] = $import_files;
 					$output = preg_replace_callback('/@import url\(([\'|"])*(.+)\\1\);/U', $callback, $output);
 					unset($GLOBALS["__TMP_CSS_IMPORT__"]);
@@ -1457,41 +1460,39 @@ class Asset {
 		}
 		
 		// gzip if enabled in config and the server
-		if (($params['gzip'] == TRUE) AND extension_loaded('zlib'))
+		if ((($params['gzip'] == TRUE) AND extension_loaded('zlib')) AND (isset($_SERVER['HTTP_ACCEPT_ENCODING']) AND strpos($_SERVER['HTTP_ACCEPT_ENCODING'], 'gzip') !== FALSE))
 		{
-			if (isset($_SERVER['HTTP_ACCEPT_ENCODING']) AND strpos($_SERVER['HTTP_ACCEPT_ENCODING'], 'gzip') !== FALSE)
+			$gzip = "<?php".PHP_EOL;
+			$gzip .= "ob_start();".PHP_EOL;
+		
+			// start an inner buffer so we can get the content length
+			$gzip .= "ob_start (\"ob_gzhandler\");".PHP_EOL;
+			$gzip .= "\n?>";
+			$gzip .= $output;
+			$gzip .= "<?php".PHP_EOL;
+			$gzip .= "ob_end_flush();".PHP_EOL;
+		
+			// now begin inner buffer headers
+			if (!empty($mime))
 			{
-				$gzip = "<?php".PHP_EOL;
-				$gzip .= "ob_start();".PHP_EOL;
-			
-				// start an inner buffer so we can get the content length
-				$gzip .= "ob_start (\"ob_gzhandler\");".PHP_EOL;
-				$gzip .= "\n?>";
-				$gzip .= $output;
-				$gzip .= "<?php".PHP_EOL;
-				$gzip .= "ob_end_flush();".PHP_EOL;
-			
-				// now begin inner buffer headers
-				if (!empty($mime))
-				{
-					$gzip .= "header(\"Content-type: ".$mime."; charset: UTF-8\");".PHP_EOL;	
-				}
-				$gzip .= "header(\"Cache-Control: must-revalidate\");".PHP_EOL;
-				$gzip .= "\$offset = ".$this->assets_gzip_cache_expiration.";".PHP_EOL;
-				$gzip .= "\$exp = \"Expires: \".gmdate(\"D, d M Y H:i:s\",time() + \$offset).\" GMT\";".PHP_EOL;
-				$gzip .= "header(\$exp);".PHP_EOL;
-				$gzip .= "\$size = \"Content-Length: \".ob_get_length();".PHP_EOL;
-				$gzip .= "header(\$size);".PHP_EOL;
-				$gzip .= 'ob_end_flush();';
-				$gzip .= "\n?>".PHP_EOL;
-				$output = $gzip;
+				$gzip .= "header(\"Content-type: ".$mime."; charset: UTF-8\");".PHP_EOL;	
 			}
+			$gzip .= "header(\"Cache-Control: must-revalidate\");".PHP_EOL;
+			$gzip .= "\$offset = ".$this->assets_gzip_cache_expiration.";".PHP_EOL;
+			$gzip .= "\$exp = \"Expires: \".gmdate(\"D, d M Y H:i:s\",time() + \$offset).\" GMT\";".PHP_EOL;
+			$gzip .= "header(\$exp);".PHP_EOL;
+			$gzip .= "\$size = \"Content-Length: \".ob_get_length();".PHP_EOL;
+			$gzip .= "header(\$size);".PHP_EOL;
+			$gzip .= 'ob_end_flush();';
+			$gzip .= "\n?>".PHP_EOL;
+			$output = $gzip;
 		}
-
+		
 		// write contents to file
 		if (!empty($params['destination']))
 		{
 			$destination_dir = dirname($params['destination']);
+
 			if (is_writable($destination_dir))
 			{
 				write_file($params['destination'], $output);	

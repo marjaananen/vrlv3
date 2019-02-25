@@ -9,7 +9,7 @@
  *
  * @package		FUEL CMS
  * @author		David McReynolds @ Daylight Studio
- * @copyright	Copyright (c) 2015, Run for Daylight LLC.
+ * @copyright	Copyright (c) 2018, Daylight Studio LLC.
  * @license		http://docs.getfuelcms.com/general/license
  * @link		http://www.getfuelcms.com
  * @filesource
@@ -106,7 +106,12 @@ class Fuel_posts extends Fuel_base_library {
 	 */
 	public function url($uri = '')
 	{
-		return site_url($this->base_uri().'/'.$uri);
+		if (!empty($uri))
+		{
+			return site_url($this->base_uri().'/'.$uri);
+		}
+		return site_url($this->base_uri());
+
 	}
 
 	// --------------------------------------------------------------------
@@ -293,7 +298,7 @@ class Fuel_posts extends Fuel_base_library {
 	// --------------------------------------------------------------------
 
 	/**
-	 * Normalizes the route by removing placedholers (e.g. :any and ($name:....)).
+	 * Normalizes the route by removing placeholders (e.g. :any and ($name:....)).
 	 *
 	 * @access	protected
 	 * @param	string 	The route to normalize
@@ -475,7 +480,8 @@ class Fuel_posts extends Fuel_base_library {
 		{
 			return $model->get_posts_count($where);
 		}
-
+		
+		$model->_common_query($model->display_unpublished_if_logged_in);
 		$count = $model->record_count($where);
 		return $count;
 	}
@@ -563,6 +569,7 @@ class Fuel_posts extends Fuel_base_library {
 			}
 			$where[$tables['fuel_categories'].'.slug'] = $category;	
 		}
+
 		$posts = $model->find_all($where, $order_by, $limit, $offset);
 		return $posts;
 	}
@@ -575,18 +582,19 @@ class Fuel_posts extends Fuel_base_library {
 	 *
 	 * @access	public
 	 * @param	string 	The tag slug or ID value to search -- can also be a Fuel_tag_model object (optional)
+	 * @param	string 	The order of the results
 	 * @param	int The limit of results
 	 * @param	int The offset of the results
 	 * @return	array
 	 */
-	public function get_tag_posts($tag, $limit = NULL, $offset = NULL)
+	public function get_tag_posts($tag, $order_by = NULL, $limit = NULL, $offset = NULL)
 	{
 		$model = $this->model();
 
 		// use the method on the model if it exists
 		if (method_exists($model, 'get_tag_posts'))
 		{
-			return $model->get_tag_posts($tag, $limit, $offset);
+			return $model->get_tag_posts($tag, $order_by, $limit, $offset);
 		}
 
 		$tables = $model->tables();
@@ -604,7 +612,7 @@ class Fuel_posts extends Fuel_base_library {
 			$where[$tables['fuel_tags'].'.slug'] = $tag;	
 		}
 		
-		$posts = $model->find_all($where, NULL, $limit, $offset);
+		$posts = $model->find_all($where, $order_by, $limit, $offset);
 		return $posts;
 	}
 	// --------------------------------------------------------------------
@@ -1060,6 +1068,7 @@ class Fuel_posts extends Fuel_base_library {
 
 		$limit = ($this->per_page()) ? $this->per_page() : NULL;
 		$offset = $this->CI->input->get('per_page');
+		$order_by = $this->get_order_by_field().' '.$this->get_order_by_direction();
 
 		if (method_exists($this->model(), $this->vars_method()))
 		{
@@ -1079,10 +1088,10 @@ class Fuel_posts extends Fuel_base_library {
 					$vars = $this->vars_post($this->matched_segment('slug'));
 					break;
 				case 'tag':
-					$vars = $this->vars_tag($this->matched_segment('tag'));
+					$vars = $this->vars_tag($this->matched_segment('tag'), $order_by, $limit, $offset);
 					break;
 				case 'category':
-					$vars = $this->vars_category($this->matched_segment('category'));
+					$vars = $this->vars_category($this->matched_segment('category'), $order_by, $limit, $offset);
 					break;
 				case 'archive':
 					$year = $this->matched_segment('year');
@@ -1164,7 +1173,7 @@ class Fuel_posts extends Fuel_base_library {
 		$posts = $this->get_posts(array(), $order_by, $limit, $offset);
 		$total_rows = $this->get_posts_count();
 		$vars['posts'] = $posts;
-		$vars['pagination'] = $this->pagination($total_rows, $this->url('/?'));
+		$vars['pagination'] = $this->pagination($total_rows, $this->url('?'));
 
 		return $vars;
 	}
@@ -1235,7 +1244,7 @@ class Fuel_posts extends Fuel_base_library {
 	 * @param	int 	The offset of the results (optional)
 	 * @return	array 
 	 */
-	protected function vars_tag($tag, $limit = NULL, $offset = NULL)
+	protected function vars_tag($tag, $order_by = NULL, $limit = NULL, $offset = NULL)
 	{
 		if (empty($tag))
 		{
@@ -1252,7 +1261,7 @@ class Fuel_posts extends Fuel_base_library {
 			$this->show_404();
 		}
 
-		$posts = $this->get_tag_posts($slug, $limit, $offset);
+		$posts = $this->get_tag_posts($slug, $order_by, $limit, $offset);
 		if (empty($posts))
 		{
 			$this->show_404();
@@ -1278,7 +1287,7 @@ class Fuel_posts extends Fuel_base_library {
 	 * @param	int 	The offset of the results (optional)
 	 * @return	array 
 	 */
-	protected function vars_category($category = NULL, $limit = NULL, $offset = NULL)
+	protected function vars_category($category = NULL, $order_by = NULL, $limit = NULL, $offset = NULL)
 	{
 		if (empty($category))
 		{
@@ -1295,7 +1304,7 @@ class Fuel_posts extends Fuel_base_library {
 			$this->show_404();
 		}
 
-		$posts = $this->get_category_posts($slug, $limit, $offset);
+		$posts = $this->get_category_posts($slug, $order_by, $limit, $offset);
 
 		if (empty($posts))
 		{
@@ -1414,8 +1423,8 @@ class Fuel_posts extends Fuel_base_library {
 	{
 		$vars['CI'] =& get_instance();
 		$vars['is_home'] = $this->is_home();
-		$vars['module'] =& $this->get_module();
-		$vars['model'] =& $this->model();
+		$vars['module'] = $this->get_module();
+		$vars['model'] = $this->model();
 		$vars['page_type'] = $this->page_type();
 		$vars['layout'] = $this->layout();
 		$vars['view'] = $this->view();

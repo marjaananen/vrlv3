@@ -18,7 +18,7 @@
 $lang['account_creation_successful']            = 'Account Successfully Created';
 $lang['account_creation_unsuccessful']          = 'Unable to Create Account';
 $lang['account_creation_duplicate_email']       = 'Email Already Used or Invalid';
-$lang['account_creation_duplicate_username']    = 'Username Already Used or Invalid';
+$lang['account_creation_duplicate_identity']    = 'Identity Already Used or Invalid';
 $lang['account_creation_missing_default_group'] = 'Default group is not set';
 $lang['account_creation_invalid_default_group'] = 'Invalid default group name set';
 
@@ -27,15 +27,16 @@ $lang['account_creation_invalid_default_group'] = 'Invalid default group name se
 $lang['password_change_successful']          = 'Password Successfully Changed';
 $lang['password_change_unsuccessful']        = 'Unable to Change Password';
 $lang['forgot_password_successful']          = 'Password Reset Email Sent';
-$lang['forgot_password_unsuccessful']        = 'Unable to Reset Password';
+$lang['forgot_password_unsuccessful']        = 'Unable to email the Reset Password link';
 
 // Activation
 $lang['activate_successful']                 = 'Account Activated';
 $lang['activate_unsuccessful']               = 'Unable to Activate Account';
 $lang['deactivate_successful']               = 'Account De-Activated';
 $lang['deactivate_unsuccessful']             = 'Unable to De-Activate Account';
-$lang['activation_email_successful']         = 'Activation Email Sent';
+$lang['activation_email_successful']         = 'Activation Email Sent. Please check your inbox or spam';
 $lang['activation_email_unsuccessful']       = 'Unable to Send Activation Email';
+$lang['deactivate_current_user_unsuccessful']= 'You cannot De-Activate your self.';
 
 // Login / Logout
 $lang['login_successful']                    = 'Logged In Successfully';
@@ -72,7 +73,3 @@ $lang['email_forgot_password_heading']       = 'Reset Password for %s';
 $lang['email_forgot_password_subheading']    = 'Please click this link to %s.';
 $lang['email_forgot_password_link']          = 'Reset Your Password';
 
-// New Password Email
-$lang['email_new_password_subject']          = 'New Password';
-$lang['email_new_password_heading']          = 'New Password for %s';
-$lang['email_new_password_subheading']       = 'Your password has been reset to: %s';

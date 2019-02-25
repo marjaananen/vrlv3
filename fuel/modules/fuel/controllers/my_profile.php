@@ -18,7 +18,15 @@ class My_profile extends Fuel_base_controller {
 		{
 			if ($id)
 			{
-				if ($this->fuel_users_model->save())
+				// make sure they are only 
+				if ($id != $this->fuel->auth->user_data('id'))
+				{
+					show_error(lang('error_no_permissions'));
+				}
+
+				$save = $this->input->post(NULL, TRUE);
+				$save['id'] = $id;
+				if ($this->fuel_users_model->save($save))
 				{
 					$this->fuel->admin->set_notification(lang('data_saved'), Fuel_admin::NOTIFICATION_SUCCESS);
 					redirect(fuel_uri('my_profile/edit/'));
@@ -29,7 +37,7 @@ class My_profile extends Fuel_base_controller {
 		$this->_form($id);
 	}
 
-	// seperated to make it easier in subclasses to use the form without rendering the page
+	// separated to make it easier in subclasses to use the form without rendering the page
 	public function _form($id = null)
 	{
 		$this->load->library('form_builder');
@@ -38,9 +46,6 @@ class My_profile extends Fuel_base_controller {
 		// create fields... start with the table info and go from there
 		$values = array('id' => $id);
 		$fields = $this->fuel_users_model->form_fields($values);
-
-		// remove permissions
-		unset($fields['permissions']);
 
 		// get saved data
 		$saved = array();
@@ -51,7 +56,7 @@ class My_profile extends Fuel_base_controller {
 		}
 
 		// remove active from field list to prevent them from updating it
-		unset($fields['active'], $fields['Permissions']);
+		unset($fields['active'], $fields['Permissions'], $fields['permissions'], $fields['is_invite'], $fields['id']);
 
 		if ( ! empty($_POST))
 		{

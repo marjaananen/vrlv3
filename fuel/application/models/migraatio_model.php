@@ -1,6 +1,6 @@
 <?php  if (!defined('BASEPATH')) exit('No direct script access allowed');
 
-require_once(FUEL_PATH.'models/base_module_model.php');
+require_once(FUEL_PATH.'models/Base_module_model.php');
  
 class Migraatio_model extends Base_module_model
 { 
@@ -60,10 +60,9 @@ class Migraatio_model extends Base_module_model
                 $this->db->insert('vrlv3_tiedotukset', $data_tiedotus);
             }
             
-            
             //haetaan sen käsitellyn tid
             $this->db->select("tid");
-            $this->db->where(array('aika' => $row->aika, 'otsikko' => $row->otsikko, 'lahettaja' => $row->lahettaja));
+            $this->db->where(array('aika' => $row->aika, 'otsikko' => $row->otsikko));
             $tid_query = $this->db->get('vrlv3_tiedotukset');
             $tid = $tid_query->row()->tid;
                 
@@ -78,7 +77,7 @@ class Migraatio_model extends Base_module_model
                 $this->db->select("kid");
                 $this->db->where('kategoria', $row2->kategoria);
                 $query3 = $this->db->get('vrlv3_lista_tiedotuskategoriat');
-                
+                                
                 $data_tiedotus_kategoria = array();
                 $data_tiedotus_kategoria['kid'] = $query3->row()->kid;
                 $data_tiedotus_kategoria['tid'] = $tid;
@@ -95,7 +94,6 @@ class Migraatio_model extends Base_module_model
        
         
         
-        
     }
  
     //Applications
@@ -107,11 +105,19 @@ class Migraatio_model extends Base_module_model
         {
 
             //Data vrlvä_tunnukset tauluun
+            $data['email'] = $row->email;
+            $data['tunnus'] = $row->tunnus;
+
+            if ($this->it_is_there_already('vrlv3_tunnukset', array('email'=>$data['email']))){
+                continue;
+            }
+            if ($this->it_is_there_already('vrlv3_tunnukset', array('tunnus'=>$data['tunnus']))){
+                continue;
+            }
             $data['ip_address'] = $row->rek_ip;
             $data['username'] = $row->tunnus;
             $data['password'] = $row->salasana;
             //$data['salt'] = 
-            $data['email'] = $row->email;
             //$data['activation_code'] = "";
             //$data['forgotten_password_code'] = "";
             //$data['forgotten_password_time'] = "";
@@ -119,7 +125,6 @@ class Migraatio_model extends Base_module_model
             $data['created_on'] = $row->rekisteroitynyt;
             //$data['last_login'] = $old_data[''];
             $data['active'] = 1;
-            $data['tunnus'] = $row->tunnus;
             $data['nimimerkki'] = $row->nimimerkki;
 
             if($row->nayta_email == 1 || $row->nayta_email == 2)

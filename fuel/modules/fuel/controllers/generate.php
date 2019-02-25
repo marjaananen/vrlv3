@@ -49,9 +49,6 @@ class Generate extends Fuel_base_controller {
 
 		foreach($names as $name) $this->_advanced($name);
 
-		// create a generic permission for the advanced module
-		$this->fuel->permissions->create($name);
-
 		$vars['created'] = $this->created;
 		$vars['errors'] = $this->errors;
 		$vars['modified'] = $this->modified;
@@ -115,7 +112,7 @@ class Generate extends Fuel_base_controller {
 			$substituted = str_replace($find, $replace, $val);
 			$ext = pathinfo($substituted, PATHINFO_EXTENSION);
 			$file = $name_path . $substituted;
-
+			
 			if (empty($ext))
 			{
 				if ( ! file_exists($file))
@@ -547,17 +544,18 @@ class Generate extends Fuel_base_controller {
 	{
 		$vars = array();
 		$vars['module'] = $name;
+		$vars['Module'] = ucwords($name);
 		$vars['model'] = $name;
 		$vars['table'] = $name;
 		$vars['module_name'] = ucwords(humanize($name));
-		$vars['model_name'] = ucfirst($name);
-		$vars['model_record'] = ucfirst(preg_replace('#ie$#', 'y', rtrim($name, 's')));
+		$vars['Model_name'] = ucfirst($name);
+		$vars['Model_record'] = ucfirst(preg_replace('#ie$#', 'y', rtrim($name, 's')));
 		$vars['ModuleName'] = ucfirst(camelize($name));
 		$vars['MODULE_NAME'] = strtoupper($name);
 
-		if ($vars['model_name'] == $vars['model_record'])
+		if ($vars['Model_name'] == $vars['Model_record'])
 		{
-			$vars['model_record'] = $vars['model_record'].'_item';
+			$vars['Model_record'] = $vars['Model_record'].'_item';
 		}
 
 		return $vars;

@@ -8,7 +8,7 @@
  *
  * @package		FUEL CMS
  * @author		David McReynolds @ Daylight Studio
- * @copyright	Copyright (c) 2015, Run for Daylight LLC.
+ * @copyright	Copyright (c) 2018, Daylight Studio LLC.
  * @license		http://docs.getfuelcms.com/general/license
  * @link		http://www.getfuelcms.com
  */
@@ -27,7 +27,7 @@
  * @link		http://docs.getfuelcms.com/models/fuel_navigation_model
  */
 
-require_once('base_module_model.php');
+require_once('Base_module_model.php');
 
 class Fuel_navigation_model extends Base_module_model {
 	
@@ -161,7 +161,7 @@ class Fuel_navigation_model extends Base_module_model {
 	 *
 	 * @access	public
 	 * @param	boolean Determines whether to return just published navigation items or not (optional... and ignored in the admin)
-	 * @return	array An array that can be used by the Menu class to create a hierachical structure
+	 * @return	array An array that can be used by the Menu class to create a hierarchical structure
 	 */	
 	public function tree($just_published = FALSE)
 	{
@@ -294,7 +294,6 @@ class Fuel_navigation_model extends Base_module_model {
 
 		
 		$fields['group_id'] = array(
-			'type' => 'inline_edit', 
 			'module' => 'navigation_group',
 			'options' => $group_options,
 			'type' => 'select',
@@ -480,9 +479,9 @@ class Fuel_navigation_model extends Base_module_model {
 		// if the path is local, then we clean it
 		if (!is_http_path($values['location']))
 		{
-			$values['location'] = str_replace(array('/', '#', '.'), array('____', '___', '_X_'), $values['location']);
+			$values['location'] = str_replace(array('/', '#', '.', ':', '@'), array('__SLASH__', '__POUND__', '_X_', '__COLON__', '__AT__'), $values['location']);
 			$values['location'] = url_title($values['location']);
-			$values['location'] = str_replace(array('____', '___', '_X_'), array('/', '#', '.'), $values['location']);
+			$values['location'] = str_replace(array('__SLASH__', '__POUND__', '_X_', '__COLON__', '__AT__'), array('/', '#', '.', ':', '@'), $values['location']);
 		}
 
 		if (empty($values['language']))
@@ -532,22 +531,22 @@ class Fuel_navigation_model extends Base_module_model {
 	public function _common_query($params = NULL)
 	{
 		parent::_common_query();
-		$this->db->select($this->_tables['fuel_navigation'].'.*, '.$this->_tables['fuel_navigation_groups'].'.id group_id, '.$this->_tables['fuel_navigation_groups'].'.name group_name');
+		$this->db->select($this->_tables['fuel_navigation'].'.*, '.$this->_tables['fuel_navigation_groups'].'.id AS group_id, '.$this->_tables['fuel_navigation_groups'].'.name group_name');
 		$this->db->join($this->_tables['fuel_navigation_groups'], $this->_tables['fuel_navigation_groups'].'.id='.$this->_tables['fuel_navigation'].'.group_id', 'left');
-		$this->db->order_by('precedence, location asc');
+		$this->db->order_by('precedence asc, location asc');
 	}
 	
 	// --------------------------------------------------------------------
 	
 	/**
-	 * Overwritten: Allows for grouping of menu items with last paramter
+	 * Overwritten: Allows for grouping of menu items with last parameter
 	 *
 	 * @access	public
 	 * @param	string	The column to use for the value (optional)
 	 * @param	string	The column to use for the label (optional)
-	 * @param	mixed	An array or string containg the where paramters of a query (optional)
+	 * @param	mixed	An array or string containing the where parameters of a query (optional)
 	 * @param	string	The order by of the query. defaults to $val asc (optional)
-	 * @param	boolean	Determines whether it will group the options together based on the menu troup (optional)
+	 * @param	boolean	Determines whether it will group the options together based on the menu group (optional)
 	 * @return	array	 */	
 	public function options_list($key = 'id', $val = 'label', $where = array(), $order = TRUE, $group = TRUE)
 	{
@@ -578,7 +577,7 @@ class Fuel_navigation_model extends Base_module_model {
 	// --------------------------------------------------------------------
 	
 	/**
-	 * Overwritten: Allows for grouping of menu items with last paramter
+	 * Overwritten: Allows for grouping of menu items with last parameter
 	 *
 	 * @access	public
 	 * @param	string The field name used as the label

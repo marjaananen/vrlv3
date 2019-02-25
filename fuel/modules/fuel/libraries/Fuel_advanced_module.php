@@ -8,7 +8,7 @@
  *
  * @package		FUEL CMS
  * @author		David McReynolds @ Daylight Studio
- * @copyright	Copyright (c) 2015, Run for Daylight LLC.
+ * @copyright	Copyright (c) 2018, Daylight Studio LLC.
  * @license		http://docs.getfuelcms.com/general/license
  * @link		http://www.getfuelcms.com
  * @filesource
@@ -52,7 +52,7 @@ class Fuel_advanced_module extends Fuel_base_library {
 	public function __construct($params = array())
 	{
 		parent::__construct();
-		
+
 		// initialize object if any parameters
 		if (!empty($params))
 		{
@@ -68,12 +68,13 @@ class Fuel_advanced_module extends Fuel_base_library {
 	 * Accepts an associative array as input, containing object preferences.
 	 *
 	 * @access	public
-	 * @param	array	Array of initalization parameters  (optional)
+	 * @param	array	Array of initialization parameters  (optional)
 	 * @return	void
 	 */	
 	public function initialize($params = array())
 	{
 		parent::initialize($params);
+
 
 		// need this here instead of the constructor, because this gets executed by 
 		// the parent Fuel_base_library before the rest of the constructor'
@@ -276,8 +277,8 @@ class Fuel_advanced_module extends Fuel_base_library {
 				// removes '_model'... must have this suffix to work!!!
 				if ($remove_suffix)
 				{
-					$mod_name = substr($models[$key], 0, -6);
-					$models[$key] = substr($models[$key], 0, -6);
+					$model_name = substr($models[$key], 0, -6);
+					$models[$key] = $model_name;
 				}
 			}
 			
@@ -294,7 +295,7 @@ class Fuel_advanced_module extends Fuel_base_library {
 	 * @param	string 	The name of a model. If no name is provided, it will assume a model's name the same as the advanced module's (optional)
 	 * @return	array
 	 */	
-	public function &model($model = NULL)
+	public function model($model = NULL)
 	{
 		$models = $this->models(TRUE);
 		if (empty($model))
@@ -325,7 +326,7 @@ class Fuel_advanced_module extends Fuel_base_library {
 				$this->_attached[$key] =& $obj;
 			}
 			
-			// if it's an array, then we use the key as the module value if it is a string and the value is the library to laod
+			// if it's an array, then we use the key as the module value if it is a string and the value is the library to load
 			else if (is_array($obj))
 			{
 				$module = key($obj);
@@ -387,7 +388,7 @@ class Fuel_advanced_module extends Fuel_base_library {
 				// first look for a Fuel_$key library in the module's folder'
 				if (file_exists($this->server_path('libraries/Fuel_'.$key.'.php')))
 				{
-					// this was added to prevent the loading of config files auotmatically
+					// this was added to prevent the loading of config files automatically
 					$init = array('name' => $key);
 					$this->load_library('fuel_'.$key, $init);
 					$this->_attached[$key] =& $this->CI->{'fuel_'.$key};
@@ -773,7 +774,7 @@ class Fuel_advanced_module extends Fuel_base_library {
 	 */
 	public function css_path()
 	{
-		$this->web_path().'assets/'.strtolower($this->name).'.css';
+		return $this->web_path().'/assets/'.strtolower($this->name).'.css';
 	}
 
 	// --------------------------------------------------------------------
@@ -792,7 +793,7 @@ class Fuel_advanced_module extends Fuel_base_library {
 	// --------------------------------------------------------------------
 	
 	/**
-	 * Returns the navigaiton items for the advanced module
+	 * Returns the navigation items for the advanced module
 	 *
 	 * @access	public
 	 * @return	mixed (returns an array of navigation menu items or FALSE if none)
@@ -839,7 +840,7 @@ class Fuel_advanced_module extends Fuel_base_library {
 	// --------------------------------------------------------------------
 	
 	/**
-	 * Returns whether documenation exists for the advanced module
+	 * Returns whether documentation exists for the advanced module
 	 *
 	 * @access	public
 	 * @return	boolean
@@ -905,7 +906,7 @@ class Fuel_advanced_module extends Fuel_base_library {
 	 */
 	public function clear_cache()
 	{
-		return $this->fuel->cache->clear_module($this->folder());
+		$this->fuel->cache->clear_module($this->folder());
 	}
 
 	// --------------------------------------------------------------------
@@ -966,7 +967,7 @@ class Fuel_advanced_module extends Fuel_base_library {
 	// --------------------------------------------------------------------
 	
 	/**
-	 * Returns whether documenation exists for the advanced module
+	 * Returns whether documentation exists for the advanced module
 	 *
 	 * @access	public
 	 * @return	boolean
@@ -978,7 +979,7 @@ class Fuel_advanced_module extends Fuel_base_library {
 	// --------------------------------------------------------------------
 	
 	/**
-	 * Returns whether documenation exists for the advanced module
+	 * Returns whether documentation exists for the advanced module
 	 *
 	 * @access	public
 	 * @return	boolean
@@ -1070,20 +1071,31 @@ class Fuel_advanced_module extends Fuel_base_library {
 	 * @param	string Name of config file. Default is the name of the advanced module (optional)
 	 * @return	void
 	 */
-	public function load_config($config = NULL)
+	public function load_config($file = NULL)
 	{
-		if (empty($config))
+		if (empty($file))
 		{
-			$config = $this->name;
+			$file = $this->name;
 		}
 		
 		// last parameter tells it to fail gracefully
 		// check application directory for overwrites
-		$this->CI->load->module_config('app', $config, FALSE, TRUE);
-		$app_config = $this->CI->config->item($this->name);
+		// $this->CI->load->module_config('app', $config, FALSE, TRUE);
+		// $app_config = $this->CI->config->item($this->name);
+
+		// last parameter tells it to fail gracefully
+		// check application directory for overwrites
+		$app_config_path = APPPATH.'/config/'.$file.'.php';
+		$app_config = array();
+		if (file_exists($app_config_path))
+		{
+			//$config = array();
+			include($app_config_path);
+			$app_config = (isset($config[$this->name])) ? $config[$file] : array();
+		}
 
 		// now get the module's configuration
-		$this->CI->load->module_config($this->folder(), $config, FALSE, TRUE);
+		$this->CI->load->module_config($this->folder(), $file, FALSE, TRUE);
 		$module_config = $this->CI->config->item($this->name);
 
 		// if app config exists then merge
@@ -1102,7 +1114,7 @@ class Fuel_advanced_module extends Fuel_base_library {
 			if (!class_exists('Base_module_model'))
 			{
 				require_once(BASEPATH.'core/Model.php');
-				require_once(FUEL_PATH.'models/base_module_model.php');
+				require_once(FUEL_PATH.'models/Base_module_model.php');
 			}
 			
 			Base_module_model::$tables = array_merge(Base_module_model::$tables, $this->CI->config->item('tables'));

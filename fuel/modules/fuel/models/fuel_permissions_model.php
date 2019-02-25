@@ -8,7 +8,7 @@
  *
  * @package		FUEL CMS
  * @author		David McReynolds @ Daylight Studio
- * @copyright	Copyright (c) 2015, Run for Daylight LLC.
+ * @copyright	Copyright (c) 2018, Daylight Studio LLC.
  * @license		http://docs.getfuelcms.com/general/license
  * @link		http://www.getfuelcms.com
  */
@@ -27,7 +27,7 @@
  * @link		http://docs.getfuelcms.com/models/fuel_permissions_model
  */
 
-require_once('base_module_model.php');
+require_once('Base_module_model.php');
 
 class Fuel_permissions_model extends Base_module_model {
 	
@@ -61,7 +61,7 @@ class Fuel_permissions_model extends Base_module_model {
 	 * @param	boolean Determines whether the result is just an integer of the number of records or an array of data (optional)
 	 * @return	mixed If $just_count is true it will return an integer value. Otherwise it will return an array of data (optional)
 	 */	
-	 public function list_items($limit = NULL, $offset = NULL, $col = 'name', $order = 'asc', $just_count = FALSE)
+	public function list_items($limit = NULL, $offset = NULL, $col = 'name', $order = 'asc', $just_count = FALSE)
 	{
 		$this->db->select('id, name, description, active');
 		$data = parent::list_items($limit, $offset, $col, $order, $just_count);
@@ -150,9 +150,12 @@ class Fuel_permissions_model extends Base_module_model {
 						$model = $user->get_permissions(TRUE);
 						$user_perms = $model->find_all_array_assoc('id');
 						$user_perm_ids = array_keys($user_perms);
-
 						$user->permissions = array_merge($user_perm_ids, $perm_ids);
-						$user->save();
+
+						// convert to array so we can remove the password value to prevent trigger of password resetting
+						$user_save = $user->values();
+						unset($user_save['password']);
+						$CI->fuel_users_model->save($user_save);
 					}
 				}
 			}

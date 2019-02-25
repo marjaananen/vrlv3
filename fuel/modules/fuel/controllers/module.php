@@ -22,7 +22,7 @@ class Module extends Fuel_base_controller {
 
 		if (empty($this->module))
 		{
-			show_error(lang('cannot_determine_module'));
+			show_error(lang('cannot_determine_module', fuel_url()));
 		}
 		
 		$params = array();
@@ -196,7 +196,7 @@ class Module extends Fuel_base_controller {
 			$languages = $this->model->get_languages($this->language_col);
 			$first_option = current($languages);
 
-			if ( ! empty($languages) AND (is_string($first_option) OR (is_array($first_option)) AND count($first_option) > 1))
+			if (( ! empty($languages) AND (is_string($first_option) OR (is_array($first_option)) AND count($first_option) > 1)) AND empty($this->filters[$this->language_col.'_equal']))
 			{
 				$lang_filter = array('type' => 'select', 'options' => $languages, 'label' => lang('label_language'), 'first_option' => lang('label_select_a_language'));
 				$this->filters[$this->language_col.'_equal'] = $lang_filter;
@@ -215,6 +215,33 @@ class Module extends Fuel_base_controller {
 		// to prevent it from being called unnecessarily with ajax
 		if ( ! is_ajax())
 		{
+			$item_total = $this->model->list_items_total();
+
+			if ($this->single_item_navigate AND $item_total == 1)
+			{
+				$items = $this->model->list_items();
+				$id = $items[0][$this->model->key_field()];
+
+				// lets check a few permissions
+				if ($this->fuel->auth->has_permission($this->permission, "edit"))
+				{
+					$url = fuel_url($this->module_uri.'/edit/'.$id);
+				}
+				elseif ($this->fuel->auth->has_permission($this->permission, "view"))
+				{
+					$url = fuel_url($this->module_uri.'/view/'.$id);
+				}
+				elseif ($this->fuel->auth->has_permission($this->permission, "show"))
+				{
+					$url = fuel_url($this->module_uri.'/show/'.$id);
+				}
+				
+				if (!empty($url))
+				{
+					redirect($url);	
+				}
+			}
+
 			$this->config->set_item('enable_query_strings', FALSE);
 		
 			// pagination
@@ -224,7 +251,7 @@ class Module extends Fuel_base_controller {
 
 			$config['base_url'] = fuel_url($this->module_uri).'/items/?'.$query_str;
 			$uri_segment = 4 + (count(explode('/', $this->module_uri)) - 1);
-			$config['total_rows'] = $this->model->list_items_total();
+			$config['total_rows'] = $item_total;
 			$config['uri_segment'] = fuel_uri_index($uri_segment);
 			$config['per_page'] = (int) $params['limit'];
 			$config['query_string_segment'] = 'offset';
@@ -252,6 +279,8 @@ class Module extends Fuel_base_controller {
 			$config['last_tag_open'] = NULL;
 			$config['last_tag_close'] = NULL;
 			$this->pagination->initialize($config);
+
+			$this->fuel->admin->set_notification(number_format($item_total).' '.pluralize($item_total, lang('num_items')), 'info');
 
 			if (method_exists($this->model, 'tree'))
 			{
@@ -287,45 +316,21 @@ class Module extends Fuel_base_controller {
 			$has_delete_permission = $this->fuel->auth->has_permission($this->permission, "delete") ? '1' : '0';
 
 			// set data table actions... look first for item_actions set in the fuel_modules
-			/*$edit_func = '
-			$CI =& get_instance();
-			$link = "";';
+			$delete_func = function($cols) use ($has_delete_permission) {
+				$CI =& get_instance();
+				$link = "";
 
-			if ($has_edit_permission)
-			{
-				$edit_func .= 'if (isset($cols[$CI->model->key_field()]))
-				{	
-					echo  $cols[$CI->model->limit_to_user_field];
-					if (empty($CI->model->limit_to_user_field) OR (!empty($CI->model->limit_to_user_field) AND (!empty($cols[$CI->model->limit_to_user_field])) AND $cols[$CI->model->limit_to_user_field] = $CI->fuel->auth->user_data("id")))
+				if ($has_delete_permission)
+				{
+					if (!empty($cols[$CI->model->key_field()]))
 					{
-						$url = fuel_url("'.$this->module_uri.'/edit/".$cols[$CI->model->key_field()]);
+						$url = fuel_url($this->module_uri."/delete/".$cols[$CI->model->key_field()]);
 						$link = "<a href=\"".$url."\" class=\"action_delete\">".lang("table_action_delete")."</a>";
 						$link .= " <input type=\"checkbox\" name=\"delete[".$cols[$CI->model->key_field()]."]\" value=\"1\" id=\"delete_".$cols[$CI->model->key_field()]."\" class=\"multi_delete\"/>";
 					}
-				}';	
-			}
-
-			$edit_func .= 'return $link;';
-
-			$edit_func = create_function('$cols', $edit_func);*/
-
-			// set data table actions... look first for item_actions set in the fuel_modules
-			$delete_func = '
-			$CI =& get_instance();
-			$link = "";';
-
-			if ($has_delete_permission)
-			{
-				$delete_func .= 'if (isset($cols[$CI->model->key_field()]))
-				{
-					$url = fuel_url("'.$this->module_uri.'/delete/".$cols[$CI->model->key_field()]);
-					$link = "<a href=\"".$url."\" class=\"action_delete\">".lang("table_action_delete")."</a>";
-					$link .= " <input type=\"checkbox\" name=\"delete[".$cols[$CI->model->key_field()]."]\" value=\"1\" id=\"delete_".$cols[$CI->model->key_field()]."\" class=\"multi_delete\"/>";
-				}';				
-			}
-
-			$delete_func .= 'return $link;';
-			$delete_func = create_function('$cols', $delete_func);
+				}
+				return $link;
+			};
 
 			foreach($this->table_actions as $key => $val)
 			{
@@ -415,39 +420,34 @@ class Module extends Fuel_base_controller {
 			$has_publish_permission = ($this->fuel->auth->has_permission($this->permission, 'publish')) ? '1' : '0';
 			$has_edit_permission = $this->fuel->auth->has_permission($this->permission, 'edit') ? '1' : '0';
 
-			$no = lang("form_enum_option_no");
-			$yes = lang("form_enum_option_yes");
-			$col_txt = lang('click_to_toggle');
-			$key_field = $this->model->key_field();
-
-			$_publish_toggle_callback = '
-			$can_publish = (($heading == "published" OR $heading == "active") AND '.$has_publish_permission.' OR
+			$_publish_toggle_callback = function($cols, $heading) {
+				$can_publish = (($heading == "published" OR $heading == "active") AND '.$has_publish_permission.' OR
 				(($heading != "published" AND $heading != "active") AND '.$has_edit_permission.'));
 
-			$no = "'.$no.'";
-			$yes = "'.$yes.'";
-			$col_txt = "'.$col_txt.'";
+				$no = lang("form_enum_option_no");
+				$yes = lang("form_enum_option_yes");
+				$col_txt = lang('click_to_toggle');
+				$key_field = $this->model->key_field();
 
-			// boolean fields
-			if (is_null($cols[$heading]) OR $cols[$heading] == "")
-			{
-				return "";
-			}
-			else if (!is_true_val($cols[$heading]))
-			{
-				$text_class = ($can_publish) ? "publish_text unpublished toggle_on" : "unpublished";
-				$action_class = ($can_publish) ? "publish_action unpublished hidden" : "unpublished hidden";
-				return \'<span class="publish_hover"><span class="\'.$text_class.\'" id="row_published_\'.$cols["'.$key_field.'"].\'" data-field="\'.$heading.\'">\'.$no.\'</span><span class="\'.$action_class.\'">\'.$col_txt.\'</span></span>\';
-			}
-			else
-			{
-				$text_class = ($can_publish) ? "publish_text published toggle_off" : "published";
-				$action_class = ($can_publish) ? "publish_action published hidden" : "published hidden";
-				return \'<span class="publish_hover"><span class="\'.$text_class.\'" id="row_published_\'.$cols["'.$key_field.'"].\'" data-field="\'.$heading.\'">\'.$yes.\'</span><span class="\'.$action_class.\'">\'.$col_txt.\'</span></span>\';
-				
-			}';
-
-			$_publish_toggle_callback = create_function('$cols, $heading', $_publish_toggle_callback);
+				// boolean fields
+				if (is_null($cols[$heading]) OR $cols[$heading] == "")
+				{
+					return "";
+				}
+				else if (!is_true_val($cols[$heading]))
+				{
+					$text_class = ($can_publish) ? "publish_text unpublished toggle_on" : "unpublished";
+					$action_class = ($can_publish) ? "publish_action unpublished hidden" : "unpublished hidden";
+					return '<span class="publish_hover"><span class="'.$text_class.'" id="row_published_'.$cols[$key_field].'" data-field="'.$heading.'">'.$no.'</span><span class="'.$action_class.'">'.$col_txt.'</span></span>';
+				}
+				else
+				{
+					$text_class = ($can_publish) ? "publish_text published toggle_off" : "published";
+					$action_class = ($can_publish) ? "publish_action published hidden" : "published hidden";
+					return '<span class="publish_hover"><span class="'.$text_class.'" id="row_published_'.$cols[$key_field].'" data-field="'.$heading.'">'.$yes.'</span><span class="'.$action_class.'">'.$col_txt.'</span></span>';
+					
+				}
+			};
 
 			foreach($boolean_fields as $bool)
 			{
@@ -547,7 +547,7 @@ class Module extends Fuel_base_controller {
 	 */	
 	function inline_items()
 	{
-		$this->items(TRUE);
+		$this->items();
 	}
 
 	// --------------------------------------------------------------------
@@ -572,7 +572,7 @@ class Module extends Fuel_base_controller {
 		
 		$defaults = array();
 		$defaults['col'] = (!empty($this->default_col)) ? $this->default_col : $this->display_field;
-		$defaults['order'] = (!empty($this->default_order)) ? $this->default_order : 'asc';
+		$defaults['order'] = (isset($this->default_order)) ? $this->default_order : 'asc';
 		$defaults['offset'] = 0;
 		$defaults['limit'] = key($this->limit_options);
 		$defaults['search_term'] = '';
@@ -651,6 +651,7 @@ class Module extends Fuel_base_controller {
 			}
 
 			$posted['extra_filters'] = $extra_filters;
+
 		}
 
 		$params = array_merge($defaults, $page_state, $posted);
@@ -776,7 +777,7 @@ class Module extends Fuel_base_controller {
 	 * Displays the fields to create a record (form view)
 	 *
 	 * @access	public
-	 * @param	string	The name of a field, or fields spearated by colon to display in the form (optional)
+	 * @param	string	The name of a field, or fields separated by colon to display in the form (optional)
 	 * @param	string	Determines whether to redirect the page after save or not
 	 * @return	void
 	 */	
@@ -793,7 +794,7 @@ class Module extends Fuel_base_controller {
 		// check permissions
 		if ( ! $this->fuel->auth->has_permission($this->module_obj->permission, 'create'))
 		{
-			show_error(lang('error_no_permissions'));
+			show_error(lang('error_no_permissions', fuel_url()));
 		}
 
 		$inline = $this->fuel->admin->is_inline();
@@ -804,11 +805,11 @@ class Module extends Fuel_base_controller {
 			{
 				if ($inline === TRUE)
 				{
-					$url = fuel_uri($this->module_uri.'/inline_edit/'.$id, TRUE);
+					$url = fuel_uri($this->module_uri.'/inline_edit/'.$id.'/'.$field, TRUE);
 				}
 				else
 				{
-					$url = fuel_uri($this->module_uri.'/edit/'.$id, TRUE);
+					$url = fuel_uri($this->module_uri.'/edit/'.$id.'/'.$field, TRUE);
 				}
 
 				// save any tab states
@@ -837,11 +838,15 @@ class Module extends Fuel_base_controller {
 		$vars['action'] = 'create';
 		$vars['related_items'] = $this->model->related_items(array());
 		$crumbs = array($this->module_uri => $this->module_name, lang('action_create'));
-
+		
 		$this->fuel->admin->set_titlebar($crumbs);
 		$this->fuel->admin->set_inline($inline);
 
-		if ($inline === TRUE)
+		if ( ! empty($field) AND strpos($field, ':') === FALSE)
+		{
+			$this->fuel->admin->set_display_mode(Fuel_admin::DISPLAY_COMPACT_NO_ACTION);
+		}
+		else if ($inline === TRUE)
 		{
 			$this->fuel->admin->set_display_mode(Fuel_admin::DISPLAY_COMPACT);
 		}
@@ -858,7 +863,7 @@ class Module extends Fuel_base_controller {
 	 * The same as the create method but does not show the left menu
 	 *
 	 * @access	public
-	 * @param	string	The name of a field, or fields spearated by colon to display in the form (optional)
+	 * @param	string	The name of a field, or fields separated by colon to display in the form (optional)
 	 * @param	string	Determines whether to redirect the page after save or not
 	 * @return	void
 	 */	
@@ -906,7 +911,7 @@ class Module extends Fuel_base_controller {
 			$posted = $this->_process();
 
 			// set publish status to no if you do not have the ability to publish
-			if ( ! $this->fuel->auth->has_permission($this->permission, 'publish'))
+			if ( ! $this->fuel->auth->has_permission($this->permission, 'publish') AND ! $this->fuel->auth->has_permission($this->permission, 'activate'))
 			{
 				$posted['published'] = 'no';
 				$posted['active'] = 'no';
@@ -933,6 +938,15 @@ class Module extends Fuel_base_controller {
 			if ( ! is_array($this->model->key_field()))
 			{
 				$posted[$this->model->key_field()] = $id;
+
+				// replace any {id} placeholder values
+				foreach ($posted as $key => $val)
+				{
+					if (is_string($val))
+					{
+						$posted[$key] = str_replace('{'.$this->model->key_field().'}', $id, $val);
+					}
+				}
 			}
 
 			// process $_FILES
@@ -963,7 +977,8 @@ class Module extends Fuel_base_controller {
 
 				if ( ! empty($data))
 				{
-					$msg = lang('module_edited', $this->module_name, $data[$this->display_field]);
+					$msg_data = $this->model->display_name($data);
+					$msg = lang('module_edited', $this->module_name, $msg_data);
 					$this->fuel->logs->write($msg);
 					$this->_clear_cache();
 					return $id;
@@ -979,7 +994,7 @@ class Module extends Fuel_base_controller {
 	 *
 	 * @access	public
 	 * @param	int		The ID value of the record to edit
-	 * @param	string	The name of a field, or fields spearated by colon to display in the form (optional)
+	 * @param	string	The name of a field, or fields separated by colon to display in the form (optional)
 	 * @param	string	Determines whether to redirect the page after save or not
 	 * @return	void
 	 */	
@@ -994,7 +1009,7 @@ class Module extends Fuel_base_controller {
 		// check permissions
 		if ( ! $this->fuel->auth->has_permission($this->module_obj->permission, 'edit') AND ! $this->fuel->auth->has_permission($this->module_obj->permission, 'create'))
 		{
-			show_error(lang('error_no_permissions'));
+			show_error(lang('error_no_permissions', fuel_url()));
 		}
 
 		$inline = $this->fuel->admin->is_inline();
@@ -1026,6 +1041,10 @@ class Module extends Fuel_base_controller {
 
 		//$vars = $this->_form($id);
 		$data = $this->_saved_data($id);
+		if (empty($data))
+		{
+			show_error(lang('error_invalid_record'));
+		}
 		$action = ( ! empty($data[$this->model->key_field()])) ? 'edit' : 'create';
 	
 		// check model first for preview path method
@@ -1058,7 +1077,7 @@ class Module extends Fuel_base_controller {
 			$vars['activate'] = ( ! empty($data['active']) AND is_true_val($data['active'])) ? 'deactivate' : 'activate';
 		}
 
-		if ( ! empty($field))
+		if ( ! empty($field) AND strpos($field, ':') === FALSE)
 		{
 			$this->fuel->admin->set_display_mode(Fuel_admin::DISPLAY_COMPACT_NO_ACTION);
 		}
@@ -1069,9 +1088,10 @@ class Module extends Fuel_base_controller {
 
 		$crumbs = array($this->module_uri => $this->module_name);
 
-		if ( ! empty($data[$this->display_field]))
+        $msg_data = $this->model->display_name($data);
+        if ( ! empty($msg_data))
 		{
-			$crumbs[''] = character_limiter(strip_tags($data[$this->display_field]), 50);
+			$crumbs[''] = character_limiter(strip_tags($msg_data), 100);
 		}
 
 		$this->fuel->admin->set_titlebar($crumbs);
@@ -1080,9 +1100,9 @@ class Module extends Fuel_base_controller {
 		$this->fuel->admin->render($this->views['create_edit'], $vars, '', FUEL_FOLDER);
 
 		// do this after rendering so it doesn't render current page'
-		if ( ! empty($data[$this->display_field]) AND $inline !== TRUE)
+		if ( ! empty($msg_data) AND $inline !== TRUE)
 		{
-			$this->fuel->admin->add_recent_page($this->uri->uri_string(), $this->module_name.': '.$data[$this->display_field], $this->module);
+			$this->fuel->admin->add_recent_page($this->uri->uri_string(), $this->module_name.': '.$msg_data, $this->module);
 		}
 	}
 	
@@ -1093,7 +1113,7 @@ class Module extends Fuel_base_controller {
 	 *
 	 * @access	public
 	 * @param	int		The ID value of the record to edit
-	 * @param	string	The name of a field, or fields spearated by colon to display in the form (optional)
+	 * @param	string	The name of a field, or fields separated by colon to display in the form (optional)
 	 * @return	void
 	 */	
 	function inline_edit($id = NULL, $field = NULL)
@@ -1156,7 +1176,8 @@ class Module extends Fuel_base_controller {
 				// run after_save hook
 				$this->_run_hook('after_save', $data);
 
-				$msg = lang('module_edited', $this->module_name, $data[$this->display_field]);
+				$msg_data = $this->model->display_name($data);
+				$msg = lang('module_edited', $this->module_name, $msg_data);
 				$this->fuel->logs->write($msg);
 				$this->_clear_cache();
 
@@ -1210,7 +1231,7 @@ class Module extends Fuel_base_controller {
 						}
 						else
 						{
-							// loop through sanitzation functions 
+							// loop through sanitization functions 
 							foreach($sanitize_input as $func)
 							{
 								$func = (isset($valid_funcs[$func])) ? $valid_funcs[$func] : FALSE;
@@ -1225,7 +1246,7 @@ class Module extends Fuel_base_controller {
 				}
 				else
 				{
-					// loop through sanitzation functions 
+					// loop through sanitization functions 
 					foreach($sanitize_input as $key => $val)
 					{
 						$func = (isset($valid_funcs[$val])) ? $valid_funcs[$val] : FALSE;
@@ -1302,7 +1323,7 @@ class Module extends Fuel_base_controller {
 		return $saved;
 	}
 	
-	// seperated to make it easier in subclasses to use the form without rendering the page
+	// separated to make it easier in subclasses to use the form without rendering the page
 	protected function _form_vars($id = NULL, $values = array(), $field = NULL, $inline = FALSE)
 	{
 
@@ -1399,10 +1420,6 @@ class Module extends Fuel_base_controller {
 				$this->form_builder->hidden = (array) $this->model->key_field();
 			}
 
-			$this->form_builder->set_fields($fields);
-			$this->form_builder->display_errors = FALSE;
-			$this->form_builder->set_field_values($field_values);
-
 			if ($this->config->item('date_format'))
 			{
 				$this->form_builder->date_format = $this->config->item('date_format');
@@ -1417,6 +1434,10 @@ class Module extends Fuel_base_controller {
 				$this->form_builder->cancel_value = lang('btn_cancel');
 			}
 
+			$this->form_builder->set_fields($fields);
+			$this->form_builder->display_errors = FALSE;
+			$this->form_builder->set_field_values($field_values);
+
 			// we will set this in the BaseFuelController.js file so that the jqx page variable is available upon execution of any form field js
 			//$this->form_builder->auto_execute_js = FALSE;
 			if (!isset($fields['__FORM_BUILDER__'], $fields['__FORM_BUILDER__']['displayonly']))
@@ -1427,7 +1448,7 @@ class Module extends Fuel_base_controller {
 			$form = $this->form_builder->render();
 		}
 
-		$action_uri = $action.'/'.$id.'/'.$field;
+		$action_uri = (!empty($id)) ? $action.'/'.$id.'/'.$field : $action.'/'.$field;
 		$vars['form_action'] = ($inline) ? $this->module_uri.'/inline_'.$action_uri.query_str() : $this->module_uri.'/'.$action_uri.query_str();
 		$vars['form'] = $form;
 		$vars['data'] = $values;
@@ -1446,7 +1467,7 @@ class Module extends Fuel_base_controller {
 		$this->_orig_post = $_POST;
 
 		// filter placeholder $_POST values 
-		$callback = create_function('$matches', '
+		$callback = function($matches){
 			if (isset($_POST[$matches["2"]]))
 			{
 				$str = $matches[1].$_POST[$matches["2"]].$matches[3];
@@ -1456,7 +1477,7 @@ class Module extends Fuel_base_controller {
 				$str = $matches[0];
 			}
 			return $str;
-		');
+		};
 
 		// first loop through and create simple non-namespaced $_POST values if they don't exist for convenience'
 		foreach($_POST as $key => $val)
@@ -1595,7 +1616,7 @@ class Module extends Fuel_base_controller {
 
 		if ( ! $this->fuel->auth->has_permission($this->permission, 'delete'))
 		{
-			show_error(lang('error_no_permissions'));
+			show_error(lang('error_no_permissions', fuel_url()));
 		}
 
 		$inline = $this->fuel->admin->is_inline();
@@ -1612,7 +1633,7 @@ class Module extends Fuel_base_controller {
 
 			foreach ($posted as $id)
 			{
-				if ($this->model->delete(array($this->model->key_field() => $id)))
+				if ($this->model->delete(array($this->model->table_name().'.'.$this->model->key_field() => $id)))
 				{
 					$any_success = TRUE;
 				}
@@ -1697,11 +1718,7 @@ class Module extends Fuel_base_controller {
 			{
 				$data = $this->model->find_by_key($id, 'array');
 				$vars['id'] = $id;
-
-				if (isset($data[$this->display_field]))
-				{
-					$vars['title'] = $data[$this->display_field];
-				}
+				$vars['title'] = $this->model->display_name($data);
 			}
 
 			if (empty($data)) show_404();
@@ -1709,7 +1726,7 @@ class Module extends Fuel_base_controller {
 			$vars['error'] = $this->model->get_errors();
 
 			$crumbs = array($this->module_uri => $this->module_name);
-			$crumbs[''] = character_limiter(strip_tags(lang('action_delete').' '.$vars['title']), 50);
+			$crumbs[''] = character_limiter(strip_tags(lang('action_delete').' '.$vars['title']), 100);
 
 			$this->fuel->admin->set_titlebar($crumbs);
 
@@ -1741,7 +1758,7 @@ class Module extends Fuel_base_controller {
 	{
 		if ( ! $this->fuel->auth->has_permission($this->permission, 'edit'))
 		{
-			show_error(lang('error_no_permissions'));
+			show_error(lang('error_no_permissions', fuel_url()));
 		}
 
 		if ( ! empty($_POST['fuel_restore_version']) AND ! empty($_POST['fuel_restore_ref_id']))
@@ -1777,7 +1794,7 @@ class Module extends Fuel_base_controller {
 
 		if ( ! $this->fuel->auth->has_permission($this->permission, 'edit') OR ! $this->fuel->auth->has_permission($this->permission, 'delete'))
 		{
-			show_error(lang('error_no_permissions'));
+			show_error(lang('error_no_permissions', fuel_url()));
 		}
 
 		$success = FALSE;
@@ -1881,12 +1898,13 @@ class Module extends Fuel_base_controller {
 			// for multi select
 			if (is_array($values))
 			{
-				$selected = (array) $selected;
-
-				foreach($values as $v)
+				$selectedValues = $values;
+				if ( ! in_array($selected, $selectedValues))
 				{
-					if ( ! in_array($v, $selected)) $selected[] = $v;
+					$selectedValues[] = $selected;
 				}
+
+				$selected = $selectedValues;
 			}
 
 			if ( ! empty($selected)) $fields[$field]['value'] = $selected;
@@ -1991,7 +2009,7 @@ class Module extends Fuel_base_controller {
 				$this->output->set_header('Content-type: application/json');
 				$output = json_encode($results);
 
-				print($output);
+				echo $output;
 			}
 		}
 	}
@@ -2003,7 +2021,7 @@ class Module extends Fuel_base_controller {
 
 		if ( ! $this->fuel->auth->has_permission($this->permission, 'export'))
 		{
-			show_error(lang('error_no_permissions'));
+			show_error(lang('error_no_permissions', fuel_url()));
 		}
 
 		if ( ! empty($_POST))
@@ -2012,6 +2030,12 @@ class Module extends Fuel_base_controller {
 			$this->load->dbutil();
 			$this->load->helper('download');
 
+			$filters = $this->model->filters($this->filters);
+			if (is_object($filters) && ($filters instanceof Base_model_fields)) {
+				$filters = $filters->get_fields();
+			}
+			$this->filters = array_merge($this->filters, $filters);
+	
 			$filename = $this->module.'_'.date('Y-m-d').'.csv';
 			$params = $this->_list_process();
 			$this->_filter_list($params);
@@ -2021,13 +2045,13 @@ class Module extends Fuel_base_controller {
 		}
 	}
 
-	// used in list view to quickly unpublish (if they have permisison)
+	// used in list view to quickly unpublish (if they have permission)
 	function toggle_on($id = NULL, $field = 'published')
 	{
 		$this->_toggle($id, $field, 'on');
 	}
 
-	// used in list view to quickly publish (if they have permisison)
+	// used in list view to quickly publish (if they have permission)
 	function toggle_off($id = NULL, $field = 'published')
 	{
 		$this->_toggle($id, $field, 'off');
@@ -2086,7 +2110,8 @@ class Module extends Fuel_base_controller {
 					// run after_save hook
 					$this->_run_hook('after_save', $data);
 
-					$msg = lang('module_edited', $this->module_name, $data[$this->display_field]);
+					$msg_data = $this->model->display_name($data);
+					$msg = lang('module_edited', $this->module_name, $msg_data);
 					$this->fuel->logs->write($msg);
 				}
 				else
@@ -2174,6 +2199,8 @@ class Module extends Fuel_base_controller {
 
 		if ( ! empty($_FILES))
 		{
+			$field_names = array();
+
 			// loop through uploaded files
 			foreach ($_FILES as $file => $file_info)
 			{
@@ -2185,9 +2212,9 @@ class Module extends Fuel_base_controller {
 					$field_name = $file_tmp;
 
 					// if there is a field with the suffix of _upload, then we will overwrite that posted value with this value
-					if (substr($file_tmp, ($file_tmp - 7)) == '_upload') 
+					if (substr($file_tmp, strlen($file_tmp) - 7) == '_upload') 
 					{
-						$field_name = substr($file_tmp, 0, ($file_tmp - 7));
+						$field_name = substr($file_tmp, 0, strlen($file_tmp) - 7);
 					}
 
 					if (isset($posted[$file_tmp.'_file_name']) AND isset($this->_orig_post[$file_tmp.'_file_name']))
@@ -2213,13 +2240,14 @@ class Module extends Fuel_base_controller {
 					if (strpos($field_value, '{') !== FALSE )
 					{
 						//e modifier is deprecated so we have to do this
-						$callback = create_function('$match', '
+						$callback = function($match){
 								$return = "";
 								if (!empty($match[2]))
 								{
 									$return = $match[1].$GLOBALS["__tmp_transient_posted__"][$match[2]].$match[3];
 								}
-								return $return;');
+								return $return;
+							};
 
 						// hacky but avoids 5.3 function syntax (which is nicer but doesn't work with 5.2)
 						$GLOBALS['__tmp_transient_posted__'] = $posted;
@@ -2238,6 +2266,9 @@ class Module extends Fuel_base_controller {
 					$posted[$tmp_field_name] = $file_val;
 					$posted[$field_name] = $file_val;
 					$posted[$file_tmp.'_file_name'] = $file_val;
+
+					$field_names[$field_name] = $field_name;
+
 				}
 			}
 
@@ -2268,24 +2299,30 @@ class Module extends Fuel_base_controller {
 
 				// transfer uploaded data the controller object as well
 				$this->upload_data =& $uploaded_data;
-
 				// now process the data related to upload a file including translated path names
 				if ( ! isset($field_name)) $field_name = '';
 
-				$this->_process_upload_data($field_name, $uploaded_data, $posted);
+				$this->_process_upload_data($field_names, $uploaded_data, $posted);
 			}
 		}
 
 		return ! $errors;
 	}
 
-	protected function _process_upload_data($field_name, $uploaded_data, $posted)
+	protected function _process_upload_data($field_names, $uploaded_data, $posted)
 	{
-		$field_name_parts = explode('--', $field_name);
-		$field_name = end($field_name_parts);
 
 		foreach($uploaded_data as $key => $val)
 		{
+			if (!isset($field_names[$key]))
+			{
+				continue;
+			}
+			$field_name = $field_names[$key];
+			$field_name_parts = explode('--', $field_name);
+			$field_name = end($field_name_parts);
+
+			$save = FALSE;
 			$key_parts = explode('___', $key);
 			$file_tmp = current($key_parts);
 
@@ -2298,9 +2335,9 @@ class Module extends Fuel_base_controller {
 				$data = $this->model->find_one_array(array($this->model->table_name().'.'.$this->model->key_field() => $id));
 
 				// if there is a field with the suffix of _upload, then we will overwrite that posted value with this value
-				if (substr($file_tmp, ($file_tmp - 7)) == '_upload')
+				if (substr($file_tmp, strlen($file_tmp) - 7) == '_upload')
 				{
-					$field_name = substr($file_tmp, 0, ($file_tmp - 7));
+					$field_name = substr($file_tmp, 0, strlen($file_tmp) - 7);
 				}
 
 				if (isset($posted[$field_name])) $save = TRUE;
@@ -2310,7 +2347,8 @@ class Module extends Fuel_base_controller {
 				{
 					if (isset($posted[$matches[1]][$matches[2]][$matches[3]]) AND isset($data[$matches[1]][$matches[2]][$matches[3]]))
 					{
-						$data[$matches[1]][$matches[2]][$matches[3]] = $posted[$file_tmp];
+						//$data[$matches[1]][$matches[2]][$matches[3]] = $posted[$file_tmp];
+						$data[$matches[1]][$matches[2]][$matches[3]] = $val['file_name'];
 						$save = TRUE;
 					}
 				}
@@ -2324,7 +2362,9 @@ class Module extends Fuel_base_controller {
 					$this->model->save($data);
 				}
 			}
+
 		}
+	
 	}
 	
 	protected function _run_hook($hook, $params = array())

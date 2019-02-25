@@ -8,7 +8,7 @@
  *
  * @package		FUEL CMS
  * @author		David McReynolds @ Daylight Studio
- * @copyright	Copyright (c) 2015, Run for Daylight LLC.
+ * @copyright	Copyright (c) 2018, Daylight Studio LLC.
  * @license		http://docs.getfuelcms.com/general/license
  * @link		http://www.getfuelcms.com
  */
@@ -147,12 +147,12 @@ class MY_DB_mysql_driver extends CI_DB_mysql_driver {
 	 * @access	public
 	 * @param	string	name of table
 	 * @param	string	field name
-	 * @return	string
+	 * @return	array
 	 */
 	public function table_info($table, $set_field_key = TRUE)
 	{
 		if (!empty($this->_table_info_cache[$table]) AND $set_field_key) return $this->_table_info_cache[$table]; // lazy load
-		$sql = "SHOW FULL COLUMNS FROM ". $this->_escape_identifiers($table);
+		$sql = "SHOW FULL COLUMNS FROM ". $this->escape_identifiers($table);
 		$query = $this->query($sql);
 		$retval = array();
 		foreach ($query->result() as $field) 
@@ -248,7 +248,7 @@ class MY_DB_mysql_driver extends CI_DB_mysql_driver {
 		
 		foreach($values as $key => $val)
 		{
-			$sql .= $this->_escape_identifiers($key).", ";
+			$sql .= $this->escape_identifiers($key).", ";
 		}
 		$sql = substr($sql, 0, -2); // get rid of last comma
 		
@@ -285,11 +285,11 @@ class MY_DB_mysql_driver extends CI_DB_mysql_driver {
 		{
 			if ((is_string($primary_key) AND $primary_key == $key) OR (is_array($primary_key) AND in_array($key, $primary_key)))
 			{
-				$sql .=  $this->_escape_identifiers($key).' = LAST_INSERT_ID('.$this->_escape_identifiers($key).'), ';
+				$sql .=  $this->escape_identifiers($key).' = LAST_INSERT_ID('.$this->escape_identifiers($key).'), ';
 			}
 			else
 			{
-				$sql .= $this->_escape_identifiers($key).' = VALUES('.$this->_escape_identifiers($key).'), ';
+				$sql .= $this->escape_identifiers($key).' = VALUES('.$this->escape_identifiers($key).'), ';
 			}
 		}
 		$sql = substr($sql, 0, -2); // get rid of last comma
@@ -365,7 +365,14 @@ class MY_DB_mysql_driver extends CI_DB_mysql_driver {
 		$sql = preg_replace('/^#(.+)$/U', '', $sql);
 		
 		// load database config
-		include(APPPATH.'config/database.php');
+		if (file_exists(APPPATH.'config/'.ENVIRONMENT.'/database.php'))
+		{
+			include(APPPATH.'config/'.ENVIRONMENT.'/database.php');
+		}
+		else
+		{
+			include(APPPATH.'config/database.php');	
+		}
 		$CI->load->database();
 	
 		// select the database
@@ -384,6 +391,20 @@ class MY_DB_mysql_driver extends CI_DB_mysql_driver {
 			}
 		}
 	}
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * Helps determine if there is currently a select specified for the active record
+	 *
+	 * @access	public
+	 * @return	boolean
+	 */
+	public function has_select()
+	{
+		return !empty($this->qb_select);
+	}
+
 }
 /* End of file MY_DB_mysql_driver.php */
 /* Location: ./application/libraries/MY_DB_mysql_driver.php */

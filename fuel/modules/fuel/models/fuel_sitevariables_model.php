@@ -8,7 +8,7 @@
  *
  * @package		FUEL CMS
  * @author		David McReynolds @ Daylight Studio
- * @copyright	Copyright (c) 2015, Run for Daylight LLC.
+ * @copyright	Copyright (c) 2018, Daylight Studio LLC.
  * @license		http://docs.getfuelcms.com/general/license
  * @link		http://www.getfuelcms.com
  */
@@ -27,7 +27,7 @@
  * @link		http://docs.getfuelcms.com/models/fuel_sitevariables_model
  */
 
-require_once('base_module_model.php');
+require_once('Base_module_model.php');
 
 class Fuel_sitevariables_model extends Base_module_model {
 
@@ -116,7 +116,7 @@ class Fuel_sitevariables_model extends Base_module_model {
 	 */	
 	public function form_fields($values = array(), $related = array()){
 		$fields = parent::form_fields($values, $related);
-		$fields['value']['class'] = 'markitup';
+		$fields['value']['editor'] = 'markitup';
 		return $fields;
 	}
 

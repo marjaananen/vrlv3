@@ -42,15 +42,17 @@ class Installer extends Fuel_base_controller {
 			}
 		}
 
-		if (strtolower($module) == 'fuel')
+		$module = strtolower($module);
+		if ($module == 'fuel')
 		{
-			$this->fuel->install();
+			$this->fuel->install();	
 		}
 		else
 		{
 			// need to load it the old fashioned way because it is not enabled by default
 			$module_file = MODULES_PATH.$module.'/libraries/Fuel_'.$module.'.php';
-
+			$this->load->add_package_path(MODULES_PATH.$module);
+			
 			if (file_exists($module_file))
 			{
 				$init = array('name' => $module, 'folder' => $module);
@@ -82,7 +84,7 @@ class Installer extends Fuel_base_controller {
 
 		$uri = trim($this->uri->uri_string(), '/');
 		$uri = str_replace('-at-', '@', $uri);
-		$segs = explode('/', trim($this->uri->uri_string(), '/'));
+		$segs = explode('/', $uri);
 		$segs = array_slice($segs, 3);
 		$module = array_pop($segs);
 		$repo = implode('/', $segs);
@@ -119,6 +121,32 @@ class Installer extends Fuel_base_controller {
 		{
 			$module_folder = MODULES_WEB_PATH.$module;
 			echo lang('module_uninstall', $module, $module_folder);
+		}
+	}
+
+	public function update($module = 'fuel')
+	{
+		if ($module == 'fuel')
+		{
+			$this->fuel->update();	
+		}
+		else
+		{
+			if ( ! $this->fuel->modules->exists($module) OR !method_exists($this->fuel->$module, 'update'))
+			{
+				echo lang('cannot_determine_module')."\n";
+				return;
+			}
+
+			// update
+			if ( ! $this->fuel->$module->update())
+			{
+				echo $this->fuel->installer->last_error();
+			}
+			else
+			{
+				echo lang('module_update', $module);
+			}
 		}
 	}
 }

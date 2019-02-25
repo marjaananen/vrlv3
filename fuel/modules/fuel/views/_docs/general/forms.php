@@ -206,7 +206,7 @@ $this->form_builder->register_custom_field($key, $custom_field);
 		<li><a href="#state">state</a></li>
 		<li><a href="#slug">slug</a></li>
 		<li><a href="#list_items">list_items</a></li>
-		<li><a href="#langauge">langauge</a></li>
+		<li><a href="#language">language</a></li>
 		<li><a href="#keyval">keyval</a></li>
 		<li><a href="#multi">multi</a> (overwritten for more functionality)</li>
 		<li><a href="#toggler">toggler</a></li>
@@ -446,7 +446,10 @@ $this->form_builder->register_custom_field($key, $custom_field);
 		<li><strong>encrypt_name</strong>: determines whether to encrypt the uploaded file name to give it a unique value. The default is FALSE</li>
 		<li><strong>multiple</strong>: determines whether to allow multiple files to be uploaded by the same field. The default is FALSE</li>
 		<li><strong>display_preview</strong>: determines whether to to display a preview of the asset</li>
+		<li><strong>remove_spaces</strong>: will automatically remove spaces from the file name. The default is TRUE</li>
 		<li><strong>replace_values</strong>: an array of key/value pairs that can be used to replace any placeholder values in the upload path</li>
+		<li><strong>display_input</strong>: a boolean value that will display an input field for the name of the file which can be helpful to store the uploaded files name to the database</li>
+		<li><strong>preview_path</strong>: A direct web path to the asset file. If not provided, it will default to either the folder or upload path values to determine the preview path</li>
 	</ul>
 
 	<h4>Image Specific</h4>
@@ -724,6 +727,7 @@ $this->form_builder->register_custom_field($key, $custom_field);
 		<li><strong>condensed</strong>: if TRUE, this will update there repeatable field to use a condensed styling</li>
 		<li><strong>non_sortable</strong>: if TRUE, this will hide the sorting grabber for repeatable fields</li>
 		<li><strong>removeable</strong>: determines whether the repeatable sets can be removed</li>
+		<li><strong>ignore_name_array</strong>: ignores the name array value that gets applied to the names of the form to create the nested array on post (e.g. array(0 =&gt; array("title" =&gt; "My Title",....) </li>
 	</ul>
 
 	<h4>Example</h4>
@@ -879,7 +883,7 @@ $this->form_builder->register_custom_field($key, $custom_field);
 		<li><strong>link_filter</strong>: a regular expression value that can be used to filter the page list down to only the pages you need</li>
 		<li><strong>editor_config</strong>: sets the editor's (markItUp! or CKEditor) configuration values for a particular field. Camel-cased attributes need to be converted to lowercase with hyphens (e.g. extraPlugins should be extra-plugins). These configuration values are attached to the textarea field so you can use
 			Javascript to set more complex object values as long they are set on the textarea field before markItUp! or CKEditor initialization (e.g. $('.mytextarea').data('toolbar', [['Bold','Italic','Strike']]).</li>
-		<li><strong>markdown</strong>: changes toolbar to use <a href="http://daringfireball.net/projects/markdown/" target="_blank">Markdown</a> formatting instead of HTML. Must have editor set to use markItUp!</li>
+		<li><strong>markdown</strong>: changes toolbar to use <a href="http://daringfireball.net/projects/markdown/" target="_blank">Markdown</a> formatting instead of HTML. Must have editor set to use markItUp! (NOTE: This is only the editor. You must use the <dfn>markdown()</dfn> function for display in your views.</li>
 	</ul>
 	
 	<h4>Example</h4>
@@ -904,7 +908,10 @@ $this->form_builder->register_custom_field($key, $custom_field);
 	The following additional parameters can be passed to this field type:</p>
 	<ul>
 		<li><strong>module</strong>: the module to inline edit</li>
+		<li><strong>module_uri</strong>: the URI path to the module if it's different then the module name (e.g. my_module/inline_create/field1:field2)</li>
 		<li><strong>multiple</strong>: whether to display a multi field to associate the inline edited data with</li>
+		<li><strong>add_params</strong>: query string parameters to pass as pre-filled values to the inline module form (e.g. name=Han%20Solo&slug=han-solo)</li>
+		<li><strong>fields</strong>: the name of the fields to display separate by a colon (e.g. name:slug:published)</li>
 	</ul>
 	
 	<h4>Example</h4>
@@ -950,7 +957,7 @@ $this->form_builder->register_custom_field($key, $custom_field);
 	The following additional parameters can be passed to this field type:</p>
 	<ul>
 		<li><strong>currency</strong>: the currency value to display next to the field. The default is '$'</li>
-		<li><strong>separator</strong>: the separator to use for the grouping of numbers. The default is 3</li>
+		<li><strong>separator</strong>: the separator to use for the grouping of numbers. The default is ','</li>
 		<li><strong>decimal</strong>: the decimal separator. The default is "." </li>
 		<li><strong>grouping</strong>: the number of ...err numbers to group by. The default is 3</li>
 		<li><strong>min</strong>: the min number to allow for the field (including negative numbers). The default is 0.00</li>
@@ -991,7 +998,7 @@ $this->form_builder->register_custom_field($key, $custom_field);
 
 <h3 id="slug" class="toggle">slug</h3>
 <div class="toggle_block_off">
-	<p>This field type can be used for creating slug or permalink values for a field using the <a href="http://ellislab.com/codeigniter/user-guide/helpers/url_helper.html" target="_blank">url_title</a> function.
+	<p>This field type can be used for creating slug or permalink values for a field using the <a href="https://www.codeigniter.com/user_guide/helpers/url_helper.html#url_title" target="_blank">url_title</a> function.
 	The following additional parameter can be passed to this field type:</p>
 	<ul>
 		<li><strong>linked_to</strong>: the field whose value to use if no value is provided.
@@ -1058,6 +1065,7 @@ $this->form_builder->register_custom_field($key, $custom_field);
 	<p>This field allows you go create a key / value array by separating keys and values with a delimiter. Each key/value goes on it's own line. The
 		post-processed result is a JSON encoded string:</p>
 	<ul>
+		<li><strong>row_delimiter</strong>: the row delimiter used to separate between key/value pairs. The default is a "\n|," (return, pipe, comma).</li>
 		<li><strong>delimiter</strong>: the delimiter used to separate between a key and a value. The default is a ":" (colon).</li>
 		<li><strong>allow_numeric_indexes</strong>: determines whether to display numeric indexes or not.</li>
 		<li><strong>allow_empty_values</strong>: determines whether to display items that may have no value.</li>
@@ -1159,7 +1167,7 @@ $this->form_builder->register_custom_field($key, $custom_field);
 	<ul>
 		<li><strong>module</strong>: the module whose data will be displayed</li>
 		<li><strong>create_button_label</strong>: the label of the create button</li>
-		<li><strong>create_url_params</strong>: additional intialization parameters to pass when creating a new record. This is often used to pre-populate form field values. Also, since they are passed as query string parameters, you can use $this->CI->input->get('my_param') to dyanmically change elements in your form (e.g. make some fields hidden).</li>
+		<li><strong>create_url_params</strong>: additional initialization parameters to pass when creating a new record. This is often used to pre-populate form field values. Also, since they are passed as query string parameters, you can use $this->CI->input->get('my_param') to dyanmically change elements in your form (e.g. make some fields hidden).</li>
 		<li><strong>edit_url_params</strong>: similar to <dfn>create_url_params</dfn> but for editing a record.</li>
 		<li><strong>display_fields</strong>: an array of fields to display when editing or creating.</li>
 		<li><strong>method</strong>: the method on the model that returns the data table. The default is the built-in get_embedded_list_items method</li>
@@ -1309,6 +1317,6 @@ $this->form_builder->remove_representative('url');
 <h2 id="pre_post_processing">Pre &amp; Post Processing Fields</h2>
 <p>If you need a field that does additional processing before being set as the value of the field or after posting, you can create a pre-processing or post-processing function to handle it. 
 	To register that function with the field, you specify the <dfn>pre_process</dfn> or <dfn>post_process</dfn> parameter respectively.
-	The value assigned to the the pre/post_process parameters is the name of the function (as a string), a lambda function (from create_function), 
+	The value assigned to the the pre/post_process parameters is the name of the function (as a string), a lambda function, 
 	or an array with the first value being the instance of an object and the second value being the name of the method on that object. There are several
 	custom functions that take advantage of this feature including the <a href="#asset">asset</a>, <a href="#slug">slug</a> <a href="#template">template</a>, <a href="#currency">currency</a> and <a href="#keyval">keyval</a> field types.</p>

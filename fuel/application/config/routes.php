@@ -1,4 +1,6 @@
-<?php  if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+<?php
+defined('BASEPATH') OR exit('No direct script access allowed');
+
 /*
 | -------------------------------------------------------------------------
 | URI ROUTING
@@ -17,13 +19,13 @@
 |
 | Please see the user guide for complete details:
 |
-|	http://codeigniter.com/user_guide/general/routing.html
+|	https://codeigniter.com/user_guide/general/routing.html
 |
 | -------------------------------------------------------------------------
 | RESERVED ROUTES
 | -------------------------------------------------------------------------
 |
-| There area two reserved routes:
+| There are three reserved routes:
 |
 |	$route['default_controller'] = 'welcome';
 |
@@ -33,46 +35,52 @@
 |
 |	$route['404_override'] = 'errors/page_missing';
 |
-| This route will tell the Router what URI segments to use if those provided
-| in the URL cannot be matched to a valid route.
+| This route will tell the Router which controller/method to use if those
+| provided in the URL cannot be matched to a valid route.
 |
+|	$route['translate_uri_dashes'] = FALSE;
+|
+| This is not exactly a route, but allows you to automatically route
+| controller and method names that contain dashes. '-' isn't a valid
+| class or method name character, so it requires translation.
+| When you set this option to TRUE, it will replace ALL dashes in the
+| controller and method URI segments.
+|
+| Examples:	my-controller/index	-> my_controller/index
+|		my-controller/my-method	-> my_controller/my_method
+
 */
 
-
-
+//Admin urls, 
 $route['yllapito/tunnukset'] = "yllapito_tunnukset/hakemusjono_etusivu";
 $route['yllapito/tunnukset/hyvaksy'] = "yllapito_tunnukset/hakemusjono";
+$route['yllapito/tunnukset/kasittele/(:any)/(:any)'] = "yllapito_tunnukset/kasittele_hakemus/$1/$2";
 
 $route['yllapito/tallirekisteri'] = "yllapito_tallirekisteri/tallirekisteri_etusivu";
+$route['yllapito/tallirekisteri/hyvaksy'] = "yllapito_tallirekisteri/tallijono";
+$route['yllapito/tallirekisteri/hyvaksy_kasittele/(:any)/(:num)'] = "yllapito_tallirekisteri/kasittele_talli/$1/$2";
+$route['yllapito/tallirekisteri/muokkaa'] = "yllapito_tallirekisteri/muokkaa_talli";
+$route['yllapito/tallirekisteri/haku'] = "yllapito_tallirekisteri/talli_haku";
 
-$route['yllapito/tallirekisteri/tallijono/hyvaksy'] = "yllapito_tallirekisteri/tallijono";
-$route['yllapito/tallirekisteri/tallijono/hyvaksy_kasittele/(:any)/(:num)'] = "yllapito_tallirekisteri/kasittele_talli/$1/$2";
-$route['yllapito/tallirekisteri/tallijono/muokkaa'] = "yllapito_tallirekisteri/muokkaa_talli";
-$route['yllapito/tallirekisteri/tallijono/haku'] = "yllapito_tallirekisteri/talli_haku";
-
-$route['yllapito/tallirekisteri/kategoriajono/hyvaksy'] = "yllapito_tallirekisteri/tallikategoriajono";
-$route['yllapito/tallirekisteri/kategoriajono/hyvaksy_kasittele/(:any)/(:num)'] = "yllapito_tallirekisteri/kasittele_tallikategoria/$1/$2";
-
-
-$route['profiili/omat-tallit'] = "profiili/tallit_index";
-$route['profiili/omat-tallit/rekisteroi'] = "profiili/rekisteroi_talli";
-$route['profiili/omat-tallit/muokkaa/(:any)/(:any)'] = "profiili/muokkaa_talli/$1/$2";
+//profile urls
+$route['profiili/omat-tallit'] = "profiili_tallit/index";
+$route['profiili/omat-tallit/rekisteroi'] = "profiili_tallit/rekisteroi_talli";
+$route['profiili/omat-tallit/muokkaa/(:any)/(:any)'] = "profiili_tallit/muokkaa_talli/$1/$2";
 
 
+//public urls
 $route['tallirekisteri/talli/(:any)'] = "tallit/talliprofiili/$1";
-$route['virtuaalitallit'] = "tallit/haku";
-
-
 $route['tunnus/(:any)'] = "jasenyys/tunnus/$1";
 $route['tunnus/(:any)/(:any)'] = "jasenyys/tunnus/$1/$2";
+$route['jasenyys'] = "jasenyys";
+$route['kisakeskus'] = "kisakeskus";
+$route['liitto'] = "liitto";
 
 
-$route['jasenyys'] = "jasenyys/haku";
+$route['default_controller'] = 'Main';
 
-//////////////////////////////////////
-
-$route['default_controller'] = 'main';
 $route['404_override'] = 'fuel/page_router';
+$route['translate_uri_dashes'] = FALSE;
 
 /*	
 | Uncomment this line if you want to use the automatically generated sitemap based on your navigation.
@@ -81,6 +89,3 @@ $route['404_override'] = 'fuel/page_router';
 //$route['sitemap.xml'] = 'sitemap_xml';
 
 include(MODULES_PATH.'/fuel/config/fuel_routes.php');
-
-/* End of file routes.php */
-/* Location: ./application/config/routes.php */

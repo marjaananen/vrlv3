@@ -25,7 +25,7 @@ class Build extends Fuel_base_controller {
 		// Only super admins can execute builds for now
 		if ($validate AND !$this->fuel->auth->is_super_admin())
 		{
-			show_error(lang('error_no_access'));
+			show_error(lang('error_no_access', fuel_url()));
 		}
 
 		// call before build hook
@@ -47,7 +47,7 @@ class Build extends Fuel_base_controller {
 			// explode on colon to separate the folder name from the file name
 			$seg_parts = explode(':', $segs_str);
 
-			// set the folder name to lookin
+			// set the folder name to look in
 			$folder = $seg_parts[0];
 
 			// set the file name if one exists
