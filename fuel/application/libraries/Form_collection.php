@@ -120,7 +120,9 @@ class Form_collection
     }
     
     public function get_stable_search_form(){
-        $options = $this->tallit_model->get_category_option_list();
+        $options = $this->CI-> tallit_model->get_category_option_list();
+        $this->CI->load->library('form_builder', array('submit_value' => 'Hae'));
+
 		
 		$options[-1] = 'Mikä tahansa';
 		
@@ -128,14 +130,16 @@ class Form_collection
 		$fields['kategoria'] = array('type' => 'select', 'options' => $options, 'value' => '-1', 'class'=>'form-control');
 		$fields['tallinumero'] = array('type' => 'text', 'class'=>'form-control');
 	
-		$this->form_builder->form_attrs = array('method' => 'post', 'action' => site_url('/tallit/haku'));
+		$this->CI->form_builder->form_attrs = array('method' => 'post', 'action' => site_url('/tallit/haku'));
 		return $this->CI->form_builder->render_template('_layouts/basic_form_template', $fields);
     }
     
     public function validate_stable_search_form(){
-        $this->form_validation->set_rules('nimi', 'Nimi', "min_length[4]|regex_match[/^[A-Za-z0-9_\-.:,; *~#&'@()]*$/]");
-		$this->form_validation->set_rules('kategoria', 'Kategoria', 'min_length[1]|max_length[2]');
-		$this->form_validation->set_rules('tallinumero', 'Tallinumero', "min_length[6]|max_length[8]|regex_match[/^[A-Z0-9]*$/]");
+        $this->CI->load->library('form_validation');
+        
+        $this->CI->form_validation->set_rules('nimi', 'Nimi', "min_length[4]|regex_match[/^[A-Za-z0-9_\-.:,; *~#&'@()]*$/]");
+		$this->CI->form_validation->set_rules('kategoria', 'Kategoria', 'min_length[1]|max_length[2]');
+		$this->CI->form_validation->set_rules('tallinumero', 'Tallinumero', "min_length[6]|max_length[8]|regex_match[/^[A-Z0-9]*$/]");
         return $this->CI->form_validation->run();
 
     }

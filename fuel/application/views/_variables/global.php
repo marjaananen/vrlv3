@@ -7,7 +7,7 @@ $CI =& get_instance();
 
 $vars = array();
 $vars['layout'] = 'main';
-$vars['page_title'] = fuel_nav(array('render_type' => 'page_title', 'delimiter' => ':', 'order' => 'desc', 'home_link' => 'Home'));
+$vars['page_title'] = fuel_nav(array('render_type' => 'page_title', 'delimiter' => ':', 'order' => 'desc', 'home_link' => 'Virtuaalinen Ratsastajainliitto'));
 $vars['meta_keywords'] = '';
 $vars['meta_description'] = '';
 $vars['js'] = array();

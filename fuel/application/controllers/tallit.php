@@ -82,7 +82,7 @@ class Tallit extends CI_Controller
     {
 		$this->load->model('tallit_model');
 		$this->load->library('form_validation');
-		$this->load->library('form_builder', array('submit_value' => 'Hae'));
+		$this->load->library('form_collection');
 		$vars['title'] = 'Tallihaku';
 		
 		$vars['msg'] = 'Hae talleja tallirekisteristä. Voit käyttää tähteä * jokerimerkkinä.';
@@ -96,7 +96,7 @@ class Tallit extends CI_Controller
 	
 			if($this->form_collection->validate_stable_search_form() == true && !(empty($this->input->post('nimi')) && empty($this->input->post('tallinumero')) && $this->input->post('kategoria') == "-1"))
 			{
-			$vars['headers'][1] = array('title' => 'Tallinumero', 'key' => 'tnro', 'profile_link' => site_url('talli/') . '/');
+			$vars['headers'][1] = array('title' => 'Tallinumero', 'key' => 'tnro', 'profile_link' => site_url('tallit/talli/'));
 			$vars['headers'][2] = array('title' => 'Nimi', 'key' => 'nimi');
 			$vars['headers'][3] = array('title' => 'Kategoria', 'key' => 'katelyh', 'aggregated_by' => 'tnro');
 			$vars['headers'][4] = array('title' => 'Perustettu', 'key' => 'perustettu');
