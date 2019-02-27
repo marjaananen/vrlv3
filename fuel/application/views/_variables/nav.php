@@ -43,7 +43,6 @@ $nav['tallit/suosituimmat'] = array('label' => 'Suosituimmat tallit', 'parent_id
 $nav['tallit/paivitetyt'] = array('label' => 'Viimeksi päivitetyt tallit', 'parent_id' => 'tallit', 'active' => 'tallit/paivitetyt'); //Koodattavaa: Viimeksi päivitetyt tallit
 //virtuaalihevoset alamenu
 $nav['virtuaalihevoset/rekisterointi'] = array('label' => 'Hevosten rekisteröinti', 'parent_id' => 'virtuaalihevoset', 'active' => 'virtuaalihevoset/rekisterointi'); //Koodattavaa: Rekisteröintilomake
-$nav['virtuaalihevoset/markkinat'] = array('label' => 'Hevosmarkkinat', 'parent_id' => 'virtuaalihevoset', 'active' => 'virtuaalihevoset/markkinat'); //Koodattavaa: Markkinat
 $nav['virtuaalihevoset/statistiikka'] = array('label' => 'Statistiikka', 'parent_id' => 'virtuaalihevoset', 'active' => 'virtuaalihevoset/statistiikka'); //Koodattavaa: Statistiikat
 $nav['virtuaalihevoset/ikaantyminen'] = array('label' => 'Hevosten ikääntyminen', 'parent_id' => 'virtuaalihevoset', 'active' => 'virtuaalihevoset/ikaantyminen'); //Koodattavaa: Syntymämaat
 $nav['virtuaalihevoset/rodut'] = array('label' => 'Rotulista', 'parent_id' => 'virtuaalihevoset', 'active' => 'virtuaalihevoset/rotulista'); //Koodattavaa: Rotulistat
@@ -83,10 +82,10 @@ $nav['yllapito/tallirekisteri/hyvaksy'] = array('label' => 'Hyväksy talleja', '
 $nav['yllapito/tallirekisteri/muokkaa'] = array('label' => 'Muokkaa talleja', 'parent_id' => 'yllapito/tallirekisteri', 'active' => 'yllapito/tallirekisteri/muokkaa');
 
 // profiili alamenu
-$nav['profiili/omat-hevoset'] = array('label' => 'Omat hevoset', 'parent_id' => 'profiili', 'active' => 'profiili/omat-hevoset');
-$nav['profiili/omat-tallit'] = array('label' => 'Omat tallit', 'parent_id' => 'profiili', 'active' => 'profiili/omat-tallit');
-$nav['profiili/omat-kasvattajanimet'] = array('label' => 'Omat kasvattajanimet', 'parent_id' => 'profiili', 'active' => 'profiili/omat-kasvattajanimet');
-$nav['profiili/omat-seurat'] = array('label' => 'Omat seurat', 'parent_id' => 'profiili', 'active' => 'profiili/omat-seurat');
-$nav['profiili/omat-puljut'] = array('label' => 'Omat puljut', 'parent_id' => 'profiili', 'active' => 'profiili/omat-puljut');
-$nav['profiili/omat-kilpailut'] = array('label' => 'Omat kilpailut', 'parent_id' => 'profiili', 'active' => 'profiili/omat-kilpailut');
+$nav['profiili/hevoset'] = array('label' => 'Omat hevoset', 'parent_id' => 'profiili', 'active' => 'profiili/hevoset');
+$nav['profiili/tallit'] = array('label' => 'Omat tallit', 'parent_id' => 'profiili', 'active' => 'profiili/tallit');
+$nav['profiili/kasvattajanimet'] = array('label' => 'Omat kasvattajanimet', 'parent_id' => 'profiili', 'active' => 'profiili/kasvattajanimet');
+$nav['profiili/seurat'] = array('label' => 'Omat seurat', 'parent_id' => 'profiili', 'active' => 'profiili/seurat');
+//$nav['profiili/puljut'] = array('label' => 'Omat puljut', 'parent_id' => 'profiili', 'active' => 'profiili/omat-puljut');
+$nav['profiili/kilpailut'] = array('label' => 'Omat kilpailut', 'parent_id' => 'profiili', 'active' => 'profiili/kilpailut');
 

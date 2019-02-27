@@ -245,9 +245,36 @@ class Tallit_model extends Base_module_model
     }
     
     //Kategoriat
-    function add_category_to_stable($tnro, $category, $applicant)
+    
+    public function mass_edit_categories($tnro, $new_cats = array()){
+                
+        $old_cats = $this->get_stables_categories($tnro);
+
+        $checked_cats = array();
+        
+        //are old categories still on new list? Delete if not.
+        foreach ($old_cats as $oc){
+            if (!array_search($oc['kategoria'], $new_cats)){
+                $this->delete_category($oc['id']);
+            }
+            $checked_cats[] = $oc['kategoria'];          
+        }
+        
+        //are there some new categories?
+        
+        foreach ($new_cats as $nc){
+            if (!array_search($nc, $checked_cats)){
+                $this->add_category_to_stable($tnro, $nc);
+            }
+            $checked_cats[] = $nc;          
+        }      
+     
+        
+    }
+    
+    function add_category_to_stable($tnro, $category, $applicant=NULL)
     {
-        $data = array('tnro' => $tnro, 'kategoria' => $category, 'anoi' => $applicant, 'hyvaksyi' => $this->ion_auth->user()->row()->tunnus);
+        $data = array('tnro' => $tnro, 'kategoria' => $category, 'anoi' => $this->ion_auth->user()->row()->tunnus, 'hyvaksyi' => $this->ion_auth->user()->row()->tunnus);
 
         $data['lisatty'] = date("Y-m-d H:i:s");
         $data['kasitelty'] = $data['lisatty'];
@@ -308,7 +335,7 @@ class Tallit_model extends Base_module_model
     
     function get_stables_categories($tnro)
     {
-        $this->db->select('katelyh, vrlv3_tallirekisteri_kategoriat.id');
+        $this->db->select('katelyh, vrlv3_tallirekisteri_kategoriat.id, vrlv3_tallirekisteri_kategoriat.kategoria');
         $this->db->from('vrlv3_tallirekisteri_kategoriat');
         $this->db->join('vrlv3_lista_tallikategoriat', 'vrlv3_lista_tallikategoriat.kat = vrlv3_tallirekisteri_kategoriat.kategoria');
         $this->db->where('tnro', $tnro);

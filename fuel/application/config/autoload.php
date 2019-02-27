@@ -61,7 +61,7 @@ $autoload['packages'] = array(
 |
 |	$autoload['libraries'] = array('user_agent' => 'ua');
 */
-$autoload['libraries'] = array('fuel/asset', 'fuel/fuel', 'session', 'ion_auth');
+$autoload['libraries'] = array('fuel/asset', 'fuel/fuel', 'session', 'ion_auth', 'form', 'form_validation');
 
 
 /*

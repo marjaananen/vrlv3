@@ -76,19 +76,50 @@
 		}
 		else
 		{
-			// load form_builder
-			$this->load->library('form_builder', array('submit_name'=>'Kirjaudu', 'submit_value'=>'Kirjaudu sisään', 'required_text' => '*Pakollinen kenttä'));
-			$this->form_builder->submit_value = "Kirjaudu sisään";
 			
-			// create fields
-			$fields = array();
-			$fields['tunnus'] = array('type' => 'text', 'required' => TRUE, 'name' => 'identity', 'label' => 'Tunnus', 'class'=>'form-control');
-			$fields['salasana'] = array('type' => 'password', 'required' => TRUE, 'name' => 'password', 'label' => 'Salasana', 'class'=>'form-control');
+			$identity = [
+				'name' => 'identity',
+				'id' => 'identity',
+				'type' => 'text',
+				'value' => "",
+				'class' => 'form-control',
+			];
+
+			$password = [
+				'name' => 'password',
+				'id' => 'password',
+				'type' => 'password',
+				'class' => 'form-control',
+			];
 			
-			$this->form_builder->form_attrs = array('method' => 'post', 'action' => site_url('/auth/login'));   
+			$hidden = array('url'=>current_url());
 			
-			// render the form
-			echo $this->form_builder->render_template('_layouts/basic_form_template', $fields );
+			?>
+				
+			<?php echo form_open("auth/login", '', $hidden);?>
+
+			<div class="panel panel-default">
+				<div class="panel-body">
+                    <div class="form-group">
+						<label for="identity" id="label_identity">Tunnus<span class="required">*</span></label><p><?php echo form_input($identity);?></p>
+					</div>
+                    <div class="form-group">
+						<label for="password" id="label_password">Salasana<span class="required">*</span></label><p><?php echo form_input($password);?></p>
+					</div>
+					<div class="form-group">
+						<label for="remember" id="label_remember">Muista minut</label> <?php echo form_checkbox('remember', '1', FALSE, 'id="remember"');?> 
+					</div>
+				</div>
+            </div>
+			  <p><?php echo form_submit('submit', "Kirjaudu");?></p>
+
+			<?php echo form_close();?>
+
+    			
+			
+			
+			
+			<?php
 			
 			echo "<br /><a href='" . site_url('/auth/forgot_password') . "'>Unohtuiko salasana?</a>";
 		}

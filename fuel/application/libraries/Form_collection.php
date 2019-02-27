@@ -27,7 +27,7 @@ class Form_collection
             $fields['osoite'] = array('type' => 'text', 'required' => TRUE, 'value' => 'http://', 'class'=>'form-control');
             $fields['lyhehd'] = array('type' => 'text', 'label' => 'Lyhenne ehdotus', 'after_html' => '<span class="form_comment">Voit ehdottaa 2-4 merkkistä lyhenteen kirjainosaa tallillesi. Ylläpito ottaa sen huomioon tallinumeroa päätettäessä.</span>', 'class'=>'form-control');
             
-            $this->CI->form_builder->form_attrs = array('method' => 'post', 'action' => site_url('/profiili/omat-tallit/rekisteroi'));
+            $this->CI->form_builder->form_attrs = array('method' => 'post', 'action' => site_url('/profiili/tallit/rekisteroi'));
         }
         
         if($mode == 'edit' || $mode == 'admin')
@@ -43,10 +43,18 @@ class Form_collection
             $fields['nimi'] = array('type' => 'text', 'required' => TRUE, 'value' => $stable['nimi'], 'class'=>'form-control');
             $fields['kuvaus'] = array('type' => 'textarea', 'value' => $stable['kuvaus'], 'cols' => 40, 'rows' => 3, 'class'=>'form-control');
             $fields['osoite'] = array('type' => 'text', 'required' => TRUE, 'value' => $stable['url'], 'class'=>'form-control');
-            $fields['kategoria'] = array('type' => 'multi', 'mode' => 'checkbox', 'required' => TRUE, 'options' => $this->CI->tallit_model->get_category_option_list(), 'class'=>'form-control', 'wrapper_tag' => 'li');
+            
+            $catvalues = array();
+            $cats = $this->CI->tallit_model->get_stables_categories($tnro);
+            foreach ($cats as $cat) {
+                $catvalues[] = $cat['kategoria'];
+            }
+            
+            
+            $fields['kategoria'] = array('type' => 'multi', 'mode' => 'checkbox', 'required' => TRUE, 'options' => $this->CI->tallit_model->get_category_option_list(), 'value'=>$catvalues, 'class'=>'form-control', 'wrapper_tag' => 'li');
 
             
-            $this->CI->form_builder->form_attrs = array('method' => 'post', 'action' => site_url('/profiili/omat-tallit/muokkaa') . '/' . $tnro . '/' . $mode);
+            $this->CI->form_builder->form_attrs = array('method' => 'post', 'action' => site_url('/profiili/tallit/muokkaa') . '/' . $tnro);
         }
 
         return $this->CI->form_builder->render_template('_layouts/basic_form_template', $fields);
@@ -109,6 +117,27 @@ class Form_collection
             return false;
         
         return $this->CI->form_validation->run();
+    }
+    
+    public function get_stable_search_form(){
+        $options = $this->tallit_model->get_category_option_list();
+		
+		$options[-1] = 'Mikä tahansa';
+		
+		$fields['nimi'] = array('type' => 'text', 'class'=>'form-control');
+		$fields['kategoria'] = array('type' => 'select', 'options' => $options, 'value' => '-1', 'class'=>'form-control');
+		$fields['tallinumero'] = array('type' => 'text', 'class'=>'form-control');
+	
+		$this->form_builder->form_attrs = array('method' => 'post', 'action' => site_url('/tallit/haku'));
+		return $this->CI->form_builder->render_template('_layouts/basic_form_template', $fields);
+    }
+    
+    public function validate_stable_search_form(){
+        $this->form_validation->set_rules('nimi', 'Nimi', "min_length[4]|regex_match[/^[A-Za-z0-9_\-.:,; *~#&'@()]*$/]");
+		$this->form_validation->set_rules('kategoria', 'Kategoria', 'min_length[1]|max_length[2]');
+		$this->form_validation->set_rules('tallinumero', 'Tallinumero', "min_length[6]|max_length[8]|regex_match[/^[A-Z0-9]*$/]");
+        return $this->CI->form_validation->run();
+
     }
 }
 

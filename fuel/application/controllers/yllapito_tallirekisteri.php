@@ -12,6 +12,9 @@ class Yllapito_tallirekisteri extends CI_Controller
         if (!$this->user_rights->is_allowed()){       
             redirect($this->user_rights->redirect());
         }
+        
+        $this->load->model('tallit_model');
+
     }
    
     function tallirekisteri_etusivu()
@@ -63,7 +66,6 @@ class Yllapito_tallirekisteri extends CI_Controller
     
     function kasittele_talli($approved, $id)
     {
-        $this->load->model('tallit_model');
         $this->load->library('queue_manager', array('db_table' => 'vrlv3_tallirekisteri_jonossa'));
         $this->session->set_flashdata('return_status', '');
         $rej_reason = $this->input->post('rejection_reason');
@@ -137,10 +139,93 @@ class Yllapito_tallirekisteri extends CI_Controller
         redirect('/yllapito/tallirekisteri/hyvaksy');
     }
     
-    function muokkaa_talli()
-    {
-        //näytä lomake jolle annetaan tallitunnus. se redirectaa muokkaukseen
+    function muokkaa(){
+        
+        if($this->input->server('REQUEST_METHOD') == 'POST'){
+            $this->form_validation->set_rules('tnro', 'Tallitunnus', 'required|min_length[1]|max_length[10]');
+            if ($this->form_validation->run() && count($this->tallit_model->get_stable($this->input->post('tnro'))) > 0){
+
+                redirect(site_url().'yllapito/tallirekisteri/muokkaa/'. $this->input->post('tnro'), 'refresh');
+
+            }
+            else {
+                $this->fuel->pages->render('misc/naytaviesti', array('msg_type' => 'danger', 'msg' => 'Tallitunnus on virheellinen.'));	
+
+            }
+            
+        }
+        else {
+            $vars['title'] = 'Hae talli muokattavaksi.';
+        
+            $this->load->library('form_builder', array('submit_value' => 'Hae muokattavaksi', 'required_text' => '*Pakollinen kenttä'));   
+            $fields['tnro'] = array('type' => 'text', 'label' => 'Tallitunnus', 'required' => TRUE, 'class'=>'form-control');
+            $this->form_builder->set_fields($fields);
+            $this->form_builder->form_attrs = array('method' => 'post', 'action' => site_url('yllapito/tallirekisteri/muokkaa'));
+     
+            // render the page
+            $vars['form'] = $this->form_builder->render_template('_layouts/basic_form_template', $fields);
+            $this->fuel->pages->render('misc/lomakemuokkaus', $vars);
+        
+        }  
+
+        
     }
+    
+    
+    function muokkaa_talli($tnro)
+    {
+        $mode = 'admin';
+		
+		if(empty($tnro) || !(count($this->tallit_model->get_stable($tnro)) > 0)){
+            $this->fuel->pages->render('misc/naytaviesti', array('msg_type' => 'danger', 'msg' => 'Tallitunnus on virheellinen.'));	
+
+        }
+			
+		$vars['title'] = 'Muokkaa tallin tietoja';
+		
+		$this->load->library('form_validation');
+		$this->load->library('form_collection');
+			
+		if($this->input->server('REQUEST_METHOD') == 'GET')
+			{
+				$vars['form'] = $this->form_collection->get_stable_form($mode, $tnro); //pyydetään lomake muokkausmoodissa
+				
+				if($vars['form'] == ""){
+					$this->fuel->pages->render('misc/naytaviesti', array('msg_type' => 'danger', 'msg' => 'Virhe lomakkeen tulostamisessa. Ota yhteys ylläpitoon!'));	
+				}
+				else {
+					$this->fuel->pages->render('misc/lomakemuokkaus', $vars);
+				}
+			}
+		else if($this->input->server('REQUEST_METHOD') == 'POST')
+			{
+				
+				if($this->form_collection->validate_stable_form($mode) == FALSE || count($this->input->post('kategoria')) == 0)
+				{
+					var_dump($this->input->post('kategoria'));
+					$vars['msg'] = "Muokkaus epäonnistui!";
+					$vars['msg_type'] = "danger";
+					$this->fuel->pages->render('misc/lomakemuokkaus', $vars);	
+
+				}
+				else
+				{
+					$vars['msg'] = "Muokkaus onnistui!";
+					$vars['msg_type'] = "success";
+					
+					$this->tallit_model->edit_stable($this->input->post('nimi'), $this->input->post('kuvaus'), $this->input->post('osoite'), $tnro, $this->input->post('tallinumero'));
+					$this->tallit_model->mass_edit_categories($tnro, $this->input->post('kategoria'));
+					
+					$vars['form'] = $this->form_collection->get_stable_form($mode, $tnro);
+						
+					$this->fuel->pages->render('misc/lomakemuokkaus', $vars);
+				}
+	
+			}
+			else
+				$this->fuel->pages->render('misc/naytaviesti');	
+    }
+    
     
     function tallikategoriajono()
     {

@@ -59,13 +59,14 @@ $route['yllapito/tunnukset/kasittele/(:any)/(:any)'] = "yllapito_tunnukset/kasit
 $route['yllapito/tallirekisteri'] = "yllapito_tallirekisteri/tallirekisteri_etusivu";
 $route['yllapito/tallirekisteri/hyvaksy'] = "yllapito_tallirekisteri/tallijono";
 $route['yllapito/tallirekisteri/hyvaksy_kasittele/(:any)/(:num)'] = "yllapito_tallirekisteri/kasittele_talli/$1/$2";
-$route['yllapito/tallirekisteri/muokkaa'] = "yllapito_tallirekisteri/muokkaa_talli";
+$route['yllapito/tallirekisteri/muokkaa'] = "yllapito_tallirekisteri/muokkaa";
+$route['yllapito/tallirekisteri/muokkaa/(:any)'] = "yllapito_tallirekisteri/muokkaa_talli/$1";
 $route['yllapito/tallirekisteri/haku'] = "yllapito_tallirekisteri/talli_haku";
 
 //profile urls
-$route['profiili/omat-tallit'] = "profiili_tallit/index";
-$route['profiili/omat-tallit/rekisteroi'] = "profiili_tallit/rekisteroi_talli";
-$route['profiili/omat-tallit/muokkaa/(:any)/(:any)'] = "profiili_tallit/muokkaa_talli/$1/$2";
+$route['profiili/tallit'] = "profiili_tallit/index";
+$route['profiili/tallit/rekisteroi'] = "profiili_tallit/rekisteroi_talli";
+$route['profiili/tallit/muokkaa/(:any)'] = "profiili_tallit/muokkaa_talli/$1";
 
 
 //public urls
