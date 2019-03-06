@@ -12,7 +12,7 @@ class Vrl_helper {
     }
     
     else {
-      return false;
+      return false;      
     }
   }
   
@@ -53,8 +53,8 @@ class Vrl_helper {
     
   }
 
-  public function get_vh($nro) {
-    if (strlen($nro)==9){
+  public function get_vh($vh) {
+    if (strlen($vh)==9){
       return "VH".substr($vh, 0, 2)."-".substr($vh, 2, 3)."-".substr($vh, 5, 4);
     }
     
@@ -78,6 +78,11 @@ class Vrl_helper {
     else {
       return "";
     }
+  }
+  
+  public function sql_date_to_normal($date){
+    $oDate = new DateTime($date);
+    return $oDate->format("d.m.Y");
   }
   
 

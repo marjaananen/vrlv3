@@ -71,6 +71,7 @@ $route['profiili/tallit/muokkaa/(:any)'] = "profiili_tallit/muokkaa_talli/$1";
 
 //public urls
 $route['tallit/talli/(:any)'] = "tallit/talliprofiili/$1";
+$route['virtuaalihevoset/hevonen/(:any)'] = "virtuaalihevoset/hevosprofiili/$1";
 $route['tunnus/(:any)'] = "jasenyys/tunnus/$1";
 $route['tunnus/(:any)/(:any)'] = "jasenyys/tunnus/$1/$2";
 $route['jasenyys'] = "jasenyys";

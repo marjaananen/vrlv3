@@ -16,7 +16,7 @@ $nav = array();
 $nav['liitto'] = array('label' => 'Liitto', 'active' => 'liitto$|liitto/:any');
 $nav['jasenyys'] = array('label' => 'Jäsenyys', 'active' => 'jasenyys$|jasenyys/:any');
 $nav['tallit'] = array('label' => 'Virtuaalitallit', 'active' => 'tallit$|tallit/:any'); //Koodattavaa: Tallihaku
-$nav['virtuaalihevoset'] = 'Virtuaalihevoset'; //Koodattavaa: Hevoshaku
+$nav['virtuaalihevoset'] = array('label' => 'Virtuaalihevoset', 'active' => 'virtuaalihevoset$|virtuaalihevoset/:any'); //Koodattavaa: Hevoshaku
 $nav['jalostus-ja-kasvatus'] = 'Jalostus ja kasvatus';
 $nav['kilpailutoiminta'] = 'Kilpailutoiminta';
 $nav['nayttelytoiminta'] = 'Näyttelytoiminta';
