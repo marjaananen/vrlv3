@@ -10,3 +10,10 @@ td.label label {
     color: black;
     font-size: small;
 }
+
+#sukutaulu {
+    width: 100%;
+    border-top: #cccccc 3px solid;
+    border-bottom: #cccccc 3px solid;
+    
+}
