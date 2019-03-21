@@ -9,26 +9,6 @@ class Tallit_model extends Base_module_model
         parent::__construct();
     }
     
-    //Hakemukset
-    function add_new_application($name, $desc, $url, $category, $abbreviation)
-    {
-        $data = array('nimi' => $name, 'kuvaus' => $desc, 'url' => $url, 'kategoria' => $category, 'lyhenne' => $abbreviation);
-
-        $data['lisatty'] = date("Y-m-d H:i:s");
-        $data['lisaaja'] = $this->ion_auth->user()->row()->tunnus;
-        
-        $this->db->insert('vrlv3_tallirekisteri_jonossa', $data);
-    }
-    
-    function add_new_category_application($tnro, $category)
-    {
-        $data = array('tnro' => $tnro, 'kategoria' => $category);
-
-        $data['lisatty'] = date("Y-m-d H:i:s");
-        $data['lisaaja'] = $this->ion_auth->user()->row()->tunnus;
-        
-        $this->db->insert('vrlv3_tallirekisteri_kategoriat_jonossa', $data);
-    }
     
     //Tallit
     function get_users_stables($pinnumber)
@@ -61,6 +41,13 @@ class Tallit_model extends Base_module_model
         return array();
     }
     
+    function add_stable($insert_data){
+            $user = $this->CI->ion_auth->user()->row();
+            $insert_data['hyvaksyi'] = $user->tunnus;
+            $this->db->insert('vrlv3_tallirekisteri', $insert_data);
+            
+        }
+        
     function edit_stable($name, $desc, $url, $tnro, $new_tnro=-1)
     {
         $data = array('nimi' => $name, 'kuvaus' => $desc, 'url' => $url);
