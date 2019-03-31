@@ -1,3 +1,22 @@
+# vrlv3
+
+Oletuksena tietokannan nimi on vrlv3, serveri localhost ja user root ilman salasanaa. 
+Kopioi tiedosto fuel/application/config/database_skeleton.php samaan kansioon ja nimeä se pelkäksi database.php:ksi. 
+Sitten muokkaa se vastaamaan omaa konfiguraatiotasi, mutta ÄLÄ COMMITOI TÄTÄ TIEDOSTOA, vaan laita se .gitignoreen vaikka tortoisegitin avulla!
+
+Oletuksena salausavaimeksi on asetettu $config['encryption_key'] = 'test_test_test_test';
+Kopioi tiedosto fuel/application/config/config_skeleton.php samaan kansioon ja nimeä se pelkäksi config.php:ksi. 
+Sitten voit halutessasi muokata sen vastaamaan omaa konfiguraatiotasi, mutta ÄLÄ COMMITOI TÄTÄ TIEDOSTOA, vaan laita se .gitignoreen vaikka tortoisegitin avulla!
+
+Kuvat, javascripta yms. sijoitetaan assets kansioon
+
+Alkuunsa luo tietokanta, ja aja sinne database kansion _schema.sql tiedostot seuraavassa järjestyksessä:
+fuel_schema.sql
+listat_data_schema.sql 
+tunnukset_schema.sql
+tiedotukset_schema.sql
+tallirekisteri_schema.sql
+
 # FUEL CMS
 FUEL CMS is a [CodeIgniter](https://codeigniter.com) based content management system. To learn more about its features visit: http://www.getfuelcms.com
 
