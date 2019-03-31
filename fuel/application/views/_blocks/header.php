@@ -27,9 +27,30 @@
 		<!-- Latest compiled and minified JavaScript -->
 		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
 		<!-- DataTables CSS -->
-		<link rel="stylesheet" type="text/css" href="//cdn.datatables.net/1.10.9/css/jquery.dataTables.css">
+		<link rel="stylesheet" type="text/css" href="//cdn.datatables.net/1.10.18/css/jquery.dataTables.min.css">
+		<!--- <link rel="stylesheet" type="text/css" href="//cdn.datatables.net/1.10.9/css/jquery.dataTables.css">---!>
 		<!-- DataTables -->
-		<script type="text/javascript" charset="utf8" src="//cdn.datatables.net/1.10.9/js/jquery.dataTables.js"></script>
+		<!--<script type="text/javascript" charset="utf8" src="//cdn.datatables.net/1.10.9/js/jquery.dataTables.js"></script>-->
+		<script type="text/javascript" charset="utf8" src="//cdn.datatables.net/1.10.18/js/jquery.dataTables.min.js"></script>
+		<!-- moment -->
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
+<script>
+	$.fn.dataTable.moment = function ( format, locale ) {
+    var types = $.fn.dataTable.ext.type;
+ 
+    // Add type detection
+    types.detect.unshift( function ( d ) {
+        return moment( d, format, locale, true ).isValid() ?
+            'moment-'+format :
+            null;
+    } );
+ 
+    // Add sorting method - use an integer for the sorting
+    types.order[ 'moment-'+format+'-pre' ] = function ( d ) {
+        return moment( d, format, locale, true ).unix();
+    };
+};
+</script>
 		
 		<?php echo js('jqcloud.min.js'); ?>
 		<?php echo css('jqcloud.min.css'); ?>

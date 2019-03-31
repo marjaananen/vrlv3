@@ -10,20 +10,15 @@ class Tunnukset_model extends Base_module_model
     }
  
     //Applications
-    function add_new_application($nickname, $email, $dateofbirth, $location)
+    function add_new_application($nickname, $email)
     {
-        $data = array('nimimerkki' => $nickname, 'email' => $email, 'sijainti' => $location);
+        $data = array('nimimerkki' => $nickname, 'email' => $email);
         
         $data['salasana'] = $this->_generate_random_string(8);
         $data['rekisteroitynyt'] = date("Y-m-d H:i:s");
         $data['varmistus'] = $this->_generate_random_string(10);
         $data['ip'] = $this->input->ip_address();
-        
-        //syntymä on muodossa dd.mm.yyyy joten pitää muuttaa
-        if($dateofbirth == '')
-            $data['syntymavuosi'] = '0000-00-00';
-        else
-            $data['syntymavuosi'] = date('Y-m-d', strtotime($dateofbirth));
+                
         
         $this->db->insert('vrlv3_tunnukset_jonossa', $data);
         
@@ -104,7 +99,7 @@ class Tunnukset_model extends Base_module_model
     {
         $data = array('success' => false);
         
-        $this->db->select('nimimerkki, email, syntymavuosi, sijainti, salasana');
+        $this->db->select('nimimerkki, email, salasana');
         $this->db->from('vrlv3_tunnukset_jonossa');
         $this->db->where('id', $id);
         $query = $this->db->get();
@@ -124,7 +119,7 @@ class Tunnukset_model extends Base_module_model
         $date = new DateTime();
         $date->setTimestamp(time() - 60*15); //nykyhetki miinus 15min, eli ei saa ottaa samaa hakemusta uudestaan käsittelyyn 15 minuuttiin
         
-        $this->db->select('id, nimimerkki, email, syntymavuosi, rekisteroitynyt, sijainti, ip');
+        $this->db->select('id, nimimerkki, email, rekisteroitynyt, ip');
         $this->db->from('vrlv3_tunnukset_jonossa');
         $this->db->where('vahvistettu', 1);
         $this->db->where('kasitelty IS NULL OR kasitelty < "' . $date->format('Y-m-d H:i:s') . '"');
@@ -148,44 +143,7 @@ class Tunnukset_model extends Base_module_model
         return $data;
     }
     
-    //Location
-    function get_location($id)
-    {
-        $data = 'Ei saatavilla';
-        
-        $this->db->select('maakunta');
-        $this->db->from('vrlv3_lista_maakunnat');
-        $this->db->where('id', $id);
-        $query = $this->db->get();
-        
-        if ($query->num_rows() > 0)
-        {
-            $data = $query->row_array(); 
-            $data = $data['maakunta'];
-        }
-        
-        return $data;
-    }
-	
-    function get_location_option_list()
-    {
-        $data = array();
-        
-        $this->db->select('id, maakunta');
-        $this->db->from('vrlv3_lista_maakunnat');
-	$this->db->order_by("maakunta", "asc"); 
-        $query = $this->db->get();
-        
-        if ($query->num_rows() > 0)
-        {
-            foreach ($query->result_array() as $row)
-            {
-               $data[$row['id']] = $row['maakunta'];
-            }
-        }
-        
-        return $data;
-    }
+   
     
     //Other/misc
     function get_next_pinnumber()
@@ -264,21 +222,7 @@ class Tunnukset_model extends Base_module_model
         return array();
     }
     
-    function get_users_by_dateofbirth($dateofbirth)
-    {
-        $this->db->select('tunnus, nimimerkki');
-        $this->db->from('vrlv3_tunnukset');
-        $this->db->where('syntymavuosi', $dateofbirth);
-        $query = $this->db->get();
-        
-        if ($query->num_rows() > 0)
-        {
-            return $query->result_array(); 
-        }
-        
-        return array();
-    }
-    
+
     function get_users_id($pinnumber)
     {
         $this->db->select('id');
@@ -296,9 +240,8 @@ class Tunnukset_model extends Base_module_model
     
     function search_users($pinnumber, $nick, $location)
     {
-        $this->db->select('tunnus, nimimerkki, syntymavuosi, maakunta, nayta_vuosi, nayta_laani');
+        $this->db->select('tunnus, nimimerkki');
         $this->db->from('vrlv3_tunnukset');
-        $this->db->join('vrlv3_lista_maakunnat', 'vrlv3_tunnukset.laani = vrlv3_lista_maakunnat.id');
         
         if(!empty($pinnumber))
         {
@@ -316,16 +259,6 @@ class Tunnukset_model extends Base_module_model
                 $this->db->where('nimimerkki', $nick);
         }
             
-        if($location != '-1')
-        {
-            $this->db->where('vrlv3_tunnukset.laani', $location);
-            
-            $date = new DateTime();
-            $date->setTimestamp(time() - 16*365*24*60*60); //vain yli 16 vuotiaita jos etsitään sijainnilla
-            $this->db->where('syntymavuosi < "' . $date->format('Y-m-d') . '"');
-            $this->db->where('nayta_laani', 1);
-        }
-   
         $query = $this->db->get();
         
         if ($query->num_rows() > 0)
@@ -353,6 +286,7 @@ class Tunnukset_model extends Base_module_model
         
         return array();
     }
+    
     
     function get_latest_logins()
     {

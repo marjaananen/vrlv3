@@ -63,8 +63,6 @@
         
         <p>Nimimerkki: <?=$application_data['nimimerkki']?></p>
         <p>Sähköpostiosoite: <?=$application_data['email']?></p>
-        <p>Syntymäaika: <?=$application_data['syntymavuosi']?></p>
-        <p>Sijainti: <?=$application_data['sijainti']?></p>
         <p>Rekisteröitymisaika: <?=$application_data['rekisteroitynyt']?></p>
         <p>IP-osoite: <?=$application_data['ip']?></p>
     </div>

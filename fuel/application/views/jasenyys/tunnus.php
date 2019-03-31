@@ -6,8 +6,6 @@
     
     <?php if ($logged_in){ ?>
         <p><b>Sähköpostiosoite:</b> <?=$email?></p>
-        <p><b>Syntymäaika:</b> <?=$syntymavuosi?></p>
-        <p><b>Sijainti:</b> <?=$sijainti?></p>
         <p>
             <b>Muut yhteystiedot:</b>
             <?php

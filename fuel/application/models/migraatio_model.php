@@ -199,7 +199,7 @@ class Migraatio_model extends Base_module_model
         $query = $this->db->get('tunnukset_nimimerkit');
         foreach ($query->result() as $row)
         {
-            if ($this->onko_tunnus($row->tunnus)) {
+            if ($this->onko_tunnus($row->tunnus) && $row->tunnus != '00000') {
                 $data_nick['tunnus'] = $row->tunnus;
                 $data_nick['nimimerkki'] = $row->nimimerkki;
                 $data_nick['vaihtanut'] = $row->vaihtanut;

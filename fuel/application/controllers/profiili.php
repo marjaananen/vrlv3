@@ -20,10 +20,8 @@ class Profiili extends Loggedin_Controller
 	$vars = array();
 	$vars['nimimerkki'] =  $user->nimimerkki;
         $vars['email'] = $user->email;
-	$dateofbirth = date("d.m.Y", strtotime($user->syntymavuosi));
 	$dateofaccept = date("d.m.Y", strtotime($user->hyvaksytty));
-	$vars['syntymavuosi'] =  $dateofbirth;
-	$vars['sijainti'] = $user->laani;
+
 	$vars['hyvaksytty'] = $dateofaccept;
         
         $vars['stable_stats'] = $this->tallit_model->get_users_stable_stats($user->tunnus);
@@ -53,10 +51,7 @@ class Profiili extends Loggedin_Controller
                 $this->form_validation->set_rules('email', 'Sähköpostiosoite', 'valid_email|is_unique[vrlv3_tunnukset.email]|is_unique[vrlv3_tunnukset_jonossa.email]');
             
             $this->form_validation->set_rules('nimimerkki', 'Nimimerkki', "min_length[1]|max_length[20]|regex_match[/^[A-Za-z0-9_\-.:,; *~#&'@()]*$/]");
-            $this->form_validation->set_rules('sijainti', 'Sijainti', 'min_length[1]|max_length[2]|numeric');
             $this->form_validation->set_rules('nayta_email', 'Sähköpostin näkyvyys', 'min_length[1]|max_length[1]|numeric|regex_match[/^[01]*$/]');
-            $this->form_validation->set_rules('nayta_vuosi', 'Iän näkyvyys', 'min_length[1]|max_length[1]|numeric|regex_match[/^[01]*$/]');
-            $this->form_validation->set_rules('nayta_laani', 'Sijainnin näkyvyys', 'min_length[1]|max_length[1]|numeric|regex_match[/^[01]*$/]');
             $this->form_validation->set_rules('salasana', 'Salasana', "min_length[6]|max_length[20]|regex_match[/^[A-Za-z0-9_\-.:,; *~#&'@()]*$/]");
             $this->form_validation->set_rules('uusi_salasana1', 'Uusi salasana', "min_length[6]|max_length[20]|regex_match[/^[A-Za-z0-9_\-.:,; *~#&'@()]*$/]");
             $this->form_validation->set_rules('uusi_salasana2', 'Toistettu uusi salasana', "min_length[6]|max_length[20]|regex_match[/^[A-Za-z0-9_\-.:,; *~#&'@()]*$/]");
@@ -91,13 +86,9 @@ class Profiili extends Loggedin_Controller
                     
                 if(!empty($this->input->post('email')))
                     $update_data['email'] = $this->input->post('email');
-                    
-                if(!empty($this->input->post('sijainti')))
-                    $update_data['laani'] = $this->input->post('sijainti');
+                
                     
                 $update_data['nayta_email'] = $this->input->post('nayta_email');    
-                $update_data['nayta_vuosi'] = $this->input->post('nayta_vuosi');
-                $update_data['nayta_laani'] = $this->input->post('nayta_laani');
 
                 if(!empty($update_data))
                 {
@@ -121,7 +112,7 @@ class Profiili extends Loggedin_Controller
         $this->load->library('form_builder', array('submit_value' => 'Päivitä tiedot'));
         $user = $this->ion_auth->user()->row();
 
-        $dateofbirth = date("d.m.Y", strtotime($user->syntymavuosi));
+
         $options = $this->tunnukset_model->get_location_option_list();
         $contacts_html = '';
         
@@ -141,10 +132,6 @@ class Profiili extends Loggedin_Controller
         $fields['email'] = array('type' => 'text', 'value' => $user->email, 'label' => 'Sähköpostiosoite', 'after_html' => '<span class="form_comment">Anna toimiva osoite tai saatat menettää tunnuksesi!</span>', 'class'=>'form-control');
         $fields['nayta_email'] = array('type' => 'checkbox', 'checked' => $user->nayta_email, 'label' => 'Näytetäänkö sähköposti julkisesti?', 'after_html' => '<span class="form_comment">Näytetäänkö sähköposti julkisesti profiilissasi.</span>', 'class'=>'form-control');
         $fields['muut_yhteystiedot'] = array('type' => 'section', 'tag' => 'label', 'value' => 'Muut yhteystiedot', 'display_label' => false, 'after_html' => $contacts_html . '<span class="form_comment"><a href="' . site_url('/profiili/muokkaa_yhteystietoja') . '">Muokkaa yhteystietoja</a></span>');
-        $fields['syntymavuosi'] = array('type' => 'text', 'label' => 'Syntymäaika', 'disabled' => 'disabled', 'size' => '10', 'value' => $dateofbirth, 'class'=>'form-control');
-        $fields['sijainti'] = array('type' => 'select', 'options' => $options, 'value' => $user->laani, 'class'=>'form-control');
-        $fields['nayta_vuosi'] = array('type' => 'checkbox', 'checked' => $user->nayta_vuosi, 'label' => 'Näytetäänkö ikä julkisesti?', 'after_html' => '<span class="form_comment">Näytetäänkö tiedot julkisesti profiilissasi. Huom! Vain yli 16-vuotiaiden tiedot voidaan näyttää profiilissa.</span>', 'class'=>'form-control');
-        $fields['nayta_laani'] = array('type' => 'checkbox', 'checked' => $user->nayta_laani, 'label' => 'Näytetäänkö sijainti julkisesti?', 'after_html' => '<span class="form_comment">Näytetäänkö tiedot julkisesti profiilissasi. Huom! Vain yli 16-vuotiaiden tiedot voidaan näyttää profiilissa.</span>', 'class'=>'form-control');
         $fields['salasana'] = array('type' => 'password', 'class'=>'form-control');
         $fields['uusi_salasana1'] = array('type' => 'password', 'label' => 'Uusi salasana', 'class'=>'form-control');
         $fields['uusi_salasana2'] = array('type' => 'password', 'label' => 'Toista uusi salasana', 'after_html' => '<span class="form_comment">Täytä salasanakentät vain jos haluat vaihtaa salasanasi. Salasanassa tulee olla vähintään 6 merkkiä. Salasana tulee voimaan heti, eikä sinun tarvitse kirjautua sisään uudelleen.</span>', 'class'=>'form-control');

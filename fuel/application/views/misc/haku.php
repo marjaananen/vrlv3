@@ -5,10 +5,14 @@
 ?>
 
 <p>
+
+<?php if(strlen(fuel_var('msg', '')) > 0){ ?>
     <div class="alert alert-<?php echo fuel_var('msg_type', 'info')?>" role="alert">   
         <?php echo fuel_var('msg', '')?>
         <?php echo validation_errors(); ?>
     </div>
+    
+    <?php } ?>
     
     <?php
         echo fuel_var('form', '');
@@ -20,12 +24,25 @@
     
     <?php if(!empty($headers)) : ?>
         <script>
+            function formatValue(value, type) {                
+                if (type === 'date') {
+                    return moment(value).format('DD.MM.YYYY');
+                }
+                
+                if (type === 'VH') {
+                    return 'VH' + value.slice(0, 1) + '-' + value.slice(2, 4) + '-' + value.slice(5, 8);
+                }
+                
+                return value;
+            }
+        
             $(document).ready(function() {
                 var headers = <?=$headers?>;
                 var data = <?=$data?>;
                 var numcolumns = 0;
                 var table = "<table id='result_table'><thead><tr>";
                 var prepend_text;
+                var output;
 
                 for(i in headers)
                 {
@@ -67,37 +84,43 @@
                             }
                         }
                         
-                        if (headers[i]['profile_link'] != undefined)
-                            table += "<td><a href='" + headers[i]['profile_link'] + data[d][headers[i]['key']] + "'>" + prepend_text + data[d][headers[i]['key']] + "</a></td>"; //profiili linkatun arvon tulostus soluunsa
-                        else if (headers[i]['admin_edit'] != undefined)
-                            table += "<td><a href='" + headers[i]['admin_edit'] + data[d][headers[i]['key']] + "/admin'>" + prepend_text + "Muokkaa</a></td>"; //profiili linkatun arvon tulostus soluunsa
-                        else if (headers[i]['date_to_age'] != undefined) {
-                            if (data[d][headers[i]['key']] == "0000-00-00") {
-                                table += "<td>Ei saatavilla</td>";
-                            }
-                            else {
-                                var t = data[d][headers[i]['key']].split(/[-]/); //date iäksi
-                                var date = new Date(t[0], t[1]-1, t[2]);
-                                table += "<td>" + _calculateAge(date) + "</td>";
-                            }
+                        if (headers[i]['image'] != undefined) {
+                            output = "<img src='" + headers[i]['image'] + "'/>";
+                        } else {
+                            output = prepend_text + formatValue(data[d][headers[i]['key']], headers[i]['type']);
                         }
-                        else
-                            table += "<td>" + prepend_text + data[d][headers[i]['key']] + "</td>"; //normaali arvon tulostus soluunsa
-                    }
                         
+                        if (headers[i]['key_link'] != undefined) {
+                            table += "<td><a href='" + headers[i]['key_link'] + data[d][headers[i]['key']] + "'>" + output + "</a></td>"; //profiili linkatun arvon tulostus soluunsa
+                        } else {
+                            table += "<td>" + output + "</td>"; //normaali arvon tulostus soluunsa
+                        }
+                    }
+
                     table += "</tr>";
                 }
                 
                 table += "<tbody></table>";
+                
+                
+                
                 $("#result_div").append(table);
-                $('#result_table').DataTable();
+                
+                    
+                $.fn.dataTable.moment( 'DD.MM.YYYY' );
+                $.fn.dataTable.moment( 'DD.MM.YYYY' );
+                
+                $('#result_table').DataTable({
+                    "order": [[ 0, "desc" ]],
+                    "lengthMenu": [ 25, 50, 75, 100 ]
+                    });                
+                
+                
+                
             });
-            
-            function _calculateAge(birthday) { // birthday is a date
-                var ageDifMs = Date.now() - birthday.getTime();
-                var ageDate = new Date(ageDifMs); // miliseconds from epoch
-                return Math.abs(ageDate.getUTCFullYear() - 1970);
-            }
+
+
+
         </script>
     <?php endif; ?>
 </p>

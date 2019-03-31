@@ -80,6 +80,8 @@ class Auth extends CI_Controller
 			{
 				//if the login is successful
 				//redirect them back to the home page
+				$this->load->model('tunnukset_model');
+				$this->tunnukset_model->add_successful_login($this->input->post('identity'));
 				$this->session->set_flashdata('message', $this->ion_auth->messages());
 				redirect($this->input->post('url'), 'refresh');
 			}

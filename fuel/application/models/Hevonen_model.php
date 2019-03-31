@@ -84,7 +84,7 @@ class Hevonen_model extends Base_module_model
         }        
         
         $this->db->from('vrlv3_hevosrekisteri');
-        
+        $this->db->limit(1000);
         $query = $this->db->get();
         
         if ($query->num_rows() > 0)

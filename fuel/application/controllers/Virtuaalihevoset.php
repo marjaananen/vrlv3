@@ -33,14 +33,14 @@ class Virtuaalihevoset extends CI_Controller
 	
 			if($this->form_collection->validate_horse_search_form() == true && !(empty($this->input->post('nimi'))));
 			{
-			$vars['headers'][1] = array('title' => 'Rekisterinumero', 'key' => 'reknro', 'profile_link' => site_url('virtuaalihevoset/hevonen/'));
-			$vars['headers'][2] = array('title' => 'Nimi', 'key' => 'nimi');
-			$vars['headers'][3] = array('title' => 'Rotu', 'key' => 'rotu');
-			$vars['headers'][4] = array('title' => 'Sukupuoli', 'key' => 'sukupuoli');
-			
-			$vars['headers'] = json_encode($vars['headers']);
-						
-			$vars['data'] = json_encode($this->hevonen_model->search_horse($this->input->post('nimi'), $this->input->post('rotu'), $this->input->post('skp'), $this->input->post('kuollut'), $this->input->post('vari'), $this->input->post('syntynyt_v')));
+				$vars['headers'][1] = array('title' => 'Rekisterinumero', 'key' => 'reknro', 'key_link' => site_url('virtuaalihevoset/hevonen/'));
+				$vars['headers'][2] = array('title' => 'Nimi', 'key' => 'nimi');
+				$vars['headers'][3] = array('title' => 'Rotu', 'key' => 'rotu');
+				$vars['headers'][4] = array('title' => 'Sukupuoli', 'key' => 'sukupuoli');
+				
+				$vars['headers'] = json_encode($vars['headers']);
+							
+				$vars['data'] = json_encode($this->hevonen_model->search_horse($this->input->post('nimi'), $this->input->post('rotu'), $this->input->post('skp'), $this->input->post('kuollut'), $this->input->post('vari'), $this->input->post('syntynyt_v')));
 			}
 		}
 		

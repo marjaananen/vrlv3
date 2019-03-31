@@ -17,15 +17,47 @@ class Tallit extends CI_Controller
 	}
 	
 	public function uusimmat (){
-		$this->pipari();
+		$vars['title'] = 'Uusimmat tallit';
+				
+		$vars['text_view'] = $this->load->view('tallit/teksti_uusimmat', NULL, TRUE);
+		
+		$vars['headers'][1] = array('title' => 'Perustettu', 'key' => 'perustettu', 'type' => 'date');
+		$vars['headers'][2] = array('title' => 'Tallinumero', 'key' => 'tnro', 'key_link' => site_url('tallit/talli/'));
+		$vars['headers'][3] = array('title' => 'Nimi', 'key' => 'nimi');
+		if($this->ion_auth->is_admin()){
+			$vars['headers'][4] = array('title' => 'Editoi', 'key' => 'tnro', 'key_link' => site_url('tallit/muokkaa/'), 'image' => site_url('assets/images/icons/edit.png'));
+		}
+		
+		$vars['headers'] = json_encode($vars['headers']);
+		
+		$stables = $this->tallit_model->search_stables_newest();		
+		$vars['data'] = json_encode($stables);
+
+		$this->fuel->pages->render('misc/haku', $vars);
 	}
 	
-	public function suosituimmat (){
-		$this->pipari();
-	}
+
 	
 	public function paivitetyt (){
-		$this->pipari();
+
+		$vars['title'] = 'Viimeksi päivitetyt tallit';
+				
+		$vars['text_view'] = $this->load->view('tallit/teksti_updated', NULL, TRUE);
+		
+		$vars['headers'][1] = array('title' => 'Päivitetty', 'key' => 'aika', 'type' => 'date');
+		$vars['headers'][2] = array('title' => 'Tallinumero', 'key' => 'tnro', 'key_link' => site_url('tallit/talli/'));
+		$vars['headers'][3] = array('title' => 'Nimi', 'key' => 'nimi');
+		if($this->ion_auth->is_admin()){
+			$vars['headers'][4] = array('title' => 'Editoi', 'key' => 'tnro', 'key_link' => site_url('tallit/muokkaa/'), 'image' => site_url('assets/images/icons/edit.png'));
+		}
+		
+		$vars['headers'] = json_encode($vars['headers']);
+		
+		$stables = $this->tallit_model->search_stables_updated();		
+		$vars['data'] = json_encode($stables);
+
+		$this->fuel->pages->render('misc/haku', $vars);
+    
 	}
 	
 	
@@ -58,7 +90,7 @@ class Tallit extends CI_Controller
 		
 		$vars['msg'] = 'Hae talleja tallirekisteristä. Voit käyttää tähteä * jokerimerkkinä.';
 		
-		$vars['text_view'] = $this->load->view('tallit/etusivu_teksti', NULL, TRUE);
+		$vars['text_view'] = $this->load->view('tallit/teksti_etusivu', NULL, TRUE);
 		
 		$vars['form'] = $this->_get_stable_search_form();
 		
@@ -67,14 +99,17 @@ class Tallit extends CI_Controller
 	
 			if($this->_validate_stable_search_form() == true && !(empty($this->input->post('nimi')) && empty($this->input->post('tallinumero')) && $this->input->post('kategoria') == "-1"))
 			{
-			$vars['headers'][1] = array('title' => 'Tallinumero', 'key' => 'tnro', 'profile_link' => site_url('tallit/talli/'));
-			$vars['headers'][2] = array('title' => 'Nimi', 'key' => 'nimi');
-			$vars['headers'][3] = array('title' => 'Kategoria', 'key' => 'katelyh', 'aggregated_by' => 'tnro');
-			$vars['headers'][4] = array('title' => 'Perustettu', 'key' => 'perustettu');
-			
-			$vars['headers'] = json_encode($vars['headers']);
-			
-			$vars['data'] = json_encode($this->tallit_model->search_stables($this->input->post('nimi'), $this->input->post('kategoria'), $this->input->post('tallinumero')));
+				$vars['headers'][1] = array('title' => 'Tallinumero', 'key' => 'tnro', 'key_link' => site_url('tallit/talli/'));
+				$vars['headers'][2] = array('title' => 'Nimi', 'key' => 'nimi');
+				$vars['headers'][3] = array('title' => 'Kategoria', 'key' => 'katelyh', 'aggregated_by' => 'tnro');
+				$vars['headers'][4] = array('title' => 'Perustettu', 'key' => 'perustettu', 'type' => 'date');
+				if($this->ion_auth->is_admin()){
+					$vars['headers'][5] = array('title' => 'Editoi', 'key' => 'tnro', 'key_link' => site_url('tallit/muokkaa/'), 'image' => site_url('assets/images/icons/edit.png'));
+				}
+				
+				$vars['headers'] = json_encode($vars['headers']);
+				
+				$vars['data'] = json_encode($this->tallit_model->search_stables($this->input->post('nimi'), $this->input->post('kategoria'), $this->input->post('tallinumero')));
 			}
 		}
 		
@@ -93,7 +128,7 @@ class Tallit extends CI_Controller
 			
 			$vars['stables'] = $this->tallit_model->get_users_stables($this->ion_auth->user()->row()->tunnus);
 			
-			$this->fuel->pages->render('profiili/tallit/index', $vars);
+			$this->fuel->pages->render('/tallit/omat', $vars);
 		}
     }
     
@@ -148,9 +183,8 @@ class Tallit extends CI_Controller
 					}
 					
 					//add stables, categories and owner
-					$this->tallit_model->add_stable($insert_data);
-					$this->tallit_model->add_owner_to_stable($insert_data['tnro'], $this->ion_auth->user()->row()->tunnus, 1);
-					$this->tallit_model->mass_edit_categories($insert_data['tnro'], $this->input->post('kategoria'));
+					$this->tallit_model->add_stable($insert_data, $this->input->post('kategoria'), $this->ion_auth->user()->row()->tunnus);
+
 				}
 				
 				$this->fuel->pages->render('misc/jonorekisterointi', $vars);
@@ -164,12 +198,15 @@ class Tallit extends CI_Controller
     {
 		$mode = 'edit';
 		$msg = "";
-		
-		if(!($this->_is_editing_allowed($tnro, $msg)))
+
+		if(!$this->_is_editing_allowed($tnro, $msg)){
             $this->fuel->pages->render('misc/naytaviesti', array('msg_type' => 'danger', 'msg' => $msg));
-		
+			return;
+		}
+			
+	
 		if($this->ion_auth->is_admin())
-            $mode = 'admin';
+			$mode = 'admin';
 		
 			
 		$vars['title'] = 'Muokkaa tallin tietoja';
@@ -216,16 +253,17 @@ class Tallit extends CI_Controller
 	
 			}
 			else
-				$this->fuel->pages->render('misc/naytaviesti');	
+				$this->fuel->pages->render('misc/naytaviesti');
+					
     }
     
     function lopeta($tnro)
     {
-		if(!($this->_is_editing_allowed($tnro, $msg)))
-            $this->fuel->pages->render('misc/naytaviesti', array('msg_type' => 'danger', 'msg' => $msg));			
-			
-        $this->load->model('tallit_model');
-        
+		if(!$this->_is_editing_allowed($tnro, $msg)){
+            $this->fuel->pages->render('misc/naytaviesti', array('msg_type' => 'danger', 'msg' => $msg));
+			return;
+		}			
+			        
         $this->tallit_model->mark_stable_inactive($tnro);
             
         $this->fuel->pages->render('misc/naytaviesti', array('msg' => 'Tallisi on merkattu lopettaneeksi.'));
@@ -238,29 +276,33 @@ class Tallit extends CI_Controller
 
     
 	private function _is_editing_allowed($tnro, &$msg){
-		
+
 		//stable nro is missing
-		if(empty($tnro))
+		if(empty($tnro)){
 			$msg = "Tallitunnus puuttuu!";
 			return false;
-		
+		}
+				
 		//only logged in can edit
-		if(!($this->ion_auth->logged_in()))
+		if(!($this->ion_auth->logged_in())){
             $msg = "Kirjaudu sisään muokataksesi tallia!";
 			return false;
+		}
 		
 		//are you admin or editor?
 		$this->load->library('user_rights', array('groups' => $this->allowed_user_groups));
 		
 		//only admin, editor and owner can edit
-		if(!($this->ion_auth->is_admin()) && !$this->user_rights->is_allowed() && !($this->tallit_model->is_stable_owner($this->ion_auth->user()->row()->tunnus, $tnro)))
+		if(!($this->ion_auth->is_admin()) && !$this->user_rights->is_allowed() && !($this->tallit_model->is_stable_owner($this->ion_auth->user()->row()->tunnus, $tnro))){
 			$msg = "Jos et ole ylläpitäjä, voit muokata vain omaa talliasi";
 			return false;
-			
+		}
+		
 		//does the stable exist?
-		if(!$this->tallit_model->is_tnro_in_use($tnro))
+		if(!$this->tallit_model->is_tnro_in_use($tnro)){
 			$msg = "Tallia ei ole olemassa.";
 			return false;
+		}
 		
 		return true;		
 		
@@ -341,12 +383,12 @@ class Tallit extends CI_Controller
 
         if($mode == 'application')
         {
-            $this->form_validation->set_rules('lyhehd', 'Lyhenne ehdotus', "min_length[2]|max_length[4]|alpha");
+            $this->form_validation->set_rules('lyhehd', 'Lyhenne ehdotus', "required|min_length[2]|max_length[4]");
         }
         
         if($mode == 'admin')
         {
-            $this->form_validation->set_rules('tallinumero', 'Tallinumero', "required|min_length[6]|max_length[8]|alphanumeric");
+            $this->form_validation->set_rules('tallinumero', 'Tallinumero', "required|min_length[6]|max_length[8]");
             //ei täydellinen check!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         }
         

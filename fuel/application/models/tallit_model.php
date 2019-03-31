@@ -41,10 +41,15 @@ class Tallit_model extends Base_module_model
         return array();
     }
     
-    function add_stable($insert_data){
-            $user = $this->CI->ion_auth->user()->row();
-            $insert_data['hyvaksyi'] = $user->tunnus;
+    function add_stable($insert_data, $kategoria, $owner){
+            $insert_data['hyvaksyi'] = $owner;
+            
+            $this->db->trans_start();
             $this->db->insert('vrlv3_tallirekisteri', $insert_data);
+            $this->add_owner_to_stable($insert_data['tnro'], $owner, 1);
+			$this->mass_edit_categories($insert_data['tnro'], $kategoria);
+            $this->db->trans_complete();
+            
             
         }
         
@@ -159,7 +164,7 @@ class Tallit_model extends Base_module_model
     {
         $this->db->select('vrlv3_tallirekisteri.tnro, nimi, perustettu, katelyh');
         $this->db->from('vrlv3_tallirekisteri');
-        $this->db->join('vrlv3_tallirekisteri_kategoriat', 'vrlv3_tallirekisteri.tnro = vrlv3_tallirekisteri_kategoriat.tnro');
+        $this->db->join('vrlv3_tallirekisteri_kategoriat', 'vrlv3_tallirekisteri.tnro = vrlv3_tallirekisteri_kategoriat.tnro', 'left');
         $this->db->join('vrlv3_lista_tallikategoriat', 'vrlv3_lista_tallikategoriat.kat = vrlv3_tallirekisteri_kategoriat.kategoria');
         
         if(!empty($name))
@@ -191,46 +196,53 @@ class Tallit_model extends Base_module_model
         return array();
     }
     
-    function get_stables_likes($tnro)
-    {  
-        $this->db->where('tnro', $tnro);
-        $this->db->where('aani', 1);
-        $this->db->from('vrlv3_tallirekisteri_yesno');
-        return $this->db->count_all_results();
-    }
     
-    function get_stables_like_by_user($tnro, $pinnumber)
+    
+    function search_stables_updated()
     {
-        $this->db->select('aika');
-        $this->db->where('tnro', $tnro);
-        $this->db->where('tunnus', $pinnumber);
-        $this->db->from('vrlv3_tallirekisteri_yesno');
-
+        $this->db->select('MAX(vrlv3_tallirekisteri_paivitetty.aika) as aika, vrlv3_tallirekisteri_paivitetty.tnro, nimi, perustettu');
+        $this->db->from('vrlv3_tallirekisteri');
+        $this->db->join('vrlv3_tallirekisteri_paivitetty', 'vrlv3_tallirekisteri_paivitetty.tnro = vrlv3_tallirekisteri.tnro');
+        $this->db->group_by('tnro');
+        $this->db->order_by('aika', 'DESC');
+        
+        $this->db->limit(100);
+       
+   
         $query = $this->db->get();
         
         if ($query->num_rows() > 0)
-        {
-            return $query->result_array()[0]['aika'];
+        {                
+            
+            return $query->result_array(); 
         }
         
-        return "0000-00-00";
+        return array();
     }
     
-    function add_stable_like($tnro)
+    
+    function search_stables_newest()
     {
-        $data = array('tnro' => $tnro, 'aani' => 1);
-
-        $data['aika'] = date("Y-m-d H:i:s");
-        $data['tunnus'] = $this->ion_auth->user()->row()->tunnus;
+        $this->db->select('tnro, nimi, perustettu');
+        $this->db->from('vrlv3_tallirekisteri');
+        $this->db->order_by('perustettu', 'DESC');
         
-        $this->db->insert('vrlv3_tallirekisteri_yesno', $data);
+        $this->db->limit(100);
+       
+   
+        $query = $this->db->get();
+        
+        if ($query->num_rows() > 0)
+        {                
+            
+            return $query->result_array(); 
+        }
+        
+        return array();
     }
     
-    function delete_stable_like($tnro)
-    {
-        $this->db->delete('vrlv3_tallirekisteri_yesno', array('tunnus' => $this->ion_auth->user()->row()->tunnus, 'tnro' => $tnro));
-    }
-    
+
+
     //Kategoriat
     
     public function mass_edit_categories($tnro, $new_cats = array()){
@@ -389,6 +401,8 @@ class Tallit_model extends Base_module_model
         
         return false;
     }
+    
+
     
 }
 
