@@ -1,199 +1,345 @@
 -- phpMyAdmin SQL Dump
--- version 4.1.14
--- http://www.phpmyadmin.net
+-- version 4.8.4
+-- https://www.phpmyadmin.net/
 --
--- Host: 127.0.0.1
--- Generation Time: 22.07.2015 klo 12:00
--- Palvelimen versio: 5.6.17
--- PHP Version: 5.5.12
+-- Host: localhost:3306
+-- Generation Time: 31.03.2019 klo 09:15
+-- Palvelimen versio: 10.1.28-MariaDB
+-- PHP Version: 5.6.30
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
+SET AUTOCOMMIT = 0;
+START TRANSACTION;
 SET time_zone = "+00:00";
 
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8mb4 */;
+
 --
--- Database: `vrlv3`
+-- Database: `vrl`
 --
 
 -- --------------------------------------------------------
 
 --
--- Rakenne taululle `vrlv3_lista_maakunnat`
+-- Rakenne taululle `vrlv3_lista_maat`
 --
 
-DROP TABLE IF EXISTS `vrlv3_lista_maakunnat`;
-CREATE TABLE `vrlv3_lista_maakunnat` (
-  `id` smallint(2) NOT NULL AUTO_INCREMENT,
-  `maakunta` tinytext COLLATE utf8_swedish_ci NOT NULL,
-  PRIMARY KEY (`id`),
-  KEY `id` (`id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_swedish_ci AUTO_INCREMENT=22 ;
+CREATE TABLE `vrlv3_lista_maat` (
+  `id` smallint(4) NOT NULL,
+  `lyh` varchar(2) NOT NULL,
+  `maa` text NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
--- Vedos taulusta `vrlv3_lista_maakunnat`
+-- Vedos taulusta `vrlv3_lista_maat`
 --
 
-INSERT INTO `vrlv3_lista_maakunnat` (`id`, `maakunta`) VALUES
-(0, 'Ei saatavilla'),
-(1, 'Ahvenanmaa'),
-(2, 'Etelä-Karjala'),
-(3, 'Etelä-Pohjanmaa'),
-(4, 'Etelä-Savo'),
-(5, 'Itä-Uusimaa'),
-(6, 'Kainuu'),
-(7, 'Kanta-Häme'),
-(8, 'Keski-Pohjanmaa'),
-(9, 'Keski-Suomi'),
-(10, 'Kymenlaakso'),
-(11, 'Lappi'),
-(12, 'Pirkanmaa'),
-(13, 'Pohjanmaa'),
-(14, 'Pohjois-Karjala'),
-(15, 'Pohjois-Pohjanmaa'),
-(16, 'Pohjois-Savo'),
-(17, 'Päijät-Häme'),
-(18, 'Satakunta'),
-(19, 'Uusimaa'),
-(20, 'Varsinais-Suomi'),
-(21, 'Ulkomaat');
-
-
--- 
--- Rakenne taululle `vrlv3_lista_tallikategoriat`
--- 
-
-CREATE TABLE IF NOT EXISTS `vrlv3_lista_tallikategoriat` (
-  `kat` smallint(2) NOT NULL auto_increment,
-  `kategoria` varchar(20) character set utf8 NOT NULL,
-  `katelyh` varchar(3) character set utf8 NOT NULL,
-  `katnro` varchar(4) collate utf8_swedish_ci NOT NULL,
-  PRIMARY KEY  (`kat`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_swedish_ci AUTO_INCREMENT=14 ;
-
--- 
--- Vedostetaan dataa taulusta `lista_tallikategoriat`
--- 
-
-INSERT INTO `vrlv3_lista_tallikategoriat` (`kat`, `kategoria`, `katelyh`, `katnro`) VALUES 
-(1, 'ratsastuskoulu', 'RK', 'KAT1'),
-(2, 'siittola', 'ST', 'KAT2'),
-(3, 'kilpailukeskus', 'KK', 'KAT3'),
-(4, 'valjakkotalli', 'VT', 'KAT4'),
-(5, 'ravitalli', 'RT', 'KAT4'),
-(6, 'laukkatalli', 'LK', 'KAT4'),
-(7, 'westerntalli', 'WT', 'KAT4'),
-(8, 'myyntitalli', 'MT', 'KAT5'),
-(9, 'oriasema', 'OA', 'KAT6'),
-(10, 'yksityistalli', 'YT', 'KAT7'),
-(11, 'muu kilpatalli', 'KT', 'KAT4'),
-(12, 'tamma-asema', 'TA', 'KAT6'),
-(13, 'harrastetalli', 'HT', 'KAT0');
-
-
-
---
--- Rakenne taululle `vrlv3_lista_tiedotuskategoriat`
---
-
-CREATE TABLE IF NOT EXISTS `vrlv3_lista_tiedotuskategoriat` (
-  `kid` int(11) NOT NULL AUTO_INCREMENT,
-  `kategoria` varchar(25) NOT NULL,
-  PRIMARY KEY (`kid`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=30 ;
-
---
--- Vedos taulusta `vrlv3_lista_tiedotuskategoriat`
---
-
-INSERT INTO `vrlv3_lista_tiedotuskategoriat` (`kid`, `kategoria`) VALUES
-(1, 'VVJ'),
-(2, 'kilpailut'),
-(3, 'kasvattajanimet'),
-(4, 'kantakirjat'),
-(5, 'sivusto'),
-(6, 'rotuyhdistykset'),
-(7, 'ERJ'),
-(8, 'Vippos'),
-(9, 'KERJ'),
-(10, 'VRL-tunnukset'),
-(11, 'seurat'),
-(12, 'KRJ'),
-(13, 'tallit'),
-(14, 'VMJ'),
-(15, 'PKK'),
-(16, 'laatuarvostelut'),
-(17, 'työpaikat'),
-(18, 'ranking'),
-(19, 'porrastetut kilpailut'),
-(20, 'rekisteri'),
-(21, 'kasvattajaklubi'),
-(22, 'ARJ'),
-(23, 'opisto'),
-(24, 'WRJ'),
-(25, 'hallitus'),
-(26, 'näyttelyt'),
-(27, 'hevosrekisteri'),
-(28, 'VRL'),
-(29, 'adoptointi');
-
-
--- phpMyAdmin SQL Dump
--- version 2.9.1.1-Debian-7
--- http://www.phpmyadmin.net
--- 
--- Palvelin: localhost
--- Luontiaika: 07.10.2015 klo 20:20
--- Palvelimen versio: 5.0.32
--- PHP:n versio: 5.2.0-8+etch11
--- 
--- Tietokanta: `vrlv10`
--- 
+INSERT INTO `vrlv3_lista_maat` (`id`, `lyh`, `maa`) VALUES
+(1, 'AF', 'Afganistan'),
+(2, 'AX', 'Ahvenanmaa'),
+(3, 'NL', 'Alankomaat'),
+(4, 'AN', 'Alankomaiden Antillit'),
+(5, 'AL', 'Albania'),
+(6, 'DZ', 'Algeria'),
+(7, 'AS', 'Amerikan Samoa'),
+(8, 'AD', 'Andorra'),
+(9, 'AO', 'Angola'),
+(10, 'AI', 'Anguilla'),
+(11, 'AQ', 'Antarktis'),
+(12, 'AG', 'Antigua ja Barbuda'),
+(13, 'AE', 'Arabiemiirikunnat'),
+(14, 'AR', 'Argentiina'),
+(15, 'AM', 'Armenia'),
+(16, 'AW', 'Aruba'),
+(17, 'AC', 'Ascension Island'),
+(18, 'AU', 'Australia'),
+(19, 'AZ', 'Azerbaidžan'),
+(20, 'BS', 'Bahama'),
+(21, 'BH', 'Bahrain'),
+(22, 'BD', 'Bangladesh'),
+(23, 'BB', 'Barbados'),
+(24, 'BE', 'Belgia'),
+(25, 'BZ', 'Belize'),
+(26, 'BJ', 'Benin'),
+(27, 'BM', 'Bermuda'),
+(28, 'BT', 'Bhutan'),
+(29, 'BO', 'Bolivia'),
+(30, 'BA', 'Bosnia ja Hertsegovina'),
+(31, 'BW', 'Botswana'),
+(32, 'BV', 'Bouvet’nsaari'),
+(33, 'BR', 'Brasilia'),
+(34, 'IO', 'Brittiläinen Intian valtameren alue'),
+(35, 'VG', 'Brittiläiset Neitsytsaaret'),
+(36, 'BN', 'Brunei'),
+(37, 'BG', 'Bulgaria'),
+(38, 'BF', 'Burkina Faso'),
+(39, 'BI', 'Burundi'),
+(40, 'KY', 'Caymansaaret'),
+(41, 'EA', 'Ceuta, Melilla'),
+(42, 'CL', 'Chile'),
+(43, 'CP', 'Clippertoninsaari'),
+(44, 'CK', 'Cookinsaaret'),
+(45, 'CR', 'Costa Rica'),
+(46, 'DG', 'Diego Garcia'),
+(47, 'DJ', 'Djibouti'),
+(48, 'DM', 'Dominica'),
+(49, 'DO', 'Dominikaaninen tasavalta'),
+(50, 'EC', 'Ecuador'),
+(51, 'EG', 'Egypti'),
+(52, 'SV', 'El Salvador'),
+(53, 'ER', 'Eritrea'),
+(54, 'ES', 'Espanja'),
+(55, 'ET', 'Etiopia'),
+(56, 'ZA', 'Etelä-Afrikka'),
+(57, 'GS', 'Etelä-Georgia ja Eteläiset Sandwichsaaret'),
+(58, 'EU', 'Euroopan unioni'),
+(59, 'FK', 'Falklandinsaaret'),
+(60, 'FO', 'Färsaaret'),
+(61, 'FJ', 'Fidži'),
+(62, 'PH', 'Filippiinit'),
+(63, 'GA', 'Gabon'),
+(64, 'GM', 'Gambia'),
+(65, 'GE', 'Georgia'),
+(66, 'GH', 'Ghana'),
+(67, 'GI', 'Gibraltar'),
+(68, 'GD', 'Grenada'),
+(69, 'GL', 'Grönlanti'),
+(70, 'GP', 'Guadeloupe'),
+(71, 'GU', 'Guam'),
+(72, 'GT', 'Guatemala'),
+(73, 'GG', 'Guernsey'),
+(74, 'GN', 'Guinea'),
+(75, 'GW', 'Guinea-Bissau'),
+(76, 'GY', 'Guyana'),
+(77, 'HT', 'Haiti'),
+(78, 'HM', 'Heard ja McDonaldinsaaret'),
+(79, 'HN', 'Honduras'),
+(80, 'HK', 'Hongkong'),
+(81, 'ID', 'Indonesia'),
+(82, 'IN', 'Intia'),
+(83, 'IQ', 'Irak'),
+(84, 'IR', 'Iran'),
+(85, 'IE', 'Irlanti'),
+(86, 'IS', 'Islanti'),
+(87, 'IL', 'Israel'),
+(88, 'IT', 'Italia'),
+(89, 'TL', 'Itä-Timor'),
+(90, 'AT', 'Itävalta'),
+(91, 'JM', 'Jamaika'),
+(92, 'JP', 'Japani'),
+(93, 'YE', 'Jemen'),
+(94, 'JE', 'Jersey'),
+(95, 'JO', 'Jordania'),
+(96, 'CX', 'Joulusaari'),
+(97, 'KH', 'Kambodža'),
+(98, 'CM', 'Kamerun'),
+(99, 'CA', 'Kanada'),
+(100, 'IC', 'Kanariansaaret'),
+(101, 'CV', 'Kap Verde'),
+(102, 'KZ', 'Kazakstan'),
+(103, 'KE', 'Kenia'),
+(104, 'CF', 'Keski-Afrikan tasavalta'),
+(105, 'CN', 'Kiina'),
+(106, 'KG', 'Kirgisia'),
+(107, 'KI', 'Kiribati'),
+(108, 'CO', 'Kolumbia'),
+(109, 'KM', 'Komorit'),
+(110, 'CD', 'Kongon demokraattinen tasavalta'),
+(111, 'CG', 'Kongon tasavalta'),
+(112, 'CC', 'Kookossaaret'),
+(113, 'KP', 'Korean demokraattinen kansantasavalta'),
+(114, 'KR', 'Korean tasavalta'),
+(115, 'GR', 'Kreikka'),
+(116, 'HR', 'Kroatia'),
+(117, 'CU', 'Kuuba'),
+(118, 'KW', 'Kuwait'),
+(119, 'CY', 'Kypros'),
+(120, 'LA', 'Laos'),
+(121, 'LV', 'Latvia'),
+(122, 'LS', 'Lesotho'),
+(123, 'LB', 'Libanon'),
+(124, 'LR', 'Liberia'),
+(125, 'LY', 'Libya'),
+(126, 'LI', 'Liechtenstein'),
+(127, 'LT', 'Liettua'),
+(128, 'LU', 'Luxemburg'),
+(129, 'EH', 'Länsi-Sahara'),
+(130, 'MO', 'Macao'),
+(131, 'MG', 'Madagaskar'),
+(132, 'MK', 'Makedonia'),
+(133, 'MW', 'Malawi'),
+(134, 'MV', 'Malediivit'),
+(135, 'MY', 'Malesia'),
+(136, 'ML', 'Mali'),
+(137, 'MT', 'Malta'),
+(138, 'IM', 'Mansaari'),
+(139, 'MA', 'Marokko'),
+(140, 'MH', 'Marshallinsaaret'),
+(141, 'MQ', 'Martinique'),
+(142, 'MR', 'Mauritania'),
+(143, 'MU', 'Mauritius'),
+(144, 'YT', 'Mayotte'),
+(145, 'MX', 'Meksiko'),
+(146, 'FM', 'Mikronesian liittovaltio'),
+(147, 'MD', 'Moldova'),
+(148, 'MC', 'Monaco'),
+(149, 'MN', 'Mongolia'),
+(150, 'ME', 'Montenegro'),
+(151, 'MS', 'Montserrat'),
+(152, 'MZ', 'Mosambik'),
+(153, 'MM', 'Myanmar'),
+(154, 'NA', 'Namibia'),
+(155, 'NR', 'Nauru'),
+(156, 'NP', 'Nepal'),
+(157, 'NI', 'Nicaragua'),
+(158, 'NE', 'Niger'),
+(159, 'NG', 'Nigeria'),
+(160, 'NU', 'Niue'),
+(161, 'NF', 'Norfolkinsaari'),
+(162, 'NO', 'Norja'),
+(163, 'CI', 'Norsunluurannikko'),
+(164, 'OM', 'Oman'),
+(165, 'PK', 'Pakistan'),
+(166, 'PW', 'Palau'),
+(167, 'PS', 'Palestiina'),
+(168, 'PA', 'Panama'),
+(169, 'PG', 'Papua-Uusi-Guinea'),
+(170, 'PY', 'Paraguay'),
+(171, 'PE', 'Peru'),
+(172, 'MP', 'Pohjois-Mariaanit'),
+(173, 'PN', 'Pitcairn'),
+(174, 'PT', 'Portugali'),
+(175, 'PR', 'Puerto Rico'),
+(176, 'PL', 'Puola'),
+(177, 'GQ', 'Päiväntasaajan Guinea'),
+(178, 'QA', 'Qatar'),
+(179, 'FR', 'Ranska'),
+(180, 'FX', 'Ranska (Eurooppaan kuuluvat osat)'),
+(181, 'TF', 'Ranskan eteläiset alueet'),
+(182, 'GF', 'Ranskan Guayana'),
+(183, 'PF', 'Ranskan Polynesia'),
+(184, 'RE', 'Réunion'),
+(185, 'RO', 'Romania'),
+(186, 'RW', 'Ruanda'),
+(187, 'SE', 'Ruotsi'),
+(188, 'SH', 'Saint Helena'),
+(189, 'KN', 'Saint Kitts ja Nevis'),
+(190, 'LC', 'Saint Lucia'),
+(191, 'PM', 'Saint-Pierre ja Miquelon'),
+(192, 'VC', 'Saint Vincent ja Grenadiinit'),
+(193, 'DE', 'Saksa'),
+(194, 'SB', 'Salomonsaaret'),
+(195, 'ZM', 'Sambia'),
+(196, 'WS', 'Samoa'),
+(197, 'SM', 'San Marino'),
+(198, 'ST', 'São Tomé ja Príncipe'),
+(199, 'SA', 'Saudi-Arabia'),
+(200, 'SN', 'Senegal'),
+(201, 'RS', 'Serbia'),
+(202, 'SC', 'Seychellit'),
+(203, 'SL', 'Sierra Leone'),
+(204, 'SG', 'Singapore'),
+(205, 'SK', 'Slovakia'),
+(206, 'SI', 'Slovenia'),
+(207, 'SO', 'Somalia'),
+(208, 'LK', 'Sri Lanka'),
+(209, 'SD', 'Sudan'),
+(210, 'FI', 'Suomi'),
+(211, 'SR', 'Suriname'),
+(212, 'SJ', 'Svalbard ja Jan Mayen'),
+(213, 'SZ', 'Swazimaa'),
+(214, 'CH', 'Sveitsi'),
+(215, 'SY', 'Syyria'),
+(216, 'TJ', 'Tadžikistan'),
+(217, 'TW', 'Taiwan'),
+(218, 'TZ', 'Tansania'),
+(219, 'DK', 'Tanska'),
+(220, 'TH', 'Thaimaa'),
+(221, 'TG', 'Togo'),
+(222, 'TK', 'Tokelau'),
+(223, 'TO', 'Tonga'),
+(224, 'TT', 'Trinidad ja Tobago'),
+(225, 'TA', 'Tristan da Cunha'),
+(226, 'TD', 'Tšad'),
+(227, 'CZ', 'Tšekki'),
+(228, 'TN', 'Tunisia'),
+(229, 'TR', 'Turkki'),
+(230, 'TM', 'Turkmenistan'),
+(231, 'TC', 'Turks- ja Caicossaaret'),
+(232, 'TV', 'Tuvalu'),
+(233, 'UG', 'Uganda'),
+(234, 'UA', 'Ukraina'),
+(235, 'HU', 'Unkari'),
+(236, 'UY', 'Uruguay'),
+(237, 'NC', 'Uusi-Kaledonia'),
+(238, 'NZ', 'Uusi-Seelanti'),
+(239, 'UZ', 'Uzbekistan'),
+(240, 'BY', 'Valko-Venäjä'),
+(241, 'VU', 'Vanuatu'),
+(242, 'VA', 'Vatikaanivaltio'),
+(243, 'VE', 'Venezuela'),
+(244, 'RU', 'Venäjä'),
+(245, 'VN', 'Vietnam'),
+(246, 'EE', 'Viro'),
+(247, 'WF', 'Wallis ja Futunasaaret'),
+(248, 'GB', 'Iso-Britannia'),
+(249, 'UK', 'Yhdistynyt kuningaskunta'),
+(250, 'US', 'Yhdysvallat'),
+(251, 'VI', 'Yhdysvaltain Neitsytsaaret'),
+(252, 'UM', 'Yhdysvaltain Tyynenmeren erillissaaret'),
+(253, 'ZW', 'Zimbabwe');
 
 -- --------------------------------------------------------
--- 
--- Rakenne taululle `lista_roturyhmat`
--- 
 
-CREATE TABLE `vrlv3_lista_roturyhmat` (
-  `id` int(1) NOT NULL auto_increment,
-  `ryhma` text NOT NULL,
-  PRIMARY KEY  (`id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=11 ;
+--
+-- Rakenne taululle `vrlv3_lista_painotus`
+--
 
--- 
--- Vedostetaan dataa taulusta `lista_roturyhmat`
--- 
+CREATE TABLE `vrlv3_lista_painotus` (
+  `pid` smallint(2) NOT NULL,
+  `painotus` varchar(20) NOT NULL,
+  `lyhenne` varchar(5) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-INSERT INTO `vrlv3_lista_roturyhmat` (`id`, `ryhma`) VALUES
-(1, 'täysiveriset'),
-(2, 'puoliveriset'),
-(3, 'kylmäveriset'),
-(4, 'raskaat kylmäveriset'),
-(5, 'a-ponit'),
-(6, 'b-ponit'),
-(7, 'c-ponit'),
-(8, 'd-ponit'),
-(9, 'lämminveriset'),
-(10, 'ponit');
+--
+-- Vedos taulusta `vrlv3_lista_painotus`
+--
 
+INSERT INTO `vrlv3_lista_painotus` (`pid`, `painotus`, `lyhenne`) VALUES
+(1, 'esteratsastus', 're.'),
+(2, 'kouluratsastus', 'ko.'),
+(3, 'kenttäratsastus', 'kent.'),
+(4, 'matkaratsastus', 'matk.'),
+(5, 'lännenratsastus', 'länn.'),
+(6, 'valjakkoajo', 'valj.'),
+(7, 'askellajiratsastus', 'askel'),
+(8, 'ravit', 'ravit'),
+(9, 'työhevosajo', 'työh.'),
+(10, 'laukat', 'lauk.');
 
--- 
--- Rakenne taululle `lista_rodut`
--- 
+-- --------------------------------------------------------
+
+--
+-- Rakenne taululle `vrlv3_lista_rodut`
+--
 
 CREATE TABLE `vrlv3_lista_rodut` (
-  `rotunro` smallint(3) NOT NULL auto_increment,
+  `rotunro` smallint(3) NOT NULL,
   `rotu` text NOT NULL,
   `lyhenne` varchar(6) NOT NULL,
-  `roturyhma` int(1),
-  `harvinainen` int(1) NOT NULL default '0',
-  PRIMARY KEY  (`rotunro`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=277 ;
+  `roturyhma` int(1) DEFAULT NULL,
+  `harvinainen` int(1) NOT NULL DEFAULT '0'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- 
--- Vedostetaan dataa taulusta `lista_rodut`
--- 
+--
+-- Vedos taulusta `vrlv3_lista_rodut`
+--
 
-INSERT INTO `vrlv3_lista_rodut` (`rotunro`, `rotu`, `lyhenne`, `roturyhma`, `harvinainen`) VALUES 
+INSERT INTO `vrlv3_lista_rodut` (`rotunro`, `rotu`, `lyhenne`, `roturyhma`, `harvinainen`) VALUES
 (1, 'Ahaltekinhevonen', 'at', 9, 0),
 (2, 'Amerikanponi', 'poa', 10, 0),
 (3, 'Arabialainen täysverinen', 'ox', 1, 0),
@@ -467,6 +613,441 @@ INSERT INTO `vrlv3_lista_rodut` (`rotunro`, `rotu`, `lyhenne`, `roturyhma`, `har
 (273, 'Venäjänravuri', 'venrav', 9, 0),
 (274, 'Albanianponi', 'alb', NULL, 0),
 (275, 'Puolalainen puoliverinen', 'pl', NULL, 0),
-(276, 'Kathiawarinhevonen', 'kath', NULL, 0);
+(276, 'Kathiawarinhevonen', 'kath', NULL, 0),
+(277, 'Dongola', 'dong.', 9, 1),
+(278, 'Anastafjahinhevonen', 'ana', 9, 0),
+(279, 'Italianratsuhevonen', 'si', 2, 0),
+(281, 'Seepraponi', 'sepn', 10, 0),
+(282, 'Navarran poni', 'nav', 10, 0),
+(283, 'Namibialainen puoliverinen', 'nwh', 2, 0),
+(284, 'Aegidienberger', 'aeg', 3, 0),
+(285, 'Warlander', 'war', 3, 0),
+(286, 'Nez Perce Horse', 'nezph', 9, 0),
+(287, 'Iberian Warmblood', 'ibw', 9, 0),
+(288, 'American Draft Pony ', '', 10, 0),
+(289, 'Miniature Gypsy Horse', 'mic', 10, 0),
+(290, 'Arasien', 'ara', 9, 0),
+(291, 'Tšekkiläinen puoliverinen', '', 2, 0),
+(292, 'Tšekintyöhevonen', 'tse', 3, 0),
+(298, 'Latvialainen puoliverinen', 'lszaa', 2, 0),
+(299, 'Mongolianhevonen', 'mong', 10, 0),
+(300, 'Rahvan', 'rv', 9, 0),
+(301, 'Espanjalainen puoliverinen', 'sw', 2, 0),
+(302, 'Henson', 'hens', 9, 0),
+(303, 'Arabohaflinger', 'ar-haf', 3, 0),
+(304, 'Meckelnburginkylmäverinen', 'mecklk', 3, 0),
+(305, 'Posavjenhevonen', 'pos', 3, 0),
+(306, 'Puolalainen kylmäverinen', 'plkv', 3, 0),
+(307, 'Ruotsalainen ardennienhevonen', 'rard', 3, 0),
+(308, 'Schleswig-holsteininhevonen', 'schles', 3, 0),
+(309, 'Sloveniankylmäverinen', 'slvnkv', 3, 0),
+(310, 'Groningeninhevonen', 'gron', 2, 0),
+(311, 'Saksin-Thüringenin raskas puoliverinen', 'sthür', 2, 0);
 
-ALTER TABLE `vrlv3_lista_rodut` ADD  FOREIGN KEY (`roturyhma`) REFERENCES `vrlv3`.`vrlv3_lista_roturyhmat`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+-- --------------------------------------------------------
+
+--
+-- Rakenne taululle `vrlv3_lista_roturyhmat`
+--
+
+CREATE TABLE `vrlv3_lista_roturyhmat` (
+  `id` int(1) NOT NULL,
+  `ryhma` text NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
+-- Vedos taulusta `vrlv3_lista_roturyhmat`
+--
+
+INSERT INTO `vrlv3_lista_roturyhmat` (`id`, `ryhma`) VALUES
+(1, 'täysiveriset'),
+(2, 'puoliveriset'),
+(3, 'kylmäveriset'),
+(4, 'raskaat kylmäveriset'),
+(5, 'a-ponit'),
+(6, 'b-ponit'),
+(7, 'c-ponit'),
+(8, 'd-ponit'),
+(9, 'lämminveriset'),
+(10, 'ponit');
+
+-- --------------------------------------------------------
+
+--
+-- Rakenne taululle `vrlv3_lista_tallikategoriat`
+--
+
+CREATE TABLE `vrlv3_lista_tallikategoriat` (
+  `kat` smallint(2) NOT NULL,
+  `kategoria` varchar(20) CHARACTER SET utf8 NOT NULL,
+  `katelyh` varchar(3) CHARACTER SET utf8 NOT NULL,
+  `katnro` varchar(4) COLLATE utf8_swedish_ci NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_swedish_ci;
+
+--
+-- Vedos taulusta `vrlv3_lista_tallikategoriat`
+--
+
+INSERT INTO `vrlv3_lista_tallikategoriat` (`kat`, `kategoria`, `katelyh`, `katnro`) VALUES
+(1, 'ratsastuskoulu', 'RK', 'KAT1'),
+(2, 'siittola', 'ST', 'KAT2'),
+(3, 'kilpailukeskus', 'KK', 'KAT3'),
+(4, 'valjakkotalli', 'VT', 'KAT4'),
+(5, 'ravitalli', 'RT', 'KAT4'),
+(6, 'laukkatalli', 'LK', 'KAT4'),
+(7, 'westerntalli', 'WT', 'KAT4'),
+(8, 'myyntitalli', 'MT', 'KAT5'),
+(9, 'oriasema', 'OA', 'KAT6'),
+(10, 'yksityistalli', 'YT', 'KAT7'),
+(11, 'muu kilpatalli', 'KT', 'KAT4'),
+(12, 'tamma-asema', 'TA', 'KAT6'),
+(13, 'harrastetalli', 'HT', 'KAT0');
+
+-- --------------------------------------------------------
+
+--
+-- Rakenne taululle `vrlv3_lista_tiedotuskategoriat`
+--
+
+CREATE TABLE `vrlv3_lista_tiedotuskategoriat` (
+  `kid` int(11) NOT NULL,
+  `kategoria` varchar(25) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
+-- Vedos taulusta `vrlv3_lista_tiedotuskategoriat`
+--
+
+INSERT INTO `vrlv3_lista_tiedotuskategoriat` (`kid`, `kategoria`) VALUES
+(1, 'VVJ'),
+(2, 'kilpailut'),
+(3, 'kasvattajanimet'),
+(4, 'kantakirjat'),
+(5, 'sivusto'),
+(6, 'rotuyhdistykset'),
+(7, 'ERJ'),
+(8, 'Vippos'),
+(9, 'KERJ'),
+(10, 'VRL-tunnukset'),
+(11, 'seurat'),
+(12, 'KRJ'),
+(13, 'tallit'),
+(14, 'VMJ'),
+(15, 'PKK'),
+(16, 'laatuarvostelut'),
+(17, 'työpaikat'),
+(18, 'ranking'),
+(19, 'porrastetut kilpailut'),
+(20, 'rekisteri'),
+(21, 'kasvattajaklubi'),
+(22, 'ARJ'),
+(23, 'opisto'),
+(24, 'WRJ'),
+(25, 'hallitus'),
+(26, 'näyttelyt'),
+(27, 'hevosrekisteri'),
+(28, 'VRL'),
+(29, 'adoptointi');
+
+-- --------------------------------------------------------
+
+--
+-- Rakenne taululle `vrlv3_lista_varit`
+--
+
+CREATE TABLE `vrlv3_lista_varit` (
+  `vid` smallint(4) NOT NULL,
+  `vari` text NOT NULL,
+  `lyhenne` varchar(20) NOT NULL,
+  `pvari` enum('Ei tiedossa','rn','m','rt') NOT NULL DEFAULT 'Ei tiedossa',
+  `gen_vkko` tinyint(1) NOT NULL DEFAULT '0',
+  `gen_tvkko` tinyint(1) NOT NULL DEFAULT '0',
+  `gen_hkko` tinyint(1) NOT NULL DEFAULT '0',
+  `gen_hp` tinyint(1) NOT NULL DEFAULT '0',
+  `gen_cha` tinyint(1) NOT NULL DEFAULT '0',
+  `gen_p` tinyint(1) NOT NULL DEFAULT '0',
+  `gen_km` tinyint(1) NOT NULL DEFAULT '0',
+  `gen_pais` tinyint(1) NOT NULL DEFAULT '0',
+  `gen_kirj` tinyint(1) NOT NULL DEFAULT '0',
+  `gen_kirj_t` tinyint(1) NOT NULL DEFAULT '0',
+  `gen_kirj_s` tinyint(1) NOT NULL DEFAULT '0',
+  `gen_kirj_fo` tinyint(1) NOT NULL DEFAULT '0',
+  `gen_kirj_spl` tinyint(1) NOT NULL DEFAULT '0',
+  `gen_kirj_tkirj` tinyint(1) NOT NULL DEFAULT '0',
+  `gen_savy` tinyint(1) DEFAULT '0'
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+--
+-- Vedos taulusta `vrlv3_lista_varit`
+--
+
+INSERT INTO `vrlv3_lista_varit` (`vid`, `vari`, `lyhenne`, `pvari`, `gen_vkko`, `gen_tvkko`, `gen_hkko`, `gen_hp`, `gen_cha`, `gen_p`, `gen_km`, `gen_pais`, `gen_kirj`, `gen_kirj_t`, `gen_kirj_s`, `gen_kirj_fo`, `gen_kirj_spl`, `gen_kirj_tkirj`, `gen_savy`) VALUES
+(1, 'samppanjanruunikko', 'acha', 'rn', 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
+(2, 'samppanjanruunikonkimo', 'achakm', 'rn', 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0),
+(3, 'samppanjanruunikonkirjava', 'achakrj', 'rn', 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0),
+(4, 'samppanjanruunikonpäistärikkö', 'achapäis', 'rn', 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0),
+(5, 'samppanjanruunivoikko', 'accha', 'rn', 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
+(6, 'samppanjanruunivoikonkimo', 'acchakm', 'rn', 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0),
+(7, 'samppanjanruunivoikonkirjava', 'acchakrj', 'rn', 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0),
+(8, 'samppanjanruunivoikonpäistärikkö', 'acchapäis', 'rn', 1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0),
+(9, 'samppanjanruunihallakko', 'adcha', 'rn', 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
+(10, 'samppanjanruunihallakonkimo', 'adchakm', 'rn', 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0),
+(11, 'samppanjanruunihallakonkirjava', 'adchakrj', 'rn', 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0),
+(12, 'samppanjanruunihallakonpäistärikkö', 'adchapäis', 'rn', 0, 0, 1, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0),
+(13, 'samppanjanmusta', 'clcha', 'm', 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
+(14, 'samppanjanmustankimo', 'clchakm', 'm', 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0),
+(15, 'samppanjanmustankirjava', 'clchakrj', 'm', 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0),
+(16, 'samppanjanmustanpäistärikkö', 'clchapäis', 'm', 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0),
+(17, 'samppanjanmustanvoikko', 'clccha', 'm', 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
+(18, 'samppanjanmustanvoikonkimo', 'clcchakm', 'm', 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0),
+(19, 'samppanjanmustanvoikonkirjava', 'clcchakrj', 'm', 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0),
+(20, 'samppanjanmustanvoikonpäistärikkö', 'clcchapäis', 'm', 1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0),
+(21, 'samppanjanhiirakko', 'cldcha', 'm', 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
+(22, 'samppanjanhiirakonkimo', 'cldchakm', 'm', 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0),
+(23, 'samppanjanhiirakonkirjava', 'cldchakjr', 'm', 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0),
+(24, 'samppanjanhiirakonpäistärikkö', 'cldchapäis', 'm', 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0),
+(25, 'cremello', 'cre', 'rt', 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
+(26, 'cremellonkimo', 'crekm', 'rt', 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0),
+(27, 'cremellonkirjava', 'crekrj', 'rt', 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0),
+(28, 'cremellonpäistärikkö', 'crepäis', 'rt', 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0),
+(29, 'dominanttivalkoinen', 'dv', 'Ei tiedossa', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
+(30, 'samppanjanrautias', 'gcha', 'rt', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
+(31, 'samppanjanrautiaankimo', 'gchakm', 'rt', 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0),
+(32, 'samppanjanrautiaankirjava', 'gchakrj', 'rt', 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0),
+(33, 'samppanjanrautiaanpäistärikkö', 'gchapäis', 'rt', 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0),
+(34, 'samppanjanvoikko', 'gccha', 'rt', 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
+(35, 'samppanjanvoikonkimo', 'gcchakm', 'rt', 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0),
+(36, 'samppanjanvoikonkirjava', 'gcchakrj', 'rt', 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0),
+(37, 'samppanjanvoikonpäistärikkö', 'gcchapäis', 'rt', 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0),
+(38, 'samppanjanpunahallakko', 'gdcha', 'rt', 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
+(39, 'samppanjanpunahallakonkimo', 'gdchakm', 'rt', 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0),
+(40, 'samppanjanpunahallakonkirjava', 'gdchakrj', 'rt', 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0),
+(41, 'samppanjanpunahallakonpäistärikkö', 'gdchapäis', 'rt', 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0),
+(46, 'hiirakko', 'vm', 'm', 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
+(47, 'hiirakonkimo', 'vmkm', 'm', 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0),
+(48, 'hiirakonkirjava', 'vmkrj', 'm', 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0),
+(49, 'hiirakonpäistärikkö', 'vmpäis', 'm', 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0),
+(50, 'hopeanhiirakko', 'hpvm', 'm', 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
+(51, 'hopeanhiirakonkimo', 'hpvmkm', 'm', 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0),
+(52, 'hopeanhiirakonkirjava', 'hpvmkrj', 'm', 0, 0, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0),
+(53, 'hopeanhiirakonpäistärikkö', 'hpvmpäis', 'm', 0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0),
+(54, 'hopeanmusta', 'hpm', 'm', 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
+(55, 'hopeanmustankimo', 'hpmkm', 'm', 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0),
+(56, 'hopeanmustankirjava', 'hpmkrj', 'm', 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0),
+(57, 'hopeanmustanpäistärikkö', 'hpmpäis', 'm', 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0),
+(58, 'hopeanmustanvoikko', 'hpmvkk', 'm', 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
+(59, 'hopeanmustanvoikonkimo', 'hpmvkkokm', 'm', 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0),
+(60, 'hopeanmustanvoikonkirjava', 'hpmvkkokrj', 'm', 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0),
+(61, 'hopeanmustanvoikonpäistärikkö', 'hpmvkkopäis', 'm', 1, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0),
+(62, 'hopeanruunikko', 'hprn', 'rn', 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
+(63, 'hopeanruunikonkimo', 'hprnkm', 'rn', 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0),
+(64, 'hopeanruunikonkirjava', 'hprnkrj', 'rn', 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0),
+(65, 'hopeanruunikonpäistärikkö', 'hprnpäis', 'rn', 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0),
+(66, 'hopeanruunihallakko', 'hprnhkko', 'rn', 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
+(67, 'hopeanruunihallakonkimo', 'hprnhkkokm', 'rn', 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0),
+(68, 'hopeanruunihallakonkirjava', 'hprnhkkokrj', 'rn', 0, 0, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0),
+(69, 'hopeanruunihallakonpäistärikkö', 'hprnhkkopäis', 'rn', 0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0),
+(70, 'hopeanruunivoikko', 'hprnvkk', 'rn', 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
+(71, 'hopeanruunivoikonhallakko', 'hprnvkkohkko', 'rn', 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
+(72, 'hopeanruunivoikonhallakonkimo', 'hprnvkkohkkokm', 'rn', 1, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0),
+(73, 'hopeanruunivoikonhallakonkirjava', 'hprnvkkohkkokrj', 'rn', 1, 0, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0),
+(74, 'hopeanruunivoikonhallakonpäistärikkö', 'hprnvkkohkkopäis', 'rn', 1, 0, 1, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0),
+(75, 'hopeanruunivoikonkimo', 'hprnvkkokm', 'rn', 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0),
+(76, 'hopeanruunivoikonkirjava', 'hprnvkkokrj', 'rn', 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0),
+(77, 'hopeanruunivoikonpäistärikkö', 'hprnvkkopäis', 'rn', 1, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0),
+(78, 'kanelirautias', 'krt', 'Ei tiedossa', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1),
+(79, 'kimo', 'km', 'Ei tiedossa', 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0),
+(80, 'kulorautias', 'klrt', 'rt', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1),
+(81, 'kärpäskimo', 'kkm', 'Ei tiedossa', 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0),
+(82, 'lehmänkirjava', 'krj', 'Ei tiedossa', 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0),
+(83, 'liinakko', 'lkk', 'rt', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1),
+(84, 'maksanrautias', 'mksrt', 'rt', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1),
+(85, 'mushroom', 'msh', 'Ei tiedossa', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
+(86, 'mushroominkimo', 'mshkm', 'Ei tiedossa', 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0),
+(87, 'mushroominkirjava', 'mshkrj', 'Ei tiedossa', 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0),
+(88, 'mushroominpäistärikkö', 'mshpäis', 'Ei tiedossa', 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0),
+(89, 'musta', 'm', 'm', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
+(90, 'mustankimo', 'mkm', 'm', 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0),
+(91, 'mustankimonkirjava', 'mkmkrj', 'm', 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0),
+(92, 'mustankirjava', 'mkrj', 'm', 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0),
+(93, 'mustanpäistärikkö', 'mpäis', 'm', 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0),
+(94, 'mustanpäistärikönkirjava', 'mpäiskrj', 'm', 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0),
+(95, 'mustanruunikko', 'mrn', 'rn', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1),
+(96, 'mustanvoikko', 'mvkk', 'm', 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
+(97, 'mustanvoikonkimo', 'mvkkokm', 'm', 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0),
+(98, 'mustanvoikonkirjava', 'mvkkokrj', 'm', 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0),
+(99, 'mustanvoikonpäistärikkö', 'mvkkopäis', 'm', 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0),
+(100, 'perlino', 'pe', 'rn', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
+(101, 'perlinonkimo', 'pekm', 'rn', 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0),
+(102, 'perlinonkirjava', 'pekrj', 'rn', 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0),
+(103, 'perlinonpäistärikkö', 'pepäis', 'rn', 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0),
+(104, 'punahallakko', 'phkko', 'rt', 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
+(105, 'punahallakonkimo', 'phkkokm', 'rt', 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0),
+(106, 'punahallakonkirjava', 'phkkokrj', 'rt', 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0),
+(107, 'punahallakonpäistärikkö', 'phkkopäis', 'rt', 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0),
+(108, 'punarautias', 'prt', 'rt', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1),
+(109, 'punaruunikko', 'prn', 'rn', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1),
+(110, 'päistärikkö', 'päis', 'Ei tiedossa', 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0),
+(111, 'päistärikönkimo', 'päiskm', 'Ei tiedossa', 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0),
+(113, 'päistärikönkirjava', 'päiskrj', 'Ei tiedossa', 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0),
+(114, 'rautias', 'rt', 'rt', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
+(115, 'rautiaankimo', 'rtkm', 'rt', 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0),
+(116, 'rautiaankimonkirjava', 'rtkmkrj', 'rt', 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0),
+(117, 'rautiaankirjava', 'rtkrj', 'rt', 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0),
+(118, 'rautiaanpäistärikkö', 'rtpäis', 'rt', 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0),
+(119, 'rautiaanpäistärikönkirjava', 'rtpäiskrj', 'rt', 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0),
+(120, 'ruunikko', 'rn', 'rn', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
+(121, 'ruunihallakko', 'rnhkko', 'rn', 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
+(122, 'ruunihallakonkimo', 'rnhkkokm', 'rn', 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0),
+(123, 'ruunihallakonkirjava', 'rnhkkokrj', 'rn', 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0),
+(124, 'ruunihallakonpäistärikkö', 'rnhkkopäis', 'rn', 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0),
+(125, 'ruunikonkimo', 'rnkm', 'rn', 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0),
+(126, 'ruunikonkimonkirjava', 'rnkrjkm', 'rn', 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0),
+(127, 'ruunikonkirjava', 'rnkrj', 'rn', 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0),
+(128, 'ruunikonpäistärikkö', 'rnpäis', 'rn', 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0),
+(129, 'ruunikonpäistärikönkirjava', 'rnpäiskrj', 'rn', 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0),
+(130, 'ruunivoikko', 'rnvkk', 'rn', 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
+(131, 'ruunivoikonkimo', 'rnvkkokm', 'rn', 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0),
+(132, 'ruunivoikonkirjava', 'rnvkkokrj', 'rn', 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0),
+(133, 'ruunivoikonpäistärikkö', 'rnvkkopäis', 'rn', 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0),
+(134, 'ruunivoikonhallakko', 'vhkko', 'rn', 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
+(135, 'ruunivoikonhallakonkimo', 'vhkkokm', 'rn', 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
+(136, 'ruunivoikonhallakonkirjava', 'vhkkokrj', 'rn', 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
+(137, 'ruunivoikonhallakonpäistärikkö', 'vhkkopäis', 'rn', 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
+(138, 'savakkorautias', 'srt', 'rt', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1),
+(143, 'tiikerinkirjava', 'kn', 'Ei tiedossa', 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0),
+(144, 'tummanpunarautias', 'tprt', 'rt', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1),
+(145, 'tummanpunaruunikko', 'tprn', 'rn', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1),
+(146, 'tummanrautias', 'trt', 'rt', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1),
+(147, 'tummanruunikko', 'trn', 'rn', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1),
+(148, 'vaaleanpunarautias', 'vprt', 'rt', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1),
+(149, 'vaaleanpunaruunikko', 'vprn', 'rn', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1),
+(150, 'vaaleanrautias', 'vrt', 'rt', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1),
+(151, 'vaaleanruunikko', 'vrn', 'rn', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1),
+(152, 'valkovoikko', 'bec', 'Ei tiedossa', 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
+(153, 'voikko', 'vkk', 'rt', 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
+(154, 'voikonhallakko', 'khkko', 'rt', 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
+(155, 'voikonkirjava', 'vkkokrj', 'rt', 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0),
+(156, 'smoky cream', 'smoky cream', 'm', 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
+(157, 'smoky cream kimo', 'smoky cream km', 'm', 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0),
+(158, 'smoky cream päistärikkö', 'smoky cream päis', 'm', 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0),
+(159, 'smoky cream kirjava', 'smoky cream krj', 'm', 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0),
+(160, 'voikonkimo', 'vkkkm', 'rt', 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0),
+(161, 'voikonpäistärikkö', 'vkkpäis', 'rt', 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0),
+(162, 'kulomusta', 'klm', 'm', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1),
+(163, 'musta tiikerinkirjava', 'mtkkrj', 'm', 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0),
+(164, 'rautias tiikerinkirjava', 'rtkkrj', 'rt', 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0),
+(166, 'ruunikko tiikerinkirjava', 'rntkkrj', 'rt', 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0),
+(167, 'rautiaanpäistärikönkimo', 'rtpäistkm', 'rt', 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0),
+(168, 'rautiaanpäistärikönkimonkirjava', 'rtpäistkmkrj', 'rt', 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0),
+(169, 'mustanpäistärikönkimonkirjava', 'mpäistkmkrj', 'm', 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0),
+(170, 'ruunikonpäistärikönkimonkirjava', 'rnpäistkmkrj', 'rn', 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0),
+(172, 'hopeanruunikonpäistärikönkimo', 'hprnpäiskm', 'rn', 0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0),
+(173, 'hopeanmustankimonkirjava', 'hpmkmkrj', 'm', 0, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0),
+(174, 'hopeanruunikonkimonkirjava', 'hprnkmkrj', 'rn', 0, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0),
+(175, 'voikonkimonkirjava', 'vkkokmkrj', 'rt', 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0),
+(176, 'hiirakonpäistärikönkirjava', 'vmpäiskrj', 'm', 0, 0, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0),
+(177, 'ruunikonpäistärikönkimo', 'rnpäiskm', 'rn', 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0),
+(178, 'sysirautias', 'sysrt', 'rt', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1);
+
+--
+-- Indexes for dumped tables
+--
+
+--
+-- Indexes for table `vrlv3_lista_maat`
+--
+ALTER TABLE `vrlv3_lista_maat`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `vrlv3_lista_painotus`
+--
+ALTER TABLE `vrlv3_lista_painotus`
+  ADD PRIMARY KEY (`pid`);
+
+--
+-- Indexes for table `vrlv3_lista_rodut`
+--
+ALTER TABLE `vrlv3_lista_rodut`
+  ADD PRIMARY KEY (`rotunro`),
+  ADD KEY `roturyhma` (`roturyhma`);
+
+--
+-- Indexes for table `vrlv3_lista_roturyhmat`
+--
+ALTER TABLE `vrlv3_lista_roturyhmat`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `vrlv3_lista_tallikategoriat`
+--
+ALTER TABLE `vrlv3_lista_tallikategoriat`
+  ADD PRIMARY KEY (`kat`);
+
+--
+-- Indexes for table `vrlv3_lista_tiedotuskategoriat`
+--
+ALTER TABLE `vrlv3_lista_tiedotuskategoriat`
+  ADD PRIMARY KEY (`kid`);
+
+--
+-- Indexes for table `vrlv3_lista_varit`
+--
+ALTER TABLE `vrlv3_lista_varit`
+  ADD PRIMARY KEY (`vid`);
+
+--
+-- AUTO_INCREMENT for dumped tables
+--
+
+--
+-- AUTO_INCREMENT for table `vrlv3_lista_maat`
+--
+ALTER TABLE `vrlv3_lista_maat`
+  MODIFY `id` smallint(4) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=254;
+
+--
+-- AUTO_INCREMENT for table `vrlv3_lista_painotus`
+--
+ALTER TABLE `vrlv3_lista_painotus`
+  MODIFY `pid` smallint(2) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+
+--
+-- AUTO_INCREMENT for table `vrlv3_lista_rodut`
+--
+ALTER TABLE `vrlv3_lista_rodut`
+  MODIFY `rotunro` smallint(3) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=312;
+
+--
+-- AUTO_INCREMENT for table `vrlv3_lista_roturyhmat`
+--
+ALTER TABLE `vrlv3_lista_roturyhmat`
+  MODIFY `id` int(1) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+
+--
+-- AUTO_INCREMENT for table `vrlv3_lista_tallikategoriat`
+--
+ALTER TABLE `vrlv3_lista_tallikategoriat`
+  MODIFY `kat` smallint(2) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+
+--
+-- AUTO_INCREMENT for table `vrlv3_lista_tiedotuskategoriat`
+--
+ALTER TABLE `vrlv3_lista_tiedotuskategoriat`
+  MODIFY `kid` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=30;
+
+--
+-- Rajoitteet vedostauluille
+--
+
+--
+-- Rajoitteet taululle `vrlv3_lista_rodut`
+--
+ALTER TABLE `vrlv3_lista_rodut`
+  ADD CONSTRAINT `vrlv3_lista_rodut_ibfk_1` FOREIGN KEY (`roturyhma`) REFERENCES `vrlv3_lista_roturyhmat` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+COMMIT;
+
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
