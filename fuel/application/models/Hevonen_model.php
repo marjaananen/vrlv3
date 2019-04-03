@@ -45,9 +45,20 @@ class Hevonen_model extends Base_module_model
        
     }
     
-    function get_omistajat($reknro){
+    function get_horse_owners($reknro)
+    {
+        $this->db->select('omistaja, nimimerkki');
+        $this->db->from('vrlv3_hevosrekisteri_omistajat');
+        $this->db->join('vrlv3_tunnukset', 'vrlv3_tunnukset.tunnus = vrlv3_hevosrekisteri_omistajat.omistaja');
+        $this->db->where('reknro', $this->CI->vrl_helper->vh_to_number($reknro));
+        $query = $this->db->get();
         
-
+        if ($query->num_rows() > 0)
+        {
+            return $query->result_array();
+        }
+        
+        return array();
     }
     
     
@@ -119,6 +130,80 @@ class Hevonen_model extends Base_module_model
         
     }
     
+    //stats
+    function get_stats_breed($rotu){
+        
+        $this->db->select("COUNT(reknro) as amount, sukupuoli");
+        $this->db->where("rotu", $rotu);
+        $this->db->group_by("sukupuoli");
+        
+        $this->db->from('vrlv3_hevosrekisteri');
+        $query = $this->db->get();
+        
+        $genders = $this->sort_gender_stats($query->result_array());
+
+        return $genders;
+        
+    }
+    
+    
+    function get_stats_colour($color){
+        
+        $this->db->select("COUNT(reknro) as amount, sukupuoli");
+        $this->db->where("vari", $color);
+        $this->db->group_by("sukupuoli");
+        
+        $this->db->from('vrlv3_hevosrekisteri');
+        $query = $this->db->get();
+        
+        $genders = $this->sort_gender_stats($query->result_array());
+
+        return $genders;
+        
+    }
+    
+    
+        
+    function get_stats_country($country){
+        
+        $this->db->select("COUNT(reknro) as amount, sukupuoli");
+        $this->db->where("syntymamaa", $country);
+        $this->db->group_by("sukupuoli");
+        
+        $this->db->from('vrlv3_hevosrekisteri');
+        $query = $this->db->get();
+        
+        $genders = $this->sort_gender_stats($query->result_array());
+
+        return $genders;
+        
+    }
+        
+        
+    private function sort_gender_stats($array){
+        $genders = array();
+        $genders['tammat'] = 0;
+        $genders['orit'] = 0;
+        $genders['ruunat'] = 0;
+        
+        foreach ($array as $row){
+            if($row['sukupuoli'] == 1){
+                $genders['tammat'] = $row['amount'];
+            }
+            if($row['sukupuoli'] == 2){
+                $genders['orit'] = $row['amount'];
+            }
+            if($row['sukupuoli'] == 3){
+                $genders['ruunat'] = $row['amount'];
+            }
+        }
+        
+        $genders['total'] = $genders['tammat'] + $genders['orit'] + $genders['ruunat'];
+        
+        return $genders;
+        
+    }
+    
     
 
     private function _get_suku_info($reknro){
@@ -133,6 +218,39 @@ class Hevonen_model extends Base_module_model
         $array = $query->row_array();
         $array['reknro'] = $this->CI->vrl_helper->get_vh($array['reknro']);
         return $array;
+    }
+    
+
+       public function get_country_list(){
+        
+        $this->db->select('id, maa, lyh');
+        $this->db->from('vrlv3_lista_maat');
+        $query = $this->db->get();
+        
+        if ($query->num_rows() > 0)
+        {
+            return $query->result_array();
+        }
+        
+        return array();
+                
+    }
+    
+    
+    
+    public function get_breed_list(){
+        
+        $this->db->select('rotunro, rotu, lyhenne');
+        $this->db->from('vrlv3_lista_rodut');
+        $query = $this->db->get();
+        
+        if ($query->num_rows() > 0)
+        {
+            return $query->result_array();
+        }
+        
+        return array();
+                
     }
     
     

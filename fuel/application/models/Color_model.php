@@ -9,7 +9,7 @@ class Color_model extends Base_module_model
         parent::__construct();
     }
     
-    $color_gen_array = array("gen_vkko"=>0,
+    private $color_gen_array = array("gen_vkko"=>0,
                              "gen_tvkko"=>0,
                              "gen_hkko"=>0,
                              "gen_hp"=>0,
@@ -25,14 +25,15 @@ class Color_model extends Base_module_model
                              "gen_kirj_tkirj"=>0,
                              "gen_savy"=>0);
     
-    $color_gen_name_array = array("gen_vkko"=>"Voikko",
+    private $color_gen_name_norm_array = array("gen_vkko"=>"Voikko",
                              "gen_tvkko"=>"Tuplavoikko",
                              "gen_hkko"=>"Hallakko",
                              "gen_hp"=>"Hopea",
                              "gen_cha"=>"Shampanja",
                              "gen_p"=>"Pearl",
                              "gen_km"=>"Kimo",
-                             "gen_pais"=>"Päistärikkö",
+                             "gen_pais"=>"Päistärikkö");
+    private $color_gen_name_kirj_array = array(
                              "gen_kirj"=>"Kirjavuus",
                              "gen_kirj_t"=>"Kirjavuus (Tobiano)",
                              "gen_kirj_s"=>"Kirjavuus (Sabino)",
@@ -41,345 +42,31 @@ class Color_model extends Base_module_model
                              "gen_kirj_tkirj"=>"Kirjavuus (Tiikerinkirjava)");
     
     
-    $color_base = array("Ei tiedossa", "rn", "rt", "m");
+    private $color_base = array("Ei tiedossa", "rn", "rt", "m");
     
-    function get_empty_color_array()
-    {
-        
-       
-        $fields['pvari'] = array('type' => 'select', 'required' => TRUE, 'options' => $this->color_base, 'after_html' => '<span class="form_comment">Valitse pohjaväri</span>', 'class'=>'form-control');
-        foreach ($color_gen_array as $key=>$value){
-            $fields[$key] = array('type' => 'checkbox', 'checked' => $value, 'class'=>'form-control');
-        }
-        
-        
-        $data = array('nimi' => $name, 'kuvaus' => $desc, 'url' => $url, 'kategoria' => $category, 'lyhenne' => $abbreviation);
-
-        $data['lisatty'] = date("Y-m-d H:i:s");
-        $data['lisaaja'] = $this->ion_auth->user()->row()->tunnus;
-        
-        $this->db->insert('vrlv3_tallirekisteri_jonossa', $data);
-    }
     
-    function add_new_category_application($tnro, $category)
-    {
-        $data = array('tnro' => $tnro, 'kategoria' => $category);
-
-        $data['lisatty'] = date("Y-m-d H:i:s");
-        $data['lisaaja'] = $this->ion_auth->user()->row()->tunnus;
+    //info
+    public function get_colour_info($id){
         
-        $this->db->insert('vrlv3_tallirekisteri_kategoriat_jonossa', $data);
-    }
-    
-    //Tallit
-    function get_users_stables($pinnumber)
-    {
-        $this->db->select('vrlv3_tallirekisteri.tnro, nimi');
-        $this->db->from('vrlv3_tallirekisteri');
-        $this->db->join('vrlv3_tallirekisteri_omistajat', 'vrlv3_tallirekisteri.tnro = vrlv3_tallirekisteri_omistajat.tnro');
-        $this->db->where('omistaja', $pinnumber);
+        $this->db->select('*');
+        $this->db->from('vrlv3_lista_varit');
+        $this->db->where("vid", $id);
         $query = $this->db->get();
         
-        if ($query->num_rows() > 0)
-        {
-            return $query->result_array(); 
-        }
-        
-        return array();
-    }
-    
-    function get_stable($tnro)
-    {
-        $this->db->from('vrlv3_tallirekisteri');
-        $this->db->where('tnro', $tnro);
-        $query = $this->db->get();
-        
-        if ($query->num_rows() > 0)
-        {
-            return $query->row_array(); 
-        }
-        
-        return array();
-    }
-    
-    function edit_stable($name, $desc, $url, $tnro, $new_tnro=-1)
-    {
-        $data = array('nimi' => $name, 'kuvaus' => $desc, 'url' => $url);
-        
-        if($new_tnro != -1)
-            $data['tnro'] = $new_tnro;
-
-        $this->db->where('tnro', $tnro);
-        $this->db->update('vrlv3_tallirekisteri', $data);
-        
-        //päivityksestä jää jälki
-        $data = array('tnro' => $tnro, 'paivitti' => $this->ion_auth->user()->row()->tunnus, 'aika' => date("Y-m-d H:i:s"));
-        $this->db->insert('vrlv3_tallirekisteri_paivitetty', $data);
-    }
-    
-    function is_stable_active($tnro)
-    {
-        $this->db->select('tnro');
-        $this->db->from('vrlv3_tallirekisteri');
-        $this->db->where('tnro', $tnro);
-        $this->db->where('lopettanut', 0);
-        $query = $this->db->get();
-        
-        if ($query->num_rows() > 0)
-        {
-            return true;
-        }
-        
-        return false;
-    }
-
-    function mark_stable_inactive($tnro)
-    {
-        $this->db->where('tnro', $tnro);
-        $this->db->update('vrlv3_tallirekisteri', array('lopettanut' => 1));
-    }
-    
-    function add_owner_to_stable($tnro, $applicant, $level)
-    {
-        $data = array('tnro' => $tnro, 'omistaja' => $applicant, 'taso' => $level);
-        
-        $this->db->insert('vrlv3_tallirekisteri_omistajat', $data);
-    }
-    
-    function get_stables_owners($tnro)
-    {
-        $this->db->select('omistaja, nimimerkki');
-        $this->db->from('vrlv3_tallirekisteri_omistajat');
-        $this->db->join('vrlv3_tunnukset', 'vrlv3_tunnukset.tunnus = vrlv3_tallirekisteri_omistajat.omistaja');
-        $this->db->where('tnro', $tnro);
-        $query = $this->db->get();
-        
-        if ($query->num_rows() > 0)
-        {
-            return $query->result_array();
-        }
-        
-        return array();
-    }
-    
-    function is_stable_owner($pinnumber, $tnro)
-    {
-        $this->db->select('omistaja');
-        $this->db->from('vrlv3_tallirekisteri_omistajat');
-        $this->db->where('tnro', $tnro);
-        $this->db->where('omistaja', $pinnumber);
-        $query = $this->db->get();
-        
-        if ($query->num_rows() > 0)
-        {
-            return true;
-        }
-        
-        return false;
-    }
-    
-    function get_users_stable_stats($pinnumber)
-    {
-        $data = array();
-        
-        $this->db->select('lopettanut');
-        $this->db->from('vrlv3_tallirekisteri');
-        $this->db->join('vrlv3_tallirekisteri_omistajat', 'vrlv3_tallirekisteri.tnro = vrlv3_tallirekisteri_omistajat.tnro');
-        $this->db->where('omistaja', $pinnumber);
-        $query = $this->db->get();
-        
-        $data['all'] = $query->num_rows();
-        $data['active'] = 0;
-        
-        if ($query->num_rows() > 0)
-        {
-            $result = $query->result_array();
-            
-            foreach($result as $r)
-            {
-                if($r['lopettanut'] == 0)
-                    $data['active']++;
-            }
-        }
-        
-        $this->db->where('lisaaja', $pinnumber);
-        $this->db->from('vrlv3_tallirekisteri_jonossa');
-        $data['queued'] = $this->db->count_all_results();
-        
-        return $data;
-    }
-    
-    function search_stables($name, $category, $tnro)
-    {
-        $this->db->select('vrlv3_tallirekisteri.tnro, nimi, perustettu, katelyh');
-        $this->db->from('vrlv3_tallirekisteri');
-        $this->db->join('vrlv3_tallirekisteri_kategoriat', 'vrlv3_tallirekisteri.tnro = vrlv3_tallirekisteri_kategoriat.tnro');
-        $this->db->join('vrlv3_lista_tallikategoriat', 'vrlv3_lista_tallikategoriat.kat = vrlv3_tallirekisteri_kategoriat.kategoria');
-        
-        if(!empty($name))
-        {
-            if(strpos($name, '*') !== false)
-                $this->db->where('nimi LIKE "' . str_replace('*', '%', $name) . '"');
-            else
-                $this->db->where('nimi', $name);
-        }
-            
-        if($category != '-1')
-            $this->db->where('vrlv3_tallirekisteri_kategoriat.kategoria', $category);
-            
-        if(!empty($tnro))
-        {
-            if(strpos($tnro, '*') !== false)
-                $this->db->where('vrlv3_tallirekisteri.tnro LIKE "' . str_replace('*', '%', $tnro) . '"');
-            else
-                $this->db->where('vrlv3_tallirekisteri.tnro', $tnro);
-        }
-   
-        $query = $this->db->get();
-        
-        if ($query->num_rows() > 0)
-        {
-            return $query->result_array(); 
-        }
-        
-        return array();
-    }
-    
-    function get_stables_likes($tnro)
-    {  
-        $this->db->where('tnro', $tnro);
-        $this->db->where('aani', 1);
-        $this->db->from('vrlv3_tallirekisteri_yesno');
-        return $this->db->count_all_results();
-    }
-    
-    function get_stables_like_by_user($tnro, $pinnumber)
-    {
-        $this->db->select('aika');
-        $this->db->where('tnro', $tnro);
-        $this->db->where('tunnus', $pinnumber);
-        $this->db->from('vrlv3_tallirekisteri_yesno');
-
-        $query = $this->db->get();
-        
-        if ($query->num_rows() > 0)
-        {
-            return $query->result_array()[0]['aika'];
-        }
-        
-        return "0000-00-00";
-    }
-    
-    function add_stable_like($tnro)
-    {
-        $data = array('tnro' => $tnro, 'aani' => 1);
-
-        $data['aika'] = date("Y-m-d H:i:s");
-        $data['tunnus'] = $this->ion_auth->user()->row()->tunnus;
-        
-        $this->db->insert('vrlv3_tallirekisteri_yesno', $data);
-    }
-    
-    function delete_stable_like($tnro)
-    {
-        $this->db->delete('vrlv3_tallirekisteri_yesno', array('tunnus' => $this->ion_auth->user()->row()->tunnus, 'tnro' => $tnro));
-    }
-    
-    //Kategoriat
-    
-    public function mass_edit_categories($tnro, $new_cats = array()){
+        return $query->row_array();
                 
-        $old_cats = $this->get_stables_categories($tnro);
-
-        $checked_cats = array();
-        
-        //are old categories still on new list? Delete if not.
-        foreach ($old_cats as $oc){
-            if (!array_search($oc['kategoria'], $new_cats)){
-                $this->delete_category($oc['id']);
-            }
-            $checked_cats[] = $oc['kategoria'];          
-        }
-        
-        //are there some new categories?
-        
-        foreach ($new_cats as $nc){
-            if (!array_search($nc, $checked_cats)){
-                $this->add_category_to_stable($tnro, $nc);
-            }
-            $checked_cats[] = $nc;          
-        }      
-     
+    }
+    
+    public function get_genes_list(){
+        return array("norm"=>$this->color_gen_name_norm_array, "kirj"=>$this->color_gen_name_kirj_array);
         
     }
     
-    function add_category_to_stable($tnro, $category, $applicant=NULL)
-    {
-        $data = array('tnro' => $tnro, 'kategoria' => $category, 'anoi' => $this->ion_auth->user()->row()->tunnus, 'hyvaksyi' => $this->ion_auth->user()->row()->tunnus);
-
-        $data['lisatty'] = date("Y-m-d H:i:s");
-        $data['kasitelty'] = $data['lisatty'];
+    //lists
+    public function get_colour_list(){
         
-        $this->db->insert('vrlv3_tallirekisteri_kategoriat', $data);
-        
-        //päivityksestä jää jälki
-        $data = array('tnro' => $tnro, 'paivitti' => $this->ion_auth->user()->row()->tunnus, 'aika' => date("Y-m-d H:i:s"));
-        $this->db->insert('vrlv3_tallirekisteri_paivitetty', $data);
-    }
-    
-    function delete_category($id)
-    {
-        $this->db->select('tnro');
-        $this->db->from('vrlv3_tallirekisteri_kategoriat');
-        $this->db->where('id', $id);
-        $query = $this->db->get();
-        
-        //päivityksestä jää jälki
-        $data = array('tnro' => $query->row()->tnro, 'paivitti' => $this->ion_auth->user()->row()->tunnus, 'aika' => date("Y-m-d H:i:s"));
-        $this->db->insert('vrlv3_tallirekisteri_paivitetty', $data);
-        
-        $this->db->delete('vrlv3_tallirekisteri_kategoriat', array('id' => $id));
-    }
-    
-    function is_category_owner($id, $pinnumber)
-    {
-        $this->db->select('omistaja');
-        $this->db->from('vrlv3_tallirekisteri_omistajat');
-        $this->db->join('vrlv3_tallirekisteri_kategoriat', 'vrlv3_tallirekisteri_omistajat.tnro = vrlv3_tallirekisteri_kategoriat.tnro');
-        $this->db->where('vrlv3_tallirekisteri_kategoriat.id', $id);
-        $this->db->where('omistaja', $pinnumber);
-        $query = $this->db->get();
-        
-        if ($query->num_rows() > 0)
-        {
-            return true;
-        }
-        
-        return false;
-    }
-    
-    function stable_has_category($tnro, $category)
-    {
-        $this->db->select('kategoria');
-        $this->db->from('vrlv3_tallirekisteri_kategoriat');
-        $this->db->where('tnro', $tnro);
-        $this->db->where('kategoria', $category);
-        $query = $this->db->get();
-        
-        if ($query->num_rows() > 0)
-        {
-            return true;
-        }
-        
-        return false;
-    }
-    
-    function get_stables_categories($tnro)
-    {
-        $this->db->select('katelyh, vrlv3_tallirekisteri_kategoriat.id, vrlv3_tallirekisteri_kategoriat.kategoria');
-        $this->db->from('vrlv3_tallirekisteri_kategoriat');
-        $this->db->join('vrlv3_lista_tallikategoriat', 'vrlv3_lista_tallikategoriat.kat = vrlv3_tallirekisteri_kategoriat.kategoria');
-        $this->db->where('tnro', $tnro);
+        $this->db->select('vid, vari, lyhenne, pvari');
+        $this->db->from('vrlv3_lista_varit');
         $query = $this->db->get();
         
         if ($query->num_rows() > 0)
@@ -388,60 +75,7 @@ class Color_model extends Base_module_model
         }
         
         return array();
-    }
-    
-    function get_category($kat)
-    {
-        $data = 'Ei saatavilla';
-        
-        $this->db->select('katelyh');
-        $this->db->from('vrlv3_lista_tallikategoriat');
-        $this->db->where('kat', $kat);
-        $query = $this->db->get();
-        
-        if ($query->num_rows() > 0)
-        {
-            $data = $query->row_array(); 
-            $data = $data['katelyh'];
-        }
-        
-        return $data;
-    }
-
-    function get_category_option_list()
-    {
-        $data = array();
-        
-        $this->db->select('kat, kategoria');
-        $this->db->from('vrlv3_lista_tallikategoriat');
-	$this->db->order_by("kategoria", "asc"); 
-        $query = $this->db->get();
-        
-        if ($query->num_rows() > 0)
-        {
-            foreach ($query->result_array() as $row)
-            {
-               $data[$row['kat']] = $row['kategoria'];
-            }
-        }
-        
-        return $data;
-    }
-    
-    //Sekalaisia
-    function is_tnro_in_use($tnro)
-    {
-        $this->db->select('tnro');
-        $this->db->from('vrlv3_tallirekisteri');
-        $this->db->where('tnro', $tnro);
-        $query = $this->db->get();
-        
-        if ($query->num_rows() > 0)
-        {
-            return true;
-        }
-        
-        return false;
+                
     }
     
 }

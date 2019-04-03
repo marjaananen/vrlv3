@@ -30,7 +30,7 @@
                 }
                 
                 if (type === 'VH') {
-                    return 'VH' + value.slice(0, 1) + '-' + value.slice(2, 4) + '-' + value.slice(5, 8);
+                    return 'VH' + value.slice(0, 2) + '-' + value.slice(2, 5) + '-' + value.slice(5, 9);
                 }
                 
                 return value;
@@ -91,7 +91,7 @@
                         }
                         
                         if (headers[i]['key_link'] != undefined) {
-                            table += "<td><a href='" + headers[i]['key_link'] + data[d][headers[i]['key']] + "'>" + output + "</a></td>"; //profiili linkatun arvon tulostus soluunsa
+                            table += "<td><a href='" + headers[i]['key_link'] + formatValue(data[d][headers[i]['key']], headers[i]['type']) + "'>" + output + "</a></td>"; //profiili linkatun arvon tulostus soluunsa
                         } else {
                             table += "<td>" + output + "</td>"; //normaali arvon tulostus soluunsa
                         }
@@ -112,8 +112,11 @@
                 
                 $('#result_table').DataTable({
                     "order": [[ 0, "desc" ]],
-                    "lengthMenu": [ 25, 50, 75, 100 ]
-                    });                
+                    "lengthMenu": [ 50, 100, 150, 200 ],
+                    "pageLength": 50
+
+                    });
+                
                 
                 
                 
