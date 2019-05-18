@@ -69,7 +69,11 @@ class Migraatiot extends CI_Controller
         echo "omistajat done<br>";
         */
          //$this->migraatio_model->migrate_hevosuvut();
-         $this->migraatio_model->migrate_vari_painotus_maa();
+         //$this->migraatio_model->migrate_vari_painotus_maa();
+        //$this->migraatio_model->migrate_kasvattajatiedot
+        echo "pluh";
+        $this->migraatio_model->migrate_kasvattajanimet();
+
         echo "lisatiedot done<br>";
     }
     

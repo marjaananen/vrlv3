@@ -1,0 +1,1 @@
+<p>Voit hallinnoida kasvattajanimelle merkittyjä kasvatteja ja rotuja muokkausnäkymästä. Vain kasvattajanimet joille ei ole merkitty kasvatteja, voi poistaa. </p>

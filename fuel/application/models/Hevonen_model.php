@@ -61,6 +61,19 @@ class Hevonen_model extends Base_module_model
         return array();
     }
     
+    function get_users_foals($user){
+        $this->db->select("reknro, nimi, rotu, vari, sukupuoli, syntymaaika");        
+        $this->db->from('vrlv3_hevosrekisteri');
+        $this->db->limit(1000);
+        $query = $this->db->get();
+        
+        if ($query->num_rows() > 0)
+        {
+            return $query->result_array(); 
+        }
+        
+        return array();
+    }
     
     //functions for search
     function search_horse($name, $rotu, $gender, $dead, $color, $birthyear){
@@ -85,6 +98,9 @@ class Hevonen_model extends Base_module_model
             $this->db->where("syntymaaika >", ($birth_year-1)."-12-31");
         }
         
+        if(isset($breeder)){
+            $this->db->where("kasvattaja_tunnus", $breeder);
+        }
     
         if(!empty($name))
         {

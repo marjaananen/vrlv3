@@ -17,7 +17,7 @@ $nav['liitto'] = array('label' => 'Liitto', 'active' => 'liitto$|liitto/:any');
 $nav['jasenyys'] = array('label' => 'Jäsenyys', 'active' => 'jasenyys$|jasenyys/:any');
 $nav['tallit'] = array('label' => 'Virtuaalitallit', 'active' => 'tallit$|tallit/:any'); //Koodattavaa: Tallihaku
 $nav['virtuaalihevoset'] = array('label' => 'Virtuaalihevoset', 'active' => 'virtuaalihevoset$|virtuaalihevoset/:any'); //Koodattavaa: Hevoshaku
-$nav['jalostus-ja-kasvatus'] = 'Jalostus ja kasvatus';
+$nav['kasvatus'] = array('label' => 'Kasvatus', 'active' => 'kasvatus$|kasvatus/:any'); //Koodattavaa: Hevoshaku
 $nav['kilpailutoiminta'] = 'Kilpailutoiminta';
 $nav['nayttelytoiminta'] = 'Näyttelytoiminta';
 //Piilotetut
@@ -50,9 +50,9 @@ $nav['virtuaalihevoset/rodut'] = array('label' => 'Rotulista', 'parent_id' => 'v
 $nav['virtuaalihevoset/varit'] = array('label' => 'Värilista', 'parent_id' => 'virtuaalihevoset', 'active' => 'virtuaalihevoset/varilista'); //Koodattavaa: Värit
 $nav['virtuaalihevoset/syntymamaat'] = array('label' => 'Syntymämaalista', 'parent_id' => 'virtuaalihevoset', 'active' => 'virtuaalihevoset/syntymamaat'); //Koodattavaa: Syntymämaat
 //jalostus ja kasvatus alamenu
-$nav['jalostus-ja-kasvatus/kasvattajanimet'] = array('label' => 'Kasvattajanimirekisteri', 'parent_id' => 'jalostus-ja-kasvatus', 'active' => 'virtuaalihevoset/kasvattajanimet'); //Koodattavaa: Syntymämaat
-$nav['jalostus-ja-kasvatus/jalostusmainokset'] = array('label' => 'Jalostusmainokset', 'parent_id' => 'jalostus-ja-kasvatus', 'active' => 'virtuaalihevoset/jalostusmainokset');
-$nav['jalostus-ja-kasvatus/rotuyhdistykset'] = array('label' => 'Rotuyhdistykset', 'parent_id' => 'jalostus-ja-kasvatus', 'active' => 'virtuaalihevoset/rotuyhdistykset');
+$nav['kasvatus/kasvattajanimihaku'] = array('label' => 'Kasvattajanimirekisteri', 'parent_id' => 'kasvatus', 'active' => 'kasvatus/kasvattajanimihaku'); //Koodattavaa: Syntymämaat
+$nav['kasvatus/jalostusmainokset'] = array('label' => 'Jalostusmainokset', 'parent_id' => 'kasvatus', 'active' => 'kasvatus/jalostusmainokset');
+$nav['kasvatus/rotuyhdistykset'] = array('label' => 'Rotuyhdistykset', 'parent_id' => 'kasvatus', 'active' => 'kasvatus/rotuyhdistykset');
 //kantakirjat, laatikset, rekkaa kasvinimi
 //kilpailutoiminta alamenu
 $nav['kilpailutoiminta/kilpailusaannot'] = array('label' => 'Kilpaileminen ja säännöt', 'parent_id' => 'kilpailutoiminta', 'active' => 'kilpailutoiminta/kilpailusaannot');

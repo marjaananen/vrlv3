@@ -492,6 +492,78 @@ class Migraatio_model extends Base_module_model
         }
     }
     
+        public function migrate_kasvattajatiedot(){
+        $query = $this->db->query("SELECT * from hevosrekisteri_kasvattaja");
+        foreach ($query->result() as $row){
+            $kasvattajainfo = array();
+            
+            
+            //onko hevo olemassa
+            
+            if ($this->it_is_there_already('vrlv3_hevosrekisteri', array('reknro'=>$row->reknro, 'kasvattaja_talli'=>$row->kasvattajatalli, 'kasvattajanimi' => $row->kasvattajanimi))){
+                continue;
+            }
+            
+            
+    
+            if (isset($row->kasvattajanimi) && strlen($row->kasvattajanimi)>0){
+               $kasvattajainfo['kasvattajanimi'] = $row->kasvattajanimi;
+            }
+            
+            if (isset($row->kasvattajahlo) && $this->onko_tunnus($row->kasvattajahlo) && $row->kasvattajahlo != "00000") {
+               $kasvattajainfo['kasvattaja_tunnus'] = $row->kasvattajahlo;
+            }
+            
+            
+            if (isset($row->kasvattajatalli) && $this->it_is_there_already('vrlv3_tallirekisteri', array('tnro'=>$row->kasvattajatalli))) {
+               $kasvattajainfo['kasvattaja_talli'] = $row->kasvattajatalli;
+
+            }
+            
+            if(sizeof($kasvattajainfo)>0){
+                $this->db->where('reknro', $row->reknro);
+                $this->db->update('vrlv3_hevosrekisteri', $kasvattajainfo);
+            }
+            
+        }
+    }
+    
+    
+    
+    public function migrate_kasvattajanimet(){
+        
+        $query = $this->db->query("SELECT * from vrlv3_kasvattajanimet");
+        foreach ($query->result() as $row){
+            
+            $this->db->where('kasvattajanimi', $row->kasvattajanimi);
+            $this->db->update('vrlv3_hevosrekisteri', array("kasvattajanimi_id"=>$row->id));
+            
+            
+            
+            $this->db->select('*');
+            $this->db->where('id', $row->id);
+            $this->db->from('kasvattajanimet');
+            $om_query = $this->db->get();
+            $om_array = $om_query->result_array();
+            
+            if(isset($om_array[0]) && isset($om_array[0]['tunnus']) && $this->onko_tunnus($om_array[0]['tunnus'])){
+                $data = array();
+                $data['kid'] = $row->id;
+                $data['tunnus'] = $om_array[0]['tunnus'];
+                
+                $this->db->insert('vrlv3_kasvattajanimet_omistajat', $data);
+
+            }
+
+                                  
+        }
+        
+       
+
+        
+      
+    }
+    
     
     public function migrate_vari_painotus_maa(){
         /*

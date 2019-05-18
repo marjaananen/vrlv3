@@ -30,7 +30,6 @@ class Jasenyys extends CI_Controller
             // load form_builder
             $this->load->library('form_builder', array('submit_value' => 'Liity', 'required_text' => '*Pakollinen kenttä'));
             $this->load->model('tunnukset_model');
-			$options = $this->tunnukset_model->get_location_option_list();
 
             // create fields
             $fields['nimimerkki'] = array('type' => 'text', 'required' => TRUE, 'after_html' => '<span class="form_comment">Nimimerkit eivät ole yksilöllisiä</span>', 'class'=>'form-control');
