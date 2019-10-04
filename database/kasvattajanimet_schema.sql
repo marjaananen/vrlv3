@@ -1,17 +1,25 @@
 -- phpMyAdmin SQL Dump
--- version 4.1.14
--- http://www.phpmyadmin.net
+-- version 4.8.4
+-- https://www.phpmyadmin.net/
 --
--- Host: 127.0.0.1
--- Generation Time: 07.10.2015 klo 21:12
--- Palvelimen versio: 5.6.17
--- PHP Version: 5.5.12
+-- Host: localhost:3306
+-- Generation Time: 31.05.2019 klo 09:48
+-- Palvelimen versio: 10.1.40-MariaDB
+-- PHP Version: 5.6.30
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
+SET AUTOCOMMIT = 0;
+START TRANSACTION;
 SET time_zone = "+00:00";
 
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8mb4 */;
+
 --
--- Database: `vrlv3`
+-- Database: `vrl`
 --
 
 -- --------------------------------------------------------
@@ -20,43 +28,13 @@ SET time_zone = "+00:00";
 -- Rakenne taululle `vrlv3_kasvattajanimet`
 --
 
-CREATE TABLE IF NOT EXISTS `vrlv3_kasvattajanimet` (
-  `kid` int(11) NOT NULL AUTO_INCREMENT,
-  `rekisteroity` datetime NOT NULL DEFAULT '2010-01-01 00:00:00',
-  `kasvattajanimi` text CHARACTER SET latin1 NOT NULL,
-  `tallinid` varchar(8) DEFAULT NULL,
-  `tila` tinyint(1) NOT NULL DEFAULT '0',
-  `hyvaksyi` int(5) unsigned zerofill NOT NULL,
-  `hyvaksytty` datetime NOT NULL,
-  PRIMARY KEY (`kid`),
-  KEY `tallinid` (`tallinid`),
-  KEY `hyvaksyi` (`hyvaksyi`),
-  FULLTEXT KEY `kasvattajanimi` (`kasvattajanimi`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
-
--- --------------------------------------------------------
-
---
--- Rakenne taululle `vrlv3_kasvattajanimet_jono`
---
-
-CREATE TABLE IF NOT EXISTS `vrlv3_kasvattajanimet_jonossa` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `kasvattajanimi` text CHARACTER SET latin1 NOT NULL,
-  `lisatty` datetime NOT NULL,
-  `lisaaja` int(5) unsigned zerofill NOT NULL,
-  `tallinid` varchar(8) DEFAULT NULL,
-  `kasvatit` text CHARACTER SET latin1 NOT NULL,
-  `rotu` smallint(3) NOT NULL,
-  `kasitelty` datetime DEFAULT NULL,
-  `kasittelija` int(5) unsigned zerofill DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  KEY `rotu` (`rotu`),
-  KEY `tallinid` (`tallinid`),
-  KEY `lisaaja` (`lisaaja`),
-  KEY `kasittelija` (`kasittelija`),
-  FULLTEXT KEY `kasvattajanimi` (`kasvattajanimi`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
+CREATE TABLE `vrlv3_kasvattajanimet` (
+  `id` int(11) NOT NULL,
+  `kasvattajanimi` varchar(45) NOT NULL,
+  `rekisteroity` datetime DEFAULT CURRENT_TIMESTAMP,
+  `tnro` varchar(8) DEFAULT NULL,
+  `tila` int(11) DEFAULT '1'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -64,14 +42,9 @@ CREATE TABLE IF NOT EXISTS `vrlv3_kasvattajanimet_jonossa` (
 -- Rakenne taululle `vrlv3_kasvattajanimet_omistajat`
 --
 
-CREATE TABLE IF NOT EXISTS `vrlv3_kasvattajanimet_omistajat` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
+CREATE TABLE `vrlv3_kasvattajanimet_omistajat` (
   `kid` int(11) NOT NULL,
-  `omistaja` int(5) unsigned zerofill NOT NULL,
-  `taso` smallint(1) NOT NULL,
-  PRIMARY KEY (`id`),
-  KEY `kid` (`kid`),
-  KEY `omistaja` (`omistaja`)
+  `tunnus` int(5) UNSIGNED ZEROFILL NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
@@ -80,39 +53,47 @@ CREATE TABLE IF NOT EXISTS `vrlv3_kasvattajanimet_omistajat` (
 -- Rakenne taululle `vrlv3_kasvattajanimet_rodut`
 --
 
-CREATE TABLE IF NOT EXISTS `vrlv3_kasvattajanimet_rodut` (
-  `id` int(11) NOT NULL,
+CREATE TABLE `vrlv3_kasvattajanimet_rodut` (
   `kid` int(11) NOT NULL,
-  `rotunro` smallint(3) NOT NULL,
-  `hyvaksyi` int(5) unsigned zerofill NOT NULL,
-  `hyvaksytty` datetime NOT NULL,
-  PRIMARY KEY (`id`),
-  KEY `id` (`id`),
-  KEY `hyvaksyi` (`hyvaksyi`),
-  KEY `rotunro` (`rotunro`),
-  KEY `kid` (`kid`)
+  `rotu` smallint(3) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- --------------------------------------------------------
-
 --
--- Rakenne taululle `vrlv3_kasvattajanimet_rotujono`
+-- Indexes for dumped tables
 --
 
-CREATE TABLE IF NOT EXISTS `vrlv3_kasvattajanimet_rodut_jonossa` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `kid` int(11) NOT NULL,
-  `rotu` smallint(3) NOT NULL,
-  `lisatty` datetime NOT NULL,
-  `lisaaja` int(5) unsigned zerofill NOT NULL,
-  `kasvatit` text CHARACTER SET latin1 NOT NULL,
-  `kasitelty` datetime DEFAULT NULL,
-  `kasittelija` int(5) unsigned zerofill DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  KEY `kid` (`kid`),
-  KEY `lisaaja` (`lisaaja`),
-  KEY `kasittelija` (`kasittelija`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
+--
+-- Indexes for table `vrlv3_kasvattajanimet`
+--
+ALTER TABLE `vrlv3_kasvattajanimet`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `vrlv3_kasvattajanimet_talli_idx` (`tnro`);
+
+--
+-- Indexes for table `vrlv3_kasvattajanimet_omistajat`
+--
+ALTER TABLE `vrlv3_kasvattajanimet_omistajat`
+  ADD PRIMARY KEY (`kid`,`tunnus`),
+  ADD KEY `vrlv3_kasvattajanimet_om_idx` (`kid`),
+  ADD KEY `vrlv3_kasvattajanimet_om_idx2` (`tunnus`);
+
+--
+-- Indexes for table `vrlv3_kasvattajanimet_rodut`
+--
+ALTER TABLE `vrlv3_kasvattajanimet_rodut`
+  ADD PRIMARY KEY (`kid`,`rotu`),
+  ADD KEY `vrlv3_kasvattajanimet_rod_idx` (`kid`),
+  ADD KEY `vrlv3_kasvattajanimet_rod_idx2` (`rotu`);
+
+--
+-- AUTO_INCREMENT for dumped tables
+--
+
+--
+-- AUTO_INCREMENT for table `vrlv3_kasvattajanimet`
+--
+ALTER TABLE `vrlv3_kasvattajanimet`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- Rajoitteet vedostauluille
@@ -122,37 +103,23 @@ CREATE TABLE IF NOT EXISTS `vrlv3_kasvattajanimet_rodut_jonossa` (
 -- Rajoitteet taululle `vrlv3_kasvattajanimet`
 --
 ALTER TABLE `vrlv3_kasvattajanimet`
-  ADD CONSTRAINT `vrlv3_kasvattajanimet_ibfk_2` FOREIGN KEY (`hyvaksyi`) REFERENCES `vrlv3_tunnukset` (`tunnus`) ON UPDATE CASCADE,
-  ADD CONSTRAINT `vrlv3_kasvattajanimet_ibfk_1` FOREIGN KEY (`tallinid`) REFERENCES `vrlv3_tallirekisteri` (`tnro`) ON DELETE SET NULL ON UPDATE CASCADE;
-
---
--- Rajoitteet taululle `vrlv3_kasvattajanimet_jono`
---
-ALTER TABLE `vrlv3_kasvattajanimet_jonossa`
-  ADD CONSTRAINT `vrlv3_kasvattajanimet_jono_ibfk_4` FOREIGN KEY (`kasittelija`) REFERENCES `vrlv3_tunnukset` (`tunnus`) ON UPDATE CASCADE,
-  ADD CONSTRAINT `vrlv3_kasvattajanimet_jono_ibfk_3` FOREIGN KEY (`lisaaja`) REFERENCES `vrlv3_tunnukset` (`tunnus`) ON UPDATE CASCADE,
-  ADD CONSTRAINT `vrlv3_kasvattajanimet_jono_ibfk_1` FOREIGN KEY (`tallinid`) REFERENCES `vrlv3_tallirekisteri` (`tnro`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `vrlv3_kasvattajanimet_jono_ibfk_2` FOREIGN KEY (`rotu`) REFERENCES `vrlv3_lista_rodut` (`rotunro`) ON UPDATE CASCADE;
+  ADD CONSTRAINT `vrlv3_kasvattajanimet_talli` FOREIGN KEY (`tnro`) REFERENCES `vrlv3_tallirekisteri` (`tnro`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 --
 -- Rajoitteet taululle `vrlv3_kasvattajanimet_omistajat`
 --
 ALTER TABLE `vrlv3_kasvattajanimet_omistajat`
-  ADD CONSTRAINT `vrlv3_kasvattajanimet_omistajat_ibfk_2` FOREIGN KEY (`omistaja`) REFERENCES `vrlv3_tunnukset` (`tunnus`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `vrlv3_kasvattajanimet_omistajat_ibfk_1` FOREIGN KEY (`kid`) REFERENCES `vrlv3_kasvattajanimet` (`kid`) ON DELETE CASCADE ON UPDATE CASCADE;
+  ADD CONSTRAINT `vrlv3_kasvattajanimet_omistajat_knimi` FOREIGN KEY (`kid`) REFERENCES `vrlv3_kasvattajanimet` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `vrlv3_kasvattajanimet_omistajat_tunnus` FOREIGN KEY (`tunnus`) REFERENCES `vrlv3_tunnukset` (`tunnus`) ON UPDATE CASCADE;
 
 --
 -- Rajoitteet taululle `vrlv3_kasvattajanimet_rodut`
 --
 ALTER TABLE `vrlv3_kasvattajanimet_rodut`
-  ADD CONSTRAINT `vrlv3_kasvattajanimet_rodut_ibfk_4` FOREIGN KEY (`kid`) REFERENCES `vrlv3_kasvattajanimet` (`kid`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `vrlv3_kasvattajanimet_rodut_ibfk_2` FOREIGN KEY (`rotunro`) REFERENCES `vrlv3_lista_rodut` (`rotunro`) ON UPDATE CASCADE,
-  ADD CONSTRAINT `vrlv3_kasvattajanimet_rodut_ibfk_3` FOREIGN KEY (`hyvaksyi`) REFERENCES `vrlv3_tunnukset` (`tunnus`) ON UPDATE CASCADE;
+  ADD CONSTRAINT `vrlv3_kasvattajanimet_rodut_knimi` FOREIGN KEY (`kid`) REFERENCES `vrlv3_kasvattajanimet` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `vrlv3_kasvattajanimet_rodut_rotu` FOREIGN KEY (`rotu`) REFERENCES `vrlv3_lista_rodut` (`rotunro`) ON UPDATE CASCADE;
+COMMIT;
 
---
--- Rajoitteet taululle `vrlv3_kasvattajanimet_rotujono`
---
-ALTER TABLE `vrlv3_kasvattajanimet_rodut_jonossa`
-  ADD CONSTRAINT `vrlv3_kasvattajanimet_rotujono_ibfk_3` FOREIGN KEY (`kasittelija`) REFERENCES `vrlv3_tunnukset` (`tunnus`) ON UPDATE CASCADE,
-  ADD CONSTRAINT `vrlv3_kasvattajanimet_rotujono_ibfk_2` FOREIGN KEY (`lisaaja`) REFERENCES `vrlv3_tunnukset` (`tunnus`) ON UPDATE CASCADE,
-  ADD CONSTRAINT `vrlv3_kasvattajanimet_rotujono_ibfk_1` FOREIGN KEY (`kid`) REFERENCES `vrlv3_kasvattajanimet` (`kid`) ON DELETE CASCADE ON UPDATE CASCADE;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;

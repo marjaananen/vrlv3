@@ -42,5 +42,28 @@
     
 </div>
 
+   <ul class="nav nav-tabs">
+        <li role="presentation" class="<?php if ($sivu == 'hevoset'){echo "active";}?>"><a href="<?php echo base_url('tallit/talli/'. $stable['tnro'] . '/hevoset')?>">Hevoset</a></li>
+        <li role="presentation" class="<?php if ($sivu == 'kasvatit'){echo "active";}?>"><a href="<?php echo base_url('tallit/talli/'. $stable['tnro'] . '/kasvatit')?>">Kasvatit</a></li>
+        <li role="presentation" class="<?php if ($sivu == 'kasvattajanimet'){echo "active";}?>"><a href="<?php echo base_url('tallit/talli/'. $stable['tnro'] . '/kasvattajanimet')?>">Kasvattajanimet</a></li>
+        <li role="presentation" class="<?php if ($sivu == 'kilpailut'){echo "active";}?>"><a href="<?php echo base_url('tallit/talli/'. $stable['tnro'] . '/kilpailut')?>">Kilpailut ja näyttelyt</a></li>
+    </ul>
+    
+    <?php
+        if($sivu == 'hevoset')
+        {
+            echo $horses;
+        }
+        else if($sivu == 'kasvatit'){
+            echo $foals;
+
+        } 
+            else if($sivu == 'kasvattajanimet'){
+                    echo $names;
+
+        }
+    
+    ?>
+</div>
 
 

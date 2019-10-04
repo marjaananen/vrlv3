@@ -18,7 +18,7 @@ class Hevonen_model extends Base_module_model
         
         $hevonen = array();
         $this->db->select("reknro, h.nimi as h_nimi, r.rotu as h_rotunimi, sukupuoli, sakakorkeus, syntymaaika, v.vari as h_varinimi, p.painotus as h_painotusnimi, syntymamaa, h.url as h_url, rekisteroity,
-                          kotitalli, t.url as t_url, t.nimi as t_nimi, kuollut, kuol_pvm, rotunro, maa, vid, pid");
+                          kotitalli, t.url as t_url, t.nimi as t_nimi, kuollut, kuol_pvm, rotunro, maa, vid, pid, kasvattajanimi, kasvattajanimi_id, kasvattaja_tunnus, kasvattaja_talli");
         $this->db->where("reknro", $this->CI->vrl_helper->vh_to_number($reknro));
 
         $this->db->from('vrlv3_hevosrekisteri as h');
@@ -45,9 +45,24 @@ class Hevonen_model extends Base_module_model
        
     }
     
+    public function onko_tunnus($tunnus){
+        $this->db->where('reknro', $tunnus);
+        $this->db->from('vrlv3_hevosrekisteri');
+        $amount = $this->db->count_all_results();
+        
+        if ($amount != 1){
+            return false;
+        }
+        
+        else {
+            return true;
+        }
+        
+    }
+    
     function get_horse_owners($reknro)
     {
-        $this->db->select('omistaja, nimimerkki');
+        $this->db->select('omistaja, nimimerkki, taso, vrlv3_hevosrekisteri_omistajat.id as id');
         $this->db->from('vrlv3_hevosrekisteri_omistajat');
         $this->db->join('vrlv3_tunnukset', 'vrlv3_tunnukset.tunnus = vrlv3_hevosrekisteri_omistajat.omistaja');
         $this->db->where('reknro', $this->CI->vrl_helper->vh_to_number($reknro));
@@ -61,10 +76,96 @@ class Hevonen_model extends Base_module_model
         return array();
     }
     
+    function get_owners_horses($nro)
+    {
+        $this->db->select('vrlv3_hevosrekisteri.reknro, nimi, rotu, sukupuoli');
+        $this->db->from('vrlv3_hevosrekisteri_omistajat');
+        $this->db->join('vrlv3_hevosrekisteri', 'vrlv3_hevosrekisteri.reknro = vrlv3_hevosrekisteri_omistajat.reknro');
+        $this->db->where('omistaja', $nro);
+        $query = $this->db->get();
+        
+        if ($query->num_rows() > 0)
+        {
+            return $query->result_array();
+        }
+        
+        return array();
+    }
+    
+    function get_owners_horses_amount($nro, $alive = 1)
+    {
+        $this->db->select('*');
+        $this->db->from('vrlv3_hevosrekisteri_omistajat');
+        $this->db->join('vrlv3_hevosrekisteri', 'vrlv3_hevosrekisteri.reknro = vrlv3_hevosrekisteri_omistajat.reknro');
+        $this->db->where('omistaja', $nro);
+                $query = $this->db->get();
+
+        return $query->num_rows();
+    }
+    
     function get_users_foals($user){
         $this->db->select("reknro, nimi, rotu, vari, sukupuoli, syntymaaika");        
         $this->db->from('vrlv3_hevosrekisteri');
-        $this->db->limit(1000);
+        $this->db->where('kasvattaja_tunnus', $user);
+        $query = $this->db->get();
+        
+        if ($query->num_rows() > 0)
+        {
+            return $query->result_array(); 
+        }
+        
+        return array();
+    }
+    
+    function get_names_foals_by_id($id){
+        $this->db->select("reknro, nimi, rotu, vari, sukupuoli, syntymaaika");        
+        $this->db->from('vrlv3_hevosrekisteri');
+        $this->db->where('kasvattajanimi_id', $id);
+        $query = $this->db->get();
+        
+        if ($query->num_rows() > 0)
+        {
+            return $query->result_array(); 
+        }
+        
+        return array();
+    }
+    function get_names_foals_by_name($name){
+        $this->db->select("reknro, nimi, rotu, vari, sukupuoli, syntymaaika");        
+        $this->db->from('vrlv3_hevosrekisteri');
+        $this->db->where('kasvattajanimi', $name);
+        $this->db->where('kasvattajanimi_id IS NULL', NULL, FALSE);
+        $query = $this->db->get();
+        
+        if ($query->num_rows() > 0)
+        {
+            return $query->result_array(); 
+        }
+        
+        return array();
+    }
+    
+    
+    
+      function get_stables_horses($nro)
+    {
+        $this->db->select('vrlv3_hevosrekisteri.reknro, nimi, rotu, sukupuoli');
+        $this->db->from('vrlv3_hevosrekisteri');
+        $this->db->where('kotitalli', $nro);
+        $query = $this->db->get();
+        
+        if ($query->num_rows() > 0)
+        {
+            return $query->result_array();
+        }
+        
+        return array();
+    }
+    
+    function get_stables_foals($user){
+        $this->db->select("reknro, nimi, rotu, vari, sukupuoli, syntymaaika");        
+        $this->db->from('vrlv3_hevosrekisteri');
+        $this->db->where('kasvattaja_talli', $user);
         $query = $this->db->get();
         
         if ($query->num_rows() > 0)
@@ -123,6 +224,14 @@ class Hevonen_model extends Base_module_model
         
     }
     
+    
+    function add_owner_to_horse($id, $applicant, $taso = 1)
+    {
+        $data = array('reknro' => $id, 'tunnus' => $applicant, 'taso' => $taso);
+        
+        $this->db->insert('vrlv3_hevosrekisteri_omistajat', $data);
+    }
+    
     //functions for pedigree
     
     function get_suku($reknro, $tunnus ="", &$suku){
@@ -175,6 +284,21 @@ class Hevonen_model extends Base_module_model
         $genders = $this->sort_gender_stats($query->result_array());
 
         return $genders;
+        
+    }
+    
+     
+    function count_breedingname_amount($id){
+        
+        $this->db->select("COUNT(kasvattajanimi_id) as amount");
+        $this->db->where("kasvattajanimi_id", $id);
+  
+        $this->db->from('vrlv3_hevosrekisteri');
+        $query = $this->db->get();
+        
+        $breedingnames = $query->row()->amount;
+
+        return $breedingnames;
         
     }
     

@@ -21,13 +21,13 @@ class Virtuaalihevoset extends CI_Controller
     {
 		$this->load->model('hevonen_model');
 		$this->load->library('form_validation');
-		$vars['title'] = 'Hevosrekisteri';
+		$data['title'] = 'Hevosrekisteri';
 		
-		$vars['msg'] = 'Hae hevosia rekisteristä. Voit käyttää tähteä * jokerimerkkinä.';
+		$data['msg'] = 'Hae hevosia rekisteristä. Voit käyttää tähteä * jokerimerkkinä.';
 		
-		$vars['text_view'] = $this->load->view('hevoset/etusivu_teksti', NULL, TRUE);
+		$data['text_view'] = $this->load->view('hevoset/etusivu_teksti', NULL, TRUE);
 		
-		$vars['form'] = $this->get_horse_search_form();
+		$data['form'] = $this->get_horse_search_form();
 		
 		if($this->input->server('REQUEST_METHOD') == 'POST')
 		{
@@ -42,10 +42,12 @@ class Virtuaalihevoset extends CI_Controller
 				$vars['headers'] = json_encode($vars['headers']);
 							
 				$vars['data'] = json_encode($this->hevonen_model->search_horse($this->input->post('nimi'), $this->input->post('rotu'), $this->input->post('skp'), $this->input->post('kuollut'), $this->input->post('vari'), $this->input->post('syntynyt_v')));
+				$data['tulokset'] = $this->load->view('misc/taulukko', $vars, TRUE);
+
 			}
 		}
 		
-		$this->fuel->pages->render('misc/haku', $vars);
+		$this->fuel->pages->render('misc/haku', $data);
     }
 	
 	
@@ -61,7 +63,9 @@ class Virtuaalihevoset extends CI_Controller
 		$vars['hevonen'] = null;
 		
 		$vars['hevonen'] = $this->hevonen_model->get_hevonen($reknro);
+		$vars['hevonen']['rekisteroity'] = $this->vrl_helper->sanitize_registration_date($vars['hevonen']['rekisteroity']);
 		$vars['suku'] = array();
+		$vars['owners'] = $this->hevonen_model->get_horse_owners($reknro);
 		$this->hevonen_model->get_suku($reknro, "", $vars['suku']);
 		$vars['pedigree_printer'] = & $this->pedigree_printer;
 		
@@ -71,6 +75,8 @@ class Virtuaalihevoset extends CI_Controller
 
 		
 	}
+	
+	
 	
 	
 	///statistiikkasivut
@@ -90,7 +96,7 @@ class Virtuaalihevoset extends CI_Controller
 					
 		$vars['data'] = json_encode($this->hevonen_model->get_country_list());
 
-		$this->fuel->pages->render('misc/haku', $vars);
+		$this->fuel->pages->render('misc/taulukko', $vars);
 		
 		
 		
@@ -119,7 +125,7 @@ class Virtuaalihevoset extends CI_Controller
 					
 		$vars['data'] = json_encode($this->hevonen_model->get_breed_list());
 
-		$this->fuel->pages->render('misc/haku', $vars);
+		$this->fuel->pages->render('misc/taulukko', $vars);
 		
 		
 		
@@ -151,7 +157,7 @@ class Virtuaalihevoset extends CI_Controller
 					
 		$vars['data'] = json_encode($this->color_model->get_colour_list());
 
-		$this->fuel->pages->render('misc/haku', $vars);
+		$this->fuel->pages->render('misc/taulukko', $vars);
 		
 		
 		

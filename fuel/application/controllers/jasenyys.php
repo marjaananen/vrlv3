@@ -105,28 +105,44 @@ class Jasenyys extends CI_Controller
 	}
 	else
 	{
-            $this->load->model('tunnukset_model');
+        $this->load->model('tunnukset_model');
 	    $pinnumber = $this->vrl_helper->vrl_to_number($tunnus);
 	    $user = $this->ion_auth->user($this->tunnukset_model->get_users_id($pinnumber))->row();
 	    
-            $fields['tunnus'] = $this->vrl_helper->get_vrl($tunnus);
+        $fields['tunnus'] = $this->vrl_helper->get_vrl($tunnus);
 	    $fields['nimimerkki'] = $user->nimimerkki;
-            $fields['rekisteroitynyt'] = date("d.m.Y", strtotime($user->hyvaksytty));
+        $fields['rekisteroitynyt'] = $this->vrl_helper->sanitize_registration_date($user->hyvaksytty);
 
-            if($user->nayta_email == 1)
-                $fields['email'] = $user->email;
-            else
-                $fields['email'] = "Ei saatavilla";            
+        if($user->nayta_email == 1 && $fields['logged_in'])
+            $fields['email'] = $user->email;
+        else
+            $fields['email'] = "Ei saatavilla";            
 	    
-            $fields['muut_yhteystiedot'] = $this->tunnukset_model->get_users_public_contacts($pinnumber);
-            
-            $fields['nimimerkit'] = $this->tunnukset_model->get_previous_nicknames($pinnumber);
-	    
-            if($sivu == 'tallit')
-            {
-                $this->load->model('tallit_model');
-                $fields['stables'] = $this->tallit_model->get_users_stables($pinnumber);
-            }
+        if($fields['logged_in']){
+			$fields['muut_yhteystiedot'] = $this->tunnukset_model->get_users_public_contacts($pinnumber);        
+			$fields['nimimerkit'] = $this->tunnukset_model->get_previous_nicknames($pinnumber);
+			
+			if($sivu == 'tallit'){
+					$fields['stables'] = $this->_omat_tallit($pinnumber);
+				}
+			else if($sivu == 'hevoset'){				
+					$fields['horses'] = $this->_omat_hevoset($pinnumber);
+				}
+			else if($sivu == 'kasvatit'){				
+					$fields['foals'] = $this->_omat_kasvatit($pinnumber);
+				}
+				else if($sivu == 'kasvattajanimet'){				
+					$fields['names'] = $this->_omat_kasvattajanimet($pinnumber);
+				}	
+			}
+			else {
+				$fields['horses'] = "Kirjaudu sisään nähdäksesi tiedot.";
+				$fields['foals'] = "Kirjaudu sisään nähdäksesi tiedot.";
+				$fields['names'] = "Kirjaudu sisään nähdäksesi tiedot.";
+				$fields['stables'] = "Kirjaudu sisään nähdäksesi tiedot.";
+				
+			}
+			
             
 	    $this->fuel->pages->render('jasenyys/tunnus', $fields);
 	}
@@ -155,15 +171,15 @@ class Jasenyys extends CI_Controller
 	$this->load->model('tunnukset_model');
 	$this->load->library('form_validation');
 	$this->load->library('form_builder', array('submit_value' => 'Hae'));
-	$vars['title'] = 'Jäsenhaku';
-	$vars['msg'] = 'Hae VRL:n jäseniä. Voit käyttää tähteä * jokerimerkkinä.';
+	$data['title'] = 'Jäsenhaku';
+	$data['msg'] = 'Hae VRL:n jäseniä. Voit käyttää tähteä * jokerimerkkinä.';
 	
 	
 	$fields['tunnus'] = array('type' => 'text', 'label' => 'VRL-tunnus', 'class'=>'form-control');
 	$fields['nimimerkki'] = array('type' => 'text', 'class'=>'form-control');
 
 	$this->form_builder->form_attrs = array('method' => 'post', 'action' => site_url('/jasenyys/haku'));
-	$vars['form'] = $this->form_builder->render_template('_layouts/basic_form_template', $fields);
+	$data['form'] = $this->form_builder->render_template('_layouts/basic_form_template', $fields);
 	
 	if($this->input->server('REQUEST_METHOD') == 'POST')
 	{
@@ -177,14 +193,15 @@ class Jasenyys extends CI_Controller
 			
 			$vars['headers'] = json_encode($vars['headers']);
                 
-            $vars['data'] = $this->tunnukset_model->search_users($this->vrl_helper->vrl_to_number($this->input->post('tunnus')), $this->input->post('nimimerkki'));
-                
-                
-		$vars['data'] = json_encode($vars['data']);		
+            $vars['data'] = $this->tunnukset_model->search_users($this->vrl_helper->vrl_to_number($this->input->post('tunnus')), $this->input->post('nimimerkki'));         
+			$vars['data'] = json_encode($vars['data']);
+			
+			$data['tulokset'] = $this->load->view('misc/taulukko', $vars, TRUE);
+
 	    }
 	}
 	
-	$this->fuel->pages->render('misc/haku', $vars);
+	$this->fuel->pages->render('misc/haku', $data);
     }
     
     function _date_valid($date)
@@ -194,5 +211,113 @@ class Jasenyys extends CI_Controller
         else
             return false;
     }
+	
+	
+	
+	
+	
+	// Tunnussivun matskut
+		private function _omat_tallit($nro){
+			
+			$this->load->model('tallit_model');	
+				
+			$vars['title'] = '';
+					
+			$vars['text_view'] = '';
+			
+			$vars['headers'][1] = array('title' => 'Perustettu', 'key' => 'perustettu', 'type' => 'date');
+			$vars['headers'][2] = array('title' => 'Tallinumero', 'key' => 'tnro', 'key_link' => site_url('tallit/talli/'));
+			$vars['headers'][3] = array('title' => 'Nimi', 'key' => 'nimi');
+			if($this->ion_auth->is_admin()){
+				$vars['headers'][4] = array('title' => 'Editoi', 'key' => 'tnro', 'key_link' => site_url('tallit/muokkaa/'), 'image' => site_url('assets/images/icons/edit.png'));
+			}
+			
+			$vars['headers'] = json_encode($vars['headers']);
+			
+			$stables =  $this->tallit_model->get_users_stables($nro);		
+			$vars['data'] = json_encode($stables);
+			
+			return $this->load->view('misc/taulukko', $vars, TRUE);
+	
+	}
+	
+	
+	
+	
+	private function _omat_hevoset($nro)
+    {
+		$this->load->model('hevonen_model');
+		$vars['title'] = "";
+		
+		$vars['msg'] = '';
+		
+		$vars['text_view'] = "";		
+	
+		
+			$vars['headers'][1] = array('title' => 'Rekisterinumero', 'key' => 'reknro', 'key_link' => site_url('virtuaalihevoset/hevonen/'), 'type'=>'VH');
+			$vars['headers'][2] = array('title' => 'Nimi', 'key' => 'nimi');
+			$vars['headers'][3] = array('title' => 'Rotu', 'key' => 'rotu');
+			$vars['headers'][4] = array('title' => 'Sukupuoli', 'key' => 'sukupuoli');
+			
+			$vars['headers'] = json_encode($vars['headers']);
+						
+			$vars['data'] = json_encode($this->hevonen_model->get_owners_horses($nro));
+		
+		
+		return $this->load->view('misc/taulukko', $vars, TRUE);
+    }
+	
+	
+	private function _omat_kasvatit($nro)
+    {
+				$this->load->model('hevonen_model');
+
+		$vars['title'] = "";
+		
+		$vars['msg'] = '';
+		
+		$vars['text_view'] = "";		
+	
+	
+		
+			$vars['headers'][1] = array('title' => 'Rekisterinumero', 'key' => 'reknro', 'key_link' => site_url('virtuaalihevoset/hevonen/'), 'type'=>'VH');
+			$vars['headers'][2] = array('title' => 'Nimi', 'key' => 'nimi');
+			$vars['headers'][3] = array('title' => 'Rotu', 'key' => 'rotu');
+			$vars['headers'][4] = array('title' => 'Sukupuoli', 'key' => 'sukupuoli');
+			
+			$vars['headers'] = json_encode($vars['headers']);
+						
+			$vars['data'] = json_encode($this->hevonen_model->get_users_foals($nro));
+		
+		
+		return $this->load->view('misc/taulukko', $vars, TRUE);
+    }
+	
+	private function _omat_kasvattajanimet($nro){
+				$this->load->model('kasvattajanimi_model');
+
+	
+		$vars['title'] = "";
+		
+		$vars['msg'] = '';
+		
+		$vars['text_view'] = "";		
+						
+			$vars['headers'][1] = array('title' => 'Kasvattajanimi', 'key' => 'kasvattajanimi');
+
+			$vars['headers'][2] = array('title' => 'Id', 'key' => 'id', 'key_link' => site_url('kasvatus/kasvattajanimet/nimi/'));
+			$vars['headers'][3] = array('title' => 'Rodut', 'key' => 'lyhenne', 'aggregated_by' => 'id');
+			$vars['headers'][4] = array('title' => 'Rekisteröity', 'key' => 'rekisteroity', 'type' => 'date');
+			//$vars['headers'][5] = array('title' => 'Editoi', 'key' => 'id', 'key_link' => site_url('kasvatus/kasvattajanimet/muokkaa/'), 'image' => site_url('assets/images/icons/edit.png'));
+			//$vars['headers'][6] = array('title' => 'Poista', 'key' => 'id', 'key_link' => site_url('kasvatus/kasvattajanimet/poista/'), 'image' => site_url('assets/images/icons/delete.png'));
+
+			$vars['headers'] = json_encode($vars['headers']);
+				
+			$vars['data'] = json_encode($this->kasvattajanimi_model->get_users_names($nro));
+			
+	
+		return $this->load->view('misc/taulukko', $vars, TRUE);
+	}	
+	
 }
 ?>

@@ -13,64 +13,210 @@ class Kasvatus extends CI_Controller
 	}
     
 	public function index (){
-		$this->kasvattajanimihaku();
+		$this->_kasvattajanimihaku();
 	}
 	
 	
     
-    public function kasvattajanimet($type = NULL)
-    {
+    public function kasvattajanimet($type = NULL, $id = NULL, $sivu = NULL, $tapa = NULL, $kohde = NULL)
+    {		
 		if($type == "omat"){
 			$this->_omat_kasvattajanimet();
+		}
+		
+		else if ($type == "nimi"){
+			$this->_kasvattajanimi($id, $sivu);
+			
 		}
 		
 		else if($type == "rekisteroi"){
 			$this->_kasvattajanimirekisterointi();
 		}
 		
+		else if($type == "poista"){
+			$this->_kasvattajanimi_poista($id);
+		}
+		
+		else if($type == "muokkaa"){
+			$this->_kasvattajanimet_muokkaa($id, $sivu, $tapa, $kohde);
+		}
+		
+		else if ($type == "suuret"){
+			$this->_kasvattajanimet_by_activity("DESC");
+			
+		}
+		
+		else if ($type == "pienet"){
+			$this->_kasvattajanimet_by_activity("ASC");
+			
+		}
+		
 		else {
 			$this->_kasvattajanimihaku();
 		}
-
     }
+	
+	
+	private function _kasvattajanimi($nimi, $sivu){
+		if(empty($timi))
+			$this->fuel->pages->render('misc/naytaviesti', array('msg_type' => 'danger', 'msg' => 'Kasvattajanimi-id puuttuu'));
+
+		
+		if(!$this->kasvattajanimi_model->is_name_id_in_use($nimi))
+			$this->fuel->pages->render('misc/naytaviesti', array('msg_type' => 'danger', 'msg' => 'Kasvattajanimi-id:tä ei ole olemassa'));
+
+		$this->load->library('Vrl_helper');
+
+		$fields['sivu'] = $sivu;			
+		$fields['nimi'] = $this->kasvattajanimi_model->get_name($nimi);
+		$fields['nimi']['rekisteroity'] = $this->vrl_helper->sanitize_registration_date($fields['nimi']['rekisteroity']);
+		$fields['owners'] = $this->kasvattajanimi_model->get_names_owners($nimi);
+		
+		if($this->ion_auth->logged_in()){		
+			if($sivu == 'kasvatit'){				
+					$fields['foals'] = $this->_nimen_kasvatit($nimi);
+				}
+				else if($sivu == 'rodut'){				
+					$fields['breeds'] = $this->_nimen_rodut($nimi);
+				}	
+			}
+			else {
+				$fields['foals'] = "Kirjaudu sisään nähdäksesi tiedot.";
+				$fields['breeds'] = "Kirjaudu sisään nähdäksesi tiedot.";
+				
+			}
+		
+		$this->fuel->pages->render('kasvattajanimet/kasvattajanimi', $fields);
+    }
+	
+	
+	
+	
+	private function _nimen_rodut($nro)
+    {
+		$vars['title'] = "";
+		
+		$vars['msg'] = '';
+		
+		$vars['text_view'] = "";		
+	
+		
+		$vars['headers'][1] = array('title' => 'ID', 'key' => 'rotunro', 'key_link' => site_url('virtuaalihevoset/rotu/'));
+		$vars['headers'][2] = array('title' => 'Rotu', 'key' => 'rotu');
+		$vars['headers'][3] = array('title' => 'Lyhenne', 'key' => 'lyhenne');
+			
+			$vars['headers'] = json_encode($vars['headers']);
+						
+			$vars['data'] = json_encode($this->kasvattajanimi_model->get_names_breeds($nro));
+		
+		
+		return $this->load->view('misc/taulukko', $vars, TRUE);
+    }
+	
+	
+	private function _nimen_kasvatit($nro)
+    {
+		$this->load->model('hevonen_model');
+		$vars['title'] = "";	
+		$vars['msg'] = '';
+		$vars['text_view'] = "";		
+	
+	
+		
+			$vars['headers'][1] = array('title' => 'Rekisterinumero', 'key' => 'reknro', 'key_link' => site_url('virtuaalihevoset/hevonen/'), 'type'=>'VH');
+			$vars['headers'][2] = array('title' => 'Nimi', 'key' => 'nimi');
+			$vars['headers'][3] = array('title' => 'Rotu', 'key' => 'rotu');
+			$vars['headers'][4] = array('title' => 'Sukupuoli', 'key' => 'sukupuoli');
+			$vars['headers'][5] = array('checkbox_id' => "nakki[]", 'title' => 'Valitse', 'key' => 'rotunro');
+
+			
+			$vars['headers'] = json_encode($vars['headers']);
+						
+			$vars['data'] = json_encode($this->hevonen_model->get_names_foals_by_id($nro));
+		
+		
+		return $this->load->view('misc/taulukko', $vars, TRUE);
+    }
+	
+	
 	
 	
 	
 	private function _kasvattajanimihaku(){
 		$this->load->library('form_validation');
 		$this->load->library('form_collection');
-		$vars['title'] = 'Kasvattajanimihaku';
+		$data['title'] = 'Kasvattajanimihaku';
 		
-		$vars['msg'] = 'Hae kasvattajanimiä rekisteristä. Voit käyttää tähteä * jokerimerkkinä.';
+		$data['msg'] = 'Hae kasvattajanimiä rekisteristä. Voit käyttää tähteä * jokerimerkkinä.';
 		
-		$vars['text_view'] = $this->load->view('kasvattajanimet/teksti_etusivu', NULL, TRUE);
+		$data['text_view'] = $this->load->view('kasvattajanimet/teksti_etusivu', NULL, TRUE);
 		
-		$vars['form'] = $this->_get_name_search_form();
+		$data['form'] = $this->_get_name_search_form();
+		
+		
 		
 		if($this->input->server('REQUEST_METHOD') == 'POST')
 		{
 	
-			if($this->_validate_name_search_form() == true && !(empty($this->input->post('kasvattajanimi')) && $this->input->post('kasvatusrotu') == "-1"))
-			{
-				$vars['headers'][1] = array('title' => 'Id', 'key' => 'id', 'key_link' => site_url('kasvatus/kasvattajanimet/nimi'));
-				$vars['headers'][2] = array('title' => 'Kasvattajanimi', 'key' => 'kasvattajanimi');
-				$vars['headers'][3] = array('title' => 'Rodut', 'key' => 'lyhenne', 'aggregated_by' => 'id');
-				$vars['headers'][4] = array('title' => 'Rekisteröity', 'key' => 'rekisteroity', 'type' => 'date');
-				if($this->ion_auth->is_admin()){
-					$vars['headers'][5] = array('title' => 'Editoi', 'key' => 'tnro', 'key_link' => site_url('kasvatus/kasvattajanimet/muokkaa/'), 'image' => site_url('assets/images/icons/edit.png'));
-					$vars['headers'][6] = array('title' => 'Poista', 'key' => 'tnro', 'key_link' => site_url('kasvatus/kasvattajanimet/poista/'), 'image' => site_url('assets/images/icons/edit.png'));
-				
-				}
-				
-				$vars['headers'] = json_encode($vars['headers']);
-				
-				$vars['data'] = json_encode($this->kasvattajanimi_model->search_names($this->input->post('kasvattajanimi'), $this->input->post('kasvatusrotu')));
+			if($this->_validate_name_search_form() == true){
+				if (!(empty($this->input->post('kasvattajanimi')) && $this->input->post('kasvatusrotu') == "-1"))
+					{
+						$vars['headers'][1] = array('title' => 'Id', 'key' => 'id', 'key_link' => site_url('kasvatus/kasvattajanimet/nimi/'));
+						$vars['headers'][2] = array('title' => 'Kasvattajanimi', 'key' => 'kasvattajanimi');
+						$vars['headers'][3] = array('title' => 'Rodut', 'key' => 'lyhenne', 'aggregated_by' => 'id');
+						$vars['headers'][4] = array('title' => 'Rekisteröity', 'key' => 'rekisteroity', 'type' => 'date');
+						if($this->ion_auth->is_admin()){
+							$vars['headers'][5] = array('title' => 'Editoi', 'key' => 'id', 'key_link' => site_url('kasvatus/kasvattajanimet/muokkaa/'), 'image' => site_url('assets/images/icons/edit.png'));
+							$vars['headers'][6] = array('title' => 'Poista', 'key' => 'id', 'key_link' => site_url('kasvatus/kasvattajanimet/poista/'), 'image' => site_url('assets/images/icons/delete.png'));
+						
+						}
+						
+						
+						$vars['headers'] = json_encode($vars['headers']);
+						
+						$vars['data'] = json_encode($this->kasvattajanimi_model->search_names($this->input->post('kasvattajanimi'), $this->input->post('kasvatusrotu')));
+						
+						$data['tulokset'] = $this->load->view('misc/taulukko', $vars, TRUE);
+
+					}
+					else {
+						$this->fuel->pages->render('misc/naytaviesti', array('msg_type' => 'danger', 'msg' => 'Haut ilman hakuehtoja eivät ole sallittuja'));
+					
+					}
 			}
 		}
 		
-		$this->fuel->pages->render('misc/haku', $vars);
+		$this->fuel->pages->render('misc/haku', $data);
+
 		
+	}
+	
+	private function _kasvattajanimet_by_activity($type = "DESC"){
 		
+			if ($type == "ASC"){
+				$vars['title'] = "Kasvattajanimet joilla on vähiten kasvatteja";
+			}
+			else {
+				$type = "DESC";
+				$vars['title'] = 'Aktiivisimmat kasvattajanimet';						
+			}
+			$vars['headers'][1] = array('title' => 'Kasvatteja', 'key' => 'amount');
+			$vars['headers'][2] = array('title' => 'Id', 'key' => 'id', 'key_link' => site_url('kasvatus/kasvattajanimet/nimi/'));
+			$vars['headers'][3] = array('title' => 'Kasvattajanimi', 'key' => 'kasvattajanimi');
+			$vars['headers'][4] = array('title' => 'Rekisteröity', 'key' => 'rekisteroity', 'type' => 'date');
+			if($this->ion_auth->is_admin()){
+				$vars['headers'][5] = array('title' => 'Editoi', 'key' => 'id', 'key_link' => site_url('kasvatus/kasvattajanimet/muokkaa/'), 'image' => site_url('assets/images/icons/edit.png'));
+				$vars['headers'][6] = array('title' => 'Poista', 'key' => 'id', 'key_link' => site_url('kasvatus/kasvattajanimet/poista/'), 'image' => site_url('assets/images/icons/delete.png'));
+				
+			}
+				
+
+			$vars['headers'] = json_encode($vars['headers']);
+				
+			$vars['data'] = json_encode($this->kasvattajanimi_model->get_names_by_foal_count($type));
+			
+	
+			$this->fuel->pages->render('misc/taulukko', $vars);
 	}
 	
     private function _omat_kasvattajanimet()
@@ -85,26 +231,26 @@ class Kasvatus extends CI_Controller
 					
 			$vars['text_view'] = $this->load->view('kasvattajanimet/teksti_omat', NULL, TRUE);
 						
-		
-			$vars['headers'][1] = array('title' => 'Id', 'key' => 'id', 'key_link' => site_url('kasvatus/kasvattajanimet/nimi'));
-			$vars['headers'][2] = array('title' => 'Kasvattajanimi', 'key' => 'kasvattajanimi');
+			$vars['headers'][1] = array('title' => 'Kasvattajanimi', 'key' => 'kasvattajanimi');
+
+			$vars['headers'][2] = array('title' => 'Id', 'key' => 'id', 'key_link' => site_url('kasvatus/kasvattajanimet/nimi/'));
 			$vars['headers'][3] = array('title' => 'Rodut', 'key' => 'lyhenne', 'aggregated_by' => 'id');
 			$vars['headers'][4] = array('title' => 'Rekisteröity', 'key' => 'rekisteroity', 'type' => 'date');
-			$vars['headers'][5] = array('title' => 'Editoi', 'key' => 'tnro', 'key_link' => site_url('kasvatus/kasvattajanimet/muokkaa/'), 'image' => site_url('assets/images/icons/edit.png'));
-			$vars['headers'][6] = array('title' => 'Poista', 'key' => 'tnro', 'key_link' => site_url('kasvatus/kasvattajanimet/poista/'), 'image' => site_url('assets/images/icons/delete.png'));
+			$vars['headers'][5] = array('title' => 'Editoi', 'key' => 'id', 'key_link' => site_url('kasvatus/kasvattajanimet/muokkaa/'), 'image' => site_url('assets/images/icons/edit.png'));
+			$vars['headers'][6] = array('title' => 'Poista', 'key' => 'id', 'key_link' => site_url('kasvatus/kasvattajanimet/poista/'), 'image' => site_url('assets/images/icons/delete.png'));
 
 			$vars['headers'] = json_encode($vars['headers']);
 				
 			$vars['data'] = json_encode($this->kasvattajanimi_model->get_users_names($this->ion_auth->user()->row()->tunnus));
 			
 	
-			$this->fuel->pages->render('misc/haku', $vars);
+			$this->fuel->pages->render('misc/taulukko', $vars);
 			
 
 		}
     }
     
-	//register a new stable
+	//register a new name
     private function _kasvattajanimirekisterointi()
     {
 		if(!($this->ion_auth->logged_in()))
@@ -140,24 +286,14 @@ class Kasvatus extends CI_Controller
 					
 					$date = new DateTime();
 					$date->setTimestamp(time());
-					
-					$tnro_alpha = $this->input->post('lyhehd');
-					
-					
-					
-					$insert_data['nimi'] = $this->input->post('nimi');
-					$insert_data['url'] =  $this->input->post('osoite');
-					$insert_data['kuvaus'] = $this->input->post('kuvaus');
-					$insert_data['perustettu'] = $date->format('Y-m-d H:i:s');
-					$insert_data['tnro'] = strtoupper($tnro_alpha) . rand(1000, 9999);
-					
-					while($this->tallit_model->is_tnro_in_use($insert_data['tnro']))
-					{
-						$insert_data['tnro'] = strtoupper($tnro_alpha) . rand(1000, 9999);
+					$insert_data['rekisteroity'] = $date->format('Y-m-d H:i:s');
+					if ($this->input->post('talli') != -1){
+						$insert_data['tnro'] = $this->input->post('talli');
 					}
+					$insert_data['kasvattajanimi'] = $this->input->post('kasvattajanimi');
 					
-					//add stables, categories and owner
-					$this->tallit_model->add_stable($insert_data, $this->input->post('kategoria'), $this->ion_auth->user()->row()->tunnus);
+					//add name
+					$this->kasvattajanimi_model->add_name($insert_data, $this->input->post('rotu'), $this->ion_auth->user()->row()->tunnus);
 
 				}
 				
@@ -167,88 +303,152 @@ class Kasvatus extends CI_Controller
 				redirect('/', 'refresh');
 		}
     }
-    
-	/*
-    function muokkaa($tnro)
-    {
-		$mode = 'edit';
+	
+	private function _kasvattajanimi_poista($id){
 		$msg = "";
+		
+		//are there horses under this name?
+        $this->load->model('hevonen_model');
+		$foal_amount = $this->hevonen_model->count_breedingname_amount($id);
+		if ($foal_amount > 0){
+			$msg = "Kasvattajanimellä on " . $foal_amount . " kasvattia, joten sitä ei voi poistaa. Poista ensin kasvateilta kasvattajanimi!";
+			$this->fuel->pages->render('misc/naytaviesti', array('msg_type' => 'danger', 'msg' => $msg));
 
-		if(!$this->_is_editing_allowed($tnro, $msg)){
+		}
+
+		else if(!$this->_is_editing_allowed($id, $msg)){
             $this->fuel->pages->render('misc/naytaviesti', array('msg_type' => 'danger', 'msg' => $msg));
 			return;
 		}
-			
-	
-		if($this->ion_auth->is_admin())
-			$mode = 'admin';
 		
-			
-		$vars['title'] = 'Muokkaa tallin tietoja';
-		
-		$this->load->library('form_validation');
-		
-			
-		if($this->tallit_model->is_stable_active($tnro))
-			$vars['append'] = "<p><a href='" . site_url('tallit/lopeta') . "/" . $tnro . "'>Lopeta talli</a></p>";
-			
-		if($this->input->server('REQUEST_METHOD') == 'GET')
-			{
-				$vars['form'] = $this->_get_stable_form($mode, $tnro); //pyydetään lomake muokkausmoodissa
-				
-				if($vars['form'] == ""){
-					$this->fuel->pages->render('misc/naytaviesti', array('msg_type' => 'danger', 'msg' => 'Virhe lomakkeen tulostamisessa. Ota yhteys ylläpitoon!'));	
-				}
-				else {
-					$this->fuel->pages->render('misc/lomakemuokkaus', $vars);
-				}
-			}
-		else if($this->input->server('REQUEST_METHOD') == 'POST')
-			{
-				
-				if($this->_validate_stable_form($mode) == FALSE || count($this->input->post('kategoria')) == 0)
-				{
-					$vars['msg'] = "Muokkaus epäonnistui!";
-					$vars['msg_type'] = "danger";
-					$this->fuel->pages->render('misc/lomakemuokkaus', $vars);	
+		else {
+			$this->kasvattajanimi_model->delete_name($id);
+				$msg = "Kasvattajanimi poistettu";
+				$this->fuel->pages->render('misc/naytaviesti', array('msg_type' => 'success', 'msg' => $msg));
 
-				}
-				else
-				{
-					$vars['msg'] = "Muokkaus onnistui!";
-					$vars['msg_type'] = "success";
-					
-					$this->tallit_model->edit_stable($this->input->post('nimi'), $this->input->post('kuvaus'), $this->input->post('osoite'), $tnro);
-					$this->tallit_model->mass_edit_categories($tnro, $this->input->post('kategoria'));
-					
-					$vars['form'] = $this->_get_stable_form($mode, $tnro);
-						
-					$this->fuel->pages->render('misc/lomakemuokkaus', $vars);
-				}
+		}
+		
+		
+	}
 	
+
+	
+
+    
+	
+    function _kasvattajanimet_muokkaa($nimi, $sivu, $tapa, $id)
+    {
+
+		$mode = 'none';
+		$msg = "";
+
+		if(!$this->_is_editing_allowed($nimi, $msg)){
+            $this->fuel->pages->render('misc/naytaviesti', array('msg_type' => 'danger', 'msg' => $msg));
+			return;
+		}
+		else {
+			$mode = 'edit';
+			if($this->ion_auth->is_admin())
+				$mode = 'admin';
+				
+			$fields['mode'] = $mode;
+			$this->load->library('Vrl_helper');
+
+			$fields['sivu'] = $sivu;			
+			$fields['nimi'] = $this->kasvattajanimi_model->get_name($nimi);
+			$fields['nimi']['rekisteroity'] = $this->vrl_helper->sanitize_registration_date($fields['nimi']['rekisteroity']);
+			$fields['owners'] = $this->kasvattajanimi_model->get_names_owners($nimi);
+
+						
+	
+			
+		
+			$vars['form'] = "Valitse välilehti, jota haluat muokata.";
+
+			if($sivu == 'omistajat'){
+				$this->load->library('ownership');
+				if($fields['mode'] == 'admin' || $this->ownership->is_names_main_owner($this->ion_auth->user()->row()->tunnus, $nimi)){				
+					$this->ownership->handle_name_ownerships($fields['mode'], $tapa, $this->ion_auth->user()->row()->tunnus, $id, $nimi, $fields);
+							
+					$fields['form'] = $this->ownership->get_owner_adding_form('kasvatus/kasvattajanimet/muokkaa/'.$nimi.'/');
+					$fields['ownership'] = $this->ownership->name_ownerships($nimi, true, 'kasvatus/kasvattajanimet/muokkaa/'.$nimi.'/');
+				} else {
+					$fields['ownership'] = $this->ownership->name_ownerships($nimi, false, 'kasvatus/kasvattajanimet/muokkaa/'.$nimi.'/');
+				}
 			}
-			else
-				$this->fuel->pages->render('misc/naytaviesti');
+			else if($sivu == 'rodut'){
+				
+				if($this->input->server('REQUEST_METHOD') == 'POST')
+				{
+					if($this->input->post("rodut")){
+						$msg = "";
+						$type = "danger";
+						$ok = $this->kasvattajanimi_model->update_breeds($nimi, $fields['nimi']['kasvattajanimi'], $msg);
+						if ($ok){ $type = "success";}
+						$fields['info'] = $this->load->view('misc/naytaviesti', array('msg_type' => $type, 'msg' => $msg), true);
+	
+					}		
+				}
+			
+				$fields['breeds'] = $this->_nimen_rodut($nimi);
+				$hidden = array("nimi" => $nimi);
+				$fields['form'] = form_open('kasvatus/kasvattajanimet/muokkaa/' . $nimi . '/rodut/', $hidden) . form_submit('rodut', 'Päivitä rodut');
+			}		
+			
+			$this->fuel->pages->render('kasvattajanimet/kasvattajanimi_muokkaa', $fields);
+		}
 					
     }
 
+	
+	private function _lisaa_varsat($nro){
+		
+		$this->load->model('hevonen_model');
+		$vars['title'] = "";	
+		$vars['msg'] = '';
+		$vars['text_view'] = "";
+		$vars['massatuho'] = array();
+		
+		$vars['massatuho']['form'] = '';
+		$vars['massatuho']['instructions'] = "Voit lisätä";
+		$vars['massatuho']['buttons'] = '<input type="submit" value="Submit">';
+	
+	
+		
+		$vars['headers'][1] = array('title' => 'Rekisterinumero', 'key' => 'reknro', 'key_link' => site_url('virtuaalihevoset/hevonen/'), 'type'=>'VH');
+		$vars['headers'][2] = array('title' => 'Nimi', 'key' => 'nimi');
+		$vars['headers'][3] = array('title' => 'Rotu', 'key' => 'rotu');
+		$vars['headers'][4] = array('title' => 'Sukupuoli', 'key' => 'sukupuoli');
+		$vars['headers'][5] = array('checkbox_id' => "nakki[]", 'title' => 'Valitse', 'key' => 'rotunro');
+
+			
+		$vars['headers'] = json_encode($vars['headers']);
+						
+		$vars['data'] = json_encode($this->hevonen_model->get_names_foals_by_id($nro));
+		
+		
+		return $this->load->view('misc/taulukko', $vars, TRUE);
+
+		
+		
+	}
        
 	
 	
-	private $allowed_user_groups = array('admin', 'tallirekisteri');
+	private $allowed_user_groups = array('admin', 'kasvattajanimirekisteri');
 
     
-	private function _is_editing_allowed($tnro, &$msg){
+	private function _is_editing_allowed($id, &$msg){
 
 		//stable nro is missing
-		if(empty($tnro)){
-			$msg = "Tallitunnus puuttuu!";
+		if(empty($id)){
+			$msg = "Kasvattajanimi-id puuttuu!";
 			return false;
 		}
 				
 		//only logged in can edit
 		if(!($this->ion_auth->logged_in())){
-            $msg = "Kirjaudu sisään muokataksesi tallia!";
+            $msg = "Kirjaudu sisään muokataksesi!";
 			return false;
 		}
 		
@@ -256,14 +456,14 @@ class Kasvatus extends CI_Controller
 		$this->load->library('user_rights', array('groups' => $this->allowed_user_groups));
 		
 		//only admin, editor and owner can edit
-		if(!($this->ion_auth->is_admin()) && !$this->user_rights->is_allowed() && !($this->tallit_model->is_stable_owner($this->ion_auth->user()->row()->tunnus, $tnro))){
-			$msg = "Jos et ole ylläpitäjä, voit muokata vain omaa talliasi";
+		if(!($this->ion_auth->is_admin()) && !$this->user_rights->is_allowed() && !($this->kasvattajanimi_model->is_name_owner($this->ion_auth->user()->row()->tunnus, $id))){
+			$msg = "Jos et ole ylläpitäjä, voit muokata vain omaa kasvattajanimeäsi.";
 			return false;
 		}
 		
 		//does the stable exist?
-		if(!$this->tallit_model->is_tnro_in_use($tnro)){
-			$msg = "Tallia ei ole olemassa.";
+		if(!$this->kasvattajanimi_model->is_name_id_in_use($id)){
+			$msg = "Nimeä ei ole olemassa.";
 			return false;
 		}
 		
@@ -272,7 +472,10 @@ class Kasvatus extends CI_Controller
 	}
 	
 	
-	*/
+
+	
+	
+	
 	private function _get_name_form($mode, $id=-1)
     {
         if($mode != 'application' && $mode != 'edit' && $mode != 'admin')
@@ -334,9 +537,9 @@ class Kasvatus extends CI_Controller
 		
 		//submit buttons
 		$submit = array();
-		$submit['application'] = array("text"=>"Rekisteröi kasvattajanimi", "url"=> site_url('kasvattajanimet/rekisteroi'));
-		$submit['edit'] = array("text"=>"Muokkaa", "url"=> site_url('kasvattajanimet/muokkaa') . '/' . $id);
-		$submit['admin'] = array("text"=>"Muokkaa", "url"=> site_url('kasvattajanimet/muokkaa') . '/' . $id);
+		$submit['application'] = array("text"=>"Rekisteröi kasvattajanimi", "url"=> site_url('kasvatus/kasvattajanimet/rekisteroi'));
+		$submit['edit'] = array("text"=>"Muokkaa", "url"=> site_url('kasvatus/kasvattajanimet/muokkaa') . '/' . $id);
+		$submit['admin'] = array("text"=>"Muokkaa", "url"=> site_url('kasvatus/kasvattajanimet/muokkaa') . '/' . $id);
 		
 
 		//start the form
@@ -380,7 +583,7 @@ class Kasvatus extends CI_Controller
     
     private function _validate_name_search_form(){
         $this->load->library('form_validation');        
-        $this->form_validation->set_rules('kasvattajanimi', 'Nimi', "min_length[4]|regex_match[/^[A-Za-z0-9_\-.:,; *~#&'@()]*$/]");
+        $this->form_validation->set_rules('kasvattajanimi', 'Nimi', "min_length[3]|regex_match[/^[A-Za-z0-9_\-.:,; *~#&'@()]*$/]");
 		$this->form_validation->set_rules('kasvatusrotu', 'Kategoria', 'min_length[1]|max_length[4]');
         return $this->form_validation->run();
 

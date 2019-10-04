@@ -63,6 +63,30 @@ class Vrl_helper {
     }
   }
   
+  
+  public function sanitize_registration_date($date) {
+    
+    
+    if ($date == null || strlen($date) < 1){
+      return "Ei tiedossa";
+    }
+    
+    else {
+          $datetocompare = date("Y.m.d", strtotime('2010-12-30'));
+          $datetocheck = date("Y.m.d", strtotime($date));
+                              
+          if($datetocheck < $datetocompare){
+             return "Vuonna 2010 tai aiemmin.";  
+          }
+          
+          else {
+            return date("d.m.Y", strtotime($date));
+          }
+
+    }
+    
+    }
+  
   public function get_vrl($nro) {
     if ($this->check_vrl_syntax($nro)){
       

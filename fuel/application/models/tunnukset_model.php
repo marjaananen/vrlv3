@@ -222,6 +222,20 @@ class Tunnukset_model extends Base_module_model
         return array();
     }
     
+    public function onko_tunnus($tunnus){
+        $this->db->where('tunnus', $tunnus);
+        $this->db->from('vrlv3_tunnukset');
+        $amount = $this->db->count_all_results();
+        
+        if ($amount != 1){
+            return false;
+        }
+        
+        else {
+            return true;
+        }
+    }
+    
 
     function get_users_id($pinnumber)
     {
@@ -238,7 +252,7 @@ class Tunnukset_model extends Base_module_model
         return -1;
     }
     
-    function search_users($pinnumber, $nick, $location)
+    function search_users($pinnumber, $nick)
     {
         $this->db->select('tunnus, nimimerkki');
         $this->db->from('vrlv3_tunnukset');
@@ -324,11 +338,12 @@ class Tunnukset_model extends Base_module_model
         return array();
     }
     
-    function add_successful_login($pinnumber)
+    function add_login($pinnumber, $ok = 1)
     {
         $data = array('tunnus' => $pinnumber);
         $data['aika'] = date("Y-m-d H:i:s");
         $data['ip'] = $this->input->ip_address();
+        $data['onnistuiko'] = $ok;
         
         $this->db->insert('vrlv3_tunnukset_kirjautumiset', $data);
         

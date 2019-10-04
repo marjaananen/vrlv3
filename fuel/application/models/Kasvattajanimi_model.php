@@ -29,6 +29,69 @@ class Kasvattajanimi_model extends Base_module_model
         return array();
     }
     
+        //names
+    function get_users_names_amount($pinnumber)
+    {
+        $this->db->select('*');
+        $this->db->from('vrlv3_kasvattajanimet');
+        $this->db->join('vrlv3_kasvattajanimet_omistajat', 'vrlv3_kasvattajanimet.id = vrlv3_kasvattajanimet_omistajat.kid');
+        $this->db->where('vrlv3_kasvattajanimet_omistajat.tunnus', $pinnumber);
+        $query = $this->db->get();
+        
+        return $query->num_rows();
+    }
+    
+    function get_names_owners($pinnumber)
+    {
+        $this->db->select('vrlv3_tunnukset.tunnus as omistaja, nimimerkki, taso, CONCAT(vrlv3_kasvattajanimet_omistajat.tunnus, "/", vrlv3_kasvattajanimet_omistajat.kid) as id');
+        $this->db->from('vrlv3_kasvattajanimet');
+        $this->db->join('vrlv3_kasvattajanimet_omistajat', 'vrlv3_kasvattajanimet.id = vrlv3_kasvattajanimet_omistajat.kid');
+        $this->db->join('vrlv3_tunnukset', 'vrlv3_tunnukset.tunnus = vrlv3_kasvattajanimet_omistajat.tunnus');
+        $this->db->where('vrlv3_kasvattajanimet.id', $pinnumber);
+        $query = $this->db->get();
+        
+        if ($query->num_rows() > 0)
+        {
+            return $query->result_array(); 
+        }
+        
+        return array();
+    }
+    
+    function get_names_breeds($pinnumber)
+    {
+        $this->db->select('rotunro, vrlv3_lista_rodut.rotu, lyhenne');
+        $this->db->from('vrlv3_kasvattajanimet');
+        $this->db->join('vrlv3_kasvattajanimet_rodut', 'vrlv3_kasvattajanimet.id = vrlv3_kasvattajanimet_rodut.kid', 'left');
+        $this->db->join('vrlv3_lista_rodut', 'vrlv3_lista_rodut.rotunro = vrlv3_kasvattajanimet_rodut.rotu');
+        $this->db->where('vrlv3_kasvattajanimet.id', $pinnumber);
+        $query = $this->db->get();
+        
+        if ($query->num_rows() > 0)
+        {
+            return $query->result_array(); 
+        }
+        
+        return array();
+    }
+    
+    function get_stables_names($pinnumber)
+    {
+        $this->db->select('vrlv3_kasvattajanimet.id, kasvattajanimi, rekisteroity, lyhenne');
+        $this->db->from('vrlv3_kasvattajanimet');
+        $this->db->join('vrlv3_kasvattajanimet_rodut', 'vrlv3_kasvattajanimet.id = vrlv3_kasvattajanimet_rodut.kid', 'left');
+        $this->db->join('vrlv3_lista_rodut', 'vrlv3_lista_rodut.rotunro = vrlv3_kasvattajanimet_rodut.rotu');
+        $this->db->where('vrlv3_kasvattajanimet.tnro', $pinnumber);
+        $query = $this->db->get();
+        
+        if ($query->num_rows() > 0)
+        {
+            return $query->result_array(); 
+        }
+        
+        return array();
+    }
+    
     
     function get_name($nro)
     {
@@ -43,7 +106,35 @@ class Kasvattajanimi_model extends Base_module_model
         
         return array();
     }
+    
+    function get_names_by_foal_count($type = "DESC"){
+        $this->db->select('vrlv3_kasvattajanimet.id, vrlv3_kasvattajanimet.kasvattajanimi, vrlv3_kasvattajanimet.rekisteroity, count(reknro) as amount');
+        $this->db->from('vrlv3_kasvattajanimet');
+        $this->db->join('vrlv3_hevosrekisteri', 'vrlv3_kasvattajanimet.id = vrlv3_hevosrekisteri.kasvattajanimi_id', 'left');
+        $this->db->group_by('vrlv3_kasvattajanimet.id');
+        $this->db->limit(500);
+
         
+        if ($type == "ASC"){
+             $this->db->order_by('amount', "ASC");
+
+        }
+        
+        else   {      
+             $this->db->order_by('amount', "DESC");
+
+        }
+        $query = $this->db->get();
+
+        if ($query->num_rows() > 0)
+        {
+            return $query->result_array(); 
+        }
+        
+        return array();
+
+        
+    }
 
     
     function search_names($name, $breed)
@@ -75,202 +166,128 @@ class Kasvattajanimi_model extends Base_module_model
         return array();
     }
     
-  /*  
-    
-    function search_stables_updated()
-    {
-        $this->db->select('MAX(vrlv3_tallirekisteri_paivitetty.aika) as aika, vrlv3_tallirekisteri_paivitetty.tnro, nimi, perustettu');
-        $this->db->from('vrlv3_tallirekisteri');
-        $this->db->join('vrlv3_tallirekisteri_paivitetty', 'vrlv3_tallirekisteri_paivitetty.tnro = vrlv3_tallirekisteri.tnro');
-        $this->db->group_by('tnro');
-        $this->db->order_by('aika', 'DESC');
+    function add_name($insert_data, $breed, $owner){
+            $this->db->insert('vrlv3_kasvattajanimet', $insert_data);
+            $id = $this->db->insert_id();            
+            $this->add_owner_to_name($id, $owner);
+            $this->add_breed_to_name($id, $breed);
+            $this->add_horses_to_name($id, $insert_data['kasvattajanimi']);
+        }
         
-        $this->db->limit(100);
-       
-   
+        
+        
+    function add_owner_to_name($id, $applicant)
+    {
+        $data = array('kid' => $id, 'tunnus' => $applicant);
+        
+        $this->db->insert('vrlv3_kasvattajanimet_omistajat', $data);
+    }
+    
+    function add_breed_to_name($id, $breed)
+    {
+        $data = array('kid' => $id, 'rotu' => $breed);
+        
+        $this->db->select("*");
+        $this->db->from('vrlv3_kasvattajanimet_rodut');
+        $this->db->where($data);     
+        $query = $this->db->get();
+        
+        if ($query->num_rows() == 0){     
+            $this->db->insert('vrlv3_kasvattajanimet_rodut', $data);
+        }
+    }
+    
+    function delete_breed_from_name($id, $breed)
+    {
+        $data = array('kid' => $id, 'rotu' => $breed);
+        
+        $this->db->delete('vrlv3_kasvattajanimet_rodut', $data);
+    }
+    
+    function add_horses_to_name($id, $name){
+        
+        $this->db->select("DISTINCT(rotu) as rotu");
+        $this->db->from('vrlv3_hevosrekisteri');
+        $this->db->where('kasvattajanimi_id', NULL);
+        $this->db->where('kasvattajanimi', $name);
+        
         $query = $this->db->get();
         
         if ($query->num_rows() > 0)
-        {                
-            
-            return $query->result_array(); 
-        }
-        
-        return array();
-    }
-    
-    
-    function search_stables_newest()
-    {
-        $this->db->select('tnro, nimi, perustettu');
-        $this->db->from('vrlv3_tallirekisteri');
-        $this->db->order_by('perustettu', 'DESC');
-        
-        $this->db->limit(100);
-       
-   
-        $query = $this->db->get();
-        
-        if ($query->num_rows() > 0)
-        {                
-            
-            return $query->result_array(); 
-        }
-        
-        return array();
-    }
-    
-
-
-    //Kategoriat
-    
-    public function mass_edit_categories($tnro, $new_cats = array()){
-                
-        $old_cats = $this->get_stables_categories($tnro);
-
-        $checked_cats = array();
-        
-        //are old categories still on new list? Delete if not.
-        foreach ($old_cats as $oc){
-            if (!array_search($oc['kategoria'], $new_cats)){
-                $this->delete_category($oc['id']);
+        {
+            foreach ($query->result_array() as $row){
+                $this->add_breed_to_name($id, $row['rotu']);
             }
-            $checked_cats[] = $oc['kategoria'];          
         }
         
-        //are there some new categories?
-        
-        foreach ($new_cats as $nc){
-            if (!array_search($nc, $checked_cats)){
-                $this->add_category_to_stable($tnro, $nc);
-            }
-            $checked_cats[] = $nc;          
-        }      
-     
+        $this->db->where('kasvattajanimi_id', NULL);
+        $this->db->where('kasvattajanimi', $name);
+        $this->db->update('vrlv3_hevosrekisteri', array("kasvattajanimi_id"=>$id));
         
     }
     
-    function add_category_to_stable($tnro, $category, $applicant=NULL)
-    {
-        $data = array('tnro' => $tnro, 'kategoria' => $category, 'anoi' => $this->ion_auth->user()->row()->tunnus, 'hyvaksyi' => $this->ion_auth->user()->row()->tunnus);
-
-        $data['lisatty'] = date("Y-m-d H:i:s");
-        $data['kasitelty'] = $data['lisatty'];
-        
-        $this->db->insert('vrlv3_tallirekisteri_kategoriat', $data);
-        
-        //päivityksestä jää jälki
-        $data = array('tnro' => $tnro, 'paivitti' => $this->ion_auth->user()->row()->tunnus, 'aika' => date("Y-m-d H:i:s"));
-        $this->db->insert('vrlv3_tallirekisteri_paivitetty', $data);
-    }
-    
-    function delete_category($id)
-    {
-        $this->db->select('tnro');
-        $this->db->from('vrlv3_tallirekisteri_kategoriat');
+    function delete_name($id){
         $this->db->where('id', $id);
-        $query = $this->db->get();
-        
-        //päivityksestä jää jälki
-        $data = array('tnro' => $query->row()->tnro, 'paivitti' => $this->ion_auth->user()->row()->tunnus, 'aika' => date("Y-m-d H:i:s"));
-        $this->db->insert('vrlv3_tallirekisteri_paivitetty', $data);
-        
-        $this->db->delete('vrlv3_tallirekisteri_kategoriat', array('id' => $id));
+        $this->db->delete('vrlv3_kasvattajanimet');
     }
     
-    function is_category_owner($id, $pinnumber)
-    {
-        $this->db->select('omistaja');
-        $this->db->from('vrlv3_tallirekisteri_omistajat');
-        $this->db->join('vrlv3_tallirekisteri_kategoriat', 'vrlv3_tallirekisteri_omistajat.tnro = vrlv3_tallirekisteri_kategoriat.tnro');
-        $this->db->where('vrlv3_tallirekisteri_kategoriat.id', $id);
-        $this->db->where('omistaja', $pinnumber);
-        $query = $this->db->get();
+    function update_breeds($id, $name, &$msg = ""){
+        $deleted = 0;
+        $added = 0;
+        $horses = 0;
+        
+        //add id's to horses with a name
+        $this->add_horses_to_name($id, $name);
+        
+        //add un-added breeds
+        $query = $this->db->query('SELECT distinct(rotu) FROM vrlv3_hevosrekisteri as hepparekka where kasvattajanimi_id = '.$id.' AND 
+            NOT EXISTS (SELECT distinct(rotu) from vrlv3_kasvattajanimet_rodut as rodut where kid = '.$id.' AND rodut.rotu = hepparekka.rotu)');        
+         
+         $added = $query->num_rows();
         
         if ($query->num_rows() > 0)
         {
-            return true;
-        }
-        
-        return false;
-    }
-    
-    function stable_has_category($tnro, $category)
-    {
-        $this->db->select('kategoria');
-        $this->db->from('vrlv3_tallirekisteri_kategoriat');
-        $this->db->where('tnro', $tnro);
-        $this->db->where('kategoria', $category);
-        $query = $this->db->get();
-        
-        if ($query->num_rows() > 0)
-        {
-            return true;
-        }
-        
-        return false;
-    }
-    
-    function get_stables_categories($tnro)
-    {
-        $this->db->select('katelyh, vrlv3_tallirekisteri_kategoriat.id, vrlv3_tallirekisteri_kategoriat.kategoria');
-        $this->db->from('vrlv3_tallirekisteri_kategoriat');
-        $this->db->join('vrlv3_lista_tallikategoriat', 'vrlv3_lista_tallikategoriat.kat = vrlv3_tallirekisteri_kategoriat.kategoria');
-        $this->db->where('tnro', $tnro);
-        $query = $this->db->get();
-        
-        if ($query->num_rows() > 0)
-        {
-            return $query->result_array();
-        }
-        
-        return array();
-    }
-    
-    function get_category($kat)
-    {
-        $data = 'Ei saatavilla';
-        
-        $this->db->select('katelyh');
-        $this->db->from('vrlv3_lista_tallikategoriat');
-        $this->db->where('kat', $kat);
-        $query = $this->db->get();
-        
-        if ($query->num_rows() > 0)
-        {
-            $data = $query->row_array(); 
-            $data = $data['katelyh'];
-        }
-        
-        return $data;
-    }
-
-    function get_category_option_list()
-    {
-        $data = array();
-        
-        $this->db->select('kat, kategoria');
-        $this->db->from('vrlv3_lista_tallikategoriat');
-	$this->db->order_by("kategoria", "asc"); 
-        $query = $this->db->get();
-        
-        if ($query->num_rows() > 0)
-        {
-            foreach ($query->result_array() as $row)
-            {
-               $data[$row['kat']] = $row['kategoria'];
+            foreach ($query->result_array() as $row){
+                $this->add_breed_to_name($id, $row['rotu']);
             }
         }
         
-        return $data;
+        //remove removed breeds
+        $this->db->select("rotu");
+        $this->db->from('vrlv3_hevosrekisteri');
+        $this->db->where('kasvattajanimi_id', $id);
+        
+        $query = $this->db->get();
+        
+        //remove only if there are any breeds left
+        $horses = $query->num_rows();
+        if ($query->num_rows() > 0)
+        {
+             $query = $this->db->query('SELECT distinct(rotu) from vrlv3_kasvattajanimet_rodut as rodut where kid = '.$id.' AND
+                              NOT EXISTS (SELECT distinct(rotu) FROM vrlv3_hevosrekisteri as hepparekka where kasvattajanimi_id = '.$id.' and rodut.rotu = hepparekka.rotu)');
+        
+           $deleted = $query->num_rows();
+           if ($query->num_rows() > 0)
+           {
+               foreach ($query->result_array() as $row){
+                   $this->delete_breed_from_name($id, $row['rotu']);
+               }
+           }
+        }
+        
+        if ($horses == 0){ $msg = "Kasvattajanimellä ei ollut yhtään kasvattia, joten rotuja ei käsitelty."; return false;}
+        else { $msg = $added . " rotu(a) lisätty, " .  $deleted . " rotu(a) poistettu."; return true;}
+        
+        
     }
     
-    //Sekalaisia
-    function is_tnro_in_use($tnro)
+
+    function is_name_owner($pinnumber, $tnro)
     {
-        $this->db->select('tnro');
-        $this->db->from('vrlv3_tallirekisteri');
-        $this->db->where('tnro', $tnro);
+        $this->db->select('tunnus');
+        $this->db->from('vrlv3_kasvattajanimet_omistajat');
+        $this->db->where('id', $tnro);
+        $this->db->where('tunnus', $pinnumber);
         $query = $this->db->get();
         
         if ($query->num_rows() > 0)
@@ -280,8 +297,22 @@ class Kasvattajanimi_model extends Base_module_model
         
         return false;
     }
-    */
-
     
+    
+    function is_name_id_in_use($tnro)
+    {
+        $this->db->select('id');
+        $this->db->from('vrlv3_kasvattajanimet');
+        $this->db->where('id', $tnro);
+        $query = $this->db->get();
+        
+        if ($query->num_rows() > 0)
+        {
+            return true;
+        }
+        
+        return false;
+    }
+ 
 }
 

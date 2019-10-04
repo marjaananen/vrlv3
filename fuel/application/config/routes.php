@@ -60,6 +60,7 @@ $route['yllapito/tunnukset/kasittele/(:any)/(:any)'] = "yllapito_tunnukset/kasit
 
 //stables
 $route['tallit/talli/(:any)'] = "tallit/talliprofiili/$1";
+$route['tallit/talli/(:any)/(:any)'] = "tallit/talliprofiili/$1/$2";
 $route['tallit/muokkaa/(:any)'] = "tallit/muokkaa/$1";
 $route['tallit/rekisterointi'] = "tallit/rekisterointi";
 

@@ -10,36 +10,18 @@
    <tr>
      <th>#</th>
      <th>Rekisteröity</th>
-     <th>Jonossa</th>
    </tr>
    <tr>
       <td>Tallit</td>
-      <td><?=$stable_stats['all']?> joista toiminnassa <?=$stable_stats['active']?></td>
-      <td><?=$stable_stats['queued']?></td>
-   </tr>
-   <tr>
-      <td>Seurat</td>
-      <td>0 joista toiminnassa 0 </td>
-      <td>0</td>
-   </tr>
-   <tr>
-      <td>Kasvattajanimet</td>
-      <td>0</td>
-      <td>0</td>
-   </tr>
-   <tr>
-      <td>Seurat</td>
-      <td>0 joista toiminnassa 0</td>
-      <td>0</td>
+      <td><?php echo $stats['tallit'];?> kpl</td>
+
    </tr>
    <tr>
       <td>Hevoset</td>
-      <td>0 joista elossa 0</td>
-      <td>0</td>
+      <td><?php echo $stats['hevoset'];?> kpl </td>
    </tr>
    <tr>
-      <td>Kilpailut</td>
-      <td>0 joista tuloksettomia 0</td>
-      <td>0 kutsu(a) ja 0 tulos(ta)</td>
+      <td>Kasvattajanimet</td>
+      <td><?php echo $stats['kasvattajanimet'];?> kpl</td>
    </tr>
 </table>

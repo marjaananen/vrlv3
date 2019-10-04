@@ -33,7 +33,7 @@ class Tallit extends CI_Controller
 		$stables = $this->tallit_model->search_stables_newest();		
 		$vars['data'] = json_encode($stables);
 
-		$this->fuel->pages->render('misc/haku', $vars);
+		$this->fuel->pages->render('misc/taulukko', $vars);
 	}
 	
 
@@ -56,13 +56,13 @@ class Tallit extends CI_Controller
 		$stables = $this->tallit_model->search_stables_updated();		
 		$vars['data'] = json_encode($stables);
 
-		$this->fuel->pages->render('misc/haku', $vars);
+		$this->fuel->pages->render('misc/taulukko', $vars);
     
 	}
 	
 	
 	
-	public function talliprofiili($tnro="")
+	public function talliprofiili($tnro="", $sivu ="")
     {
 		
 		if(empty($tnro))
@@ -72,13 +72,114 @@ class Tallit extends CI_Controller
 		if(!$this->tallit_model->is_tnro_in_use($tnro))
 			$this->fuel->pages->render('misc/naytaviesti', array('msg_type' => 'danger', 'msg' => 'Tallitunnusta ei ole olemassa'));
 
-			
-		$vars['stable'] = $this->tallit_model->get_stable($tnro);
-		$vars['categories'] = $this->tallit_model->get_stables_categories($tnro);
-		$vars['owners'] = $this->tallit_model->get_stables_owners($tnro);		
+			$this->load->library('Vrl_helper');
+
+		$fields['sivu'] = $sivu;			
+		$fields['stable'] = $this->tallit_model->get_stable($tnro);
+		$fields['stable']['perustettu'] = $this->vrl_helper->sanitize_registration_date($fields['stable']['perustettu']);
+		$fields['categories'] = $this->tallit_model->get_stables_categories($tnro);
+		$fields['owners'] = $this->tallit_model->get_stables_owners($tnro);
 		
-		$this->fuel->pages->render('tallit/profiili', $vars);
+		if($this->ion_auth->logged_in()){		
+
+			if($sivu == 'hevoset'){				
+					$fields['horses'] = $this->_tallin_hevoset($tnro);
+				}
+			else if($sivu == 'kasvatit'){				
+					$fields['foals'] = $this->_tallin_kasvatit($tnro);
+				}
+				else if($sivu == 'kasvattajanimet'){				
+					$fields['names'] = $this->_tallin_kasvattajanimet($tnro);
+				}	
+			}
+			else {
+				$fields['horses'] = "Kirjaudu sisään nähdäksesi tiedot.";
+				$fields['foals'] = "Kirjaudu sisään nähdäksesi tiedot.";
+				$fields['names'] = "Kirjaudu sisään nähdäksesi tiedot.";
+				$fields['stables'] = "Kirjaudu sisään nähdäksesi tiedot.";
+				
+			}
+		
+		$this->fuel->pages->render('tallit/profiili', $fields);
     }
+	
+	
+	
+	
+	private function _tallin_hevoset($nro)
+    {
+		$this->load->model('hevonen_model');
+		$vars['title'] = "";
+		
+		$vars['msg'] = '';
+		
+		$vars['text_view'] = "";		
+	
+		
+			$vars['headers'][1] = array('title' => 'Rekisterinumero', 'key' => 'reknro', 'key_link' => site_url('virtuaalihevoset/hevonen/'), 'type'=>'VH');
+			$vars['headers'][2] = array('title' => 'Nimi', 'key' => 'nimi');
+			$vars['headers'][3] = array('title' => 'Rotu', 'key' => 'rotu');
+			$vars['headers'][4] = array('title' => 'Sukupuoli', 'key' => 'sukupuoli');
+			
+			$vars['headers'] = json_encode($vars['headers']);
+						
+			$vars['data'] = json_encode($this->hevonen_model->get_stables_horses($nro));
+		
+		
+		return $this->load->view('misc/taulukko', $vars, TRUE);
+    }
+	
+	
+	private function _tallin_kasvatit($nro)
+    {
+				$this->load->model('hevonen_model');
+
+		$vars['title'] = "";
+		
+		$vars['msg'] = '';
+		
+		$vars['text_view'] = "";		
+	
+	
+		
+			$vars['headers'][1] = array('title' => 'Rekisterinumero', 'key' => 'reknro', 'key_link' => site_url('virtuaalihevoset/hevonen/'), 'type'=>'VH');
+			$vars['headers'][2] = array('title' => 'Nimi', 'key' => 'nimi');
+			$vars['headers'][3] = array('title' => 'Rotu', 'key' => 'rotu');
+			$vars['headers'][4] = array('title' => 'Sukupuoli', 'key' => 'sukupuoli');
+			
+			$vars['headers'] = json_encode($vars['headers']);
+						
+			$vars['data'] = json_encode($this->hevonen_model->get_stables_foals($nro));
+		
+		
+		return $this->load->view('misc/taulukko', $vars, TRUE);
+    }
+	
+	private function _tallin_kasvattajanimet($nro){
+		$this->load->model('kasvattajanimi_model');
+
+		$vars['title'] = "";
+		
+		$vars['msg'] = '';
+		
+		$vars['text_view'] = "";		
+						
+			$vars['headers'][1] = array('title' => 'Kasvattajanimi', 'key' => 'kasvattajanimi');
+
+			$vars['headers'][2] = array('title' => 'Id', 'key' => 'id', 'key_link' => site_url('kasvatus/kasvattajanimet/nimi/'));
+			$vars['headers'][3] = array('title' => 'Rodut', 'key' => 'lyhenne', 'aggregated_by' => 'id');
+			$vars['headers'][4] = array('title' => 'Rekisteröity', 'key' => 'rekisteroity', 'type' => 'date');
+			//$vars['headers'][5] = array('title' => 'Editoi', 'key' => 'id', 'key_link' => site_url('kasvatus/kasvattajanimet/muokkaa/'), 'image' => site_url('assets/images/icons/edit.png'));
+			//$vars['headers'][6] = array('title' => 'Poista', 'key' => 'id', 'key_link' => site_url('kasvatus/kasvattajanimet/poista/'), 'image' => site_url('assets/images/icons/delete.png'));
+
+			$vars['headers'] = json_encode($vars['headers']);
+				
+			$vars['data'] = json_encode($this->kasvattajanimi_model->get_stables_names($nro));
+			
+	
+		return $this->load->view('misc/taulukko', $vars, TRUE);
+	}	
+	
 	
 	
     
@@ -86,13 +187,13 @@ class Tallit extends CI_Controller
     {
 		$this->load->library('form_validation');
 		$this->load->library('form_collection');
-		$vars['title'] = 'Tallihaku';
+		$data['title'] = 'Tallihaku';
 		
-		$vars['msg'] = 'Hae talleja tallirekisteristä. Voit käyttää tähteä * jokerimerkkinä.';
+		$data['msg'] = 'Hae talleja tallirekisteristä. Voit käyttää tähteä * jokerimerkkinä.';
 		
-		$vars['text_view'] = $this->load->view('tallit/teksti_etusivu', NULL, TRUE);
+		$data['text_view'] = $this->load->view('tallit/teksti_etusivu', NULL, TRUE);
 		
-		$vars['form'] = $this->_get_stable_search_form();
+		$data['form'] = $this->_get_stable_search_form();
 		
 		if($this->input->server('REQUEST_METHOD') == 'POST')
 		{
@@ -110,10 +211,13 @@ class Tallit extends CI_Controller
 				$vars['headers'] = json_encode($vars['headers']);
 				
 				$vars['data'] = json_encode($this->tallit_model->search_stables($this->input->post('nimi'), $this->input->post('kategoria'), $this->input->post('tallinumero')));
+				
+				$data['tulokset'] = $this->load->view('misc/taulukko', $vars, TRUE);
+
 			}
 		}
 		
-		$this->fuel->pages->render('misc/haku', $vars);
+		$this->fuel->pages->render('misc/haku', $data);
     }
 	
 	
@@ -126,9 +230,27 @@ class Tallit extends CI_Controller
         }
 		else {
 			
-			$vars['stables'] = $this->tallit_model->get_users_stables($this->ion_auth->user()->row()->tunnus);
+			$vars['title'] = 'Omat tallit';
+				
+			$vars['text_view'] = "";
 			
-			$this->fuel->pages->render('/tallit/omat', $vars);
+			$vars['headers'][1] = array('title' => 'Perustettu', 'key' => 'perustettu', 'type' => 'date');
+			$vars['headers'][2] = array('title' => 'Tallinumero', 'key' => 'tnro', 'key_link' => site_url('tallit/talli/'));
+			$vars['headers'][3] = array('title' => 'Nimi', 'key' => 'nimi');
+			$vars['headers'][4] = array('title' => 'Editoi', 'key' => 'tnro', 'key_link' => site_url('tallit/muokkaa/'), 'image' => site_url('assets/images/icons/edit.png'));
+			
+			$vars['headers'][5] = array('title' => 'Lopeta', 'key' => 'tnro', 'key_link' => site_url('tallit/lopeta/'), 'image' => site_url('assets/images/icons/delete.png'));
+			
+			$vars['headers'] = json_encode($vars['headers']);
+			
+			
+			$stables = $this->tallit_model->get_users_stables($this->ion_auth->user()->row()->tunnus, 1);	
+			
+			$stables = $this->tallit_model->get_users_stables($this->ion_auth->user()->row()->tunnus);	
+			$vars['data'] = json_encode($stables);
+	
+			$this->fuel->pages->render('misc/taulukko', $vars);
+				
 		}
     }
     
@@ -194,10 +316,13 @@ class Tallit extends CI_Controller
 		}
     }
     
-    function muokkaa($tnro)
+    function muokkaa($tnro, $sivu='tiedot', $tapa = null, $id = null)
     {
 		$mode = 'edit';
 		$msg = "";
+		
+		$data = array();
+		$data['sivu'] = $sivu;
 
 		if(!$this->_is_editing_allowed($tnro, $msg)){
             $this->fuel->pages->render('misc/naytaviesti', array('msg_type' => 'danger', 'msg' => $msg));
@@ -207,55 +332,81 @@ class Tallit extends CI_Controller
 	
 		if($this->ion_auth->is_admin())
 			$mode = 'admin';
-		
 			
-		$vars['title'] = 'Muokkaa tallin tietoja';
+		$data['stable'] = $this->tallit_model->get_stable($tnro);
 		
-		$this->load->library('form_validation');
 		
-			
-		if($this->tallit_model->is_stable_active($tnro))
-			$vars['append'] = "<p><a href='" . site_url('tallit/lopeta') . "/" . $tnro . "'>Lopeta talli</a></p>";
-			
-		if($this->input->server('REQUEST_METHOD') == 'GET')
-			{
-				$vars['form'] = $this->_get_stable_form($mode, $tnro); //pyydetään lomake muokkausmoodissa
-				
-				if($vars['form'] == ""){
-					$this->fuel->pages->render('misc/naytaviesti', array('msg_type' => 'danger', 'msg' => 'Virhe lomakkeen tulostamisessa. Ota yhteys ylläpitoon!'));	
-				}
-				else {
-					$this->fuel->pages->render('misc/lomakemuokkaus', $vars);
-				}
-			}
-		else if($this->input->server('REQUEST_METHOD') == 'POST')
-			{
-				
-				if($this->_validate_stable_form($mode) == FALSE || count($this->input->post('kategoria')) == 0)
-				{
-					$vars['msg'] = "Muokkaus epäonnistui!";
-					$vars['msg_type'] = "danger";
-					$this->fuel->pages->render('misc/lomakemuokkaus', $vars);	
 
-				}
-				else
+		if($sivu == 'omistajat'){
+			$this->load->library('ownership');
+			if($mode == 'admin' || $this->ownership->is_stables_main_owner($this->ion_auth->user()->row()->tunnus, $tnro)){				
+				$this->ownership->handle_stable_ownerships($mode, $tapa, $this->ion_auth->user()->row()->tunnus, $id, $tnro, $data);				
+				$data['form'] = $this->ownership->get_owner_adding_form('tallit/muokkaa/'.$tnro.'/');
+				$data['ownership'] = $this->ownership->stable_ownerships($tnro, true, 'tallit/muokkaa/'.$tnro.'/');
+			} else {
+				$data['ownership'] = $this->ownership->stable_ownerships($tnro, false, 'tallit/muokkaa/'.$tnro.'/');
+			}
+		}
+
+		
+		else if ($sivu == 'lopeta'){
+			if($this->tallit_model->is_stable_active($tnro))
+				$data['editor'] = "<p><a href='" . site_url('tallit/lopeta') . "/" . $tnro . "'>Lopeta talli</a></p>";
+			else
+				$data['editor'] = "Talli on lopetettu.";
+		}
+		
+		else if($sivu == 'tiedot'){
+					
+			$this->load->library('form_validation');
+	
+			if($this->input->server('REQUEST_METHOD') == 'GET')
 				{
-					$vars['msg'] = "Muokkaus onnistui!";
-					$vars['msg_type'] = "success";
+					$vars['form'] = $this->_get_stable_form($mode, $tnro); //pyydetään lomake muokkausmoodissa
 					
-					$this->tallit_model->edit_stable($this->input->post('nimi'), $this->input->post('kuvaus'), $this->input->post('osoite'), $tnro);
-					$this->tallit_model->mass_edit_categories($tnro, $this->input->post('kategoria'));
-					
-					$vars['form'] = $this->_get_stable_form($mode, $tnro);
-						
-					$this->fuel->pages->render('misc/lomakemuokkaus', $vars);
+					if($vars['form'] == ""){
+						$data['editor'] = $this->load->view('misc/naytaviesti', array('msg_type' => 'danger', 'msg' => "Virhe lomakkeen tulostamisessa. Ota yhteys ylläpitoon!"), true);
+					}
+					else {
+						$data['editor'] = $this->load->view('misc/lomakemuokkaus', $vars, true);
+					}
 				}
+			else if($this->input->server('REQUEST_METHOD') == 'POST')
+				{
+					
+					if($this->_validate_stable_form($mode) == FALSE || count($this->input->post('kategoria')) == 0)
+					{
+						$vars['msg'] = "Muokkaus epäonnistui!";
+						$vars['msg_type'] = "danger";
+						$data['editor'] = $this->load->view('misc/lomakemuokkaus', $vars, true);	
+	
+					}
+					else
+					{
+						$vars['msg'] = "Muokkaus onnistui!";
+						$vars['msg_type'] = "success";
+						
+						$this->tallit_model->edit_stable($this->input->post('nimi'), $this->input->post('kuvaus'), $this->input->post('osoite'), $tnro);
+						$this->tallit_model->mass_edit_categories($tnro, $this->input->post('kategoria'));
+						
+						$vars['form'] = $this->_get_stable_form($mode, $tnro);
+							
+						$data['editor'] = $this->load->view('misc/lomakemuokkaus', $vars, true);	
+					}
+				}
+					
+
 	
 			}
-			else
-				$this->fuel->pages->render('misc/naytaviesti');
+			
+			
+			
+			$this->fuel->pages->render('tallit/talli_muokkaa', $data);
+				
+				
 					
     }
+	
     
     function lopeta($tnro)
     {

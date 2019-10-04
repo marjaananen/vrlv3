@@ -50,9 +50,10 @@ $nav['virtuaalihevoset/rodut'] = array('label' => 'Rotulista', 'parent_id' => 'v
 $nav['virtuaalihevoset/varit'] = array('label' => 'Värilista', 'parent_id' => 'virtuaalihevoset', 'active' => 'virtuaalihevoset/varilista'); //Koodattavaa: Värit
 $nav['virtuaalihevoset/syntymamaat'] = array('label' => 'Syntymämaalista', 'parent_id' => 'virtuaalihevoset', 'active' => 'virtuaalihevoset/syntymamaat'); //Koodattavaa: Syntymämaat
 //jalostus ja kasvatus alamenu
-$nav['kasvatus/kasvattajanimihaku'] = array('label' => 'Kasvattajanimirekisteri', 'parent_id' => 'kasvatus', 'active' => 'kasvatus/kasvattajanimihaku'); //Koodattavaa: Syntymämaat
-$nav['kasvatus/jalostusmainokset'] = array('label' => 'Jalostusmainokset', 'parent_id' => 'kasvatus', 'active' => 'kasvatus/jalostusmainokset');
-$nav['kasvatus/rotuyhdistykset'] = array('label' => 'Rotuyhdistykset', 'parent_id' => 'kasvatus', 'active' => 'kasvatus/rotuyhdistykset');
+$nav['kasvatus/kasvattajanimet'] = array('label' => 'Kasvattajanimirekisteri', 'parent_id' => 'kasvatus', 'active' => 'kasvatus/kasvattajanimet'); 
+$nav['kasvatus/kasvattajanimet/rekisteroi'] = array('label' => 'Rekisteröi kasvattajanimi', 'parent_id' => 'kasvatus', 'active' => 'kasvatus/kasvattajanimet/omat');
+$nav['kasvatus/kasvattajanimet/omat'] = array('label' => 'Omat kasvattajanimet', 'parent_id' => 'kasvatus', 'active' => 'kasvatus/kasvattajanimet/omat');
+$nav['kasvatus/kasvatit'] = array('label' => 'Omat kasvatit', 'parent_id' => 'kasvatus', 'active' => 'kasvatus/kasvatit');
 //kantakirjat, laatikset, rekkaa kasvinimi
 //kilpailutoiminta alamenu
 $nav['kilpailutoiminta/kilpailusaannot'] = array('label' => 'Kilpaileminen ja säännöt', 'parent_id' => 'kilpailutoiminta', 'active' => 'kilpailutoiminta/kilpailusaannot');
@@ -71,7 +72,6 @@ $nav['kilpailutoiminta/jarjestaminen'] = array('label' => 'Näyttelyiden järjes
 
 // ylläpito alamenu
 $nav['yllapito/tunnukset'] = array('label' => 'Tunnukset', 'parent_id' => 'yllapito', 'active' => 'yllapito/tunnukset');
-$nav['yllapito/tallirekisteri'] = array('label' => 'Tallirekisteri', 'parent_id' => 'yllapito', 'active' => 'yllapito/tallirekisteri');
 //$nav['yllapito/hevosrekisteri'] = array('label' => 'Hevosrekisteri', 'parent_id' => 'yllapito', 'active' => 'yllapito/hevosrekisteri');
     
 // ylläpito/tunnukset alamenu
@@ -79,14 +79,8 @@ $nav['yllapito/tunnukset/hyvaksy'] = array('label' => 'Hyväksy VRL-tunnuksia', 
 $nav['yllapito/tunnukset/muokkaa'] = array('label' => 'Muokkaa tunnuksen tietoja', 'parent_id' => 'yllapito/tunnukset', 'active' => 'yllapito/tunnukset/muokkaa');
 $nav['tunnukset'] = array('label' => 'Tee hakuja tunnuksista', 'parent_id' => 'yllapito/tunnukset', 'active' => 'yllapito/tunnukset/haku');
 
-$nav['yllapito/tallirekisteri/hyvaksy'] = array('label' => 'Hyväksy talleja', 'parent_id' => 'yllapito/tallirekisteri', 'active' => 'yllapito/tallirekisteri/hyvaksy');
-$nav['yllapito/tallirekisteri/muokkaa'] = array('label' => 'Muokkaa talleja', 'parent_id' => 'yllapito/tallirekisteri', 'active' => 'yllapito/tallirekisteri/muokkaa');
-
 // profiili alamenu
-$nav['profiili/hevoset'] = array('label' => 'Omat hevoset', 'parent_id' => 'profiili', 'active' => 'profiili/hevoset');
-$nav['profiili/tallit'] = array('label' => 'Omat tallit', 'parent_id' => 'profiili', 'active' => 'profiili/tallit');
-$nav['profiili/kasvattajanimet'] = array('label' => 'Omat kasvattajanimet', 'parent_id' => 'profiili', 'active' => 'profiili/kasvattajanimet');
-$nav['profiili/seurat'] = array('label' => 'Omat seurat', 'parent_id' => 'profiili', 'active' => 'profiili/seurat');
-//$nav['profiili/puljut'] = array('label' => 'Omat puljut', 'parent_id' => 'profiili', 'active' => 'profiili/omat-puljut');
-$nav['profiili/kilpailut'] = array('label' => 'Omat kilpailut', 'parent_id' => 'profiili', 'active' => 'profiili/kilpailut');
+$nav['profiili/tiedot'] = array('label' => 'Omat tiedot', 'parent_id' => 'profiili', 'active' => 'profiili/tiedot');
+$nav['profiili/pikaviestit'] = array('label' => 'Omat pikaviestit', 'parent_id' => 'profiili', 'active' => 'profiili/pikaviestit');
+
 

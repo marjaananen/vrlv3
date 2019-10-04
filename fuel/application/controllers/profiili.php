@@ -15,16 +15,25 @@ class Profiili extends Loggedin_Controller
     function index()
     {
         $this->load->model('tallit_model');
-	$user = $this->ion_auth->user()->row();
+		        $this->load->model('hevonen_model');
+				        $this->load->model('kasvattajanimi_model');
+
+
+		$user = $this->ion_auth->user()->row();
 	
-	$vars = array();
+		$vars = array();
 	$vars['nimimerkki'] =  $user->nimimerkki;
         $vars['email'] = $user->email;
 	$dateofaccept = date("d.m.Y", strtotime($user->hyvaksytty));
 
 	$vars['hyvaksytty'] = $dateofaccept;
         
-        $vars['stable_stats'] = $this->tallit_model->get_users_stable_stats($user->tunnus);
+    $vars['stats'] = array();
+	$vars['stats']['tallit'] = $this->tallit_model->get_users_stables_amount($user->tunnus);
+	$vars['stats']['hevoset'] = $this->hevonen_model->get_owners_horses_amount($user->tunnus);
+	$vars['stats']['kasvattajanimet'] = $this->kasvattajanimi_model->get_users_names_amount($user->tunnus);
+
+
 	
 	$this->fuel->pages->render('profiili/index', $vars);
     }
@@ -112,8 +121,6 @@ class Profiili extends Loggedin_Controller
         $this->load->library('form_builder', array('submit_value' => 'Päivitä tiedot'));
         $user = $this->ion_auth->user()->row();
 
-
-        $options = $this->tunnukset_model->get_location_option_list();
         $contacts_html = '';
         
         foreach($this->tunnukset_model->get_users_contacts($user->tunnus) as $row)

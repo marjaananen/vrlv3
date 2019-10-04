@@ -13,10 +13,11 @@ class Tallit_model extends Base_module_model
     //Tallit
     function get_users_stables($pinnumber)
     {
-        $this->db->select('vrlv3_tallirekisteri.tnro, nimi');
+        $this->db->select('vrlv3_tallirekisteri.tnro, nimi, perustettu, lopettanut');
         $this->db->from('vrlv3_tallirekisteri');
         $this->db->join('vrlv3_tallirekisteri_omistajat', 'vrlv3_tallirekisteri.tnro = vrlv3_tallirekisteri_omistajat.tnro');
         $this->db->where('omistaja', $pinnumber);
+	
         $query = $this->db->get();
         
         if ($query->num_rows() > 0)
@@ -27,6 +28,18 @@ class Tallit_model extends Base_module_model
         return array();
     }
     
+	function get_users_stables_amount($pinnumber, $active = 1)
+    {
+        $this->db->select('vrlv3_tallirekisteri.tnro, nimi, perustettu, lopettanut');
+        $this->db->from('vrlv3_tallirekisteri');
+        $this->db->join('vrlv3_tallirekisteri_omistajat', 'vrlv3_tallirekisteri.tnro = vrlv3_tallirekisteri_omistajat.tnro');
+        $this->db->where('omistaja', $pinnumber);
+		$query = $this->db->get();
+
+	
+		return $query->num_rows();
+    }
+	
     function get_stable($tnro)
     {
         $this->db->from('vrlv3_tallirekisteri');
@@ -49,6 +62,11 @@ class Tallit_model extends Base_module_model
             $this->add_owner_to_stable($insert_data['tnro'], $owner, 1);
 			$this->mass_edit_categories($insert_data['tnro'], $kategoria);
             $this->db->trans_complete();
+			
+			
+
+        //päivityksestä jää jälki
+		$this->mark_update($insert_data['tnro'], "Tallin lisääminen");
             
             
         }
@@ -64,8 +82,9 @@ class Tallit_model extends Base_module_model
         $this->db->update('vrlv3_tallirekisteri', $data);
         
         //päivityksestä jää jälki
-        $data = array('tnro' => $tnro, 'paivitti' => $this->ion_auth->user()->row()->tunnus, 'aika' => date("Y-m-d H:i:s"));
-        $this->db->insert('vrlv3_tallirekisteri_paivitetty', $data);
+		$this->mark_update($tnro, "Tallin tietojen päivitys");
+		
+
     }
     
     function is_stable_active($tnro)
@@ -88,18 +107,26 @@ class Tallit_model extends Base_module_model
     {
         $this->db->where('tnro', $tnro);
         $this->db->update('vrlv3_tallirekisteri', array('lopettanut' => 1));
+		
+		//päivityksestä jää jälki
+		$this->mark_update($tnro, "Tallin lopetus");
     }
     
     function add_owner_to_stable($tnro, $applicant, $level)
     {
-        $data = array('tnro' => $tnro, 'omistaja' => $applicant, 'taso' => $level);
-        
+        $data = array('tnro' => $tnro, 'omistaja' => $applicant, 'taso' => $level);       
         $this->db->insert('vrlv3_tallirekisteri_omistajat', $data);
+		
+		//päivityksestä jää jälki
+		$this->mark_update($tnro, "Omistajan (Taso " . $level . ") lisäys");
+
+		
+
     }
     
     function get_stables_owners($tnro)
     {
-        $this->db->select('omistaja, nimimerkki');
+        $this->db->select('omistaja, nimimerkki, taso, vrlv3_tallirekisteri_omistajat.id as id');
         $this->db->from('vrlv3_tallirekisteri_omistajat');
         $this->db->join('vrlv3_tunnukset', 'vrlv3_tunnukset.tunnus = vrlv3_tallirekisteri_omistajat.omistaja');
         $this->db->where('tnro', $tnro);
@@ -281,8 +308,8 @@ class Tallit_model extends Base_module_model
         $this->db->insert('vrlv3_tallirekisteri_kategoriat', $data);
         
         //päivityksestä jää jälki
-        $data = array('tnro' => $tnro, 'paivitti' => $this->ion_auth->user()->row()->tunnus, 'aika' => date("Y-m-d H:i:s"));
-        $this->db->insert('vrlv3_tallirekisteri_paivitetty', $data);
+		$this->mark_update($tnro, "Kategorian ".$category." lisäys.");
+
     }
     
     function delete_category($id)
@@ -293,8 +320,7 @@ class Tallit_model extends Base_module_model
         $query = $this->db->get();
         
         //päivityksestä jää jälki
-        $data = array('tnro' => $query->row()->tnro, 'paivitti' => $this->ion_auth->user()->row()->tunnus, 'aika' => date("Y-m-d H:i:s"));
-        $this->db->insert('vrlv3_tallirekisteri_paivitetty', $data);
+		$this->mark_update($query->row()->tnro, "Kategorian poisto.");
         
         $this->db->delete('vrlv3_tallirekisteri_kategoriat', array('id' => $id));
     }
@@ -401,6 +427,12 @@ class Tallit_model extends Base_module_model
         
         return false;
     }
+	
+	
+	function mark_update($tnro, $text=""){
+		$data = array('tnro' => $tnro, 'paivitti' => $this->ion_auth->user()->row()->tunnus, 'aika' => date("Y-m-d H:i:s"), 'text' => $text);
+		$this->db->insert('vrlv3_tallirekisteri_paivitetty', $data);
+	}
     
 
     

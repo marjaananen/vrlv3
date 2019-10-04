@@ -11,18 +11,17 @@ class Migraatio_model extends Base_module_model
     
     
     
+    
+    
      //Applications
     function migrate_tiedotukset()
     {
+
         $this->db->select("kategoria");
         $this->db->distinct();
         $query = $this->db->get('tiedotukset_kategoriat');
         
         foreach ($query->result() as $row){
-            
-            $this->db->where('kategoria', $row->kategoria);
-            $this->db->from('vrlv3_lista_tiedotuskategoriat');
-            $amount = $this->db->count_all_results();
             
             if (!$this->it_is_there_already('vrlv3_lista_tiedotuskategoriat', array('kategoria'=> $row->kategoria))){
                 $this->db->insert('vrlv3_lista_tiedotuskategoriat', array("kategoria" => $row->kategoria ));
@@ -95,13 +94,16 @@ class Migraatio_model extends Base_module_model
         
         
     }
+    
+    
+
  
  
     //Applications
     function migrate_tunnukset()
     {
         //VRLV3_TUNNUKSET
-        $query = $this->db->get('tunnukset');       
+        $query = $this->db->query("SELECT * from tunnukset WHERE NOT EXISTS(SELECT * FROM vrlv3_tunnukset WHERE tunnukset.tunnus = vrlv3_tunnukset.tunnus)");
         foreach ($query->result() as $row)
         {
 
@@ -109,22 +111,14 @@ class Migraatio_model extends Base_module_model
             $data['email'] = $row->email;
             $data['tunnus'] = $row->tunnus;
 
-            if ($this->it_is_there_already('vrlv3_tunnukset', array('email'=>$data['email']))){
-                continue;
-            }
             if ($this->it_is_there_already('vrlv3_tunnukset', array('tunnus'=>$data['tunnus']))){
+                echo "tunnus";
                 continue;
             }
             $data['ip_address'] = $row->rek_ip;
             $data['username'] = $row->tunnus;
             $data['password'] = $row->salasana;
-            //$data['salt'] = 
-            //$data['activation_code'] = "";
-            //$data['forgotten_password_code'] = "";
-            //$data['forgotten_password_time'] = "";
-            //$data['remember_code'] = $old_data[''];
             $data['created_on'] = $row->rekisteroitynyt;
-            //$data['last_login'] = $old_data[''];
             $data['active'] = 1;
             $data['nimimerkki'] = $row->nimimerkki;
 
@@ -132,37 +126,20 @@ class Migraatio_model extends Base_module_model
                 $data['nayta_email'] = 0;
             else
                 $data['nayta_email'] = 1;
-
-            if($row->nayta_vuosilaani == 1 || $row->nayta_vuosilaani == 2)
-            {
-                $data['nayta_vuosi'] = 0;
-                $data['nayta_laani'] = 0;
-            }
-            else
-            {
-                $data['nayta_vuosi'] = 1;
-                $data['nayta_laani'] = 1;
-            }
-            
-            
-            
-            $this->db->where('id', $row->laani);
-            $this->db->from('vrlv3_lista_maakunnat');
-            $amount = $this->db->count_all_results();
-            
-            if ($amount != 1) {
-                $data['laani'] = 0;
-            }
-            else {
-                $data['laani'] = $row->laani;;
+                
+            if ($this->it_is_there_already('vrlv3_tunnukset', array('email'=>$data['email']))){                
+                if (strlen($data['email']) == 0){
+                    $data['email'] = $row->tunnus. "@tämä_puuttui_kokonaan_vanhasta.fuuu";
+                }
+                
+                else {
+                    $data['email'] =  "TUPLAMAILIOSOITE:" . $data['email'];
+                }
             }
             
-            $data['syntymavuosi'] = $row->syntymavuosi;
             $data['jaahylla'] = $row->jaahylla;
             $data['frozen'] = $row->frozen;
-            $data['reason'] = $row->reason;
-            
-            
+            $data['reason'] = $row->reason;            
             $data['hyvaksytty'] = $row->hyvaksytty;
             
             if (!$this->onko_tunnus($row->hyvaksyi)){
@@ -172,10 +149,9 @@ class Migraatio_model extends Base_module_model
                 $data['hyvaksyi'] = $row->hyvaksyi;
             }
             
-        
-        
             if (!$this->onko_tunnus($row->tunnus)) {
                 $this->db->insert('vrlv3_tunnukset', $data);
+                $this->_add_tunnus_data($row->tunnus);
             }
             else {
                 $this->db->where('tunnus', $row->tunnus);
@@ -185,26 +161,39 @@ class Migraatio_model extends Base_module_model
             
         }
         
-        /*
+        
+    }
+    
+    private function _add_tunnus_data($tunnus){
+        
         
         //VRLV3_TUNNUKSET_KIRJAUTUMISET
-        $query = $this->db->get('tunnukset_epa');
-        $this->vrlv3_tunnukset_kirjautumiset($query);
-        $query = $this->db->get('tunnukset_kirjautumiset');
-        $this->vrlv3_tunnukset_kirjautumiset($query);
+        $this->db->select("*");
+        $this->db->where('tunnus', $tunnus);
+        $this->db->from('tunnukset_epa');
+        $query = $this->db->get();      
+        $this->vrlv3_tunnukset_kirjautumiset($query, 0);
         
-        */
+        $this->db->where('tunnus', $tunnus);
+        $this->db->from('tunnukset_kirjautunut');
+        $query = $this->db->get();
+        $this->vrlv3_tunnukset_kirjautumiset($query, 1);
+        
+        
             
-        //VRLV3_TUNNUKSET_NIKIT     
-        $query = $this->db->get('tunnukset_nimimerkit');
+        //VRLV3_TUNNUKSET_NIKIT
+        $this->db->select("*");
+        $this->db->where('tunnus', $tunnus);
+        $this->db->from('tunnukset_nimimerkit');
+        $query = $this->db->get();
+        
         foreach ($query->result() as $row)
         {
-            if ($this->onko_tunnus($row->tunnus) && $row->tunnus != '00000') {
-                $data_nick['tunnus'] = $row->tunnus;
-                $data_nick['nimimerkki'] = $row->nimimerkki;
-                $data_nick['vaihtanut'] = $row->vaihtanut;
-                $data_nick['piilotettu'] = $row->piilotettu;
-            }
+            $data_nick['tunnus'] = $row->tunnus;
+            $data_nick['nimimerkki'] = $row->nimimerkki;
+            $data_nick['vaihtanut'] = $row->vaihtanut;
+            $data_nick['piilotettu'] = $row->piilotettu;
+        
             
             $this->db->where(array('tunnus'=>$row->tunnus, 'vaihtanut'=>$row->vaihtanut));
             $this->db->from('vrlv3_tunnukset_nimimerkit');
@@ -215,7 +204,32 @@ class Migraatio_model extends Base_module_model
             }
         }
         
+       
+        $this->db->select("*");
+        $this->db->where('tunnus', $tunnus);
+        $this->db->from('tunnukset_yhteystiedot');
+        $query = $this->db->get();
+        foreach ($query->result() as $row)
+        {
+            if ($this->onko_tunnus($row->tunnus)) { 
+                $data_contact['tunnus'] = $row->tunnus;
+                $data_contact['tyyppi'] = $row->tyyppi;
+                $data_contact['tieto'] = $row->tieto;
+                
+                $this->db->where($data_contact);
+                $this->db->from('vrlv3_tunnukset_yhteystiedot');
+                $amount = $this->db->count_all_results();
         
+                if ($amount == 0){
+                    $this->db->insert('vrlv3_tunnukset_yhteystiedot', $data_contact);              
+                }
+            }
+        }
+
+    }
+    
+    public function migrate_pikaviestit(){
+         //PIKAVIESTIT
         $query = $this->db->get('tunnukset_pikaviestit');
         foreach ($query->result() as $row)
         {
@@ -236,40 +250,19 @@ class Migraatio_model extends Base_module_model
                 $this->db->from('vrlv3_tunnukset_pikaviestit');
                 $amount = $this->db->count_all_results();
         
-                if ($amount == 0){
+                if ($amount === 0){
                     $this->db->insert('vrlv3_tunnukset_pikaviestit', $data_message);              
                 }
             }
         }
-        
-        $query = $this->db->get('tunnukset_yhteystiedot');
-        foreach ($query->result() as $row)
-        {
-            if ($this->onko_tunnus($row->tunnus)) { 
-                $data_contact['tunnus'] = $row->tunnus;
-                $data_contact['tyyppi'] = $row->tyyppi;
-                $data_contact['tieto'] = $row->tieto;
-                
-                $this->db->where($data_contact);
-                $this->db->from('vrlv3_tunnukset_yhteystiedot');
-                $amount = $this->db->count_all_results();
-        
-                if ($amount == 0){
-                    $this->db->insert('vrlv3_tunnukset_yhteystiedot', $data_contact);              
-                }
-            }
-        }
-
     }
     
     public function migrate_tallit(){
-        $query = $this->db->get('tallirekisteri');
+        
+        
+        $query = $this->db->query("SELECT * from tallirekisteri WHERE NOT EXISTS(SELECT * FROM vrlv3_tallirekisteri WHERE tallirekisteri.tnro = vrlv3_tallirekisteri.tnro)");
         foreach ($query->result() as $row)
         {
-            if ($this->it_is_there_already('vrlv3_tallirekisteri', array('tnro'=>$row->tnro))){
-                continue;
-            }
-
             $data_talli['tnro'] = $row->tnro;
             $data_talli['nimi'] = $row->nimi;
             $data_talli['url'] = $row->url;
@@ -278,23 +271,48 @@ class Migraatio_model extends Base_module_model
             $data_talli['hyvaksyi'] =  $this->clean_tunnus($row->hyvaksyi);
             $data_talli['piilotettu'] = $row->piilotettu;
             $data_talli['hyvaksytty'] = $row->hyvaksytty;
-            $data_talli['lopettanut'] = 0;
-            $data_talli['lopetti_pvm'] = "0000-00-00 00:00:00";
-            $data_talli['lopetti_tunnus'] = "00000";
             
-            $this->db->insert('vrlv3_tallirekisteri', $data_talli); 
+
+            //LOPETUS            
+            $this->db->select("*");
+            $this->db->from("tallirekisteri_lopettaneet");
+            $this->db->where("tnro", $row->tnro);
+            $query2 = $this->db->get();  
+            $row2 = $query2->row();
+
+            if (isset($row2)){          
+                $data_talli['lopettanut'] = 1;
+                $data_talli['lopetti_pvm'] = $row2->lopetti;
+                $data_talli['lopetti_tunnus'] = $this->clean_tunnus($row2->merkitsi);
+                
+            }
+            else {
+                $data_talli['lopettanut'] = 0;
+                $data_talli['lopetti_pvm'] = "0000-00-00 00:00:00";
+                $data_talli['lopetti_tunnus'] = "00000";
+            
+            }
+            
+            
+
+            
+            $this->db->insert('vrlv3_tallirekisteri', $data_talli);
+            
+            $this->_add_tallikategoriat($row->tnro);
+            $this->_add_tallinomistajat($row->tnro);
+
         }        
         
         
     }
     
-    public function migrate_tallikategoriat(){
-        $query = $this->db->get('tallirekisteri_kategoriat');
+    private function _add_tallikategoriat($tnro){
+        $this->db->select("*");
+        $this->db->from("tallirekisteri_kategoriat");
+        $this->db->where('tnro', $tnro);
+        $query = $this->db->get();
         foreach ($query->result() as $row){
-            //onko talli olemassa
-            if (!$this->it_is_there_already('vrlv3_tallirekisteri', array('tnro'=>$row->tnro))){
-                continue;
-            }
+            //onko kategoria olemassa
             if (!$this->it_is_there_already('vrlv3_lista_tallikategoriat', array('kat'=>$row->kategoria))){
                 continue;
             }
@@ -315,35 +333,18 @@ class Migraatio_model extends Base_module_model
         }
     }
     
-    public function migrate_tallilopetukset(){
-        $query = $this->db->get('tallirekisteri_lopettaneet');
-        foreach ($query->result() as $row){
-            //onko talli olemassa
-            if (!$this->it_is_there_already('vrlv3_tallirekisteri', array('tnro'=>$row->tnro))){
-                continue;
-            }
-            //onko talli jo merkattu lopettaneeksi
-            if ($this->it_is_there_already('vrlv3_tallirekisteri', array('tnro'=>$row->tnro, 'lopettanut'=>'1'))){
-                continue;
-            }
-            
-            $data_kat['lopettanut'] = 1;
-            $data_kat['lopetti_pvm'] = $row->lopetti;
-            $data_kat['lopetti_tunnus'] = $this->clean_tunnus($row->merkitsi);
-
-            $this->db->where('tnro', $row->tnro);
-            $this->db->update('vrlv3_tallirekisteri', $data_kat);
-        }
-    }
     
-        public function migrate_talliomistajat(){
-        $query = $this->db->get('tallirekisteri_omistajat');
+        private function _add_tallinomistajat($tnro){
+        $this->db->select("*");
+        $this->db->from("tallirekisteri_omistajat");
+        $this->db->where('tnro', $tnro);
+        $query = $this->db->get();
         foreach ($query->result() as $row){
             //onko talli tai tunnus olemassa
-            if (!$this->it_is_there_already('vrlv3_tallirekisteri', array('tnro'=>$row->tnro))||!$this->onko_tunnus($row->omistaja)){
+            if (!$this->onko_tunnus($row->omistaja)){
                 continue;
             }
-            //onko talli jo merkattu lopettaneeksi
+            //onko omistaja jo merkitty
             if ($this->it_is_there_already('vrlv3_tallirekisteri_omistajat', array('tnro'=>$row->tnro, 'omistaja'=>$row->omistaja))){
                 continue;
             }
@@ -362,6 +363,7 @@ class Migraatio_model extends Base_module_model
         $new = $this->db->count_all_results('vrlv3_hevosrekisteri');
         return $old-$new;
     }
+    
     
     
      public function migrate_hevoset($limit1 = 0, $limit2 = NULL){
@@ -399,14 +401,36 @@ class Migraatio_model extends Base_module_model
             $data['kotitalli'] = $this->clean_tallitunnus($row->kotitalli);
             $data['kuollut'] = $row->kuollut;
             
+            $this->db->select("*");
+            $this->db->from("hevosrekisteri_lisatiedot");
+            $this->db->where("reknro", $row->reknro);
+            $query2 = $this->db->get();
+
+            $lisatiedot = $query2->row();
             
-            /*
+            if(isset($lisatiedot)){
             
-            $data_talli['vari'] = 
-            $data_talli['painotus'] = $row->hyvaksytty;
-            $data_talli['syntymamaa'] = 0;
-            */
-            
+                $color = $this->check_color($lisatiedot->vari);
+                if (isset($color)){          
+                        $data['vari'] = $color;
+                }
+                
+                $painotus = $lisatiedot->painotus;
+                if($painotus !="0"){
+                    if ($this->it_is_there_already('vrlv3_lista_painotus', array('pid'=>$painotus))){
+                    $data['painotus'] = $painotus;
+                    }
+                }
+                
+                $syntmaa = $lisatiedot->syntymamaa;
+                if($syntmaa !="0"){
+                    if ($this->it_is_there_already('vrlv3_lista_maat', array('id'=>$syntmaa))){
+                    $data['syntymamaa'] = $syntmaa;
+                    }
+                }
+            }
+
+    
             $this->db->insert('vrlv3_hevosrekisteri', $data); 
         }        
         
@@ -493,10 +517,10 @@ class Migraatio_model extends Base_module_model
     }
     
         public function migrate_kasvattajatiedot(){
-        $query = $this->db->query("SELECT * from hevosrekisteri_kasvattaja");
+        $query = $this->db->query("SELECT * from hevosrekisteri_kasvattaja WHERE kasvattajanimi = 'Karkurannan'");
         foreach ($query->result() as $row){
             $kasvattajainfo = array();
-            
+            //tää ei jaksa pyöriä läpi
             
             //onko hevo olemassa
             
@@ -526,11 +550,6 @@ class Migraatio_model extends Base_module_model
             }
             
         }
-    }
-    
-    
-    
-    public function migrate_kasvattajanimet(){
         
         $query = $this->db->query("SELECT * from vrlv3_kasvattajanimet");
         foreach ($query->result() as $row){
@@ -538,105 +557,37 @@ class Migraatio_model extends Base_module_model
             $this->db->where('kasvattajanimi', $row->kasvattajanimi);
             $this->db->update('vrlv3_hevosrekisteri', array("kasvattajanimi_id"=>$row->id));
             
-            
-            
-            $this->db->select('*');
-            $this->db->where('id', $row->id);
-            $this->db->from('kasvattajanimet');
-            $om_query = $this->db->get();
-            $om_array = $om_query->result_array();
-            
-            if(isset($om_array[0]) && isset($om_array[0]['tunnus']) && $this->onko_tunnus($om_array[0]['tunnus'])){
-                $data = array();
-                $data['kid'] = $row->id;
-                $data['tunnus'] = $om_array[0]['tunnus'];
-                
-                $this->db->insert('vrlv3_kasvattajanimet_omistajat', $data);
-
-            }
-
+        }
                                   
-        }
         
-       
-
-        
-      
     }
     
     
-    public function migrate_vari_painotus_maa(){
-        /*
-       $this->db->where('vari !=', "");
-        $query = $this->db->get('hevosrekisteri_lisatiedot');
-
-        foreach ($query->result() as $row)
-        {
-            $color = $this->check_color($row->vari);
-            
-            if (!isset($color)){
-                continue;
-            }
-            
-            if ($this->it_is_there_already('vrlv3_hevosrekisteri', array('reknro'=>$row->reknro, 'vari'=>$color))){
-                continue;
-            }
-
-            $data['vari'] = $color;
-            
-            $this->db->where('reknro', $row->reknro);
-            $this->db->update('vrlv3_hevosrekisteri', $data);
-            
-        }
+    public function migrate_kasvattajanimet(){
+        $this->db->query("INSERT INTO vrlv3_kasvattajanimet (id, kasvattajanimi, rekisteroity, tila) SELECT id, kasvattajanimi, rekisteroity, tila FROM kasvattajanimet");
         
-        $this->db->select("painotus, reknro");
-        $this->db->where('painotus !=', "0");
-        $query = $this->db->get('hevosrekisteri_lisatiedot');
+        $this->db->query("UPDATE vrlv3_kasvattajanimet
+            INNER JOIN kasvattajanimet ON vrlv3_kasvattajanimet.id = kasvattajanimet.id
+            SET vrlv3_kasvattajanimet.tnro = kasvattajanimet.tallinid
+            WHERE EXISTS(SELECT * FROM vrlv3_tallirekisteri WHERE vrlv3_tallirekisteri.tnro = kasvattajanimet.tallinid)");
         
-
-        foreach ($query->result() as $row)
-        {
-            
-            if (!$this->it_is_there_already('vrlv3_lista_painotus', array('pid'=>$row->painotus))){
-                continue;
-            }
-            
-            if ($this->it_is_there_already('vrlv3_hevosrekisteri', array('reknro'=>$row->reknro, 'painotus'=>$row->painotus))){
-            
-                continue;
-            }
-            $data = array();
-            $data['painotus'] = $row->painotus;
-            
-            $this->db->where('reknro', $row->reknro);
-            $this->db->update('vrlv3_hevosrekisteri', $data);
-            
-        }
-        */
-        $this->db->select('syntymamaa, reknro');
-        $this->db->where('syntymamaa !=', "0");
-        $query = $this->db->get('hevosrekisteri_lisatiedot');
-
-        foreach ($query->result() as $row)
-        {
-            if (!$this->it_is_there_already('vrlv3_lista_maat', array('id'=>$row->syntymamaa))){
-                continue;
-            }
-            
-            if ($this->it_is_there_already('vrlv3_hevosrekisteri', array('reknro'=>$row->reknro, 'syntymamaa'=>$row->syntymamaa))){
-                continue;
-            }
-            
-            $data = array();
-            $data['syntymamaa'] = $row->syntymamaa;
-            
-            $this->db->where('reknro', $row->reknro);
-            $this->db->update('vrlv3_hevosrekisteri', $data);
-            
-        } 
         
+        $this->db->query("INSERT INTO vrlv3_kasvattajanimet_rodut (kid, rotu)
+            (SELECT distinct id, rotu
+                FROM kasvattajanimet_rodut 
+                WHERE EXISTS (
+                        SELECT * FROM vrlv3_lista_rodut 
+                        WHERE vrlv3_lista_rodut.rotunro = kasvattajanimet_rodut.rotu) 
+                    AND EXISTS (SELECT * FROM vrlv3_kasvattajanimet 
+                        WHERE vrlv3_kasvattajanimet.id = kasvattajanimet_rodut.id))");
+        
+        echo "done";
         
     }
+    
+    
+
+    
         
         
     
@@ -726,25 +677,44 @@ class Migraatio_model extends Base_module_model
         
     }
     
-    public function vrlv3_tunnukset_kirjautumiset($query){
+    public function vrlv3_tunnukset_kirjautumiset($query, $success){
         foreach ($query->result() as $row)
         {
-            if ($this->onko_tunnus($row->tunnus)) {
-                $data_login['tunnus'] = $row->tunnus;
-                $data_login['ip'] = $row->ip;
-                $data_login['onnistuiko'] = 0;
-                $data_login['aika'] = $row->kirjautunut;
-                
-                
-                $this->db->where(array('tunnus'=>$row->tunnus, 'aika'=>$row->aika));
-                $this->db->from('vrlv3_tunnukset_kirjautumiset');
-                $amount = $this->db->count_all_results();
-        
-                if ($amount == 0){
-                   $this->db->insert('vrlv3_tunnukset_kirjautumiset', $data_login);
-                }
-                               
+            $data_login['tunnus'] = $row->tunnus;
+            $data_login['ip'] = $row->ip;
+            $data_login['onnistuiko'] = $success;
+            $data_login['aika'] = $row->kirjautunut;
+            
+            
+            $this->db->where(array('tunnus'=>$row->tunnus, 'aika'=>$row->kirjautunut));
+            $this->db->from('vrlv3_tunnukset_kirjautumiset');
+            $amount = $this->db->count_all_results();
+    
+            if ($amount == 0){
+               $this->db->insert('vrlv3_tunnukset_kirjautumiset', $data_login);
             }
+                               
         }
     }
+    
+    function count_by_keys($old_table, $new_table, $countable_old, $countable_new){
+        $query = $this->db->query("SELECT COUNT(DISTINCT(". $countable_new .")) as kpl from " . $new_table);
+        $new = $query->row()->kpl;
+        
+        $query = $this->db->query("SELECT COUNT(DISTINCT(". $countable_old . ")) as kpl from " . $old_table);
+        $old = $query->row()->kpl;
+        
+        return array("new"=> $new, "old"=> $old);
+    }
+
+    function count_all_rows($old_table, $new_table){
+        $query = $this->db->query("SELECT COUNT(*) as kpl from " . $new_table);
+        $new = $query->row()->kpl;
+        
+        $query = $this->db->query("SELECT COUNT(*) as kpl from " . $old_table);
+        $old = $query->row()->kpl;
+        
+        return array("new"=> $new, "old"=> $old);
+    }
 }
+

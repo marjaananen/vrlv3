@@ -3,8 +3,8 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: 31.03.2019 klo 09:15
--- Palvelimen versio: 10.1.28-MariaDB
+-- Generation Time: 31.05.2019 klo 09:59
+-- Palvelimen versio: 10.1.40-MariaDB
 -- PHP Version: 5.6.30
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
