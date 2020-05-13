@@ -45,6 +45,8 @@ CREATE TABLE `vrlv3_kasvattajanimet` (
 CREATE TABLE `vrlv3_kasvattajanimet_omistajat` (
   `kid` int(11) NOT NULL,
   `tunnus` int(5) UNSIGNED ZEROFILL NOT NULL
+  `taso` int(1) NOT NULL DEFAULT '1'
+
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
