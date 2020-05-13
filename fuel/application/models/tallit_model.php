@@ -428,6 +428,22 @@ class Tallit_model extends Base_module_model
         return false;
     }
 	
+	    //Sekalaisia
+    function is_name_in_use($tnro)
+    {
+        $this->db->select('tnro');
+        $this->db->from('vrlv3_tallirekisteri');
+        $this->db->where('nimi', $tnro);
+        $query = $this->db->get();
+        
+        if ($query->num_rows() > 0)
+        {
+            return true;
+        }
+        
+        return false;
+    }
+	
 	
 	function mark_update($tnro, $text=""){
 		$data = array('tnro' => $tnro, 'paivitti' => $this->ion_auth->user()->row()->tunnus, 'aika' => date("Y-m-d H:i:s"), 'text' => $text);

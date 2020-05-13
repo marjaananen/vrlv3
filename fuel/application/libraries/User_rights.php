@@ -34,7 +34,6 @@ class User_rights
     {
         //Jos ei ole kirjautunut sisään, ei voi kuulua mihinkään, ja heitetään vain etusivulle
         if (!$this->CI->ion_auth->logged_in()){
-            $this->redirect_address ="/";
             return false;
         }
         //Admin pääsee kaikkialle.
@@ -51,22 +50,13 @@ class User_rights
             foreach ($this->req_user_groups as $group){
                 
                 //Onko ryhmä olemassa?
-                if($this->CI->ion_auth_model->group_exists($group)){
-                    //Onko käyttäjä kys. ryhmässä
-                    if($this->CI->ion_auth->in_group($group)){                        
-                        $user_is_in_one_of_the_groups = true;
-                        break;
-                    }
-                    
-                    else {
-                        //todo: parent grouppitoiminnallisuus
-                    }
-       
-                }
-                //Grouppia ei ollut, joten kukaan käyttäjä ei myöskään voi siinä ryhmässä olla.
-                //Grouppi lisätään kuitenkin kantaan, ja tulevaisuudessa siihen voidaan lisätä ihmisiä.
+                if($this->CI->ion_auth->in_group($group)){                        
+                    $user_is_in_one_of_the_groups = true;
+                    break;
+                } 
+                
                 else {
-                    $this->create_group($this->req_user_group, "Automatically added group");       
+                    $this->CI->ion_auth->create_group($group, "Automatically added group");   
                 }                           
             }
             

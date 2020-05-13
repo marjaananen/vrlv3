@@ -92,11 +92,13 @@ class Jasenyys extends CI_Controller
     {
 	$this->load->library('Vrl_helper');
 	$fields = array();
+	$fields['logged_in'] = $this->ion_auth->logged_in();
         
-	if(empty($tunnus))
+	if(empty($tunnus) && $fields['logged_in'])
+		$tunnus = $this->ion_auth->user()->row()->tunnus;
+	else if (empty($tunnus))
 	    redirect('/');
         
-	$fields['logged_in'] = $this->ion_auth->logged_in();
 	$fields['sivu'] = $sivu;
         
 	if(!($this->vrl_helper->check_vrl_syntax($tunnus) && $this->ion_auth->identity_check($this->vrl_helper->vrl_to_number($tunnus))))

@@ -54,6 +54,10 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 //Admin urls, 
 $route['yllapito/tunnukset'] = "yllapito_tunnukset/hakemusjono_etusivu";
 $route['yllapito/tunnukset/hyvaksy'] = "yllapito_tunnukset/hakemusjono";
+$route['yllapito/tunnukset/muokkaa'] = "yllapito_tunnukset/muokkaa";
+$route['yllapito/tunnukset/muokkaa/(:any)'] = "yllapito_tunnukset/muokkaa/$1";
+
+
 $route['yllapito/tunnukset/kasittele/(:any)/(:any)'] = "yllapito_tunnukset/kasittele_hakemus/$1/$2";
 
 
@@ -65,11 +69,21 @@ $route['tallit/muokkaa/(:any)'] = "tallit/muokkaa/$1";
 $route['tallit/rekisterointi'] = "tallit/rekisterointi";
 
 $route['virtuaalihevoset/hevonen/(:any)'] = "virtuaalihevoset/hevosprofiili/$1";
+$route['virtuaalihevoset/hevonen/muokkaa/(:any)'] = "virtuaalihevoset/muokkaa/$1";
+$route['virtuaalihevoset/hevonen/muokkaa/(:any)/(:any)'] = "virtuaalihevoset/muokkaa/$1/$2";
+$route['virtuaalihevoset/hevonen/muokkaa/(:any)/(:any)/(:any)'] = "virtuaalihevoset/muokkaa/$1/$2/$3";
+$route['virtuaalihevoset/hevonen/muokkaa/(:any)/(:any)/(:any)/(:any)'] = "virtuaalihevoset/muokkaa/$1/$2/$3/$4";
+
+$route['tunnus'] = "jasenyys/tunnus/";
 $route['tunnus/(:any)'] = "jasenyys/tunnus/$1";
 $route['tunnus/(:any)/(:any)'] = "jasenyys/tunnus/$1/$2";
 $route['jasenyys'] = "jasenyys";
 $route['kisakeskus'] = "kisakeskus";
 $route['liitto'] = "liitto";
+
+
+$route['profiili/tunnus'] = "jasenyys/tunnus/";
+
 
 
 $route['default_controller'] = 'Main';

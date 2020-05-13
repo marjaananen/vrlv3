@@ -286,7 +286,7 @@ class Kasvattajanimi_model extends Base_module_model
     {
         $this->db->select('tunnus');
         $this->db->from('vrlv3_kasvattajanimet_omistajat');
-        $this->db->where('id', $tnro);
+        $this->db->where('kid', $tnro);
         $this->db->where('tunnus', $pinnumber);
         $query = $this->db->get();
         
@@ -304,6 +304,21 @@ class Kasvattajanimi_model extends Base_module_model
         $this->db->select('id');
         $this->db->from('vrlv3_kasvattajanimet');
         $this->db->where('id', $tnro);
+        $query = $this->db->get();
+        
+        if ($query->num_rows() > 0)
+        {
+            return true;
+        }
+        
+        return false;
+    }
+    
+    function is_name_in_use($tnro)
+    {
+        $this->db->select('kasvattajanimi');
+        $this->db->from('vrlv3_kasvattajanimet');
+        $this->db->where('kasvattajanimi', $tnro);
         $query = $this->db->get();
         
         if ($query->num_rows() > 0)

@@ -602,10 +602,6 @@ class Auth extends CI_Controller
 	
 
 		// validate form input
-		$this->form_validation->set_rules('first_name', $this->lang->line('edit_user_validation_fname_label'), 'trim|required');
-		$this->form_validation->set_rules('last_name', $this->lang->line('edit_user_validation_lname_label'), 'trim|required');
-		$this->form_validation->set_rules('phone', $this->lang->line('edit_user_validation_phone_label'), 'trim|required');
-		$this->form_validation->set_rules('company', $this->lang->line('edit_user_validation_company_label'), 'trim|required');
 
 		if (isset($_POST) && !empty($_POST))
 		{
@@ -615,15 +611,9 @@ class Auth extends CI_Controller
 				show_error($this->lang->line('error_csrf'));
 			}
 
-			// update the password if it was posted
-			if ($this->input->post('password'))
-			{
-				$this->form_validation->set_rules('password', $this->lang->line('edit_user_validation_password_label'), 'required|min_length[' . $this->config->item('min_password_length', 'ion_auth') . ']|matches[password_confirm]');
-				$this->form_validation->set_rules('password_confirm', $this->lang->line('edit_user_validation_password_confirm_label'), 'required');
-			}
-
 			if ($this->form_validation->run() === TRUE)
 			{
+				/*
 				$data = [
 					'first_name' => $this->input->post('first_name'),
 					'last_name' => $this->input->post('last_name'),
@@ -636,7 +626,7 @@ class Auth extends CI_Controller
 				{
 					$data['password'] = $this->input->post('password');
 				}
-
+*/
 				// Only allow updating groups if user is admin
 				if ($this->ion_auth->is_admin())
 				{
@@ -655,7 +645,7 @@ class Auth extends CI_Controller
 
 					}
 				}
-
+/*
 				// check to see if we are updating the user
 				if ($this->ion_auth->update($user->id, $data))
 				{
@@ -671,11 +661,12 @@ class Auth extends CI_Controller
 					$this->redirectUser();
 
 				}
+				*/
 
 			}
-		}
+		
 
-		// display the edit user form
+		}// display the edit user form
 		$this->data['csrf'] = $this->_get_csrf_nonce();
 
 		// set the flash data error message if there is one
@@ -686,40 +677,7 @@ class Auth extends CI_Controller
 		$this->data['groups'] = $groups;
 		$this->data['currentGroups'] = $currentGroups;
 
-		$this->data['first_name'] = [
-			'name'  => 'first_name',
-			'id'    => 'first_name',
-			'type'  => 'text',
-			'value' => $this->form_validation->set_value('first_name', $user->first_name),
-		];
-		$this->data['last_name'] = [
-			'name'  => 'last_name',
-			'id'    => 'last_name',
-			'type'  => 'text',
-			'value' => $this->form_validation->set_value('last_name', $user->last_name),
-		];
-		$this->data['company'] = [
-			'name'  => 'company',
-			'id'    => 'company',
-			'type'  => 'text',
-			'value' => $this->form_validation->set_value('company', $user->company),
-		];
-		$this->data['phone'] = [
-			'name'  => 'phone',
-			'id'    => 'phone',
-			'type'  => 'text',
-			'value' => $this->form_validation->set_value('phone', $user->phone),
-		];
-		$this->data['password'] = [
-			'name' => 'password',
-			'id'   => 'password',
-			'type' => 'password'
-		];
-		$this->data['password_confirm'] = [
-			'name' => 'password_confirm',
-			'id'   => 'password_confirm',
-			'type' => 'password'
-		];
+	
 
 		$this->_render_page('auth/edit_user', $this->data);
 	}

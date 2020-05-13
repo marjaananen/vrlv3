@@ -281,6 +281,10 @@ class Tallit extends CI_Controller
 					$vars['msg'] = "Rekisteröinti epäonnistui!";
 					$vars['msg_type'] = "danger";
 				}
+				else if($this->tallit_model->is_name_in_use($this->input->post('nimi'))){
+					$vars['msg'] = "Talli nimeltä " .$this->input->post('nimi')." on jo olemassa.";
+					$vars['msg_type'] = "danger";
+				}
 				else
 				{
 					$vars['msg'] = "Rekisteröinti onnistui!";
@@ -484,7 +488,7 @@ class Tallit extends CI_Controller
 					
 			$cats = $this->tallit_model->get_stables_categories($tnro);
             foreach ($cats as $cat) {
-                $stable['kategoria'] = $cat['kategoria'];
+                $stable['kategoria'][] = $cat['kategoria'];
             }
 		}
 		

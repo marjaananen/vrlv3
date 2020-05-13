@@ -8,8 +8,10 @@ class Main extends CI_Controller
 
     function index()
     {
+        $this->load->model("uutiset_model");
         $vars = array();
         $vars['message'] = $this->session->flashdata('message');
+        $vars['tiedotukset'] = $this->uutiset_model->hae_tiedotukset(5,0);
         $this->fuel->pages->render('index', $vars);
     }
     

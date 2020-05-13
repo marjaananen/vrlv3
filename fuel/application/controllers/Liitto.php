@@ -146,7 +146,7 @@ class Liitto extends CI_Controller
 			$tiedotus['lahettaja_nick'] = '';
 		}
 	    else {
-	    $tiedotus['lahettaja_nick'] =  $user->nimimerkki;
+			$tiedotus['lahettaja_nick'] =  $user->nimimerkki;
 		}
 	}
 	

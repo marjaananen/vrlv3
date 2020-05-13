@@ -2,7 +2,7 @@
 class Yllapito_tunnukset extends CI_Controller
 {
     
-    private $allowed_user_groups = array('admin');
+    private $allowed_user_groups = array('admin', 'tunnukset');
     
     function __construct()
     {
@@ -162,5 +162,107 @@ class Yllapito_tunnukset extends CI_Controller
         }
             
     }
-}
+    
+    
+    
+    public function muokkaa($tunnus = null)
+	{
+		$data['title'] = "Muokkaa käyttäjän oikeuksia";
+        $this->load->library("vrl_helper");
+        
+        //eio tunnusta, haetaan tunnuksenhakulomake
+        if ($tunnus==null && $this->input->server('REQUEST_METHOD') == 'GET'){
+            $this->load->library('form_builder', array('submit_value' => 'Hae'));
+            $fields['VRL'] = array('type' => 'text', 'class'=>'form-control');
+            $this->form_builder->form_attrs = array('method' => 'post', 'action' => site_url('/yllapito/tunnukset/muokkaa'));                  
+            $data['form'] = $this->form_builder->render_template('_layouts/basic_form_template', $fields);
+             $this->fuel->pages->render('misc/lomakemuokkaus', $data);
+        }
+        
+        //haetaan oikea tunnus
+        else if ($tunnus == null && $this->input->server('REQUEST_METHOD') == 'POST'){
+            $tunnus = $this->input->post('VRL');
+            if($this->vrl_helper->check_vrl_syntax($tunnus)){
+                redirect('/yllapito/tunnukset/muokkaa/'.$this->vrl_helper->vrl_to_number($tunnus), 'refresh');
+                return;
+            }
+            else $this->index();
+            
+        }
+        //tunnus tiedossa
+        else {	
+            if ($this->input->server('REQUEST_METHOD') == 'POST')
+            {
+                
+                if (!$this->vrl_helper->check_vrl_syntax($this->input->post('tunnus'))
+                    || !($this->vrl_helper->vrl_to_number($tunnus) == $this->vrl_helper->vrl_to_number($this->input->post('tunnus')))){
+                    var_dump($tunnus);
+                    echo ".";
+                    echo $this->input->post('tunnus');
+                    echo ".";
+                    echo $this->vrl_helper->vrl_to_number($tunnus);
+                    echo "=";
+                    echo $this->vrl_helper->vrl_to_number($this->input->post('tunnus'));
+                    
+                } else {
+                    $this->sort_users_groups($this->input->post('oikeudet'), $this->ion_auth->get_user_id_from_identity($tunnus));
+                }
+
+            }
+           
+           
+            $user_id = $this->ion_auth->get_user_id_from_identity($tunnus);
+            $groups = $this->ion_auth->groups()->result_array();
+            $currentGroups = $this->ion_auth->get_users_groups($user_id)->result();
+            $group_options = array();
+            foreach ($groups as $key=>$group){
+                $group_options[$group['id']] = $group['name'];
+            }
+            $users_groups=array();
+            foreach ($currentGroups as $group){
+                $users_groups[]=$group->id;
+            }
+            
+           
+
+            $this->load->library('form_builder', array('submit_value' => "Muokkaa oikeuksia", 'required_text' => '*Pakollinen kenttä'));
+            $fields['tunnus'] = array('type' => 'hidden', 'value' => $tunnus);
+            $fields['oikeudet'] = array('type' => 'multi', 'mode' => 'checkbox', 'required' => TRUE, 'options' => $group_options, 'value'=>$users_groups, 'class'=>'form-control', 'wrapper_tag' => 'li');
+            $this->form_builder->form_attrs = array('method' => 'post', 'action' => '/yllapito/tunnukset/muokkaa/'.$this->vrl_helper->vrl_to_number($tunnus));
+
+            
+            $data['form'] = $this->form_builder->render_template('_layouts/basic_form_template', $fields);
+            // set the flash data error message if there is one
+            $this->data['message'] = (validation_errors() ? validation_errors() : ($this->ion_auth->errors() ? $this->ion_auth->errors() : $this->session->flashdata('message')));
+            
+    
+            $this->fuel->pages->render('misc/lomakemuokkaus', $data);
+
+        }
+    }
+        
+        
+        
+    private function sort_users_groups($groupData, $id){
+                            // Only allow updating groups if user is admin
+            // Update the groups user belongs to
+
+            if (isset($groupData) && !empty($groupData))
+            {
+
+                $this->ion_auth->remove_from_group('', $id);
+
+                foreach ($groupData as $grp)
+                {
+                    $this->ion_auth->add_to_group($grp, $id);
+                }
+
+            }
+                    
+    }
+    
+    
+	}
+    
+
 ?>

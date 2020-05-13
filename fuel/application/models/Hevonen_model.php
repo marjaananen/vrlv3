@@ -45,6 +45,10 @@ class Hevonen_model extends Base_module_model
        
     }
     
+    
+    
+    
+    
     public function onko_tunnus($tunnus){
         $this->db->where('reknro', $tunnus);
         $this->db->from('vrlv3_hevosrekisteri');
@@ -62,7 +66,7 @@ class Hevonen_model extends Base_module_model
     
     function get_horse_owners($reknro)
     {
-        $this->db->select('omistaja, nimimerkki, taso, vrlv3_hevosrekisteri_omistajat.id as id');
+        $this->db->select('omistaja, nimimerkki, taso, CONCAT(vrlv3_hevosrekisteri_omistajat.omistaja, "/", vrlv3_hevosrekisteri_omistajat.reknro) as id');
         $this->db->from('vrlv3_hevosrekisteri_omistajat');
         $this->db->join('vrlv3_tunnukset', 'vrlv3_tunnukset.tunnus = vrlv3_hevosrekisteri_omistajat.omistaja');
         $this->db->where('reknro', $this->CI->vrl_helper->vh_to_number($reknro));
@@ -177,39 +181,45 @@ class Hevonen_model extends Base_module_model
     }
     
     //functions for search
-    function search_horse($name, $rotu, $gender, $dead, $color, $birthyear){
-        $this->db->select("reknro, nimi, rotu, vari, sukupuoli, syntymaaika");
-
-        if ($dead == 1){
-            $this->db->where("kuollut", 1);
-        }
-        else $this->db->where("kuollut", 0);
+    function search_horse($reknro, $name, $rotu, $gender, $dead, $color, $birthyear){
+        $this->db->select("reknro, nimi, rotu, vari, IF(sukupuoli='1', 'tamma', IF(sukupuoli='2', 'ori', 'ruuna')) as sukupuoli, syntymaaika");
         
-        if($rotu > -1){
-            $this->db->where("rotu", $rotu);
+        //jos haetaan rekisterinumerolla, millään muulla ei ole väliä
+        if (strlen($reknro) > 5){
+            $this->db->where("reknro", $reknro);
         }
-        if($color > -1){
-            $this->db->where("vari", $color);
-        }
-        if($gender > -1){
-            $this->db->where("sukupuoli", $gender);
-        }
-        if(isset($birth_year) && $birth_year > 1000){
-            $this->db->where("syntymaaika <", ($birth_year+1)."-01-01");
-            $this->db->where("syntymaaika >", ($birth_year-1)."-12-31");
-        }
+        else {
+            if ($dead == 1){
+                $this->db->where("kuollut", 1);
+            }
+            else { $this->db->where("kuollut", 0);}
+            
+            if($rotu > -1){
+                $this->db->where("rotu", $rotu);
+            }
+            if($color > -1){
+                $this->db->where("vari", $color);
+            }
+            if($gender > -1){
+                $this->db->where("sukupuoli", $gender);
+            }
+            if(isset($birth_year) && $birth_year > 1000){
+                $this->db->where("syntymaaika <", ($birth_year+1)."-01-01");
+                $this->db->where("syntymaaika >", ($birth_year-1)."-12-31");
+            }
+            
+            if(isset($breeder)){
+                $this->db->where("kasvattaja_tunnus", $breeder);
+            }
         
-        if(isset($breeder)){
-            $this->db->where("kasvattaja_tunnus", $breeder);
+            if(!empty($name))
+            {
+                if(strpos($name, '*') !== false)
+                    $this->db->where('nimi LIKE "' . str_replace('*', '%', $name) . '"');
+                else
+                    $this->db->where('nimi', $name);
+            }
         }
-    
-        if(!empty($name))
-        {
-            if(strpos($name, '*') !== false)
-                $this->db->where('nimi LIKE "' . str_replace('*', '%', $name) . '"');
-            else
-                $this->db->where('nimi', $name);
-        }        
         
         $this->db->from('vrlv3_hevosrekisteri');
         $this->db->limit(1000);

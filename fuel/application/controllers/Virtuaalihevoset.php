@@ -21,6 +21,7 @@ class Virtuaalihevoset extends CI_Controller
     {
 		$this->load->model('hevonen_model');
 		$this->load->library('form_validation');
+		$this->load->library('vrl_helper');
 		$data['title'] = 'Hevosrekisteri';
 		
 		$data['msg'] = 'Hae hevosia rekisteristä. Voit käyttää tähteä * jokerimerkkinä.';
@@ -31,20 +32,26 @@ class Virtuaalihevoset extends CI_Controller
 		
 		if($this->input->server('REQUEST_METHOD') == 'POST')
 		{
-	
-			if($this->validate_horse_search_form() == true && !(empty($this->input->post('nimi'))));
+			$vars['headers'][1] = array('title' => 'Rekisterinumero', 'key' => 'reknro', 'key_link' => site_url('virtuaalihevoset/hevonen/'), 'type'=>'VH');
+			$vars['headers'][2] = array('title' => 'Nimi', 'key' => 'nimi');
+			$vars['headers'][3] = array('title' => 'Rotu', 'key' => 'rotu');
+			$vars['headers'][4] = array('title' => 'Sukupuoli', 'key' => 'sukupuoli');
+			
+			$vars['headers'] = json_encode($vars['headers']);
+			
+			if($this->validate_horse_search_form() == true)
 			{
-				$vars['headers'][1] = array('title' => 'Rekisterinumero', 'key' => 'reknro', 'key_link' => site_url('virtuaalihevoset/hevonen/'), 'type'=>'VH');
-				$vars['headers'][2] = array('title' => 'Nimi', 'key' => 'nimi');
-				$vars['headers'][3] = array('title' => 'Rotu', 'key' => 'rotu');
-				$vars['headers'][4] = array('title' => 'Sukupuoli', 'key' => 'sukupuoli');
-				
-				$vars['headers'] = json_encode($vars['headers']);
-							
-				$vars['data'] = json_encode($this->hevonen_model->search_horse($this->input->post('nimi'), $this->input->post('rotu'), $this->input->post('skp'), $this->input->post('kuollut'), $this->input->post('vari'), $this->input->post('syntynyt_v')));
-				$data['tulokset'] = $this->load->view('misc/taulukko', $vars, TRUE);
+				$reknro = 0;
+				if ($this->vrl_helper->check_vh_syntax($this->input->post('reknro'))){
+					$reknro = $this->vrl_helper->vh_to_number($this->input->post('reknro'));
+				}
 
+				$vars['data'] = json_encode($this->hevonen_model->search_horse($reknro, $this->input->post('nimi'), $this->input->post('rotu'), $this->input->post('skp'),
+																			   $this->input->post('kuollut'), $this->input->post('vari'), $this->input->post('syntynyt_v')));
 			}
+			
+			$data['tulokset'] = $this->load->view('misc/taulukko', $vars, TRUE);
+
 		}
 		
 		$this->fuel->pages->render('misc/haku', $data);
@@ -76,6 +83,105 @@ class Virtuaalihevoset extends CI_Controller
 		
 	}
 	
+	
+	 function muokkaa($reknro, $sivu='tiedot', $tapa = null, $id = null)
+    {
+		$mode = 'edit';
+		$msg = "";
+		
+		$data = array();
+		$data['sivu'] = $sivu;
+		
+		$this->load->library("vrl_helper");
+				
+		if(empty($reknro) || !$this->vrl_helper->check_vh_syntax($reknro)){
+			ECHO "EI";
+		}
+
+		if(!$this->_is_editing_allowed($reknro, $msg)){
+            $this->fuel->pages->render('misc/naytaviesti', array('msg_type' => 'danger', 'msg' => $msg));
+			return;
+		}
+			
+	
+		if($this->ion_auth->is_admin())
+			$mode = 'admin';
+			
+		$data['hevonen'] = $this->hevonen_model->get_hevonen($reknro);
+		
+
+		if($sivu == 'omistajat'){
+			$this->load->library('ownership');
+			if($mode == 'admin' || $this->ownership->is_horses_main_owner($this->ion_auth->user()->row()->tunnus, $this->vrl_helper->vh_to_number($reknro))){				
+				$this->ownership->handle_horse_ownerships($mode, $tapa, $this->ion_auth->user()->row()->tunnus, $id, $this->vrl_helper->vh_to_number($reknro), $data);				
+				$data['form'] = $this->ownership->get_owner_adding_form('virtuaalihevoset/hevonen/muokkaa/'.$reknro.'/');
+				$data['ownership'] = $this->ownership->horse_ownerships($reknro, true, 'virtuaalihevoset/hevonen/muokkaa/'.$reknro.'/');
+			} else {
+				$data['ownership'] = $this->ownership->horse_ownerships($reknro, false, 'virtuaalihevoset/hevonen/muokkaa/'.$reknro.'/');
+			}
+		}
+
+		
+		else if ($sivu == 'lopeta'){
+			$data['editor'] = "TODO";
+		}
+		
+		else if($sivu == 'tiedot'){
+					
+			$data['editor'] = "TODO";
+
+	
+
+					
+
+	
+			}
+			
+			
+			
+			$this->fuel->pages->render('hevoset/hevonen_muokkaa', $data);
+				
+				
+					
+    }
+	
+	private $allowed_user_groups = array('admin', 'hevosrekisteri');
+
+	
+
+	private function _is_editing_allowed($reknro, &$msg){
+
+		//stable nro is missing
+		if(empty($reknro)){
+			$msg = "Rekisterinumero puuttuu!";
+			return false;
+		}
+				
+		//only logged in can edit
+		if(!($this->ion_auth->logged_in())){
+            $msg = "Kirjaudu sisään muokataksesi!";
+			return false;
+		}
+		
+		//are you admin or editor?
+		$this->load->library('user_rights', array('groups' => $this->allowed_user_groups));
+		
+		//only admin, editor and owner can edit
+		if(!($this->ion_auth->is_admin()) && !$this->user_rights->is_allowed() && !($this->hevonen_model->is_horse_owner($this->ion_auth->user()->row()->tunnus, $reknro))){
+			$msg = "Jos et ole ylläpitäjä, voit muokata vain omia hevosiasi.";
+			return false;
+		}
+		
+		//does the stable exist?
+		$this->load->library("vrl_helper");
+		if(!$this->hevonen_model->onko_tunnus($this->vrl_helper->vh_to_number($reknro))){
+			$msg = "Hevosta ei ole olemassa.";
+			return false;
+		}
+		
+		return true;		
+		
+	}
 	
 	
 	

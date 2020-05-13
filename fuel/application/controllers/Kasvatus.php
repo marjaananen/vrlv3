@@ -276,6 +276,10 @@ class Kasvatus extends CI_Controller
 					$vars['msg'] = "Rekisteröinti epäonnistui!";
 					$vars['msg_type'] = "danger";
 				}
+				else if($this->kasvattajanimi_model->is_name_in_use($this->input->post('kasvattajanimi'))){
+					$vars['msg'] = "Kasvattajanimi " .$this->input->post('kasvattajanimi')." on jo olemassa.";
+					$vars['msg_type'] = "danger";
+				}
 				else
 				{
 					$vars['msg'] = "Rekisteröinti onnistui!";
@@ -401,37 +405,6 @@ class Kasvatus extends CI_Controller
     }
 
 	
-	private function _lisaa_varsat($nro){
-		
-		$this->load->model('hevonen_model');
-		$vars['title'] = "";	
-		$vars['msg'] = '';
-		$vars['text_view'] = "";
-		$vars['massatuho'] = array();
-		
-		$vars['massatuho']['form'] = '';
-		$vars['massatuho']['instructions'] = "Voit lisätä";
-		$vars['massatuho']['buttons'] = '<input type="submit" value="Submit">';
-	
-	
-		
-		$vars['headers'][1] = array('title' => 'Rekisterinumero', 'key' => 'reknro', 'key_link' => site_url('virtuaalihevoset/hevonen/'), 'type'=>'VH');
-		$vars['headers'][2] = array('title' => 'Nimi', 'key' => 'nimi');
-		$vars['headers'][3] = array('title' => 'Rotu', 'key' => 'rotu');
-		$vars['headers'][4] = array('title' => 'Sukupuoli', 'key' => 'sukupuoli');
-		$vars['headers'][5] = array('checkbox_id' => "nakki[]", 'title' => 'Valitse', 'key' => 'rotunro');
-
-			
-		$vars['headers'] = json_encode($vars['headers']);
-						
-		$vars['data'] = json_encode($this->hevonen_model->get_names_foals_by_id($nro));
-		
-		
-		return $this->load->view('misc/taulukko', $vars, TRUE);
-
-		
-		
-	}
        
 	
 	

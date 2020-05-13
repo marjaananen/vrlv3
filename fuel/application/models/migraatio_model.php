@@ -564,14 +564,17 @@ class Migraatio_model extends Base_module_model
     
     
     public function migrate_kasvattajanimet(){
+        /*//siirretään kasvattajanimet sellaisenaan
         $this->db->query("INSERT INTO vrlv3_kasvattajanimet (id, kasvattajanimi, rekisteroity, tila) SELECT id, kasvattajanimi, rekisteroity, tila FROM kasvattajanimet");
-        
+        //lisätään kasvattajanimelle tallit, mutta tarkistetaan onko talli olemassa
         $this->db->query("UPDATE vrlv3_kasvattajanimet
             INNER JOIN kasvattajanimet ON vrlv3_kasvattajanimet.id = kasvattajanimet.id
             SET vrlv3_kasvattajanimet.tnro = kasvattajanimet.tallinid
             WHERE EXISTS(SELECT * FROM vrlv3_tallirekisteri WHERE vrlv3_tallirekisteri.tnro = kasvattajanimet.tallinid)");
+        echo "kasvattajanimet done";
+
         
-        
+        //lisätään kasvattajanimelle rodut, mutta tarkistetaan että nimi ja rotu on olemassa
         $this->db->query("INSERT INTO vrlv3_kasvattajanimet_rodut (kid, rotu)
             (SELECT distinct id, rotu
                 FROM kasvattajanimet_rodut 
@@ -580,6 +583,47 @@ class Migraatio_model extends Base_module_model
                         WHERE vrlv3_lista_rodut.rotunro = kasvattajanimet_rodut.rotu) 
                     AND EXISTS (SELECT * FROM vrlv3_kasvattajanimet 
                         WHERE vrlv3_kasvattajanimet.id = kasvattajanimet_rodut.id))");
+        echo "kasvattajanimen rodut done";
+
+        //Lisätään kasvattajanimelle omistaja, mutta tarkistetaan että omistaja ja nimi on olemassa
+        $this->db->query("INSERT INTO vrlv3_kasvattajanimet_omistajat (kid, tunnus, taso)
+            (SELECT distinct id, tunnus, '1'
+                FROM kasvattajanimet 
+                WHERE EXISTS (
+                        SELECT * FROM vrlv3_tunnukset 
+                        WHERE vrlv3_tunnukset.tunnus = kasvattajanimet.tunnus) 
+                    AND EXISTS (SELECT * FROM vrlv3_kasvattajanimet 
+                        WHERE vrlv3_kasvattajanimet.id = kasvattajanimet.id))");
+        echo "kasvatajanimen omistajat done";
+                
+
+        $this->db->query("UPDATE vrlv3_hevosrekisteri
+            INNER JOIN hevosrekisteri_kasvattaja ON vrlv3_hevosrekisteri.reknro = hevosrekisteri_kasvattaja.reknro
+            SET vrlv3_hevosrekisteri.kasvattajanimi = hevosrekisteri_kasvattaja.kasvattajanimi");
+        
+        $this->db->query("UPDATE vrlv3_hevosrekisteri
+            INNER JOIN hevosrekisteri_kasvattaja ON vrlv3_hevosrekisteri.reknro = hevosrekisteri_kasvattaja.reknro
+            SET vrlv3_hevosrekisteri.kasvattaja_tunnus = hevosrekisteri_kasvattaja.kasvattajahlo
+            WHERE hevosrekisteri_kasvattaja.kasvattajahlo != '00000' AND EXISTS(SELECT * FROM vrlv3_tunnukset 
+                        WHERE vrlv3_tunnukset.tunnus = hevosrekisteri_kasvattaja.kasvattajahlo)");
+        
+        $this->db->query("UPDATE vrlv3_hevosrekisteri
+            INNER JOIN hevosrekisteri_kasvattaja ON vrlv3_hevosrekisteri.reknro = hevosrekisteri_kasvattaja.reknro
+            SET vrlv3_hevosrekisteri.kasvattaja_talli = hevosrekisteri_kasvattaja.kasvattajatalli
+            WHERE EXISTS(SELECT * FROM vrlv3_tallirekisteri 
+                        WHERE vrlv3_tallirekisteri.tnro = hevosrekisteri_kasvattaja.kasvattajatalli)");
+        */
+        
+                
+        $this->db->query("UPDATE vrlv3_hevosrekisteri
+            INNER JOIN vrlv3_kasvattajanimet ON vrlv3_hevosrekisteri.kasvattajanimi = vrlv3_kasvattajanimet.kasvattajanimi
+            SET vrlv3_hevosrekisteri.kasvattajanimi_id = vrlv3_kasvattajanimet.id
+            WHERE vrlv3_hevosrekisteri.kasvattajanimi = vrlv3_kasvattajanimet.kasvattajanimi");
+        
+            
+            
+                        
+        
         
         echo "done";
         

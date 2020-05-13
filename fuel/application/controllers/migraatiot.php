@@ -191,7 +191,8 @@ class Migraatiot extends CI_Controller
     
     function hevoset(){
         $this->load->model('migraatio_model');
-       /* $montako=$this->migraatio_model->count_kaakit();
+        /*
+        $montako=$this->migraatio_model->count_kaakit();
         
         if ($montako > 100000){
             $limit = ceil($montako/10);
@@ -218,16 +219,18 @@ class Migraatiot extends CI_Controller
         
         $this->migraatio_model->migrate_hevosenomistajat();
         echo "omistajat done<br>";
-        
-        //$this->migraatio_model->migrate_hevosuvut();
-        echo "suvut done";*/
-        $this->migraatio_model->migrate_kasvattajatiedot();
-        echo "pluh";
+        */
+        $this->migraatio_model->migrate_hevosuvut();
+        echo "suvut done";
 
         echo "lisatiedot done<br>";
     }
     
-
+    function kasvattajanimet (){
+    $this->load->model('migraatio_model');
+    $this->migraatio_model->migrate_kasvattajanimet();
+    echo "kasvit done";
+    }
     
     
 
