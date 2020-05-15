@@ -36,21 +36,59 @@ class Uutiset_model extends Base_module_model
         
     }
     
+    function muokkaa_tiedotus ($tid, $otsikko, $teksti, $tagit = array()){
+        $insert_data = array();            
+        $date = new DateTime();
+        $date->setTimestamp(time());
+        
+        $insert_data['muokpvm'] = $date->format('Y-m-d H:i:s');
+        $insert_data['otsikko'] = $otsikko;
+        $insert_data['teksti'] =  nl2br($teksti);
+        $insert_data['muokkaaja'] = $this->ion_auth->user()->row()->tunnus;
+        
+        $this->db->where('tid', $tid);
+        $this->db->update('vrlv3_tiedotukset', $insert_data);
+        
+        //poistetaan vanhat kategoriat
+        $this->db->where('tid', $tid);
+        $this->db->delete('vrlv3_tiedotukset_kategoriat');
+        
+        //lisätään uudet kategoriat
+        foreach ($tagit as $tag)
+        {            
+            $data_tiedotus_kategoria = array();
+            $data_tiedotus_kategoria['kid'] = $tag;
+            $data_tiedotus_kategoria['tid'] = $tid;
+            $this->db->insert('vrlv3_tiedotukset_kategoriat', $data_tiedotus_kategoria);        
+        }
+        
+        return $tid;
+        
+        
+    }
+    
     function laheta_tiedotus($otsikko, $teksti, $tagit=array()){
-            
+        $insert_data = array();            
+        $date = new DateTime();
+        $date->setTimestamp(time());
+                    
 
-        $data_tiedotus['otsikko']= $otsikko;
-        $data_tiedotus['teksti']= $teksti;
-        $data_tiedotus['lahettaja'] = $this->ion_auth->user()->row()->tunnus;
-        $data_tiedotus['julkinen'] = 1;
+        $insert_data['muokpvm'] = $date->format('Y-m-d H:i:s');
+        $insert_data['otsikko'] = $otsikko;
+        $insert_data['teksti'] =  nl2br($teksti);
+        $insert_data['aika'] = $date->format('Y-m-d H:i:s');
+        $insert_data['lahettaja'] = $this->ion_auth->user()->row()->tunnus;
+        $insert_data['julkinen'] = 1;
+        $insert_data['muokkaaja'] = $this->ion_auth->user()->row()->tunnus;
+            
         
       
-        $this->db->insert('vrlv3_tiedotukset', $data_tiedotus);
+        $this->db->insert('vrlv3_tiedotukset', $insert_data);
             
       
         //haetaan sen käsitellyn tid
         $this->db->select("tid");
-        $this->db->where(array($data_tiedotus));
+        $this->db->where($insert_data);
         $this->db->order_by("aika", "desc"); 
         $tid_query = $this->db->get('vrlv3_tiedotukset');
         $tid = $tid_query->row()->tid;
@@ -62,9 +100,12 @@ class Uutiset_model extends Base_module_model
             $data_tiedotus_kategoria['kid'] = $tag;
             $data_tiedotus_kategoria['tid'] = $tid;
             $this->db->insert('vrlv3_tiedotukset_kategoriat', $data_tiedotus_kategoria);        
-        }               
+        }
+        
+        return $tid;
                                        
     }
+    
     
     
     function hae_kategoria($kid, $limit, $offset)
@@ -105,7 +146,9 @@ class Uutiset_model extends Base_module_model
         }
         
         $this->db->order_by("aika", "desc");
-        $this->db->limit($limit, $offset);    
+        if($limit > 0){
+            $this->db->limit($limit, $offset);
+        }
         $query = $this->db->get('vrlv3_tiedotukset');
         
         return  $this->_kasittele_tiedotukset($query->result_array());
@@ -129,6 +172,11 @@ class Uutiset_model extends Base_module_model
         
     }
     
+    function delete_tiedotus($id)
+    {        
+        $this->db->delete('vrlv3_tiedotukset', array('tid' => $id));
+    }
+    
     
     function hae_tiedotus($tid)
     {
@@ -140,6 +188,20 @@ class Uutiset_model extends Base_module_model
         
         return  $this->_kasittele_tiedotukset($query->result_array());
         
+    }
+    
+
+    function hae_kategoriat_options(){
+        $this->db->select("vrlv3_lista_tiedotuskategoriat.kid as kid, vrlv3_lista_tiedotuskategoriat.kategoria as kat");
+        $this->db->order_by("kat");
+            $this->db->from("vrlv3_lista_tiedotuskategoriat");
+            $kat_query = $this->db->get();
+            $kategoriat = array();
+            foreach ($kat_query->result_array() as $kat_row){
+                $kategoriat[$kat_row['kid']] = $kat_row['kat'];
+            }
+            
+            return $kategoriat;
     }
     
     private function _kasittele_tiedotukset($tiedotuslista){
@@ -165,6 +227,7 @@ class Uutiset_model extends Base_module_model
         return $tiedotukset;
     
     }
+    
     
     
 
