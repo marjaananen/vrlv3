@@ -38,8 +38,7 @@
                 $date = new DateTime();
                 foreach($latest_failed_logins as $lfl)
                 {
-                    $date->setTimestamp($lfl['time']);
-                    echo "<li>" . $lfl['nimimerkki'] . " (" . $date->format('Y-m-d H:i:s') . ")</li>";
+                    echo "<li>" . $lfl['nimimerkki'] . " (" . $lfl['aika'] . ")</li>";
                 }
             ?>
         </ul>

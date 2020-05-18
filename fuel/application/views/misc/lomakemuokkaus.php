@@ -1,4 +1,4 @@
-
+<h1><?php echo fuel_var('title', '')?></h1>
 <p>
     <div class="alert alert-<?php echo fuel_var('msg_type', 'info')?>" role="alert">   
         <?php echo fuel_var('msg', 'Tähdellä merkittyjä kenttiä ei voi jättää tyhjäksi.')?>

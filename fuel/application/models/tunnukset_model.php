@@ -286,11 +286,12 @@ class Tunnukset_model extends Base_module_model
     //Logins
     function get_latest_failed_logins()
     {
-        $this->db->select('nimimerkki, time');
-        $this->db->from('vrlv3_login_attempts');
-        $this->db->join('vrlv3_tunnukset', 'vrlv3_login_attempts.login = vrlv3_tunnukset.tunnus');
-        $this->db->order_by("time", "desc");
-        $this->db->limit(5);
+        $this->db->select('vrlv3_tunnukset.tunnus, nimimerkki, aika, ip');
+        $this->db->from('vrlv3_tunnukset_kirjautumiset');
+        $this->db->join('vrlv3_tunnukset', 'vrlv3_tunnukset_kirjautumiset.tunnus = vrlv3_tunnukset.tunnus');
+        $this->db->where('onnistuiko', 0);
+        $this->db->order_by("aika", "desc");
+        $this->db->limit(10);
         $query = $this->db->get();
         
         if ($query->num_rows() > 0)
@@ -302,14 +303,17 @@ class Tunnukset_model extends Base_module_model
     }
     
     
-    function get_latest_logins()
+    function get_latest_logins($id=null, $limit=10)
     {
-        $this->db->select('nimimerkki, aika');
+        $this->db->select('vrlv3_tunnukset.tunnus, nimimerkki, aika, ip');
         $this->db->from('vrlv3_tunnukset_kirjautumiset');
         $this->db->join('vrlv3_tunnukset', 'vrlv3_tunnukset_kirjautumiset.tunnus = vrlv3_tunnukset.tunnus');
         $this->db->where('onnistuiko', 1);
+        if($id != null){
+            $this->db->where('vrlv3_tunnukset.tunnus', $id);
+        }
         $this->db->order_by("aika", "desc");
-        $this->db->limit(5);
+        $this->db->limit($limit);
         $query = $this->db->get();
         
         if ($query->num_rows() > 0)
@@ -320,15 +324,17 @@ class Tunnukset_model extends Base_module_model
         return array();
     }
     
-    function get_logins_by_ip($ip)
+    function get_logins_by_ip($ip, $limit=5)
     {
-        $this->db->select('nimimerkki, vrlv3_tunnukset.tunnus, aika');
+        $this->db->select('nimimerkki, vrlv3_tunnukset.tunnus, aika, ip');
         $this->db->from('vrlv3_tunnukset_kirjautumiset');
         $this->db->join('vrlv3_tunnukset', 'vrlv3_tunnukset_kirjautumiset.tunnus = vrlv3_tunnukset.tunnus');
         $this->db->where('ip',  $ip);
         $this->db->order_by("aika", "desc");
-        $this->db->limit(5);
+        $this->db->limit($limit);
         $query = $this->db->get();
+        echo $this->db->last_query();
+
         
         if ($query->num_rows() > 0)
         {

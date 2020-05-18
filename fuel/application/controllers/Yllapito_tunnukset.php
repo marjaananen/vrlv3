@@ -12,6 +12,7 @@ class Yllapito_tunnukset extends CI_Controller
         if (!$this->user_rights->is_allowed()){       
             redirect($this->user_rights->redirect());
         }
+        $this->load->model("tunnukset_model");
     }
 
     //ADMIN-OSUUS
@@ -167,81 +168,184 @@ class Yllapito_tunnukset extends CI_Controller
     
     public function muokkaa($tunnus = null)
 	{
-		$data['title'] = "Muokkaa käyttäjän oikeuksia";
+        $data['title'] = "Muokkaa käyttäjän oikeuksia";
         $this->load->library("vrl_helper");
+        //jos haettiin tunnusta, avataan ko. tunnuksen editori
+        if($this->input->server('REQUEST_METHOD') == 'POST' && $this->input->post('tunnushaku')){
+            $tunnus = $this->input->post('VRL');
+            if($this->vrl_helper->check_vrl_syntax($tunnus)){
+                redirect('/yllapito/tunnukset/muokkaa/'.$this->vrl_helper->vrl_to_number($tunnus), 'refresh');
+                return;
+            } else  {
+                $data['msg'] = "Tunnusta ei löydy";
+                $data['msg_type'] = "danger";
+                
+                $this->fuel->pages->render('misc/naytaviesti', $data);
+            }
+         
+        }
+        //jos haluttiin tallentaa oikeuksia
+        else if ($this->input->server('REQUEST_METHOD') == 'POST' && $this->input->post('oikeus')){
+            $tunnus = $this->vrl_helper->vrl_to_number($this->input->post('tunnus'));
+            $this->sort_users_groups($this->input->post('oikeudet'), $this->ion_auth->get_user_id_from_identity($tunnus));
+            redirect('/yllapito/tunnukset/oikeudet', 'refresh');
+ 
+        }
+        
+        else if ($tunnus != null){
+            $user_id = $this->ion_auth->get_user_id_from_identity($this->vrl_helper->vrl_to_number($tunnus));
+            
+            if ($user_id == false){
+                $data['msg'] = "Tunnusta ei löydy";
+                $data['msg_type'] = "danger";
+                
+                $this->fuel->pages->render('misc/naytaviesti', $data);
+
+            }
+            else {
+                $groups = $this->ion_auth->groups()->result_array();
+                $currentGroups = $this->ion_auth->get_users_groups($user_id)->result();
+                $group_options = array();
+                foreach ($groups as $key=>$group){
+                    $group_options[$group['id']] = $group['name'];
+                }
+                $users_groups=array();
+                foreach ($currentGroups as $group){
+                    $users_groups[]=$group->id;
+                }
+                
+           
+                $data['msg'] = "Valitse käyttäjälle sopivat oikeudet";
+                $this->load->library('form_builder', array('submit_value' => "Muokkaa oikeuksia", 'submit_name' => 'oikeus', 'required_text' => '*Pakollinen kenttä'));
+                $fields['tunnus'] = array('type' => 'hidden', 'value' => $tunnus);
+                $fields['oikeudet'] = array('type' => 'multi', 'mode' => 'checkbox', 'required' => TRUE, 'options' => $group_options, 'value'=>$users_groups, 'class'=>'form-control', 'wrapper_tag' => 'li');
+                $this->form_builder->form_attrs = array('method' => 'post', 'action' => '/yllapito/tunnukset/muokkaa/'.$this->vrl_helper->vrl_to_number($tunnus));
+    
+                
+                $data['form'] = $this->form_builder->render_template('_layouts/basic_form_template', $fields);
+                // set the flash data error message if there is one
+                $this->data['message'] = (validation_errors() ? validation_errors() : ($this->ion_auth->errors() ? $this->ion_auth->errors() : $this->session->flashdata('message')));
+                
+        
+                $this->fuel->pages->render('misc/lomakemuokkaus', $data);
+    
+            }
+        
+        }
+    
         
         //eio tunnusta, haetaan tunnuksenhakulomake
-        if ($tunnus==null && $this->input->server('REQUEST_METHOD') == 'GET'){
-            $this->load->library('form_builder', array('submit_value' => 'Hae'));
+        else {
+            $this->load->library('form_builder', array('submit_value' => 'Hae', 'submit_name'=>'tunnushaku'));
             $fields['VRL'] = array('type' => 'text', 'class'=>'form-control');
             $this->form_builder->form_attrs = array('method' => 'post', 'action' => site_url('/yllapito/tunnukset/muokkaa'));                  
             $data['form'] = $this->form_builder->render_template('_layouts/basic_form_template', $fields);
              $this->fuel->pages->render('misc/lomakemuokkaus', $data);
         }
-        
-        //haetaan oikea tunnus
-        else if ($tunnus == null && $this->input->server('REQUEST_METHOD') == 'POST'){
-            $tunnus = $this->input->post('VRL');
-            if($this->vrl_helper->check_vrl_syntax($tunnus)){
-                redirect('/yllapito/tunnukset/muokkaa/'.$this->vrl_helper->vrl_to_number($tunnus), 'refresh');
-                return;
-            }
-            else $this->index();
-            
-        }
-        //tunnus tiedossa
-        else {	
-            if ($this->input->server('REQUEST_METHOD') == 'POST')
-            {
-                
-                if (!$this->vrl_helper->check_vrl_syntax($this->input->post('tunnus'))
-                    || !($this->vrl_helper->vrl_to_number($tunnus) == $this->vrl_helper->vrl_to_number($this->input->post('tunnus')))){
-                    var_dump($tunnus);
-                    echo ".";
-                    echo $this->input->post('tunnus');
-                    echo ".";
-                    echo $this->vrl_helper->vrl_to_number($tunnus);
-                    echo "=";
-                    echo $this->vrl_helper->vrl_to_number($this->input->post('tunnus'));
                     
-                } else {
-                    $this->sort_users_groups($this->input->post('oikeudet'), $this->ion_auth->get_user_id_from_identity($tunnus));
-                }
-
-            }
-           
-           
-            $user_id = $this->ion_auth->get_user_id_from_identity($tunnus);
-            $groups = $this->ion_auth->groups()->result_array();
-            $currentGroups = $this->ion_auth->get_users_groups($user_id)->result();
-            $group_options = array();
-            foreach ($groups as $key=>$group){
-                $group_options[$group['id']] = $group['name'];
-            }
-            $users_groups=array();
-            foreach ($currentGroups as $group){
-                $users_groups[]=$group->id;
-            }
             
-           
-
-            $this->load->library('form_builder', array('submit_value' => "Muokkaa oikeuksia", 'required_text' => '*Pakollinen kenttä'));
-            $fields['tunnus'] = array('type' => 'hidden', 'value' => $tunnus);
-            $fields['oikeudet'] = array('type' => 'multi', 'mode' => 'checkbox', 'required' => TRUE, 'options' => $group_options, 'value'=>$users_groups, 'class'=>'form-control', 'wrapper_tag' => 'li');
-            $this->form_builder->form_attrs = array('method' => 'post', 'action' => '/yllapito/tunnukset/muokkaa/'.$this->vrl_helper->vrl_to_number($tunnus));
-
-            
-            $data['form'] = $this->form_builder->render_template('_layouts/basic_form_template', $fields);
-            // set the flash data error message if there is one
-            $this->data['message'] = (validation_errors() ? validation_errors() : ($this->ion_auth->errors() ? $this->ion_auth->errors() : $this->session->flashdata('message')));
-            
-    
-            $this->fuel->pages->render('misc/lomakemuokkaus', $data);
-
-        }
     }
         
+    public function oikeudet($oikeus = null){
+        $this->load->model('Oikeudet_model');
+        $vars['title'] = 'Käyttöoikeudet';				
+
+        if ($oikeus == null){        
         
+			$vars['text_view'] = "";			
+			$vars['headers'][1] = array('title' => 'Id', 'key' => 'id', 'key_link' => site_url('yllapito/tunnukset/oikeudet/'));
+			$vars['headers'][2] = array('title' => 'Oikeusryhmä', 'key' => 'name');
+			$vars['headers'][3] = array('title' => 'Kuvaus', 'key' => 'description');			
+			$vars['headers'][4] = array('title' => 'Jäsenet (kpl)', 'key' => 'kpl');
+			
+			$vars['headers'] = json_encode($vars['headers']);		
+			$stables = $this->Oikeudet_model->get_groups();
+			
+			$vars['data'] = json_encode($stables);
+	
+			$this->fuel->pages->render('misc/taulukko', $vars);
+        }
+            
+        else {
+            				
+			$vars['text_view'] = "";
+			
+			$vars['headers'][1] = array('title' => 'Tunnus', 'key' => 'tunnus', 'type'=>'VRL', 'key_link' => site_url('/tunnus/'));
+			$vars['headers'][2] = array('title' => 'Nimimerkki', 'key' => 'nimimerkki');
+			$vars['headers'][3] = array('title' => 'Editoi', 'key' => 'tunnus', 'key_link' => site_url('yllapito/tunnukset/muokkaa/'), 'image' => site_url('assets/images/icons/edit.png'));
+			
+			
+			$vars['headers'] = json_encode($vars['headers']);
+			
+			
+			$stables = $this->Oikeudet_model->users_in_group_id($oikeus);
+			$vars['data'] = json_encode($stables);
+	
+			$this->fuel->pages->render('misc/taulukko', $vars);
+            }
+        
+        
+    }
+    
+    public function kirjautumiset($tapa = 'tunnus'){
+        $data = array();
+        $data['title'] = 'Viimeisimpien kirjautumisten haku';
+        $this->load->library('vrl_helper');
+        if($tapa == 'tunnus'){
+                $this->load->library('form_builder', array('submit_value' => 'Hae kirjautumiset', 'submit_name'=>'tunnushaku'));
+                $fields['tunnus'] = array('type' => 'text', 'class'=>'form-control', 'after_html' => '<span class="form_comment">VRL-tunnus, jonka viimeiset kirjautumistiedot haluat.</span>');
+                $this->form_builder->form_attrs = array('method' => 'post', 'action' => site_url('/yllapito/tunnukset/kirjautumiset/tunnus'));                  
+                $data['form'] = $this->form_builder->render_template('_layouts/basic_form_template', $fields);
+        }else if ($tapa == 'ip'){
+                $this->load->library('form_builder', array('submit_value' => 'Hae kirjautumiset', 'submit_name'=>'iphaku'));
+                $fields['ip'] = array('type' => 'text', 'class'=>'form-control', 'after_html' => '<span class="form_comment">IP osoite (Esim. 127.0.0.1) josta kirjautuneet haluat.</span>');
+                $this->form_builder->form_attrs = array('method' => 'post', 'action' => site_url('/yllapito/tunnukset/kirjautumiset/ip'));                  
+                $data['form'] = $this->form_builder->render_template('_layouts/basic_form_template', $fields);
+        }
+        
+        if($this->input->server('REQUEST_METHOD') == 'POST'){
+            $vars['text_view'] = "";
+            
+            $vars['headers'][1] = array('title' => 'Tunnus', 'key' => 'tunnus', 'type' => 'vrl', 'key_link' => site_url('tunnus/'));
+            $vars['headers'][2] = array('title' => 'Nimimerkki', 'key' => 'nimimerkki');
+            $vars['headers'][3] = array('title' => 'Aika', 'key' => 'aika', 'type'=>'date');
+            $vars['headers'][4] = array('title' => 'Ip-osoite', 'key' => 'ip');
+
+            $vars['headers'] = json_encode($vars['headers']);
+            if($tapa == 'tunnus' && $this->input->post('tunnushaku')){
+                if($this->vrl_helper->check_vrl_syntax($this->input->post('tunnus'))){
+                    $latest_logins = $this->tunnukset_model->get_latest_logins($this->vrl_helper->vrl_to_number($this->input->post('tunnus')), 20);
+                
+                    $vars['data'] = json_encode($latest_logins);            
+                    $data['tulokset'] = $this->load->view('misc/taulukko', $vars, TRUE);
+
+                }
+                else {
+                    $this->fuel->pages->render('misc/naytaviesti', array("msg"=>"Virheellinen tunnus!", "msg_type"=>"danger"));
+                }
+            }
+            
+            else if($tapa == 'ip' && $this->input->post('iphaku')){
+                $latest_logins = $this->tunnukset_model->get_logins_by_ip($this->input->post('ip'), 20);
+                
+                $vars['data'] = json_encode($latest_logins);            
+                $data['tulokset'] = $this->load->view('misc/taulukko', $vars, TRUE);
+
+
+            }
+        }
+
+
+            $this->fuel->pages->render('misc/haku', $data);
+            
+            
+        
+        
+        
+    }
+    
+    
+    
         
     private function sort_users_groups($groupData, $id){
                             // Only allow updating groups if user is admin

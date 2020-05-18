@@ -49,7 +49,7 @@ class Vrl_helper {
       return preg_replace("/[^0-9]/", "", $vrl);					
     }
     
-    else return "";
+    else return -1;
     
   }
 

@@ -28,6 +28,7 @@ class User_rights
     {
         $this->CI =& get_instance();
         $this->req_user_groups = $param['groups'];
+        $this->CI->load->model('Oikeudet_model');
     }
 
     public function is_allowed()
@@ -48,12 +49,13 @@ class User_rights
             
             //Käydään läpi jokainen ryhmä
             foreach ($this->req_user_groups as $group){
-                
-                //Onko ryhmä olemassa?
-                if($this->CI->ion_auth->in_group($group)){                        
-                    $user_is_in_one_of_the_groups = true;
-                    break;
-                } 
+                if($this->CI->Oikeudet_model->does_user_group_exist_by_name($group)){
+                    //Onko ryhmä olemassa?
+                    if($this->CI->ion_auth->in_group($group)){                        
+                        $user_is_in_one_of_the_groups = true;
+                        break;
+                    }
+                }
                 
                 else {
                     $this->CI->ion_auth->create_group($group, "Automatically added group");   

@@ -77,6 +77,9 @@ $nav['yllapito/tunnukset'] = array('label' => 'Tunnukset', 'parent_id' => 'yllap
 // ylläpito/tunnukset alamenu
 $nav['yllapito/tunnukset/hyvaksy'] = array('label' => 'Hyväksy VRL-tunnuksia', 'parent_id' => 'yllapito/tunnukset', 'active' => 'yllapito/tunnukset/hyvaksy');
 $nav['yllapito/tunnukset/muokkaa'] = array('label' => 'Muokkaa tunnuksen tietoja', 'parent_id' => 'yllapito/tunnukset', 'active' => 'yllapito/tunnukset/muokkaa');
+$nav['yllapito/tunnukset/oikeudet'] = array('label' => 'Käyttöoikeudet', 'parent_id' => 'yllapito/tunnukset', 'active' => 'yllapito/tunnukset/oikeudet');
+$nav['yllapito/tunnukset/kirjautumiset/ip'] = array('label' => 'Kirjautumiset (ip)', 'parent_id' => 'yllapito/tunnukset', 'active' => 'yllapito/tunnukset/kirjautumiset/ip');
+$nav['yllapito/tunnukset/kirjautumiset/tunnus'] = array('label' => 'Kirjautumiset (tunnus)', 'parent_id' => 'yllapito/tunnukset', 'active' => 'yllapito/tunnukset/kirjautumiset/tunnus');
 
 // profiili alamenu
 $nav['profiili/tunnus'] = array('label' => 'Omat tiedot', 'parent_id' => 'profiili', 'active' => 'profiili/tunnus');

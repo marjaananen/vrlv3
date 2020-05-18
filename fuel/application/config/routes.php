@@ -56,6 +56,11 @@ $route['yllapito/tunnukset'] = "yllapito_tunnukset/hakemusjono_etusivu";
 $route['yllapito/tunnukset/hyvaksy'] = "yllapito_tunnukset/hakemusjono";
 $route['yllapito/tunnukset/muokkaa'] = "yllapito_tunnukset/muokkaa";
 $route['yllapito/tunnukset/muokkaa/(:any)'] = "yllapito_tunnukset/muokkaa/$1";
+$route['yllapito/tunnukset/oikeudet'] = "yllapito_tunnukset/oikeudet";
+$route['yllapito/tunnukset/oikeudet/(:any)'] = "yllapito_tunnukset/oikeudet/$1";
+$route['yllapito/tunnukset/kirjautumiset'] = "yllapito_tunnukset/kirjautumiset";
+$route['yllapito/tunnukset/kirjautumiset/(:any)'] = "yllapito_tunnukset/kirjautumiset/$1";
+
 $route['yllapito/tiedotukset'] = "yllapito_tiedotukset";
 $route['yllapito/tiedotukset/(:any)'] = "yllapito_tiedotukset/$1";
 $route['yllapito/tiedotukset/(:any)/(:any)'] = "yllapito_tiedotukset/$1/$2";
