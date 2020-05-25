@@ -33,23 +33,25 @@ CREATE TABLE `vrlv3_hevosrekisteri` (
   `nimi` varchar(80) NOT NULL,
   `rotu` smallint(3) NOT NULL,
   `sukupuoli` enum('1','2','3','') NOT NULL,
-  `sakakorkeus` smallint(3) NOT NULL,
+  `sakakorkeus` `sakakorkeus` SMALLINT(3) NULL DEFAULT NULL,
   `syntymaaika` datetime NOT NULL,
   `vari` smallint(4) DEFAULT NULL,
   `painotus` smallint(2) DEFAULT NULL,
   `syntymamaa` smallint(4) DEFAULT NULL,
   `url` text NOT NULL,
-  `rekisteroity` datetime NOT NULL,
+  `rekisteroity` DATETIME NOT NULL DEFAULT current_timestamp,
   `hyvaksyi` int(5) UNSIGNED ZEROFILL NOT NULL,
   `kotitalli` varchar(8) DEFAULT NULL,
   `kuollut` int(1) NOT NULL DEFAULT '0',
-  `kuol_merkkasi` int(5) UNSIGNED ZEROFILL NOT NULL,
-  `kuol_pvm` datetime NOT NULL,
+  `kuol_merkkasi` `kuol_merkkasi` INT(5) UNSIGNED ZEROFILL NULL DEFAULT NULL,
+  `kuol_pvm` `kuol_pvm` DATETIME NULL DEFAULT NULL,
   `kasvattajanimi` varchar(25) CHARACTER SET latin1 DEFAULT NULL,
   `kasvattajanimi_id` int(8) DEFAULT NULL,
   `kasvattaja_talli` varchar(8) DEFAULT NULL,
   `kasvattaja_tunnus` int(5) UNSIGNED DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+
 
 -- --------------------------------------------------------
 

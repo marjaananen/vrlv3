@@ -77,6 +77,8 @@ $route['tallit/muokkaa/(:any)'] = "tallit/muokkaa/$1";
 $route['tallit/rekisterointi'] = "tallit/rekisterointi";
 
 $route['virtuaalihevoset/hevonen/(:any)'] = "virtuaalihevoset/hevosprofiili/$1";
+$route['virtuaalihevoset/hevonen/(:any)/(:any)'] = "virtuaalihevoset/hevosprofiili/$1/$2";
+
 $route['virtuaalihevoset/hevonen/muokkaa/(:any)'] = "virtuaalihevoset/muokkaa/$1";
 $route['virtuaalihevoset/hevonen/muokkaa/(:any)/(:any)'] = "virtuaalihevoset/muokkaa/$1/$2";
 $route['virtuaalihevoset/hevonen/muokkaa/(:any)/(:any)/(:any)'] = "virtuaalihevoset/muokkaa/$1/$2/$3";

@@ -34,11 +34,8 @@ class Vrl_helper {
   
   public function vh_to_number($vh){
     
-    if ($this->check_vh_syntax($vh)){
-      return preg_replace("/[^0-9]/", "", $vh);					
-    }
-    
-    else return "";
+     return preg_replace("/[^0-9]/", "", $vh);					
+
     
   }
   
@@ -104,9 +101,32 @@ class Vrl_helper {
     }
   }
   
+  public function generate_vh($rotu, $nro){
+    return "VH". date("y") ."-".sprintf("%03d", $rotu)."-".sprintf("%04d", $nro);
+  }
+  
   public function sql_date_to_normal($date){
     $oDate = new DateTime($date);
     return $oDate->format("d.m.Y");
+  }
+  
+  public function normal_date_to_sql($date){
+    $oDate = new DateTime($date);
+    return $oDate->format("Y-m-d");
+  }
+  
+  public function validateDate($date, $format = 'd.m.Y')
+  {
+    try {
+    $d = DateTime::createFromFormat($format, $date);
+    // The Y ( 4 digits year ) returns TRUE for any integer with any number of digits so changing the comparison from == to === fixes the issue.
+        return $d && $d->format($format) === $date;
+
+    }
+    catch (Exception $e){
+      return false;
+    }
+    
   }
   
 

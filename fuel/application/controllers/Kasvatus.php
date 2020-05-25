@@ -15,6 +15,54 @@ class Kasvatus extends CI_Controller
 	public function index (){
 		$this->_kasvattajanimihaku();
 	}
+    
+    public function unelmasuku(){
+        $this->load->library('vrl_helper');
+        $this->load->library('form_collection');
+        $vars['title'] = 'Unelmasuku';
+        
+        if(!$this->ion_auth->logged_in()){
+            $vars['msg'] = "Kirjaudu sisään käyttääksesi unelmasukuhakua.";
+            $vars['msg_type'] = 'danger';
+        }else {
+
+            $vars['text_view'] = "<p>Anna hevosten VH-tunnukset (isä, emä) ja voit kokeilla, miltä varsan sukutaulu tulisi näyttämään. Sukutaulussa näkyvät vain Virtuaaliseen Ratsastajainliittoon rekisteröidyt hevoset.</p>";
+            
+            $i_nro = "";
+            $e_nro = "";
+                
+            if($this->input->server('REQUEST_METHOD') == 'POST')
+            {
+                $i_nro = $this->input->post('i_nro');
+                $e_nro = $this->input->post('e_nro');
+                
+                if($this->vrl_helper->check_vh_syntax($i_nro) && $this->vrl_helper->check_vh_syntax($e_nro)){
+                    $vars['suku'] = array();
+                    $this->load->library("pedigree_printer");
+                    $vars['pedigree_printer'] = & $this->pedigree_printer;
+                    $this->load->model('Hevonen_model');
+                    $this->Hevonen_model->get_unelmasuku($i_nro, $e_nro, $vars['suku']);
+                }
+                else {
+                    $vars['msg'] = "Virheellinen VH-tunnus";
+                    $vars['msg_type'] = 'danger';
+                }
+                
+            }
+            $vars['form'] = $this->_get_dreampedigree_form($i_nro, $e_nro);
+        }
+            $this->fuel->pages->render('jalostus/unelmasuku', $vars);
+    }
+        
+
+    private function _get_dreampedigree_form($i="", $e=""){
+        $this->load->library('form_builder', array('submit_value' => "Hae", 'required_text' => '*Pakollinen kenttä'));	
+		$fields['i_nro'] = array('type' => 'text', 'label'=>'Isän VH-tunnus','required'=>TRUE, 'value' => $i, 'class'=>'form-control');
+        $fields['e_nro'] = array('type' => 'text', 'label'=>'Emän VH-tunnus','required'=>TRUE, 'value' => $e, 'class'=>'form-control');
+        $this->form_builder->form_attrs = array('method' => 'post', 'action' => site_url('kasvatus/unelmasuku'));
+        return $this->form_builder->render_template('_layouts/basic_form_template', $fields);
+
+    }
 	
 	
     

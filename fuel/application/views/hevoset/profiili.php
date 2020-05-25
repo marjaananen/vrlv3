@@ -69,8 +69,33 @@ if(isset($hevonen['kasvattaja_tunnus'])){
     <p><b>Omistajat:</b> <?php echo $omistajatieto; ?></p>
 </div>
 
-<div class="container">
-    <?php $pedigree_printer->createPedigree($suku, 4);?>
+
+ <ul class="nav nav-tabs">
+        <li role="presentation" class="<?php if ($sivu == 'suku' || empty($sivu)){echo "active";}?>"><a href="<?php echo base_url('virtuaalihevoset/hevonen/'. $hevonen['reknro'] . '/suku')?>">Suku</a></li>
+        <li role="presentation" class="<?php if ($sivu == 'varsat'){echo "active";}?>"><a href="<?php echo base_url('virtuaalihevoset/hevonen/'. $hevonen['reknro'] . '/varsat')?>">Jälkeläiset</a></li>
+        <li role="presentation" class="<?php if ($sivu == 'kilpailut'){echo "active";}?>"><a href="<?php echo base_url('virtuaalihevoset/hevonen/'. $hevonen['reknro'] . '/kilpailut')?>">Kilpailut ja näyttelyt</a></li>
+    </ul>
+    
+    <?php
+        if($sivu == 'suku' || empty($sivu))
+        {
+             $pedigree_printer->createPedigree($suku, 4);
+        }
+        else if($sivu == 'varsat'){
+            echo $foals;
+
+        } 
+        else if($sivu == 'kilpailut'){
+            echo $kilpailut;
+
+        }
+    
+    ?>
+
+
+
+<div class="alert alert-info" role="alert">
+  <?=$hevonen['h_nimi']?> on virtuaalihevonen. Se ei ole oikeasti olemassa.
 </div>
 
 

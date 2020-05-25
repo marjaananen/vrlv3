@@ -50,7 +50,6 @@ private function _handle_owners($taulu, $mode, $tapa, $adder, $owner, $item, &$f
                 $ok = false;
             }
             else if($this->CI->vrl_helper->check_vrl_syntax($tunnus) && ($taso == 1 || $taso == 0)){
-                echo "moi";
                 $ok = $this->_add($taulu, $this->CI->vrl_helper->vrl_to_number($tunnus), $item, $taso);
                 if ($ok){ $type = "success"; $msg = "Omistajan lisäys onnistui.";}
                 else {$type = "warning"; $msg = "Omistajan lisäys epäonnistui. Tarkasta, että tunnus on kirjoitettu oikein, ja ettei käyttäjä ole jo omistaja!";}
