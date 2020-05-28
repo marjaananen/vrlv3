@@ -91,7 +91,7 @@ $route['jasenyys'] = "jasenyys";
 $route['kisakeskus'] = "kisakeskus";
 $route['liitto'] = "liitto";
 
-
+$route['profiili/vaihda_salasana'] = 'auth/change_password';
 $route['profiili/tunnus'] = "jasenyys/tunnus/";
 
 

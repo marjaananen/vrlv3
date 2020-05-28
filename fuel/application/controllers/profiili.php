@@ -61,29 +61,7 @@ class Profiili extends Loggedin_Controller
             
             $this->form_validation->set_rules('nimimerkki', 'Nimimerkki', "min_length[1]|max_length[20]|regex_match[/^[A-Za-z0-9_\-.:,; *~#&'@()]*$/]");
             $this->form_validation->set_rules('nayta_email', 'Sähköpostin näkyvyys', 'min_length[1]|max_length[1]|numeric|regex_match[/^[01]*$/]');
-            $this->form_validation->set_rules('salasana', 'Salasana', "min_length[6]|max_length[20]|regex_match[/^[A-Za-z0-9_\-.:,; *~#&'@()]*$/]");
-            $this->form_validation->set_rules('uusi_salasana1', 'Uusi salasana', "min_length[6]|max_length[20]|regex_match[/^[A-Za-z0-9_\-.:,; *~#&'@()]*$/]");
-            $this->form_validation->set_rules('uusi_salasana2', 'Toistettu uusi salasana', "min_length[6]|max_length[20]|regex_match[/^[A-Za-z0-9_\-.:,; *~#&'@()]*$/]");
-            
-            if(!empty($this->input->post('salasana'))) //onko salasana ok
-            {
-                $valid = $this->ion_auth->hash_password_db($user->id, $this->input->post('salasana'));
-                if($valid == false)
-                    $vars['fail_msg'] = 'Annoit väärän salasanan!';
-            }
-            
-            if($this->input->post('uusi_salasana1') != $this->input->post('uusi_salasana2'))
-            {
-                $valid = false;
-                $vars['fail_msg'] = 'Uudet salasanat eivät vastaa toisiaan!';
-            }
-            else if(!empty($this->input->post('uusi_salasana1')) && empty($this->input->post('salasana')))
-            {
-                $valid = false;
-                $vars['fail_msg'] = 'Salasanan vaihtaminen vaatii vanhan antamisen!';
-            }
-            else if(!empty($this->input->post('uusi_salasana1')) && !empty($this->input->post('salasana')))
-                $change_password = true;
+         
             
             if ($this->form_validation->run() == true && $valid == true)
             {
@@ -107,13 +85,7 @@ class Profiili extends Loggedin_Controller
                         $this->tunnukset_model->add_previous_nickname($previous_nick, $user->tunnus);
                 }
                 
-                if($change_password == true && $vars['success'] == true)
-                {
-                    $change_password = $this->ion_auth->change_password($user->tunnus, $this->input->post('salasana'), $this->input->post('uusi_salasana1'));
-                    
-                    if($change_password == false)
-                        $vars['success'] = false;
-                }
+               
             }
         }
         
@@ -139,10 +111,7 @@ class Profiili extends Loggedin_Controller
         $fields['email'] = array('type' => 'text', 'value' => $user->email, 'label' => 'Sähköpostiosoite', 'after_html' => '<span class="form_comment">Anna toimiva osoite tai saatat menettää tunnuksesi!</span>', 'class'=>'form-control');
         $fields['nayta_email'] = array('type' => 'checkbox', 'checked' => $user->nayta_email, 'label' => 'Näytetäänkö sähköposti julkisesti?', 'after_html' => '<span class="form_comment">Näytetäänkö sähköposti julkisesti profiilissasi.</span>', 'class'=>'form-control');
         $fields['muut_yhteystiedot'] = array('type' => 'section', 'tag' => 'label', 'value' => 'Muut yhteystiedot', 'display_label' => false, 'after_html' => $contacts_html . '<span class="form_comment"><a href="' . site_url('/profiili/muokkaa_yhteystietoja') . '">Muokkaa yhteystietoja</a></span>');
-        $fields['salasana'] = array('type' => 'password', 'class'=>'form-control');
-        $fields['uusi_salasana1'] = array('type' => 'password', 'label' => 'Uusi salasana', 'class'=>'form-control');
-        $fields['uusi_salasana2'] = array('type' => 'password', 'label' => 'Toista uusi salasana', 'after_html' => '<span class="form_comment">Täytä salasanakentät vain jos haluat vaihtaa salasanasi. Salasanassa tulee olla vähintään 6 merkkiä. Salasana tulee voimaan heti, eikä sinun tarvitse kirjautua sisään uudelleen.</span>', 'class'=>'form-control');
-        
+                
         $this->form_builder->form_attrs = array('method' => 'post', 'action' => site_url('profiili/tiedot'));
 
         // render the page

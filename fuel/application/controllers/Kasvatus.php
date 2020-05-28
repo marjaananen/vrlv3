@@ -5,6 +5,8 @@ class Kasvatus extends CI_Controller
     {
         parent::__construct();
 		$this->load->model('kasvattajanimi_model');
+        $this->load->library('user_rights', array('groups' => $this->allowed_user_groups));
+
     }
 	
 	//pages
@@ -213,7 +215,7 @@ class Kasvatus extends CI_Controller
 						$vars['headers'][2] = array('title' => 'Kasvattajanimi', 'key' => 'kasvattajanimi');
 						$vars['headers'][3] = array('title' => 'Rodut', 'key' => 'lyhenne', 'aggregated_by' => 'id');
 						$vars['headers'][4] = array('title' => 'Rekisteröity', 'key' => 'rekisteroity', 'type' => 'date');
-						if($this->ion_auth->is_admin()){
+						if($this->user_rights->is_allowed()){
 							$vars['headers'][5] = array('title' => 'Editoi', 'key' => 'id', 'key_link' => site_url('kasvatus/kasvattajanimet/muokkaa/'), 'image' => site_url('assets/images/icons/edit.png'));
 							$vars['headers'][6] = array('title' => 'Poista', 'key' => 'id', 'key_link' => site_url('kasvatus/kasvattajanimet/poista/'), 'image' => site_url('assets/images/icons/delete.png'));
 						
@@ -252,7 +254,7 @@ class Kasvatus extends CI_Controller
 			$vars['headers'][2] = array('title' => 'Id', 'key' => 'id', 'key_link' => site_url('kasvatus/kasvattajanimet/nimi/'));
 			$vars['headers'][3] = array('title' => 'Kasvattajanimi', 'key' => 'kasvattajanimi');
 			$vars['headers'][4] = array('title' => 'Rekisteröity', 'key' => 'rekisteroity', 'type' => 'date');
-			if($this->ion_auth->is_admin()){
+			if($this->user_rights->is_allowed()){
 				$vars['headers'][5] = array('title' => 'Editoi', 'key' => 'id', 'key_link' => site_url('kasvatus/kasvattajanimet/muokkaa/'), 'image' => site_url('assets/images/icons/edit.png'));
 				$vars['headers'][6] = array('title' => 'Poista', 'key' => 'id', 'key_link' => site_url('kasvatus/kasvattajanimet/poista/'), 'image' => site_url('assets/images/icons/delete.png'));
 				
@@ -400,7 +402,7 @@ class Kasvatus extends CI_Controller
 		}
 		else {
 			$mode = 'edit';
-			if($this->ion_auth->is_admin())
+			if($this->user_rights->is_allowed())
 				$mode = 'admin';
 				
 			$fields['mode'] = $mode;

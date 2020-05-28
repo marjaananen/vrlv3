@@ -24,7 +24,7 @@ class Tallit extends CI_Controller
 		$vars['headers'][1] = array('title' => 'Perustettu', 'key' => 'perustettu', 'type' => 'date');
 		$vars['headers'][2] = array('title' => 'Tallinumero', 'key' => 'tnro', 'key_link' => site_url('tallit/talli/'));
 		$vars['headers'][3] = array('title' => 'Nimi', 'key' => 'nimi');
-		if($this->ion_auth->is_admin()){
+		if($this->user_rights->is_allowed()){
 			$vars['headers'][4] = array('title' => 'Editoi', 'key' => 'tnro', 'key_link' => site_url('tallit/muokkaa/'), 'image' => site_url('assets/images/icons/edit.png'));
 		}
 		
@@ -47,7 +47,7 @@ class Tallit extends CI_Controller
 		$vars['headers'][1] = array('title' => 'Päivitetty', 'key' => 'aika', 'type' => 'date');
 		$vars['headers'][2] = array('title' => 'Tallinumero', 'key' => 'tnro', 'key_link' => site_url('tallit/talli/'));
 		$vars['headers'][3] = array('title' => 'Nimi', 'key' => 'nimi');
-		if($this->ion_auth->is_admin()){
+		if($this->user_rights->is_allowed()){
 			$vars['headers'][4] = array('title' => 'Editoi', 'key' => 'tnro', 'key_link' => site_url('tallit/muokkaa/'), 'image' => site_url('assets/images/icons/edit.png'));
 		}
 		
@@ -204,7 +204,7 @@ class Tallit extends CI_Controller
 				$vars['headers'][2] = array('title' => 'Nimi', 'key' => 'nimi');
 				$vars['headers'][3] = array('title' => 'Kategoria', 'key' => 'katelyh', 'aggregated_by' => 'tnro');
 				$vars['headers'][4] = array('title' => 'Perustettu', 'key' => 'perustettu', 'type' => 'date');
-				if($this->ion_auth->is_admin()){
+				if($this->user_rights->is_allowed()){
 					$vars['headers'][5] = array('title' => 'Editoi', 'key' => 'tnro', 'key_link' => site_url('tallit/muokkaa/'), 'image' => site_url('assets/images/icons/edit.png'));
 				}
 				
@@ -334,7 +334,7 @@ class Tallit extends CI_Controller
 		}
 			
 	
-		if($this->ion_auth->is_admin())
+		if($this->user_rights->is_allowed())
 			$mode = 'admin';
 			
 		$data['stable'] = $this->tallit_model->get_stable($tnro);

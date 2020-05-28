@@ -230,10 +230,7 @@ class Jasenyys extends CI_Controller
 			$vars['headers'][1] = array('title' => 'Perustettu', 'key' => 'perustettu', 'type' => 'date');
 			$vars['headers'][2] = array('title' => 'Tallinumero', 'key' => 'tnro', 'key_link' => site_url('tallit/talli/'));
 			$vars['headers'][3] = array('title' => 'Nimi', 'key' => 'nimi');
-			if($this->ion_auth->is_admin()){
-				$vars['headers'][4] = array('title' => 'Editoi', 'key' => 'tnro', 'key_link' => site_url('tallit/muokkaa/'), 'image' => site_url('assets/images/icons/edit.png'));
-			}
-			
+
 			$vars['headers'] = json_encode($vars['headers']);
 			
 			$stables =  $this->tallit_model->get_users_stables($nro);		
