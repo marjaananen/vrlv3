@@ -16,7 +16,18 @@ if(isset($suku) and sizeof($suku) > 0){
  }
  
  ?>
+ <?php if(isset($varit)){?>
+  <script src="<?php echo base_url();?>assets/js/periytymisjavascript.js"></script>
 
+ <h3>Värien periytyminen</h3>
+ <p>Huom! Virtuaalihevosharrastuksessa perinnöllisyyttä ei ole pakko noudattaa, ja hevosen väri voi vaihtua sen elämän aikana. Tässä osiossa esitelty tieto perustuu valittujen vanhempien tämänhetkiseen rekisteröityyn väriin. </p>
+ 
+ <?php echo fuel_var('varit', 'Värien periytyminen voidaan laskea vain jos molemmilla vanhemmilla on väri.')?>
+ 
+ <?php } ?>
+ 
+ 
+ 
 
 
 

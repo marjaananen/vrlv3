@@ -1018,6 +1018,11 @@ ALTER TABLE `vrlv3_lista_painotus`
 --
 ALTER TABLE `vrlv3_lista_rodut`
   MODIFY `rotunro` smallint(3) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=312;
+  
+  
+ALTER TABLE `vrlv3_lista_varit`
+  MODIFY `rotunro` smallint(4) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=179;
+
 
 --
 -- AUTO_INCREMENT for table `vrlv3_lista_roturyhmat`

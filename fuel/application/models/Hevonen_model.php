@@ -462,7 +462,7 @@ class Hevonen_model extends Base_module_model
             { $this->db->where("kuollut", 0);}
             
             if($rotu > -1){
-                $this->db->where("rotu", $rotu);
+                $this->db->where("h.rotu", $rotu);
             }
             if($color > -1){
                 $this->db->where("vari", $color);
@@ -662,7 +662,7 @@ class Hevonen_model extends Base_module_model
     
 
     private function _get_suku_info($reknro){
-        $this->db->select("h.reknro, h.nimi, r.lyhenne as rotu, v.lyhenne as vari, sukupuoli, sakakorkeus, i_nro, e_nro");
+        $this->db->select("h.reknro, h.nimi, r.lyhenne as rotu, v.lyhenne as vari, v.vid as vid, sukupuoli, sakakorkeus, i_nro, e_nro");
         $this->db->where("h.reknro", $this->CI->vrl_helper->vh_to_number($reknro));
         $this->db->from('vrlv3_hevosrekisteri as h');
         $this->db->join("vrlv3_lista_rodut as r", "h.rotu = r.rotunro", 'left outer');

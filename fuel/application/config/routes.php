@@ -65,6 +65,12 @@ $route['yllapito/tiedotukset'] = "yllapito_tiedotukset";
 $route['yllapito/tiedotukset/(:any)'] = "yllapito_tiedotukset/$1";
 $route['yllapito/tiedotukset/(:any)/(:any)'] = "yllapito_tiedotukset/$1/$2";
 
+$route['yllapito/hevosrekisteri'] = "yllapito_hevosrekisteri";
+$route['yllapito/hevosrekisteri/(:any)'] = "yllapito_hevosrekisteri/$1";
+$route['yllapito/hevosrekisteri/(:any)/(:any)'] = "yllapito_hevosrekisteri/$1/$2";
+$route['yllapito/hevosrekisteri/(:any)/(:any)/(:any)'] = "yllapito_hevosrekisteri/$1/$2/$3";
+
+
 
 $route['yllapito/tunnukset/kasittele/(:any)/(:any)'] = "yllapito_tunnukset/kasittele_hakemus/$1/$2";
 

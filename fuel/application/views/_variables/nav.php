@@ -51,10 +51,12 @@ $nav['virtuaalihevoset/varit'] = array('label' => 'Värilista', 'parent_id' => '
 $nav['virtuaalihevoset/syntymamaat'] = array('label' => 'Syntymämaalista', 'parent_id' => 'virtuaalihevoset', 'active' => 'virtuaalihevoset/syntymamaat'); //Koodattavaa: Syntymämaat
 //jalostus ja kasvatus alamenu
 $nav['kasvatus/kasvattajanimet'] = array('label' => 'Kasvattajanimirekisteri', 'parent_id' => 'kasvatus', 'active' => 'kasvatus/kasvattajanimet'); 
-$nav['kasvatus/kasvattajanimet/rekisteroi'] = array('label' => 'Rekisteröi kasvattajanimi', 'parent_id' => 'kasvatus', 'active' => 'kasvatus/kasvattajanimet/omat');
-$nav['kasvatus/kasvattajanimet/omat'] = array('label' => 'Omat kasvattajanimet', 'parent_id' => 'kasvatus', 'active' => 'kasvatus/kasvattajanimet/omat');
+$nav['kasvatus/kasvattajanimet/rekisteroi'] = array('label' => 'Rekisteröi kasvattajanimi', 'parent_id' => 'kasvatus/kasvattajanimet', 'active' => 'kasvatus/kasvattajanimet/omat');
+$nav['kasvatus/kasvattajanimet/omat'] = array('label' => 'Omat kasvattajanimet', 'parent_id' => 'kasvatus/kasvattajanimet', 'active' => 'kasvatus/kasvattajanimet/omat');
 $nav['kasvatus/kasvatit'] = array('label' => 'Omat kasvatit', 'parent_id' => 'kasvatus', 'active' => 'kasvatus/kasvatit');
-$nav['kasvatus/unelmasuku'] = array('label' => 'Unelmasuku', 'parent_id' => 'kasvatus', 'active' => 'kasvatus/unelmasuku'); 
+$nav['kasvatus/unelmasuku'] = array('label' => 'Unelmasuku', 'parent_id' => 'kasvatus', 'active' => 'kasvatus/unelmasuku');
+$nav['kasvatus/varijalostus'] = array('label' => 'Värien periytyminen', 'parent_id' => 'kasvatus', 'active' => 'kasvatus/varijalostus'); 
+$nav['kasvatus/varilaskuri'] = array('label' => 'Periytymislaskuri', 'parent_id' => 'kasvatus/varijalostus', 'active' => 'kasvatus/varilaskuri'); 
 
 //kantakirjat, laatikset, rekkaa kasvinimi
 //kilpailutoiminta alamenu
@@ -75,6 +77,7 @@ $nav['kilpailutoiminta/jarjestaminen'] = array('label' => 'Näyttelyiden järjes
 // ylläpito alamenu
 $nav['yllapito/tiedotukset'] = array('label' => 'Tiedotukset', 'parent_id' => 'yllapito', 'active' => 'yllapito/tiedotukset');
 $nav['yllapito/tunnukset'] = array('label' => 'Tunnukset', 'parent_id' => 'yllapito', 'active' => 'yllapito/tunnukset');
+$nav['yllapito/hevosrekisteri'] = array('label' => 'Hevosrekisteri', 'parent_id' => 'yllapito', 'active' => 'yllapito/hevosrekisteri');
     
 // ylläpito/tunnukset alamenu
 $nav['yllapito/tunnukset/hyvaksy'] = array('label' => 'Hyväksy VRL-tunnuksia', 'parent_id' => 'yllapito/tunnukset', 'active' => 'yllapito/tunnukset/hyvaksy');
@@ -88,6 +91,8 @@ $nav['profiili/tunnus'] = array('label' => 'Omat tiedot', 'parent_id' => 'profii
 $nav['profiili/tiedot'] = array('label' => 'Muokkaa tietoja', 'parent_id' => 'profiili', 'active' => 'profiili/tiedot');
 $nav['profiili/vaihda_salasana'] = array('label' => 'Vaihda salasana', 'parent_id' => 'profiili', 'active' => 'profiili/vaihda_salasana');
 $nav['profiili/pikaviestit'] = array('label' => 'Omat pikaviestit', 'parent_id' => 'profiili', 'active' => 'profiili/pikaviestit');
+
+$nav['yllapito/hevosrekisteri/varit'] = array('label' => 'Hallitse värejä', 'parent_id' => 'yllapito/hevosrekisteri', 'active' => 'yllapito/hevosrekisteri/varit');
 
 
 
