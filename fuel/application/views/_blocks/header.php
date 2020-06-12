@@ -94,8 +94,12 @@
 		{
 			echo "<p>Tervetuloa, " . $this->session->userdata( 'tunnus' ) . "<br /> <a href=" . site_url('/auth/logout') . ">Kirjaudu ulos</a> <br /> <a href=" . site_url('/profiili') . ">Profiili</a>";
 			echo "<br />Sinulle on " . $this->tunnukset_model->unread_messages($this->session->userdata('identity')) . " uutta <a href=" . site_url('/profiili/pikaviestit') . ">pikaviestiä</a>.</p>";
-			if ($this->ion_auth->is_admin()){
-				echo "<p>Olet ylläpitäjä, tästä pääset ylläpitäjähommiin:</p>";
+			
+			
+			$group_amount = $this->ion_auth->get_users_groups()->result_array();
+          
+			if ($this->ion_auth->is_admin() || sizeof($group_amount) > 2 || (sizeof($group_amount) == 1 && $group_amount[0]['name'] !== "members")){
+				echo "<p>Ylläpitotoiminnot:</p>";
 				echo $adminmainmenu;
 			}
 		}

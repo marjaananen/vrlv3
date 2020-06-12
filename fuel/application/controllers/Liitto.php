@@ -20,7 +20,33 @@ class Liitto extends CI_Controller
     {
         $vars = array();
         $vars['message'] = $this->session->flashdata('message');
+        $this->load->model("Oikeudet_model");
+        $vars['user'] = array();
+        $vars['users']['admin'] = $this->_get_groups_users("admin", "Ylläpitotiimi");
+        $vars['users']['tunnukset'] = $this->_get_groups_users("tunnukset", "Tunnusvastaava");
+        $vars['users']['jaos'] = $this->_get_groups_users("jaos", "Jaosvastaava");
+        $vars['users']['tyovoima'] = $this->_get_groups_users("tyovoima", "Työvoimavastaava");
+        $vars['users']['hevosrekisteri'] = $this->_get_groups_users("hevosrekisteri", "Hevosrekisteritiimi");
+        $vars['users']['tallirekisteri'] = $this->_get_groups_users("tallirekisteri", "Tallirekisteritiimi");
+        $vars['users']['kasvattajanimet'] = $this->_get_groups_users("kasvattajanimet", "Kasvattajanimirekisteritiimi");
+
+
+        
+    
+        
+        
         $this->fuel->pages->render('liitto/yllapito', $vars);
+    }
+    
+    private function _get_groups_users($group_name, $desc){
+        $users = array();
+        if($this->Oikeudet_model->does_user_group_exist_by_name($group_name)){
+            $users = $this->Oikeudet_model->users_in_group_name($group_name);
+            
+        }else {
+            $this->ion_auth->create_group($group_name, $desc);   
+        }
+        return $users;
     }
 	
 	function wiki()

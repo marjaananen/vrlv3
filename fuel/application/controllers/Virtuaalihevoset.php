@@ -421,6 +421,7 @@ class Virtuaalihevoset extends CI_Controller
 		$vars['headers'][1] = array('title' => 'ID', 'key' => 'rotunro', 'key_link' => site_url('virtuaalihevoset/rotu/'));
 		$vars['headers'][2] = array('title' => 'Rotu', 'key' => 'rotu');
 		$vars['headers'][3] = array('title' => 'Lyhenne', 'key' => 'lyhenne');
+        $vars['headers'][4] = array('title' => 'Harvinainen', 'key' => 'harvinainen');
 		$vars['headers'] = json_encode($vars['headers']);
 					
 		$vars['data'] = json_encode($this->hevonen_model->get_breed_list());

@@ -93,6 +93,7 @@ $nav['profiili/vaihda_salasana'] = array('label' => 'Vaihda salasana', 'parent_i
 $nav['profiili/pikaviestit'] = array('label' => 'Omat pikaviestit', 'parent_id' => 'profiili', 'active' => 'profiili/pikaviestit');
 
 $nav['yllapito/hevosrekisteri/varit'] = array('label' => 'Hallitse värejä', 'parent_id' => 'yllapito/hevosrekisteri', 'active' => 'yllapito/hevosrekisteri/varit');
+$nav['yllapito/hevosrekisteri/rodut'] = array('label' => 'Hallitse rotuja', 'parent_id' => 'yllapito/hevosrekisteri', 'active' => 'yllapito/hevosrekisteri/rodut');
 
 
 

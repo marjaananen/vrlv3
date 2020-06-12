@@ -695,7 +695,7 @@ class Hevonen_model extends Base_module_model
     
     public function get_breed_list(){
         
-        $this->db->select('rotunro, rotu, lyhenne');
+        $this->db->select('rotunro, rotu, lyhenne, roturyhma, harvinainen');
         $this->db->from('vrlv3_lista_rodut');
         $query = $this->db->get();
         

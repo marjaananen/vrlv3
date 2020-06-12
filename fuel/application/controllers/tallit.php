@@ -5,7 +5,12 @@ class Tallit extends CI_Controller
     {
         parent::__construct();
 		$this->load->model('tallit_model');
+        $this->load->library('user_rights', array('groups' => $this->allowed_user_groups));
+
     }
+    
+    private $allowed_user_groups = array('admin', 'tallirekisteri');
+    
 	
 	//pages
 	public function pipari(){
@@ -427,7 +432,6 @@ class Tallit extends CI_Controller
    
 	
 	
-	private $allowed_user_groups = array('admin', 'tallirekisteri');
 
     
 	private function _is_editing_allowed($tnro, &$msg){
@@ -445,7 +449,6 @@ class Tallit extends CI_Controller
 		}
 		
 		//are you admin or editor?
-		$this->load->library('user_rights', array('groups' => $this->allowed_user_groups));
 		
 		//only admin, editor and owner can edit
 		if(!($this->ion_auth->is_admin()) && !$this->user_rights->is_allowed() && !($this->tallit_model->is_stable_owner($this->ion_auth->user()->row()->tunnus, $tnro))){

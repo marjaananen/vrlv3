@@ -39,6 +39,23 @@ class Oikeudet_model extends Base_module_model
         return array();
     }
     
+    function users_in_group_name($group_name){
+        $this->db->select('vrlv3_tunnukset.tunnus, vrlv3_tunnukset.nimimerkki');
+        $this->db->from('vrlv3_users_groups');
+        $this->db->join('vrlv3_tunnukset', 'vrlv3_users_groups.user_id = vrlv3_tunnukset.id');
+        $this->db->join('vrlv3_groups', 'vrlv3_groups.id = vrlv3_users_groups.group_id');
+
+        $this->db->where('vrlv3_groups.name', $group_name);
+        $query = $this->db->get();
+        
+        if ($query->num_rows() > 0)
+        {
+            return $query->result_array();
+        }
+        
+        return array();
+    }
+    
     
     function get_groups(){
         $this->db->select('vrlv3_groups.id, name, description, count(user_id) as kpl');

@@ -14,6 +14,8 @@ class Yllapito_hevosrekisteri extends CI_Controller
             redirect($this->user_rights->redirect());
         }
         $this->load->model('Color_model');
+        $this->load->model('Breed_model');
+
         $this->url = "yllapito/hevosrekisteri/";
         
 
@@ -107,7 +109,7 @@ $this->pipari();
            $this->fuel->pages->render('misc/naytaviesti', array('msg_type' => 'danger', 'msg' => "Käsiteltävää väriä ei ole valittu"));
         }
         $msg = "";
-        if($this->_is_editing_allowed($id, $msg)){
+        if($this->_is_editing_color_allowed($id, $msg)){
             $this->load->model("Color_model");
 
             if ($tapa == "poista"){
@@ -206,10 +208,7 @@ $this->pipari();
         return $this->form_validation->run();
     }
     
-    
-  
-    
-    private function _is_editing_allowed($vid, &$msg){
+      private function _is_editing_color_allowed($vid, &$msg){
         
         $newsitem = $this->Color_model->get_colour_info($vid);
         if ($newsitem === null || sizeof($newsitem) == 0){
@@ -223,7 +222,203 @@ $this->pipari();
         
         
         
+    }  
+    
+    
+    //////////////////////////////////
+    //RODUT
+    
+    
+     function rodut($msg = array()){
+        
+         $data = $msg;
+         $data['title'] = 'Muokkaa rotulistaa';
+         $data['text_view'] = "<p>Olemassaolevan rodun muokkaaminen vaikuttaa kaikkiin hevosiin, joille ko. ritu on rekisteröity! Rotua ei voi poistaa, jos sille on rekisteröity yksikin hevonen.</p>";
+         
+
+        //start the form
+            
+        if($this->input->server('REQUEST_METHOD') == 'POST'){
+            $tid = 0;
+            if ($this->_validate_breed_form('new') == FALSE)
+                {
+                    $data['msg'] = "Tallennus epäonnistui epäonnistui!";
+                    $data['msg_type'] = "danger";
+                    $data['form'] = $this->_get_breed_form('new');
+
+                }
+
+            else
+                {
+                   $data['form'] = $this->_get_breed_form('new');
+
+                    //add 
+                   $tid = $this->Breed_model->lisaa_rotu($data['msg'], $this->input->post('rotu'), $this->input->post('lyhenne'), $this->input->post('roturyhma'), $this->input->post('harvinainen'));
+                   
+                   if ($tid !== false){
+                   
+                    $data['msg'] = "Julkaisu onnistui! Katso uusi väri <a href=\"".site_url('virtuaalihevoset/rotu/'.$tid) ."\">täältä</a>.";
+                    $data['msg_type'] = "success";
+                    }
+                    else {
+                        $data['msg_type'] = "danger";
+
+                    }
+                }
+        }
+        
+        else  {
+            $data['form'] = $this->_get_breed_form('new');
+        }
+                
+        //start the list      
+        $data['tulokset'] = $this->_rotutaulukko();
+        $this->fuel->pages->render('misc/haku', $data);
+
     }
+    
+    
+        private function _rotutaulukko(){
+                                //start the list
+        $this->load->model("Breed_model");
+		
+						
+		
+		$vars['headers'][1] = array('title' => 'ID', 'key' => 'rotunro', 'key_link' => site_url('virtuaalihevoset/rotu/'));
+		$vars['headers'][2] = array('title' => 'Rotu', 'key' => 'rotu');
+		$vars['headers'][3] = array('title' => 'Lyhenne', 'key' => 'lyhenne');
+        $vars['headers'][4] = array('title' => 'Roturyhmä', 'key' => 'roturyhma');
+        $vars['headers'][5] = array('title' => 'Harvinainen', 'key' => 'harvinainen');
+        $vars['headers'][6] = array('title' => 'Poista', 'key' => 'rotunro', 'key_link' => site_url($this->url.'rotu/poista/'), 'image' => site_url('assets/images/icons/delete.png'));
+        $vars['headers'][7] = array('title' => 'Editoi', 'key' => 'rotunro', 'key_link' => site_url($this->url.'rotu/muokkaa/'), 'image' => site_url('assets/images/icons/edit.png'));
+  
+		$vars['headers'] = json_encode($vars['headers']);
+					
+		$vars['data'] = json_encode($this->Breed_model->get_breed_list());
+        
+        return  $this->load->view('misc/taulukko', $vars, TRUE);
+        
+    }
+	
+    
+    
+	
+    
+    function rotu ($tapa = null, $id = null){
+        if($tapa == null || $id == null){           
+           $this->fuel->pages->render('misc/naytaviesti', array('msg_type' => 'danger', 'msg' => "Käsiteltävää rotua ei ole valittu"));
+        }
+        $msg = "";
+        if($this->_is_editing_breed_allowed($id, $msg)){
+            $this->load->model("Breed_model");
+
+            if ($tapa == "poista"){
+                if ($this->Breed_model->delete_rotu($id) === false){
+                    $this->rodut(array('msg_type' => 'danger', 'msg' => "Et voi poistaa rotua jolle on rekisteröity hevosia"));
+    
+                }
+                
+                else {
+                    $this->rodut(array('msg_type' => 'success', 'msg' => "Poisto onnistui."));
+                }
+            }
+            
+            else if ($tapa == "muokkaa"){
+                 $data = array();
+                $data['title'] = "Muokkaa rotua";
+                $data['data_view'] = "<p>Huom! Muokkaukset koskevat kaikkia hevosia, joille tämä rotu on rekisteröity. Käytäthän muokkausta vain virheiden korjaamiseen (kirjoitusvirheet jne).</p>";
+                $data['msg'] = "";
+                if($this->input->server('REQUEST_METHOD') == 'POST'){
+                    $tid = 0;
+                    if ($this->_validate_breed_form('edit') == FALSE)
+                        {
+                            $data['msg'] = "Rodun muokkaus epäonnistui!";
+                            $data['msg_type'] = "danger";
+                        }
+        
+                    else
+                        {
+    
+                            if($this->Breed_model->muokkaa_rotu($data['msg'], $id, $this->input->post('rotu'), $this->input->post('lyhenne'),
+                                                                $this->input->post('roturyhma'), $this->input->post('harvinainen'))){
+                                $data['msg'] = "Muokkaus onnistui! Katso rotu <a href=\"". site_url('virtuaalihevoset/rotu/'.$id) ."\">täältä</a>.";
+                                $data['msg_type'] = "success";
+                                $this->fuel->pages->render('misc/naytaviesti', array($data));
+
+                            }else {
+                                $data['msg_type'] = "danger";
+                                
+                            }
+                        }
+                }
+                
+                
+                $data['form'] = $this->_get_breed_form('edit',  $id);
+                $this->fuel->pages->render('misc/haku', $data);
+    
+            }
+        } else {
+            $this->fuel->pages->render('misc/naytaviesti', array('msg_type' => 'danger', 'msg' => $msg));
+ 
+        }
+     
+    
+    }
+    
+    
+    
+ 
+    
+    private function _get_breed_form($mode, $id = 0, $color = array()){
+        if ($mode == "edit"){           
+            $color = $this->Breed_model->get_breed_info($id);
+            $this->load->library('form_builder', array('submit_value' => "Tallenna", 'required_text' => '*Pakollinen kenttä'));
+            $this->form_builder->form_attrs = array('method' => 'post', 'action' => site_url($this->url .'rotu/muokkaa/'.$id));
+           
+        }
+        else {
+
+            $this->load->library('form_builder', array('submit_value' => "Lisää", 'required_text' => '*Pakollinen kenttä'));
+            $this->form_builder->form_attrs = array('method' => 'post', 'action' => site_url($this->url .'rodut'));
+        }     
+            
+        $fields['rotu'] = array('type' => 'text', 'label' => "Rotu", 'required' => TRUE, 'value' => $color['rotu'] ?? "", 'class'=>'form-control');
+        $fields['lyhenne'] = array('type' => 'text', 'label' => "Lyhenne", 'required' => TRUE, 'value' => $color['lyhenne'] ?? "", 'class'=>'form-control');
+        $fields['roturyhma'] = array('type' => 'select', 'label'=> 'Roturyhmä', 'options' => $this->Breed_model->get_breed_group_option_list(), 'required' => FALSE, 'value'=> $color['roturyhma'] ?? "0", 'class'=>'form-control');
+        $fields['harvinainen'] = array('type' => 'enum', 'label'=> 'Harvinainen?','mode' => 'radios', 'options' => array(0=>"Ei", 1=>"Kyllä"), 'value'=> $color['harvinainen']?? 0);
+
+        
+        return  $this->form_builder->render_template('_layouts/basic_form_template', $fields);
+    }
+    
+    private function _validate_breed_form()
+    {
+        
+        $this->load->library('form_validation');
+
+        $this->form_validation->set_rules('rotu', 'Otsikko', "required|min_length[1]|max_length[240]");
+        $this->form_validation->set_rules('lyhenne', 'Lyhenne', "required|min_length[1]|max_length[240]");
+        return $this->form_validation->run();
+    }
+    
+    private function _is_editing_breed_allowed($id, &$msg){
+        
+        $newsitem = $this->Breed_model->get_breed_info($id);
+        if ($newsitem === null || sizeof($newsitem) == 0){
+            $msg = "Rotua jota yrität muokata ei ole olemassa.";
+            return false;
+        }
+        
+
+       
+       return true;
+        
+        
+        
+    }  
+  
+    
+
     
 }
     
