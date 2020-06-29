@@ -394,6 +394,10 @@ class CI_Email {
 	public function __construct(array $config = array())
 	{
 		$this->charset = config_item('charset');
+		
+		if(!isset($config) || sizeof($config) < 2){
+			config_item('email_config');
+		}
 		$this->initialize($config);
 		$this->_safe_mode = ( ! is_php('5.4') && ini_get('safe_mode'));
 
@@ -413,6 +417,9 @@ class CI_Email {
 	public function initialize(array $config = array())
 	{
 		$this->clear();
+		if(!isset($config) || sizeof($config) < 2){
+			config_item('email_config');
+		}
 
 		foreach ($config as $key => $val)
 		{

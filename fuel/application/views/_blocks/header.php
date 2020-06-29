@@ -92,7 +92,7 @@
 	{
 		if ($this->ion_auth->logged_in())
 		{
-			echo "<p>Tervetuloa, " . $this->session->userdata( 'tunnus' ) . "<br /> <a href=" . site_url('/auth/logout') . ">Kirjaudu ulos</a> <br /> <a href=" . site_url('/profiili') . ">Profiili</a>";
+			echo "<p>Tervetuloa, VRL-" . $this->session->userdata( 'tunnus' ) . "<br /> <a href=" . site_url('/auth/logout') . ">Kirjaudu ulos</a> <br /> <a href=" . site_url('/profiili') . ">Profiili</a>";
 			echo "<br />Sinulle on " . $this->tunnukset_model->unread_messages($this->session->userdata('identity')) . " uutta <a href=" . site_url('/profiili/pikaviestit') . ">pikaviestiä</a>.</p>";
 			
 			

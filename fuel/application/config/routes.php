@@ -60,6 +60,8 @@ $route['yllapito/tunnukset/oikeudet'] = "yllapito_tunnukset/oikeudet";
 $route['yllapito/tunnukset/oikeudet/(:any)'] = "yllapito_tunnukset/oikeudet/$1";
 $route['yllapito/tunnukset/kirjautumiset'] = "yllapito_tunnukset/kirjautumiset";
 $route['yllapito/tunnukset/kirjautumiset/(:any)'] = "yllapito_tunnukset/kirjautumiset/$1";
+$route['yllapito/tunnukset/kasittele/(:any)/(:any)'] = "yllapito_tunnukset/kasittele_hakemus/$1/$2";
+
 
 $route['yllapito/tiedotukset'] = "yllapito_tiedotukset";
 $route['yllapito/tiedotukset/(:any)'] = "yllapito_tiedotukset/$1";
@@ -70,9 +72,12 @@ $route['yllapito/hevosrekisteri/(:any)'] = "yllapito_hevosrekisteri/$1";
 $route['yllapito/hevosrekisteri/(:any)/(:any)'] = "yllapito_hevosrekisteri/$1/$2";
 $route['yllapito/hevosrekisteri/(:any)/(:any)/(:any)'] = "yllapito_hevosrekisteri/$1/$2/$3";
 
+$route['yllapito/jaokset'] = "yllapito_jaokset";
+$route['yllapito/jaokset/(:any)'] = "yllapito_jaokset/$1";
+$route['yllapito/jaokset/(:any)/(:any)'] = "yllapito_jaokset/$1/$2";
+$route['yllapito/jaokset/(:any)/(:any)/(:any)'] = "yllapito_jaokset/$1/$2/$3";
 
 
-$route['yllapito/tunnukset/kasittele/(:any)/(:any)'] = "yllapito_tunnukset/kasittele_hakemus/$1/$2";
 
 
 

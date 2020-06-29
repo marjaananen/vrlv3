@@ -78,6 +78,8 @@ $nav['kilpailutoiminta/jarjestaminen'] = array('label' => 'Näyttelyiden järjes
 $nav['yllapito/tiedotukset'] = array('label' => 'Tiedotukset', 'parent_id' => 'yllapito', 'active' => 'yllapito/tiedotukset');
 $nav['yllapito/tunnukset'] = array('label' => 'Tunnukset', 'parent_id' => 'yllapito', 'active' => 'yllapito/tunnukset');
 $nav['yllapito/hevosrekisteri'] = array('label' => 'Hevosrekisteri', 'parent_id' => 'yllapito', 'active' => 'yllapito/hevosrekisteri');
+$nav['yllapito/jaokset'] = array('label' => 'Jaokset', 'parent_id' => 'yllapito', 'active' => 'yllapito/jaokset');
+
     
 // ylläpito/tunnukset alamenu
 $nav['yllapito/tunnukset/hyvaksy'] = array('label' => 'Hyväksy VRL-tunnuksia', 'parent_id' => 'yllapito/tunnukset', 'active' => 'yllapito/tunnukset/hyvaksy');
@@ -94,6 +96,13 @@ $nav['profiili/pikaviestit'] = array('label' => 'Omat pikaviestit', 'parent_id' 
 
 $nav['yllapito/hevosrekisteri/varit'] = array('label' => 'Hallitse värejä', 'parent_id' => 'yllapito/hevosrekisteri', 'active' => 'yllapito/hevosrekisteri/varit');
 $nav['yllapito/hevosrekisteri/rodut'] = array('label' => 'Hallitse rotuja', 'parent_id' => 'yllapito/hevosrekisteri', 'active' => 'yllapito/hevosrekisteri/rodut');
+
+$nav['yllapito/jaokset/lajit'] = array('label' => 'Hallitse lajeja', 'parent_id' => 'yllapito/jaokset', 'active' => 'yllapito/jaokset/lajit');
+$nav['yllapito/jaokset/jaokset'] = array('label' => 'Jaokset', 'parent_id' => 'yllapito/jaokset', 'active' => 'yllapito/jaokset/jaokset');
+$nav['yllapito/jaokset/lisaa_jaos'] = array('label' => 'Lisää jaos', 'parent_id' => 'yllapito/jaokset', 'active' => 'yllapito/jaokset/lisaa_jaos');
+
+
+
 
 
 

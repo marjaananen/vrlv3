@@ -31,7 +31,7 @@ class User_rights
         $this->CI->load->model('Oikeudet_model');
     }
 
-    public function is_allowed()
+    public function is_allowed($list = array())
     {
         //Jos ei ole kirjautunut sisään, ei voi kuulua mihinkään, ja heitetään vain etusivulle
         if (!$this->CI->ion_auth->logged_in()){
@@ -46,9 +46,16 @@ class User_rights
             $this->CI->load->model('ion_auth_model');
             
             $user_is_in_one_of_the_groups = false;
+            $allowed_user_groups = array();
+            if (sizeof($list) > 0){
+                $allowed_user_groups = $list;
+            }
+            else {
+                $allowed_user_groups = $this->req_user_groups;
+            }
             
             //Käydään läpi jokainen ryhmä
-            foreach ($this->req_user_groups as $group){
+            foreach ($allowed_user_groups as $group){
                 if($this->CI->Oikeudet_model->does_user_group_exist_by_name($group)){
                     //Onko ryhmä olemassa?
                     if($this->CI->ion_auth->in_group($group)){                        

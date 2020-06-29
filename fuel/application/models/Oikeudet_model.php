@@ -73,6 +73,7 @@ class Oikeudet_model extends Base_module_model
         
         return array();     
     }
+    
         
         
     
