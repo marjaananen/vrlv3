@@ -76,7 +76,9 @@ $route['yllapito/jaokset'] = "yllapito_jaokset";
 $route['yllapito/jaokset/(:any)'] = "yllapito_jaokset/$1";
 $route['yllapito/jaokset/(:any)/(:any)'] = "yllapito_jaokset/$1/$2";
 $route['yllapito/jaokset/(:any)/(:any)/(:any)'] = "yllapito_jaokset/$1/$2/$3";
-
+$route['yllapito/jaokset/(:any)/(:any)/(:any)/(:any)'] = "yllapito_jaokset/$1/$2/$3/$4";
+$route['yllapito/jaokset/(:any)/(:any)/(:any)/(:any)/(:any)'] = "yllapito_jaokset/$1/$2/$3/$4/$5";
+$route['yllapito/jaokset/(:any)/(:any)/(:any)/(:any)/(:any)/(:any)'] = "yllapito_jaokset/$1/$2/$3/$4/$5/$6";
 
 
 

@@ -432,6 +432,22 @@ class Hevonen_model extends Base_module_model
         return array();
     }
     
+        function is_horse_owner($pinnumber, $id)
+    {
+        $this->db->select('omistaja');
+        $this->db->from('vrlv3_hevosrekisteri_omistajat');
+        $this->db->where('reknro', $id);
+        $this->db->where('omistaja', $pinnumber);
+        $query = $this->db->get();
+        
+        if ($query->num_rows() > 0)
+        {
+            return true;
+        }
+        
+        return false;
+    }
+    
     function get_stables_foals($user){
         $this->db->select("reknro, nimi, rotu, vari, sukupuoli, syntymaaika");        
         $this->db->from('vrlv3_hevosrekisteri');

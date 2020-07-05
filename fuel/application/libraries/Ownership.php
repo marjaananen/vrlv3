@@ -10,9 +10,15 @@ public function __construct()
         $this->CI =& get_instance();
 	}
     
-    public $taulut = array("hev"=>array("t"=>"vrlv3_hevosrekisteri", "id"=>"reknro", "ot"=>array("om"=>"omistaja", "id"=> "reknro", "t"=>"taso")),
-                           "tal"=>array("t"=>"vrlv3_tallirekisteri", "id"=>"tnro","ot"=>array("om"=>"omistaja", "id"=> "tnro", "t"=>"taso")),
-                           "kasv"=>array("t"=>"vrlv3_kasvattajanimet", "id"=>"id","ot"=>array("om"=>"tunnus", "id"=> "kid", "t"=>"taso"))
+    public $taulut = array("hev"=>array("t"=>"vrlv3_hevosrekisteri", "id"=>"reknro",
+										"ot"=>array("om"=>"omistaja", "id"=> "reknro", "t"=>"taso")),
+                           "tal"=>array("t"=>"vrlv3_tallirekisteri", "id"=>"tnro",
+										"ot"=>array("om"=>"omistaja", "id"=> "tnro", "t"=>"taso")),
+                           "kasv"=>array("t"=>"vrlv3_kasvattajanimet", "id"=>"id",
+										 "ot"=>array("om"=>"tunnus", "id"=> "kid", "t"=>"taso")),
+						    "jaos"=>array("t"=>"vrlv3_kisat_jaokset", "id"=>"id",
+										  "ot"=>array("om"=>"tunnus", "id"=> "jid", "t"=>"taso"))
+
                           );
                            
                                        
@@ -32,10 +38,22 @@ public function __construct()
     public function handle_name_ownerships($mode, $tapa, $adder, $owner, $item, &$fields){
         return $this->_handle_owners  ($this->taulut['kasv'], $mode, $tapa, $adder, $owner, $item, $fields);
     }
+	
+	public function handle_jaos_ownerships($mode, $tapa, $adder, $owner, $item, &$fields){
+        return $this->_handle_owners  ($this->taulut['jaos'], $mode, $tapa, $adder, $owner, $item, $fields);
+    }
 
 private function _handle_owners($taulu, $mode, $tapa, $adder, $owner, $item, &$fields){
     $msg ="";
     $type="";
+	
+	$om = "pääomistaja";
+	$om2 = "haltija";
+	
+	if($taulu['t'] == 'vrlv3_kisat_jaokset'){
+		$om = "ylläpitäjä";
+		$om2 = "kalenterityöntekijä";
+	}
     
     if($this->CI->input->server('REQUEST_METHOD') == 'POST'){
 
@@ -51,8 +69,8 @@ private function _handle_owners($taulu, $mode, $tapa, $adder, $owner, $item, &$f
             }
             else if($this->CI->vrl_helper->check_vrl_syntax($tunnus) && ($taso == 1 || $taso == 0)){
                 $ok = $this->_add($taulu, $this->CI->vrl_helper->vrl_to_number($tunnus), $item, $taso);
-                if ($ok){ $type = "success"; $msg = "Omistajan lisäys onnistui.";}
-                else {$type = "warning"; $msg = "Omistajan lisäys epäonnistui. Tarkasta, että tunnus on kirjoitettu oikein, ja ettei käyttäjä ole jo omistaja!";}
+                if ($ok){ $type = "success"; $msg = "Lisäys onnistui.";}
+                else {$type = "warning"; $msg = "Lisäys epäonnistui. Tarkasta, että tunnus on kirjoitettu oikein, ja ettei käyttäjä ole jo listalla!";}
             }
             else {
                 $type = "warning"; $msg = "Virheellinen syöte!";
@@ -75,8 +93,8 @@ private function _handle_owners($taulu, $mode, $tapa, $adder, $owner, $item, &$f
             $this->CI->load->library("vrl_helper");
             $this->CI->vrl_helper->check_vrl_syntax($owner);
             $ok = $this->_edit($taulu, $this->CI->vrl_helper->vrl_to_number($owner), $item);
-            if ($ok){ $type = "success"; $msg = "Omistajan tason muutos onnistui.";}
-            else {$type = "danger"; $msg = "Omistajan tason muutos epäonnistui. Ainutta pääomistajaa ei saa muuttaa haltijaksi.";}
+            if ($ok){ $type = "success"; $msg = "Tason muutos onnistui.";}
+            else {$type = "danger"; $msg = "Tason muutos epäonnistui. Ainutta ".$om."a ei saa muuttaa ".$om2."ksi.";}
 
             
         }
@@ -93,8 +111,8 @@ private function _handle_owners($taulu, $mode, $tapa, $adder, $owner, $item, &$f
             $this->CI->load->library("vrl_helper");
             $this->CI->vrl_helper->check_vrl_syntax($owner);
             $ok = $this->_del($taulu, $this->CI->vrl_helper->vrl_to_number($owner), $item);
-            if ($ok){ $type = "success"; $msg = "Omistajan poisto onnistui!";}
-            else {$type = "danger"; $msg = "Omistajan poisto epäonnistui. Ainutta pääomistajaa ei saa poistaa.";}
+            if ($ok){ $type = "success"; $msg = "Poisto onnistui!";}
+            else {$type = "danger"; $msg = "Poisto epäonnistui. Ainutta ".$om."a ei saa poistaa.";}
 
             
         }
@@ -117,6 +135,10 @@ private function _handle_owners($taulu, $mode, $tapa, $adder, $owner, $item, &$f
     
     public function name_ownerships($item, $edit, $url){
         return $this->_listing ('name', $item, $edit, $url);
+    }
+	
+	public function jaos_ownerships($item, $edit, $url){
+        return $this->_listing ('jaos', $item, $edit, $url);
     }
     
              
@@ -152,6 +174,10 @@ private function _handle_owners($taulu, $mode, $tapa, $adder, $owner, $item, &$f
             $this->CI->load->model('kasvattajanimi_model');
 			$vars['data'] = json_encode($this->CI->kasvattajanimi_model->get_names_owners($item));
         }
+		 else if ($type == 'jaos') {
+            $this->CI->load->model('jaos_model');
+			$vars['data'] = json_encode($this->CI->jaos_model->get_jaos_owners($item));
+        }
 		$vars['headers'] = json_encode($vars['headers']);
 		
 		return $this->CI->load->view('misc/taulukko', $vars, TRUE);
@@ -169,7 +195,9 @@ private function _handle_owners($taulu, $mode, $tapa, $adder, $owner, $item, &$f
     public function is_names_main_owner($adder, $item){
         return $this->_editor_permission($this->taulut['kasv'],$adder, $item);
     }
-    
+    public function is_jaos_main_owner($adder, $item){
+        return $this->_editor_permission($this->taulut['jaos'],$adder, $item);
+    }
 
 
 // Add Ownership    
@@ -184,6 +212,11 @@ private function _handle_owners($taulu, $mode, $tapa, $adder, $owner, $item, &$f
     
     public function add_name_ownerships( $owner, $item, $level=1){
         return $this->_add($this->taulut['kasv'], $owner, $item, $level);             
+
+    }
+	
+	public function add_jaos_ownerships( $owner, $item, $level=1){
+        return $this->_add($this->taulut['jaos'], $owner, $item, $level);             
 
     }
     
@@ -224,6 +257,11 @@ private function _handle_owners($taulu, $mode, $tapa, $adder, $owner, $item, &$f
     
     public function del_name_ownerships( $owner, $item){
         return $this->_del($this->taulut['kasv'],  $owner, $item);             
+
+    }
+	
+	public function del_jaos_ownerships( $owner, $item){
+        return $this->_del($this->jaos['kasv'],  $owner, $item);             
 
     }
     
@@ -272,6 +310,11 @@ private function _handle_owners($taulu, $mode, $tapa, $adder, $owner, $item, &$f
     
     public function edit_name_ownerships($owner, $item){
         return $this->_edit($this->taulut['kasv'], $owner, $item);             
+
+    }
+	
+	public function edit_jaos_ownerships($owner, $item){
+        return $this->_edit($this->taulut['jaos'], $owner, $item);             
 
     }
     
@@ -377,12 +420,12 @@ private function _handle_owners($taulu, $mode, $tapa, $adder, $owner, $item, &$f
     }
     
     
-    public function get_owner_adding_form($url){
+    public function get_owner_adding_form($url, $om = "Omistaja", $om2 = "Haltija"){
 
         $this->CI->load->library('form_builder', array('submit_value' => 'Lisää omistaja'));
 		
 		$fields['tunnus'] = array('type' => 'text', 'class'=>'form-control');
-		$fields['taso'] = array('type' => 'select', 'options' => array(1=>"Omistaja", 0=>"Haltija"), 'value' => '1', 'class'=>'form-control');
+		$fields['taso'] = array('type' => 'select', 'options' => array(1=>$om, 0=>$om2), 'value' => '1', 'class'=>'form-control');
 	
 		$this->CI->form_builder->form_attrs = array('method' => 'post', 'action' => site_url("".$url."omistajat/lisaa"));
 		return $this->CI->form_builder->render_template('_layouts/basic_form_template', $fields);

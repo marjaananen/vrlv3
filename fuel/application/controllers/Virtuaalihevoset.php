@@ -321,7 +321,7 @@ class Virtuaalihevoset extends CI_Controller
 		}
         
         if (!$this->vrl_helper->check_vh_syntax(($this->vrl_helper->get_vh($this->vrl_helper->vh_to_number($reknro))))){
-            $msg = "Virheellinen VRL-tunnus";
+            $msg = "Virheellinen VH-tunnus";
             return false;
         }
 		

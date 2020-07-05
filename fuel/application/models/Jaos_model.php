@@ -9,26 +9,6 @@ class Jaos_model extends Base_module_model
         parent::__construct();
     }
     
-    public function get_sport_option_list(){
-        $data = array();
-        
-        $this->db->select('pid, painotus');
-        $this->db->from('vrlv3_lista_painotus');
-        $this->db->order_by("painotus", "asc"); 
-        $query = $this->db->get();
-        
-        if ($query->num_rows() > 0)
-        {
-            foreach ($query->result_array() as $row)
-            {
-               $data[$row['pid']] = $row['painotus'];
-            }
-        }
-        
-        return $data;
-        
-    }
-    
     
     function add_jaos(&$msg, $jaos){
             $this->db->insert('vrlv3_kisat_jaokset', $jaos);
@@ -38,17 +18,17 @@ class Jaos_model extends Base_module_model
     
     function edit_jaos($id, $jaos){
         $this->db->where('id', $id);
-        $this->db->update('vrlv3_jaokset', $rules);
+        $this->db->update('vrlv3_kisat_jaokset', $jaos);
     }
     function set_jaos_online($id, $online = true){
         $this->db->where('id', $id);
-        $this->db->update('vrlv3_jaokset', array('toiminnassa' => $online));
+        $this->db->update('vrlv3_kisat_jaokset', array('toiminnassa' => $online));
     }
     
     function add_owner_to_jaos($id, $tunnus)
     {
         $data = array('jid' => $id, 'tunnus' => $tunnus);      
-        $this->db->insert('vrlv3_jaokset_omistajat', $data);
+        $this->db->insert('vrlv3_kisat_jaokset_omistajat', $data);
     }
 
     function delete_jaos($id, &$msg){
@@ -61,12 +41,11 @@ class Jaos_model extends Base_module_model
     //names
     function get_users_jaos($pinnumber)
     {
-        $this->db->select('vrlv3_jaokset.id, nimi, toiminnassa');
-        $this->db->from('vrlv3_jaokset');
-        $this->db->join('vrlv3_jaokset_omistajat', 'vrlv3_jaokset.id = vrlv3_jaokset_omistajat.jid');
-        $this->db->join('vrlv3_kasvattajanimet_rodut', 'vrlv3_kasvattajanimet.id = vrlv3_kasvattajanimet_rodut.kid', 'left');
+        $this->db->select('vrlv3_kisat_jaokset.id, nimi, toiminnassa');
+        $this->db->from('vrlv3_kisat_jaokset');
+        $this->db->join('vrlv3_kisat_jaokset_omistajat', 'vrlv3_kisat_jaokset.id = vrlv3_kisat_jaokset_omistajat.jid');
         $this->db->join('vrlv3_lista_rodut', 'vrlv3_lista_rodut.rotunro = vrlv3_kasvattajanimet_rodut.rotu');
-        $this->db->where('vrlv3_jaokset_omistajat.tunnus', $pinnumber);
+        $this->db->where('vrlv3_kisat_jaokset_omistajat.tunnus', $pinnumber);
         $query = $this->db->get();
         
         if ($query->num_rows() > 0)
@@ -92,19 +71,40 @@ class Jaos_model extends Base_module_model
         return array();
     }
     
-    function get_jaokset_search($all = true, $online = null)
+    function get_jaos($id)
     {
-        $this->db->select('j.id, j.nimi, j.toiminnassa, j.lyhenne, j.url, j.kuvaus, ');
-        $this->db->from('vrlv3_jaokset as j');
-        $this->db->join('vrlv3_jaokset_omistajat', 'vrlv3_jaokset.id = vrlv3_jaokset_omistajat.jid');
-        $this->db->join('vrlv3_lista_painotus as l', 'vrlv3_jaokset.laji = vrlv3_lista_painotus', 'left');
-        $this->db->join('vrlv3_lista_painotus', 'vrlv3_lista_rodut.rotunro = vrlv3_kasvattajanimet_rodut.rotu');
-        $this->db->where('vrlv3_kasvattajanimet_omistajat.tunnus', $pinnumber);
+        $jaos = array();
+        $this->db->select('*');
+        $this->db->from('vrlv3_kisat_jaokset as j');
+        //$this->db->join('vrlv3_kisat_jaokset_omistajat', 'vrlv3_kisat_jaokset.id = vrlv3_kisat_jaokset_omistajat.jid');
+        //$this->db->join('vrlv3_lista_painotus as l', 'j.laji = l.pid', 'left');
+        $this->db->where('j.id', $id);
         $query = $this->db->get();
         
         if ($query->num_rows() > 0)
         {
-            return $query->result_array(); 
+            $result = $query->result_array();
+            $jaos = $result[0];
+            
+            
+            return $jaos;
+        }
+        
+        return array();
+    }
+    
+    
+    function get_jaos_owners($id)
+    {
+        $this->db->select('vrlv3_tunnukset.tunnus as omistaja, nimimerkki, taso, CONCAT(vrlv3_kisat_jaokset_omistajat.tunnus, "/", vrlv3_kisat_jaokset_omistajat.jid) as id');
+        $this->db->from('vrlv3_kisat_jaokset_omistajat');
+        $this->db->join('vrlv3_tunnukset', 'vrlv3_tunnukset.tunnus = vrlv3_kisat_jaokset_omistajat.tunnus');
+        $this->db->where('jid', $id);
+        $query = $this->db->get();
+        
+        if ($query->num_rows() > 0)
+        {
+            return $query->result_array();
         }
         
         return array();
@@ -130,6 +130,7 @@ class Jaos_model extends Base_module_model
     
     function is_lyhenne_in_use($name, $id = null)
     {
+        
         $this->db->select('id');
         $this->db->from('vrlv3_kisat_jaokset');
         $this->db->where('lyhenne', $name);
@@ -144,6 +145,83 @@ class Jaos_model extends Base_module_model
         }
         
         return false;
+    }
+    
+    function is_jaos_owner($pinnumber, $id)
+    {
+        $this->db->select('omistaja');
+        $this->db->from('vrlv3_kisat_jaokset_omistajat');
+        $this->db->where('id', $id);
+        $this->db->where('omistaja', $pinnumber);
+        $query = $this->db->get();
+        
+        if ($query->num_rows() > 0)
+        {
+            return true;
+        }
+        
+        return false;
+    }
+    
+    function get_class_list($jaos, $only_usable = true)
+    {
+        $this->db->select("*");
+        $this->db->from('vrlv3_kisat_luokat');
+        $this->db->where("jaos", $jaos);
+        $this->db->order_by("jarjnro");
+        if($only_usable){
+            $this->db->where("kaytossa", 1);
+        }
+        $query = $this->db->get();
+        
+        if ($query->num_rows() > 0)
+        {
+            return $query->result_array(); 
+        }
+        
+        return array();
+    }
+    
+    function get_class($id, $jaos_id)
+    {
+        $this->db->select("*");
+        $this->db->from('vrlv3_kisat_luokat');
+        $this->db->where("id", $id);
+        $this->db->where("jaos", $jaos_id);
+
+        $query = $this->db->get();
+        
+        if ($query->num_rows() > 0)
+        {
+            
+            $array = $query->result_array();
+            return $array[0];
+        }
+        
+        return array();
+    }
+    
+    
+    function add_class($jaos_id, $laji_id, $class){
+        $class['jaos'] = $jaos_id;
+        $class['laji'] = $laji_id;
+        $this->db->insert('vrlv3_kisat_luokat', $class);
+        $id = $this->db->insert_id();
+        return $id;
+    }
+    
+     function edit_class($class_id, $class){        
+        unset($class['jaos']);
+        unset($class['laji']);
+        $this->db->where('id', $class_id);
+        $this->db->update('vrlv3_kisat_luokat', $class);
+    }
+    
+    function delete_class($id, $jaos_id){
+        //todo delete luokat, ominaisuudet
+        $data = array('id' => $id, 'jaos'=>$jaos_id);
+        $this->db->delete('vrlv3_kisat_luokat', $data);
+        return true;
     }
     
     
