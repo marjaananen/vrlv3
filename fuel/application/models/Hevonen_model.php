@@ -87,6 +87,7 @@ class Hevonen_model extends Base_module_model
             unset($hevonen['e_nro']);
 
         }
+
         
         $hevonen['syntymaaika'] = $this->CI->vrl_helper->normal_date_to_sql($hevonen['syntymaaika']);
         if (isset($hevonen['kuol_pvm'])){
@@ -123,6 +124,33 @@ class Hevonen_model extends Base_module_model
 
         $hevonen['reknro'] = $this->CI->vrl_helper->vh_to_number($vh);
         $suku['reknro'] = $this->CI->vrl_helper->vh_to_number($vh);
+        
+        //porrastettujen ominaisuudet
+        $ominaisuudet = array();
+        if(sizeof($suku)>0){
+            $this->CI =& get_instance();
+            $this->load->library('Porrastetut');
+            
+            $i = $suku['i_nro'] ?? null;
+            $e = $suku['e_nro'] ?? null;
+            
+            $foals_traits = $this->porrastetut->get_foals_traitlist($i, $e);
+            
+            foreach ($foals_traits as $t_id=>$trait){
+                $row = array();
+                if($trait > 0){
+                    $row['reknro'] = $hevonen['reknro'];
+                    $row['ominaisuus'] = $t_id;
+                    $row['arvo'] = $trait;
+                    $ominaisuudet[]=$row;
+                }      
+                
+            }
+            
+        }
+        
+        
+        
         $hevonen['hyvaksyi'] = $tunnus;
         if($hevonen['kuollut']){
             $hevonen['kuol_merkkasi'] = $tunnus;
@@ -146,6 +174,11 @@ class Hevonen_model extends Base_module_model
 
         if(sizeof($suku)>0){
             $this->db->insert('vrlv3_hevosrekisteri_sukutaulut', $suku);
+
+        }
+        
+        if(sizeof($ominaisuudet)>0){
+            $this->db->insert_batch('vrlv3_hevosrekisteri_ominaisuudet', $ominaisuudet); 
 
         }
         
@@ -561,6 +594,23 @@ class Hevonen_model extends Base_module_model
             }
         
         
+    }
+    
+    //porrastetut
+    function get_horse_traits($reknro)
+    {
+        $this->db->select('m.reknro, l.id, l.ominaisuus, m. arvo');
+        $this->db->from('vrlv3_hevosrekisteri_ominaisuudet as m');
+        $this->db->join('vrlv3_lista_ominaisuudet as l', 'l.id = m.ominaisuus');
+        $this->db->where('m.reknro', $this->CI->vrl_helper->vh_to_number($reknro));
+        $query = $this->db->get();
+        
+        if ($query->num_rows() > 0)
+        {
+            return $query->result_array();
+        }
+        
+        return array();
     }
     
     //stats

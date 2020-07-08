@@ -50,6 +50,8 @@ class Kasvatus extends CI_Controller
                     $this->Hevonen_model->get_unelmasuku($i_nro, $e_nro, $vars['suku']);
 
                     $vars['varit'] = $this->_get_dreampedigree_colours( $vars['suku']['i']['vid'], $vars['suku']['e']['vid']);
+                    $vars['ominaisuudet'] = $this->_get_dreampedigree_traits( $i_nro, $e_nro);
+
                     
                     
                 }
@@ -112,6 +114,15 @@ class Kasvatus extends CI_Controller
         
     }
     
+    private function _get_dreampedigree_traits($i, $e){
+            $this->load->library("Porrastetut");
+            $vars['traits'] = $this->porrastetut->get_trait_names_array();
+            $vars['horse_traits'] = $this->porrastetut->get_foals_traitlist($i, $e);
+            
+            return $this->load->view('hevoset/porrastetut_stats', $vars, TRUE);
+        
+    }
+    
     public function varilaskuri(){
         $this->load->model('Color_model');
         $vars = array();
@@ -119,43 +130,41 @@ class Kasvatus extends CI_Controller
         $vars['haku'] = false;
 
         
-        if(!$this->ion_auth->logged_in()){
-            $vars['msg'] = "Kirjaudu sisään käyttääksesi peritymisgeneraattoria.";
-            $vars['msg_type'] = 'danger';
-        }else {
-            $vars['pohjavarit'] = $this->Color_model->get_base_list();
-            $vars['erikoisvarit'] = $this->Color_model->get_special_list();
-            $vars['kirjavat'] = array_merge($this->Color_model->get_kirj_list(), $this->Color_model->get_colour_markings_list());
+       
+        $vars['pohjavarit'] = $this->Color_model->get_base_list();
+        $vars['erikoisvarit'] = $this->Color_model->get_special_list();
+        $vars['kirjavat'] = array_merge($this->Color_model->get_kirj_list(), $this->Color_model->get_colour_markings_list());
+        
+
+        $this->load->library('color_inheritance', $vars);
+        $vars['inheritance_printer'] = & $this->color_inheritance;
+
+        
+        $vars['text_view'] = $this->load->view('jalostus/varilomake_teksti', NULL, TRUE);
+
+        if($this->input->server('REQUEST_METHOD') == 'POST')
+        {
+            $dadlist = array();
+            $mumlist = array();
             
-
-            $this->load->library('color_inheritance', $vars);
-            $vars['inheritance_printer'] = & $this->color_inheritance;
-
-            
-            $vars['text_view'] = $this->load->view('jalostus/varilomake_teksti', NULL, TRUE);
-
-            if($this->input->server('REQUEST_METHOD') == 'POST')
-            {
-                $dadlist = array();
-                $mumlist = array();
-                
-                if($this->input->post('isa')){              
-                    $dadlist = $this->input->post('isa');
-                }if ($this->input->post('ema')){
-                    $mumlist = $this->input->post('ema');
-                }
-                
-                $isapohja = $this->input->post('isapohja');
-                $emapohja = $this->input->post('emapohja');
-                
-                $vars['baby'] = $this->color_inheritance->periytaVarit($isapohja, $emapohja, $dadlist, $mumlist);
-                $vars['varmalla'] = $this->color_inheritance->varmat($vars['baby']);
-                $vars['tulos'] = true;
-            }else {
-                $vars['haku'] = true;
+            if($this->input->post('isa')){              
+                $dadlist = $this->input->post('isa');
+            }if ($this->input->post('ema')){
+                $mumlist = $this->input->post('ema');
             }
             
+            $isapohja = $this->input->post('isapohja');
+            $emapohja = $this->input->post('emapohja');
+            
+            $vars['baby'] = $this->color_inheritance->periytaVarit($isapohja, $emapohja, $dadlist, $mumlist);
+            $vars['varmalla'] = $this->color_inheritance->varmat($vars['baby']);
+            $vars['tulos'] = true;
+        }else {
+            $vars['haku'] = true;
         }
+        
+            
+        
         $this->fuel->pages->render('jalostus/varilomake', $vars);
     }
 	

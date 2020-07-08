@@ -9,17 +9,24 @@ class Trait_model extends Base_module_model
         parent::__construct();
     }
     
-    public function get_trait_list(){
+    public function get_trait_list($jaos = null){
         
-        $this->db->select('id, ominaisuus');
+        $this->db->select('id, vrlv3_lista_ominaisuudet.ominaisuus');
         $this->db->from('vrlv3_lista_ominaisuudet');
+        if(isset($jaos)){
+            $this->db->join('vrlv3_kisat_jaokset_ominaisuudet', 'vrlv3_lista_ominaisuudet.id =vrlv3_kisat_jaokset_ominaisuudet.ominaisuus' );
+            $this->db->where('vrlv3_kisat_jaokset_ominaisuudet.jaos', $jaos);
+        }
         $query = $this->db->get();
         if ($query->num_rows() > 0)
         {
+
             return $query->result_array();
         }
         
         return array();
+    
+
                 
     }
     
@@ -162,7 +169,7 @@ class Trait_model extends Base_module_model
             $tulos = $query->result_array();
              if (!(sizeof($tulos) == 1 && $tulos[0]['id'] == $id)) {
 
-                $msg = "Ominaisuusa ei voitu lisätä: ";
+                $msg = "Ominaisuutta ei voitu lisätä: ";
                 foreach ($tulos as $roturivi){
                 if ($roturivi['ominaisuus'] == $ominaisuus){
                     $msg .= "annettu ominaisuusnimi on jo käytössä. ";

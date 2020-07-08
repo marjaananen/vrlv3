@@ -27,6 +27,20 @@ if(isset($suku) and sizeof($suku) > 0){
  <?php } ?>
  
  
+  <?php if(isset($ominaisuudet)){?>
+
+ <h3>Porrastettujen kilpailujen ominaisuuspisteet</h3>
+ <p>Lue lisää porrastetuista kilpailutoiminta-sivulta.</p>
+ 
+ <?php echo fuel_var('ominaisuudet', 'Ominaisuuspisteiden lasku ei onnistunut, ota yhteyttä ylläpitoon.')?>
+ 
+ <?php } ?>
+ 
+ 
+ 
+
+ 
+ 
  
 
 

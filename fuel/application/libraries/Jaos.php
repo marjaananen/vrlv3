@@ -44,7 +44,7 @@ class Jaos
     }
     
     
-	public function get_jaos_form ($url, $mode = "new", $admin = false, $jaos) {
+	public function get_jaos_form ($url, $mode = "new", $admin = false, $jaos = array()) {
         
         
         $sport_options = $this->CI->Sport_model->get_sport_option_list();
@@ -293,6 +293,14 @@ class Jaos
          return false;
       }
       
+      else if($jaos['s_hevosia_per_luokka_max'] > 100){
+         $msg = "Yli 100 hevosen luokkia ei saa järjestää.";
+         return false;
+      }
+      else if($jaos['s_hevosia_per_luokka_min'] < 30){
+         $msg = "Luokan minimikoko pitää olla 30 tai yli.";
+         return false;
+      }
       return true;
       
         
@@ -316,10 +324,9 @@ class Jaos
       $vars['headers'][5] = array('title' => 'Käy- tössä', 'key' => 'kaytossa');
       $vars['headers'][6] = array('title' => 'Vaik. taso', 'key' => 'taso');
       $vars['headers'][7] = array('title' => 'Aste', 'key' => 'aste');
-      $vars['headers'][8] = array('title' => 'Min. ikä', 'key' => 'min_age');
-      $vars['headers'][9] = array('title' => 'Min. säkä', 'key' => 'minheight');
-      $vars['headers'][10] = array('title' => '&nbsp;', 'key' => 'id', 'key_link' => site_url($url_poista), 'image' => site_url('assets/images/icons/delete.png'));
-      $vars['headers'][11] = array('title' => '&nbsp;', 'key' => 'id', 'key_link' => site_url($url_muokkaa), 'image' => site_url('assets/images/icons/edit.png')); 
+      $vars['headers'][8] = array('title' => 'Min. säkä', 'key' => 'minheight');
+      $vars['headers'][9] = array('title' => '&nbsp;', 'key' => 'id', 'key_link' => site_url($url_poista), 'image' => site_url('assets/images/icons/delete.png'));
+      $vars['headers'][10] = array('title' => '&nbsp;', 'key' => 'id', 'key_link' => site_url($url_muokkaa), 'image' => site_url('assets/images/icons/edit.png')); 
 		$vars['headers'] = json_encode($vars['headers']);				
 		$vars['data'] = json_encode($this->CI->Jaos_model->get_class_list($id, false));
         
@@ -342,10 +349,10 @@ class Jaos
     
       $fields['porastettu_info'] = array('type'=>'hidden', 'before_html' => '</div></div></div><div class="panel panel-default"><div class="panel-heading">Porrastetun luokan tiedot (vain porrastetuille)</div> <div class="panel-body"><div class="form-group">');
 
-      $fields['taso'] = array('label' => 'Taso (0-10)', 'type' => 'number', 'value' => $class['taso'] ?? 0, 'class'=>'form-control', 'represents' => 'int|smallint|mediumint|bigint', 'negative' => FALSE, 'decimal' => FALSE);    
+      $fields['taso'] = array('label' => 'Taso (0-10)', 'type' => 'number', 'value' => $class['taso'] ?? 0, 'class'=>'form-control', 'represents' => 'int|smallint|mediumint|bigint', 'negative' => FALSE, 'decimal' => FALSE,
+                              'after_html' => '<span class="form_comment">Taso vaikuttaa myös osallistujan minimi-ikään!</span>');    
       $fields['aste'] = array('type' => 'select', 'options' => $aste_options, 'value' => $class['aste'] ?? -1, 'class'=>'form-control');
       $fields['minheight'] = array('label' => 'Minimisäkäkorkeus', 'type' => 'number', 'value' => $class['minheight'] ?? 0, 'class'=>'form-control', 'represents' => 'int|smallint|mediumint|bigint', 'negative' => FALSE, 'decimal' => FALSE);    
-      $fields['min_age'] = array('label' => 'Minimi-ikä', 'type' => 'number', 'value' => $class['min_age'] ?? 3, 'class'=>'form-control', 'represents' => 'int|smallint|mediumint|bigint', 'negative' => FALSE, 'decimal' => FALSE);    
               
       $fields['end'] = array('type'=>'hidden', 'after_html' => '</div>');
 
@@ -363,7 +370,6 @@ class Jaos
             $class['taso'] = $this->CI->input->post('taso');
             $class['aste'] = $this->CI->input->post('aste');
             $class['minheight'] = $this->CI->input->post('minheight');
-            $class['min_age'] = $this->CI->input->post('min_age');
          }else {
             $class['porrastettu'] = 0;
          }
@@ -382,7 +388,6 @@ class Jaos
       $this->CI->form_validation->set_rules('taso', 'Taso', 'min_length[1]|max_length[3]|numeric');
       $this->CI->form_validation->set_rules('aste', 'Aste', 'min_length[1]|max_length[3]|numeric');
       $this->CI->form_validation->set_rules('minheight', 'Minimikorkeus', 'min_length[1]|max_length[3]|numeric');
-      $this->CI->form_validation->set_rules('min_age', 'Minimi-ikä', 'min_length[1]|max_length[2]|numeric');
       
       return $this->CI->form_validation->run();
       

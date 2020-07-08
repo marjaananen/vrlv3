@@ -428,6 +428,8 @@ class Migraatio_model extends Base_module_model
                     $data['syntymamaa'] = $syntmaa;
                     }
                 }
+                
+                $data['porr_kilpailee'] = $lisatiedot->porr_kilpailee;
             }
 
     

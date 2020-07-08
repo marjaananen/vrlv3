@@ -86,13 +86,17 @@ if(isset($hevonen['kasvattaja_tunnus'])){
 
         } 
         else if($sivu == 'kilpailut'){
+          echo "<h3>Porrastetut</h3>";
+            echo $porr_stats;
+            echo $porr_levels;
+          echo "<h3>Perinteiset kilpailut</h3><br />";
             echo $kilpailut;
 
         }
     
     ?>
 
-
+<hr>
 
 <div class="alert alert-info" role="alert">
   <?=$hevonen['h_nimi']?> on virtuaalihevonen. Se ei ole oikeasti olemassa.

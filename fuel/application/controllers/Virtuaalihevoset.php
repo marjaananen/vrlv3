@@ -92,7 +92,15 @@ class Virtuaalihevoset extends CI_Controller
             $vars['foals'] = $this->_hevosen_varsat($vars['hevonen']['reknro']);
 
         } else if ($sivu == 'kilpailut'){
-            $vars['kilpailut'] = "Kilpailutiedot puuttuvat.";
+            $this->load->library("Porrastetut");
+            $vars['traits'] = $this->porrastetut->get_trait_names_array();
+            $vars['horse_traits'] = $this->porrastetut->get_horses_full_traitlist($reknro);
+            $vars['horse_levels'] = $this->porrastetut->get_horses_full_level_list($reknro);
+            
+            $vars['porr_stats'] = $this->load->view('hevoset/porrastetut_stats', $vars, TRUE);
+            $vars['porr_levels'] = $this->load->view('hevoset/porrastetut_levels', $vars, TRUE);
+
+            $vars['kilpailut'] = "Perinteisten kilpailujen tiedot puuttuvat.";
         }
         else {
             $vars['suku'] = array();
