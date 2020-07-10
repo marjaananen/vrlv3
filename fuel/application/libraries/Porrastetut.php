@@ -103,9 +103,11 @@ class Porrastetut
     
     
     
-    public function get_horses_full_traitlist($reknro){
-        $full_trait_list = array();
-        $full_trait_list = $this->get_empty_trait_array();
+    public function get_horses_full_traitlist($reknro, $full_trait_list = array()){
+        if(sizeof($full_trait_list) < 1){
+            $full_trait_list = $this->get_empty_trait_array();
+
+        }
         
         if(isset($reknro)){
             $horse_traits = $this->CI->Hevonen_model->get_horse_traits($reknro);
@@ -133,13 +135,17 @@ class Porrastetut
     
     
     
-    public function get_horses_full_level_list($reknro){
+    public function get_horses_full_level_list($reknro, $empty_trait_list = array(), $jaokset=array(), $full_jaos_info = array()){
         $full_info = array();
-        $jaokset =  $this->CI->Jaos_model->get_jaos_porr_list();
-        $horse_list = $this->get_horses_full_traitlist($reknro);
+        if(sizeof($jaokset) < 1){
+            $jaokset =  $this->CI->Jaos_model->get_jaos_porr_list();
+        }
+        $horse_list = $this->get_horses_full_traitlist($reknro, $empty_trait_list);
         
         foreach ($jaokset as $jaos){
-            $full_info[$jaos['lyhenne']]['points'] = $this->get_horses_point_sum_for_sport($horse_list, $jaos['id']);           
+            $jaos_traits = $full_jaos_info[$jaos['id']]['traits'] ?? null;
+
+            $full_info[$jaos['lyhenne']]['points'] = $this->get_horses_point_sum_for_sport($horse_list, $jaos['id'], $jaos_traits);           
             $full_info[$jaos['lyhenne']]['level'] = $this->get_level_by_points($full_info[$jaos['lyhenne']]['points']);
 
         }
@@ -163,6 +169,70 @@ class Porrastetut
         }
         return $foal;
     }
+    
+    
+    //ikä
+    
+    public function level_by_age($age){
+        $level = -1;
+        
+        foreach ($this->levels as $nro=>$info){
+            if($age >= $info['min_age']){
+                $level = $nro;
+            }else {
+                break;
+            }
+        }
+        
+        return $level;
+        
+    }
+    
+    public function check_horses_age( $vh ) {
+
+	$vh = $this->CI->vrl_helper->vh_to_number( $vh );	
+	
+	$age = $this->CI->Hevonen_model->get_hevonen_ages($vh);
+    if(sizeof($age) == 0){
+        $ageNow = 0;
+						
+    }else {
+        $today = strtotime( date("Y-m-d") ); // today's timestamp
+    
+        if( $age['3vuotta'] != '0000-00-00' AND !empty($age['3vuotta']) ) {
+        
+            if( empty($age['4vuotta']) OR $age['4vuotta'] == '0000-00-00' ) { $age['4vuotta'] = strtotime( "+1 year", $today ); }
+            if( empty($age['5vuotta']) OR $age['5vuotta'] == '0000-00-00' ) { $age['5vuotta'] = strtotime( "+1 year", $today ); }
+            if( empty($age['6vuotta']) OR $age['6vuotta'] == '0000-00-00' ) { $age['6vuotta'] = strtotime( "+1 year", $today ); }
+            if( empty($age['7vuotta']) OR $age['7vuotta'] == '0000-00-00' ) { $age['7vuotta'] = strtotime( "+1 year", $today ); }
+            if( empty($age['8vuotta']) OR $age['8vuotta'] == '0000-00-00' ) { $age['8vuotta'] = strtotime( "+1 year", $today ); }
+        
+            
+            if ( $today >= strtotime($age['3vuotta']) AND $today < strtotime($age['4vuotta']) ) {
+                $ageNow = 3;
+                // print '-'.$today.' >= '.strtotime($age['3vuotta']).'-';
+            } elseif ( $today >= strtotime($age['4vuotta']) AND $today < strtotime($age['5vuotta']) ) {
+                $ageNow = 4;
+            } elseif ( $today >= strtotime($age['5vuotta']) AND $today < strtotime($age['6vuotta']) ) {
+                $ageNow = 5;
+            } elseif ( $today >= strtotime($age['6vuotta']) AND $today < strtotime($age['7vuotta']) ) {
+                $ageNow = 6;
+            } elseif ( $today >= strtotime($age['7vuotta']) AND $today < strtotime($age['8vuotta']) ) {
+                $ageNow = 7;
+            } elseif ( $today >= strtotime($age['8vuotta']) ) {
+                $ageNow = 8;
+            }
+        } else {
+            $ageNow = 0;
+        }
+    }
+	
+	// print '-'.$ageNow.'-';
+	return $ageNow;
+}
+    
+    
+    
     
     
 }

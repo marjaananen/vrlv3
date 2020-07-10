@@ -48,7 +48,7 @@ CREATE TABLE `vrlv3_hevosrekisteri` (
   `kasvattajanimi` varchar(25) CHARACTER SET latin1 DEFAULT NULL,
   `kasvattajanimi_id` int(8) DEFAULT NULL,
   `kasvattaja_talli` varchar(8) DEFAULT NULL,
-  `kasvattaja_tunnus` int(5) UNSIGNED DEFAULT NULL,
+  `kasvattaja_tunnus` int(5) UNSIGNED  ZEROFILL DEFAULT NULL,
   `porr_kilpailee` INT(1) NOT NULL DEFAULT '1'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
@@ -160,13 +160,31 @@ ALTER TABLE `vrlv3_hevosrekisteri_sukutaulut`
   CONSTRAINT `REKNRO`
     FOREIGN KEY (`reknro`)
     REFERENCES `vrlv3`.`vrlv3_hevosrekisteri` (`reknro`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION,
+    ON DELETE CASCADE
+    ON UPDATE CASCADE,
   CONSTRAINT `OMINAISUUS`
     FOREIGN KEY (`ominaisuus`)
     REFERENCES `vrlv3`.`vrlv3_lista_ominaisuudet` (`id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION);
+  
+  
+  CREATE TABLE `vrlv3`.`vrlv3_hevosrekisteri_ikaantyminen` (
+  `reknro` INT(9) UNSIGNED ZEROFILL NOT NULL,
+  `3vuotta` DATE NULL DEFAULT '00000-00-00',
+  `4vuotta` DATE NULL DEFAULT '00000-00-00',
+  `5vuotta` DATE NULL DEFAULT '00000-00-00',
+  `6vuotta` DATE NULL DEFAULT '00000-00-00',
+  `7vuotta` DATE NULL DEFAULT '00000-00-00',
+  `8vuotta` DATE NULL DEFAULT '00000-00-00',
+  `ikaantyminen_d` INT(3) NULL DEFAULT 0,
+  PRIMARY KEY (`reknro`),
+  CONSTRAINT `reknro_key`
+    FOREIGN KEY (`reknro`)
+    REFERENCES `vrlv3`.`vrlv3_hevosrekisteri` (`reknro`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE);
+
 
 COMMIT;
 

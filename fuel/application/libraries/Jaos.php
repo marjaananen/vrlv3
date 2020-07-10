@@ -336,7 +336,6 @@ class Jaos
     
     function get_class_form($url, $class){
       $this->CI->load->library('form_builder', array('submit_value' => 'Tallenna'));
-      var_dump($class);
       $aste_options = array(0=>"",1=> "Seurataso", 2=>"Aluetaso", 3=> "Kansallinen taso");
 
       $fields = array();

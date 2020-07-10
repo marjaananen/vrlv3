@@ -70,4 +70,9 @@ FROM hevosrekisteri_ominaisuudet
 WHERE tarkkuus_ketteryys > 0.00 AND
 EXISTS (SELECT reknro from vrlv3_hevosrekisteri where vrlv3_hevosrekisteri.reknro = hevosrekisteri_ominaisuudet.reknro);
 
+INSERT INTO vrlv3.vrlv3_hevosrekisteri_ikaantyminen (reknro, 3vuotta, 4vuotta, 5vuotta, 6vuotta, 7vuotta)
+Select reknro, 3vuotta, 4vuotta, 5vuotta, 6vuotta, 7vuotta
+FROM hevosrekisteri_ikaantyminen WHERE EXISTS
+(SELECT * from  vrlv3_hevosrekisteri where vrlv3_hevosrekisteri.reknro = hevosrekisteri_ikaantyminen.reknro);
+
 

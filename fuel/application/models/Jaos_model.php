@@ -72,7 +72,7 @@ class Jaos_model extends Base_module_model
     
     function get_jaos_porr_list()
     {
-        $this->db->select("id, nimi, lyhenne, kuvaus, url, IF(toiminnassa='1', 'toiminnnassa', 'ei toiminnassa') as toiminnassa");
+        $this->db->select("id, nimi, lyhenne, laji, kuvaus, url, IF(toiminnassa='1', 'toiminnnassa', 'ei toiminnassa') as toiminnassa");
         $this->db->from('vrlv3_kisat_jaokset');
         $this->db->where("s_salli_porrastetut", 1);
         $query = $this->db->get();

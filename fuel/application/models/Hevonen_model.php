@@ -28,6 +28,7 @@ class Hevonen_model extends Base_module_model
         $this->db->join("vrlv3_lista_painotus as p", "h.painotus = p.pid", 'left outer');
         $this->db->join("vrlv3_tallirekisteri as t", "h.kotitalli = t.tnro", 'left outer');
 
+
         $query = $this->db->get();
         $hevonen = array();
         
@@ -57,6 +58,30 @@ class Hevonen_model extends Base_module_model
         $this->db->where("h.reknro", $this->CI->vrl_helper->vh_to_number($reknro));
         $this->db->from('vrlv3_hevosrekisteri as h');
         $this->db->join("vrlv3_hevosrekisteri_sukutaulut as s", "s.reknro = h.reknro", 'left outer');                
+
+
+        $query = $this->db->get();
+        $hevonen = array();
+
+        if ($query->num_rows() > 0)
+        {
+            $hevonen = $query->row_array();
+        
+        }
+        
+        
+        return $hevonen;        
+        
+       
+    }
+    
+    function get_hevonen_ages($reknro)
+    {
+        
+        $hevonen = array();
+        $this->db->select("*");
+        $this->db->where("reknro", $this->CI->vrl_helper->vh_to_number($reknro));
+        $this->db->from('vrlv3_hevosrekisteri_ikaantyminen');
 
 
         $query = $this->db->get();
@@ -355,12 +380,71 @@ class Hevonen_model extends Base_module_model
         return array();
     }
     
-    function get_owners_horses($nro)
+    function get_owners_horses($nro, $only_alive = false, $rotu = null)
     {
-        $this->db->select("h.reknro, h.nimi, r.lyhenne as rotu, IF(sukupuoli='1', 'tamma', IF(sukupuoli='2', 'ori', 'ruuna')) as sukupuoli");
+        $this->db->select("h.reknro, h.nimi, r.lyhenne as rotu, IF(sukupuoli='1', 'tamma', IF(sukupuoli='2', 'ori', 'ruuna')) as sukupuoli, r.rotunro, h.porr_kilpailee, h.sakakorkeus, h.kotitalli, h.painotus");
         $this->db->from('vrlv3_hevosrekisteri as h');
         $this->db->join('vrlv3_hevosrekisteri_omistajat as o', 'h.reknro = o.reknro');
         $this->db->join("vrlv3_lista_rodut as r", "h.rotu = r.rotunro", 'left outer');
+        if(isset($rotu)){
+            $this->db->where('h.rotu', $rotu);
+        }
+        if($only_alive){
+             $this->db->where('h.kuollut', 0);
+        }
+
+        $this->db->where('o.omistaja', $nro);
+        $query = $this->db->get();
+        
+        if ($query->num_rows() > 0)
+        {
+            return $query->result_array();
+        }
+        
+        return array();
+    }
+    
+    
+    function get_owners_porrastettu_horses($nro, $rotu = null, $kotitalli = null, $minheight=null)
+    {
+        $this->db->select("h.reknro, h.nimi, rotu as rotunro, h.porr_kilpailee, h.sakakorkeus, h.kotitalli, h.painotus, i.*");
+        $this->db->from('vrlv3_hevosrekisteri as h');
+        $this->db->join('vrlv3_hevosrekisteri_omistajat as o', 'h.reknro = o.reknro');
+        $this->db->join('vrlv3_hevosrekisteri_ikaantyminen as i', 'h.reknro = i.reknro');
+        $this->db->where('h.kuollut', 0);
+        $this->db->where('h.porr_kilpailee', 1);
+
+        if(isset($rotu)){
+            $this->db->where('h.rotu', $rotu);
+        }
+        
+        if(isset($kotitalli)){
+            $this->db->where('h.kotitalli', $kotitalli);
+        }
+        
+        if(isset($minheight)){
+            $this->db->where('h.sakakorkeus >', $minheight);
+        }else {
+            $this->db->where('h.sakakorkeus >', 10);
+        }
+
+        $this->db->where('o.omistaja', $nro);
+        $query = $this->db->get();
+        
+        if ($query->num_rows() > 0)
+        {
+            return $query->result_array();
+        }
+        
+        return array();
+    }
+    
+    function get_owners_breeds($nro)
+    {
+        $this->db->select("distinct(r.rotunro) as rotunro, r.lyhenne");
+        $this->db->from('vrlv3_hevosrekisteri as h');
+        $this->db->join('vrlv3_hevosrekisteri_omistajat as o', 'h.reknro = o.reknro');
+        $this->db->join("vrlv3_lista_rodut as r", "h.rotu = r.rotunro");
         $this->db->where('o.omistaja', $nro);
         $query = $this->db->get();
         
