@@ -91,7 +91,7 @@ class Virtuaalihevoset extends CI_Controller
         if ($sivu == 'varsat'){
             $vars['foals'] = $this->_hevosen_varsat($vars['hevonen']['reknro']);
 
-        } else if ($sivu == 'kilpailut'){
+        } else if ($sivu == 'porrastetut'){
             $this->load->library("Porrastetut");
             $vars['traits'] = $this->porrastetut->get_trait_names_array();
             $vars['horse_traits'] = $this->porrastetut->get_horses_full_traitlist($reknro);
@@ -101,6 +101,15 @@ class Virtuaalihevoset extends CI_Controller
             $vars['porr_levels'] = $this->load->view('hevoset/porrastetut_levels', $vars, TRUE);
 
             $vars['kilpailut'] = "Perinteisten kilpailujen tiedot puuttuvat.";
+        } else if ($sivu == 'kilpailut'){
+            $this->load->model("Jaos_model");
+            $jaokset = $this->Jaos_model->get_jaokset_all();
+            foreach ($jaokset as $jaos){
+                $vars['jaokset'][$jaos['id']] = $jaos;
+            }
+            $vars['kisatiedot'] = $this->hevonen_model->get_horse_sport_info_by_jaos($reknro);
+            $vars['kilpailut'] = $this->load->view('hevoset/kilpailut_stats', $vars, TRUE);
+            
         }
         else {
             $vars['suku'] = array();
@@ -579,6 +588,8 @@ class Virtuaalihevoset extends CI_Controller
         $fields['sakakorkeus'] = array('type' => 'text', 'class'=>'form-control', 'value'=> $poni['sakakorkeus'] ?? '', 'after_html' => '<span class="form_comment">Säkäkorkeus numeroina (senttimetreinä)</span>');
         $fields['vari'] = array('type' => 'select', 'options' => $color_options,  'value'=> $poni['vari'] ?? '-1', 'class'=>'form-control','after_html' => '<span class="form_comment">Jos toivomasi väri ei löydy listalta, ole yhteydessä ylläpitoon.</span>');
 		$fields['painotus'] = array('type' => 'select', 'options' => $skill_options, 'value' =>  $poni['painotus'] ?? -1, 'class'=>'form-control');
+        $fields['porr_kilpailee'] = array('label'=>'Kilpailee porrastetuissa', 'type' => 'checkbox', 'checked' => $poni['porr_kilpailee'] ?? false, 'class'=>'form-control');
+
 		$fields['syntymamaa'] = array('type' => 'select', 'options' => $country_options, 'value' => $poni['syntymamaa'] ?? -1, 'class'=>'form-control');
         $fields['kotitalli'] = array('type' => 'text', 'class'=>'form-control', 'value'=> $poni['kotitalli'] ?? '', 'after_html' => '<span class="form_comment">Tallin tunnus VRL:n rekisterissä.</span>');
 
@@ -660,6 +671,11 @@ class Virtuaalihevoset extends CI_Controller
         }
         if ($this->input->post('painotus') != -1){
             $poni['painotus'] = $this->input->post('painotus');
+        }
+        if ($this->input->post('porr_kilpailee')){
+            $poni['porr_kilpailee'] = $this->input->post('porr_kilpailee');
+        }else {
+            $poni['porr_kilpailee'] = 0;
         }
         if ($this->input->post('syntymamaa') != -1){
             $poni['syntymamaa'] = $this->input->post('syntymamaa');

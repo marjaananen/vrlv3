@@ -112,6 +112,7 @@ class Kilpailutoiminta extends CI_Controller
                 //Haetaan ikä
                 $levelByAge = $this->porrastetut->level_by_age($poni);
                 $full_traits = $this->porrastetut->get_horses_full_level_list($poni['reknro'], $empty_trait_list, $vars['jaokset']);
+                $full_sport_info = $this->Hevonen_model->get_horse_sport_info_by_jaos($poni['reknro']);
                 //On ikää kisata, ja säkäkorkeus merkitty
                 if( $levelByAge > 2 && $poni['sakakorkeus'] > 10) {
                     
@@ -129,22 +130,22 @@ class Kilpailutoiminta extends CI_Controller
                         $level = $full_traits[$jaos['lyhenne']]['level'];
                         
                         $vh = $this->vrl_helper->get_vh($poni['reknro']);
+                        
+                        $rajoitus = $full_sport_info[$jaos['id']]['taso_max'] ?? 10;
                 
                         //Jos hevonen ei ole tarpeeksi vanha nousemaan tasolta, se ei nouse, vaikka pisteet riittÃ¤isi
-                        if ($levelByAge < $level /*&& $level <= $poni[$jaos . '_max']*/){
+                        if ($levelByAge < $level && $level <= $rajoitus){
                             $vars['printArrayWaitlist'][$jaos['lyhenne']][] = $nick . " (VRL-" . $tunnus . ") - " . $poni['nimi'] . " " . $vh . " (Odottaa ikääntymistä päästäkseen seuraavalle tasolle vt." . $level .")<br />";
                         }
                                         
-                        else if ($level <= 10 /*$poni[$jaos . '_max']*/){
-                                            
+                        else if ($level <= $rajoitus){
                             $vars['printArray'][$jaos['lyhenne']][$level][] = $nick . " (VRL-" . $tunnus . ") - " . $poni['nimi'] . " " . $vh . "<br />";
                         }
                         
-                        else if ($level <= 11 /*$poni[$jaos . '_max'] > -1*/){
+                        else if ($rajoitus > -1){
                             $vars['printArrayReadylist'][$jaos['lyhenne']][] = $nick . " (VRL-" . $tunnus . ") - " . $poni['nimi'] . " " . $vh . " (vt." . $level .")<br />";
                         }
-                        else {
-                        }
+
                         
                     }	
                 }

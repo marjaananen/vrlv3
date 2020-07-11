@@ -37,7 +37,7 @@ foreach ($jaokset as $jaos){
 	}else {
 		echo "<p>Ei kilpailevia hevosia  (".$jaos['lyhenne'].")</p>";
 	}
-	echo "<p><h3>Odottavat hevoset</b></p><p>";
+	echo "<p><h3>Odottavat hevoset</h3></p><p>";
 	if(isset($printArrayWaitlist[$jaos['lyhenne']])){
 		foreach ($printArrayWaitlist[$jaos['lyhenne']] as $poni){
 			echo $poni;

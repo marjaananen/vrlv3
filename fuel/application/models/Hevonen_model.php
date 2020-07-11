@@ -697,6 +697,26 @@ class Hevonen_model extends Base_module_model
         return array();
     }
     
+       //porrastetut
+    function get_horse_sport_info_by_jaos($reknro)
+    {
+        $this->db->select('*');
+        $this->db->from('vrlv3_hevosrekisteri_kisatiedot');
+        $this->db->where('reknro', $this->CI->vrl_helper->vh_to_number($reknro));
+        $query = $this->db->get();
+        
+        if ($query->num_rows() > 0)
+        {
+            $result = array();
+            foreach($query->result_array() as $row){
+                $result[$row['jaos']] = $row;
+            }
+            return $result;
+        }
+        
+        return array();
+    }
+    
     //stats
     function get_stats_breed($rotu){
         

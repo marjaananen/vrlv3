@@ -184,6 +184,33 @@ ALTER TABLE `vrlv3_hevosrekisteri_sukutaulut`
     REFERENCES `vrlv3`.`vrlv3_hevosrekisteri` (`reknro`)
     ON DELETE CASCADE
     ON UPDATE CASCADE);
+  
+  
+  CREATE TABLE `vrlv3`.`vrlv3_hevosrekisteri_kisatiedot` (
+  `reknro` INT(9) ZEROFILL UNSIGNED NOT NULL,
+  `jaos` INT(11) NOT NULL,
+  `taso_max` INT NOT NULL DEFAULT 10,
+  `os` INT NOT NULL DEFAULT 0,
+  `sij` INT NOT NULL DEFAULT 0,
+  `voi` INT NOT NULL DEFAULT 0,
+  `porr_os` INT NOT NULL DEFAULT 0,
+  `porr_sij` INT NOT NULL DEFAULT 0,
+  `porr_voi` INT NOT NULL DEFAULT 0,
+  INDEX `jaos_idx` (`jaos` ASC),
+  INDEX `reknro_idx` (`reknro` ASC),
+  INDEX `primary_idx` (`reknro` ASC, `jaos` ASC),
+  CONSTRAINT `jaosf`
+    FOREIGN KEY (`jaos`)
+    REFERENCES `vrlv3`.`vrlv3_kisat_jaokset` (`id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `reknrof`
+    FOREIGN KEY (`reknro`)
+    REFERENCES `vrlv3`.`vrlv3_hevosrekisteri` (`reknro`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE);
+
+
 
 
 COMMIT;

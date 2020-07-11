@@ -73,7 +73,9 @@ if(isset($hevonen['kasvattaja_tunnus'])){
  <ul class="nav nav-tabs">
         <li role="presentation" class="<?php if ($sivu == 'suku' || empty($sivu)){echo "active";}?>"><a href="<?php echo base_url('virtuaalihevoset/hevonen/'. $hevonen['reknro'] . '/suku')?>">Suku</a></li>
         <li role="presentation" class="<?php if ($sivu == 'varsat'){echo "active";}?>"><a href="<?php echo base_url('virtuaalihevoset/hevonen/'. $hevonen['reknro'] . '/varsat')?>">Jälkeläiset</a></li>
-        <li role="presentation" class="<?php if ($sivu == 'kilpailut'){echo "active";}?>"><a href="<?php echo base_url('virtuaalihevoset/hevonen/'. $hevonen['reknro'] . '/kilpailut')?>">Kilpailut ja näyttelyt</a></li>
+        <li role="presentation" class="<?php if ($sivu == 'porrastetut'){echo "active";}?>"><a href="<?php echo base_url('virtuaalihevoset/hevonen/'. $hevonen['reknro'] . '/porrastetut')?>">Ominaisuudet</a></li>
+
+        <li role="presentation" class="<?php if ($sivu == 'kilpailut'){echo "active";}?>"><a href="<?php echo base_url('virtuaalihevoset/hevonen/'. $hevonen['reknro'] . '/kilpailut')?>">Kilpailustatistiikka</a></li>
     </ul>
     
     <?php
@@ -85,11 +87,15 @@ if(isset($hevonen['kasvattaja_tunnus'])){
             echo $foals;
 
         } 
-        else if($sivu == 'kilpailut'){
-          echo "<h3>Porrastetut</h3>";
-            echo $porr_stats;
+        else if($sivu == 'porrastetut'){
             echo $porr_levels;
-          echo "<h3>Perinteiset kilpailut</h3><br />";
+            echo $porr_stats;
+
+
+
+        }
+        
+        else if($sivu == 'kilpailut'){
             echo $kilpailut;
 
         }
