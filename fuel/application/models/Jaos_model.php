@@ -56,6 +56,117 @@ class Jaos_model extends Base_module_model
     }
     
     
+        //tapahtumat
+    function get_event_list($jaos)
+    {
+        $this->db->select('*');
+        $this->db->from('vrlv3_tapahtumat');
+        $this->db->where('vrlv3_tapahtumat.jaos_id', $jaos);
+        $this->db->where('vrlv3_tapahtumat.tulos', 1);
+
+        $query = $this->db->get();
+        
+        if ($query->num_rows() > 0)
+        {
+            return $query->result_array(); 
+        }
+        
+        return array();
+    }
+    
+    function get_event($id, $jaos = null)
+    {
+        $this->db->select('*');
+        $this->db->from('vrlv3_tapahtumat');
+        $this->db->where('vrlv3_tapahtumat.id', $id);
+        if(isset($jaos)){
+            $this->db->where('vrlv3_tapahtumat.jaos_id', $jaos);
+
+        }
+        $query = $this->db->get();
+        
+        if ($query->num_rows() > 0)
+        {
+            return $query->row_array(); 
+        }
+        
+        return array();
+    }
+    
+    function get_event_horses($event){
+        $this->db->select('oid, vh, tulos, palkinto, kommentti');
+        $this->db->from('vrlv3_tapahtumat_osallistujat');
+        $this->db->where('vrlv3_tapahtumat_osallistujat.tapahtuma', $event);
+        $query = $this->db->get();
+        
+        if ($query->num_rows() > 0)
+        {
+            return $query->result_array(); 
+        }
+        
+        return array();
+
+    }
+    
+    function delete_event($id, $jaos_id){
+        $data = array('id' => $id, 'jaos_id'=>$jaos_id);
+        $this->db->delete('vrlv3_tapahtumat', $data);
+        return true;
+    }
+    
+    function delete_event_horse($id, $event_id){
+        $data = array('oid' => $id, 'tapahtuma'=>$event_id);
+        $this->db->delete('vrlv3_tapahtumat_osallistujat', $data);
+        return true;
+    }
+    
+    function add_event($pvm, $title, $user, $jaos, $participant_data = array()){
+        $event_data['otsikko'] = $title;
+        $event_data['pv'] = $this->CI->vrl_helper->normal_date_to_sql($pvm);
+        $event_data['vastuu'] = $user;
+        $event_data['jaos_id'] = $jaos;
+
+
+    
+     $this->db->insert('vrlv3_tapahtumat', $event_data);
+     $id = $this->db->insert_id();
+        
+     foreach($participant_data as $horse){
+        $horse['tapahtuma'] = $id;
+        $this->db->insert('vrlv3_tapahtumat_osallistujat', $horse);
+
+        
+     }
+        
+        
+        return $id;   
+    }
+    
+    function edit_event($id, $jaos, $title, $date){
+        $where = array('id'=> $id, 'jaos_id' => $jaos);
+        $this->db->where($where);
+        $this->db->update('vrlv3_tapahtumat', array("otsikko"=>$title, "pv" => $this->CI->vrl_helper->normal_date_to_sql($date)));
+    
+        return true;
+        }
+    
+    
+    
+    function add_event_participants($id, $participant_data = array()){
+        
+     foreach($participant_data as $horse){
+        $horse['tapahtuma'] = $id;
+        $this->db->insert('vrlv3_tapahtumat_osallistujat', $horse);
+
+        
+     }
+        
+        
+        return true;
+    }
+    
+    
+    
     function get_jaos_list()
     {
         $this->db->select("id, nimi, lyhenne, kuvaus, url, IF(toiminnassa='1', 'toiminnnassa', 'ei toiminnassa') as toiminnassa");
@@ -70,6 +181,18 @@ class Jaos_model extends Base_module_model
         return array();
     }
     
+    function get_jaos_option_list(){
+        $options = array();
+        $options[0] = "";
+        
+        $jaos_list = $this->get_jaos_list();
+        
+        foreach ($jaos_list as $jaos){
+            $options[$jaos['id']] = $jaos['lyhenne'];
+        }
+        
+        return $options;
+    }
     function get_jaos_porr_list()
     {
         $this->db->select("id, nimi, lyhenne, laji, kuvaus, url, IF(toiminnassa='1', 'toiminnnassa', 'ei toiminnassa') as toiminnassa");

@@ -10,6 +10,96 @@ class Kisakeskus_model extends CI_Model
 	$this->load->database();
     }
     
+    //hae kisakalenterissa olevat tiedot
+    public function get_calendar($porrastettu = null, $arvontatapa = null, $jaos = null){ 
+        $this->db->select('vip, kp, j.id as jaos, j.lyhenne as jaoslyhenne, k.url, k.info, jarj_talli, t.nimi as tallinimi, kisa_id, porrastettu, k.hyvaksytty');
+        $this->db->from('vrlv3_kisat_kisakalenteri as k');
+        $this->db->join('vrlv3_tallirekisteri as t', 't.tnro = k.jarj_talli');
+        $this->db->join('vrlv3_kisat_jaokset as j', 'j.id = k.jaos');
+        if(isset($porrastettu)){
+            $this->db->where('porrastettu', $porrastettu);
+        }
+        if(isset($arvontatapa)){
+            $this->db->where('arvontatapa', $arvontatapa);
+        }
+
+        $this->db->where('tulokset', 0);
+        $this->db->where('k.hyvaksytty is NOT NULL', NULL, FALSE);
+
+        $this->db->order_by('kp', 'desc');
+        $this->db->limit('1000');
+                
+        $query = $this->db->get();
+        
+        if ($query->num_rows() > 0)
+        {
+            return $query->result_array();
+        }else {
+            return array();
+        }
+        
+    }
+    
+    
+     public function get_results($porrastettu = null, $arvontatapa = null, $jaos = null){ 
+        $this->db->select('kp, j.id as jaos, j.lyhenne as jaoslyhenne, k.url, tulos_id, jarj_talli, t.nimi as tallinimi, k.kisa_id, porrastettu');
+        $this->db->from('vrlv3_kisat_kisakalenteri as k');
+        $this->db->join('vrlv3_tallirekisteri as t', 't.tnro = k.jarj_talli');
+        $this->db->join('vrlv3_kisat_jaokset as j', 'j.id = k.jaos');
+        $this->db->join('vrlv3_kisat_tulokset as u', 'k.kisa_id = u.kisa_id');
+
+        if(isset($porrastettu)){
+            $this->db->where('porrastettu', $porrastettu);
+        }
+        if(isset($arvontatapa)){
+            $this->db->where('arvontatapa', $arvontatapa);
+        }
+
+        $this->db->where('k.tulokset', 1);
+        $this->db->where('t.hyvaksytty !=','0000-00-00 00:00:00');
+
+        $this->db->order_by('kp', 'desc');
+        $this->db->limit('1000');
+                
+        $query = $this->db->get();
+        
+        if ($query->num_rows() > 0)
+        {
+            return $query->result_array();
+        }else {
+            return array();
+        }
+        
+    }
+    
+    
+    //hae_yksittäinen_tulos
+    public function get_result($result_id = null, $kisa_id = null){
+        $this->db->select('t.*, k.kp, k.vip, t.ilmoitettu, k.tunnus as tunnus, k.url, t.tunnus as tulosten_lah, k.jarj_talli, k.tunnus, k.jaos, k.arvontatapa');
+        $this->db->from('vrlv3_kisat_tulokset as t');
+        $this->db->join('vrlv3_kisat_kisakalenteri as k', 'k.kisa_id = t.kisa_id');
+
+        if(isset($result_id)){
+            $this->db->where('t.tulos_id', $result_id);
+        }
+        if(isset($kisa_id)){
+            $this->db->where('t.kisa_id', $kisa_id);
+        }
+
+        $this->db->where('t.tulokset', 1);
+        $this->db->where('t.hyvaksytty !=','0000-00-00 00:00:00');
+                
+        $query = $this->db->get();
+        
+        if ($query->num_rows() > 0)
+        {        
+            return $query->row_array();
+        }else {
+            return array();
+        }
+        
+    }
+    
     //Luokat luontilomakkeelle
       public function hae_luokat($porrastettu = 1, $laji = -1){
 	    $this->db->select('luokka_id, teksti, porr_vaikeus, laji');
@@ -222,7 +312,7 @@ class Kisakeskus_model extends CI_Model
      
      
 
-    //Osallistumiset 
+    //Osallistumiset h
       public function lisaa_osallistuja_luokkaan ($kisa_id, $luokka_id, $vh, $vrl, $rimpsu){
 	    
 	      $lisattava = array();

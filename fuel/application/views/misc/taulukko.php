@@ -23,6 +23,10 @@
                     return 'VH' + value.slice(0, 2) + '-' + value.slice(2, 5) + '-' + value.slice(5, 9);
                 }
                 
+                
+                if (type === 'small'){
+                    return '<small>'+value+'</small>';
+                }
                 return value;
             }
         
@@ -34,9 +38,9 @@
                 var prepend_text;
                 var output;
 
-                for(i in headers)
+                for(var i in headers)
                 {
-                    table += "<th>" + headers[i]['title'] + "</th>";
+                    table += "<th>" + headers[i].title + "</th>";
                     numcolumns++;
                 }
                 
@@ -51,40 +55,45 @@
                     
                     for(var i=1; i<=numcolumns; i++)
                     {
-                        if (headers[i]['prepend_text'] != undefined)
-                            prepend_text = headers[i]['prepend_text'];
+                        if (headers[i].prepend_text != undefined)
+                            prepend_text = headers[i].prepend_text;
                         else
                             prepend_text = "";
                         
                         //Jos pitää koota kaikki saman hakukohteen useat arvot yhteen arvoon, mennään iffiin
                         //esim. tallihaussa kootaan yhteen muuttujaan kaikki tallin kategoriat
-                        if(headers[i]['aggregated_by'] != undefined)
+                        if(headers[i].aggregated_by != undefined)
                         {
-                            for(agr in data) //etsitään muut aggregoitavat rivit
+                            for(var agr in data) //etsitään muut aggregoitavat rivit
                             {
                                 if (data[agr] == null)
                                     continue;
                                 
                                 //eihän ole sama rivi kuin mitä tulostetaan && vastaahan yksilöivät ID:t toisiaan (aggregated_by:t siis kertovat ID:n keyn)
-                                if (d != agr && data[agr][headers[i]['aggregated_by']] == data[d][headers[i]['aggregated_by']])
+                                if (d != agr && data[agr][headers[i].aggregated_by] == data[d][headers[i].aggregated_by])
                                 {
-                                    data[d][headers[i]['key']] += ", " + data[agr][headers[i]['key']]; //appendaus
+                                    data[d][headers[i].key] += ", " + data[agr][headers[i].key]; //appendaus
                                     data[agr] = null; //poistetaan aggregoitu rivi ettei myöhemmin tulosteta sitä uudestaan
                                 }
                             }
                         }
                         
-                        if (headers[i]['image'] != undefined) {
-                            output = "<img src='" + headers[i]['image'] + "'/>";
-                        } else if (headers[i]['checkbox_id'] != undefined){
-                            output = "<input type=\"checkbox\" name=\"" + headers[i]['checkbox_id'] +"\" value=\"" + data[d][headers[i]['key']] +"\" >";
+                        if (headers[i].image != undefined) {
+                            output = "<img src='" + headers[i].image + "'/>";
+                        } else if (headers[i].static_text != undefined) {
+                            output = headers[i].static_text;
+                        }else if (headers[i].checkbox_id != undefined){
+                            output = "<input type=\"checkbox\" name=\"" + headers[i].checkbox_id +"\" value=\"" + data[d][headers[i].key] +"\" >";
                         } else {
-                            output = prepend_text + formatValue(data[d][headers[i]['key']], headers[i]['type']);
+                            output = prepend_text + formatValue(data[d][headers[i].key], headers[i].type);
                         }
                         
-                        if (headers[i]['key_link'] != undefined) {
-                            table += "<td><a href='" + headers[i]['key_link'] + formatValue(data[d][headers[i]['key']], headers[i]['type']) + "'>" + output + "</a></td>"; //profiili linkatun arvon tulostus soluunsa
-                        } else {
+                        if (headers[i].key_link != undefined) {
+                            table += "<td><a href='" + headers[i].key_link + formatValue(data[d][headers[i].key], headers[i].type) + "'>" + output + "</a></td>"; //profiili linkatun arvon tulostus soluunsa
+                        } else if (headers[i].type === 'url') {
+                            table += "<td><a href='" + formatValue(data[d][headers[i].key], headers[i].type) + "' target='_blank'>" + output + "</a></td>"; //profiili linkatun arvon tulostus soluunsa
+                        }
+                        else {
                             table += "<td>" + output + "</td>"; //normaali arvon tulostus soluunsa
                         }
                     }

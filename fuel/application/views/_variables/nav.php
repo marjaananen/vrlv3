@@ -60,16 +60,19 @@ $nav['kasvatus/varilaskuri'] = array('label' => 'Periytymislaskuri', 'parent_id'
 
 //kantakirjat, laatikset, rekkaa kasvinimi
 //kilpailutoiminta alamenu
+$nav['kilpailutoiminta/kilpailukalenteri'] = array('label' => 'Kilpailukalenteri', 'parent_id' => 'kilpailutoiminta', 'active' => 'kilpailutoiminta/kilpailukalenteri');
+$nav['kilpailutoiminta/tulosarkisto'] = array('label' => 'Tulosarkisto', 'parent_id' => 'kilpailutoiminta', 'active' => 'kilpailutoiminta/tulosarkisto');
+
 $nav['kilpailutoiminta/kilpailujaokset'] = array('label' => 'Jaokset', 'parent_id' => 'kilpailutoiminta', 'active' => 'kilpailutoiminta/jaokset');
 $nav['kilpailutoiminta/kilpailusaannot'] = array('label' => 'Yleiset kilpailusäännöt', 'parent_id' => 'kilpailutoiminta', 'active' => 'kilpailutoiminta/kilpailusaannot');
 $nav['kilpailutoiminta/porrastetut'] = array('label' => 'Porrastetut kilpailut', 'parent_id' => 'kilpailutoiminta', 'active' => 'kilpailutoiminta/porrastetut');
 $nav['kilpailutoiminta/porrastetut/luokat'] = array('label' => 'Luokat', 'parent_id' => 'kilpailutoiminta/porrastetut', 'active' => 'kilpailutoiminta/porrastetut/luokat');
 $nav['kilpailutoiminta/porrastetut/kilpailulistat'] = array('label' => 'Kilpailulistat', 'parent_id' => 'kilpailutoiminta/porrastetut', 'active' => 'kilpailutoiminta/porrastetut/kilpailulistat');
 
-$nav['kilpailutoiminta/kilpailukalenteri'] = array('label' => 'Kilpailukalenteri', 'parent_id' => 'kilpailutoiminta', 'active' => 'kilpailutoiminta/kilpailukalenteri');
-$nav['kilpailutoiminta/kilpailut/jarjesta'] = array('label' => 'Järjestä kilpailut', 'parent_id' => 'kilpailutoiminta/kilpailukalenteri', 'active' => 'kilpailutoiminta/kisat/jarjesta');
-$nav['kilpailutoiminta/kilpailut/tulokset'] = array('label' => 'Lähetä tulokset', 'parent_id' => 'kilpailutoiminta/kilpailukalenteri', 'active' => 'kilpailutoiminta/kisat/tulokset');
-$nav['kilpailutoiminta/kilpailukalenteri/tulosarkisto'] = array('label' => 'Tulosarkisto', 'parent_id' => 'kilpailutoiminta/kilpailukalenteri', 'active' => 'kilpailutoiminta/kilpailukalenteri/tulosarkisto');
+
+$nav['kilpailutoiminta/kilpailut'] = array('label' => 'Omat kilpailut', 'parent_id' => 'kilpailutoiminta', 'active' => 'kilpailutoiminta/kilpailut');
+$nav['kilpailutoiminta/kilpailut/jarjesta'] = array('label' => 'Järjestä kilpailut', 'parent_id' => 'kilpailutoiminta/kilpailut', 'active' => 'kilpailutoiminta/kisat/jarjesta');
+$nav['kilpailutoiminta/kilpailut/tulokset'] = array('label' => 'Lähetä tulokset', 'parent_id' => 'kilpailutoiminta/kilpailut', 'active' => 'kilpailutoiminta/kisat/tulokset');
 
 
 //porrastettujen jutut, anomisen jutut jne jne
@@ -108,6 +111,8 @@ $nav['yllapito/jaokset/ominaisuudet'] = array('label' => 'Hallitse ominaisuuksia
 
 $nav['yllapito/jaokset/jaokset'] = array('label' => 'Jaokset', 'parent_id' => 'yllapito/jaokset', 'active' => 'yllapito/jaokset/jaokset');
 $nav['yllapito/jaokset/lisaa_jaos'] = array('label' => 'Lisää jaos', 'parent_id' => 'yllapito/jaokset', 'active' => 'yllapito/jaokset/lisaa_jaos');
+$nav['yllapito/jaokset/tapahtumat'] = array('label' => 'Hallitse tapahtumia', 'parent_id' => 'yllapito/jaokset', 'active' => 'yllapito/jaokset/tapahtumat');
+
 
 
 

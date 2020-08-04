@@ -12,18 +12,53 @@ class Jaos
 
     }
     
-    function jaostaulukko($url_poista, $url_muokkaa){
+    function jaostaulukko($url_poista, $url_muokkaa, $url_tapahtumat){
                                 //start the list		
 		$vars['headers'][1] = array('title' => 'ID', 'key' => 'id');
 		$vars['headers'][2] = array('title' => 'Nimi', 'key' => 'nimi');
 		$vars['headers'][3] = array('title' => 'Lyhenne', 'key' => 'lyhenne');
       $vars['headers'][4] = array('title' => 'Toiminnassa', 'key' => 'toiminnassa');
-       $vars['headers'][5] = array('title' => 'Poista', 'key' => 'id', 'key_link' => site_url($url_poista), 'image' => site_url('assets/images/icons/delete.png'));
-        $vars['headers'][6] = array('title' => 'Editoi', 'key' => 'id', 'key_link' => site_url($url_muokkaa), 'image' => site_url('assets/images/icons/edit.png'));
-  
+      $vars['headers'][5] = array('title' => 'Poista', 'key' => 'id', 'key_link' => site_url($url_poista), 'image' => site_url('assets/images/icons/delete.png'));
+      $vars['headers'][6] = array('title' => 'Editoi', 'key' => 'id', 'key_link' => site_url($url_muokkaa), 'image' => site_url('assets/images/icons/edit.png'));
+      $vars['headers'][7] = array('title' => 'Tapahtumat', 'key' => 'id', 'key_link' => site_url($url_tapahtumat), 'image' => site_url('assets/images/icons/award_star_gold_2.png'));
+
 		$vars['headers'] = json_encode($vars['headers']);
 					
 		$vars['data'] = json_encode($this->CI->Jaos_model->get_jaos_list());
+        
+        return  $this->CI->load->view('misc/taulukko', $vars, TRUE);
+        
+    }
+    
+    
+      function tapahtumataulukko ($jaos, $url_poista, $url_muokkaa){
+                                //start the list		
+		$vars['headers'][1] = array('title' => 'ID', 'key' => 'id');
+		$vars['headers'][2] = array('title' => 'Päivämäärä', 'key' => 'pv', 'type'=>'date');
+		$vars['headers'][3] = array('title' => 'Otsikko', 'key' => 'otsikko');
+      $vars['headers'][4] = array('title' => 'Poista', 'key' => 'id', 'key_link' => site_url($url_poista), 'image' => site_url('assets/images/icons/delete.png'));
+      $vars['headers'][5] = array('title' => 'Editoi', 'key' => 'id', 'key_link' => site_url($url_muokkaa), 'image' => site_url('assets/images/icons/edit.png'));
+
+		$vars['headers'] = json_encode($vars['headers']);
+					
+		$vars['data'] = json_encode($this->CI->Jaos_model->get_event_list($jaos));
+        
+        return  $this->CI->load->view('misc/taulukko', $vars, TRUE);
+        
+    }
+    
+      function tapahtumaosallistujat ($id, $url_poista){
+                                //start the list		
+		$vars['headers'][1] = array('title' => 'ID', 'key' => 'oid');
+		$vars['headers'][2] = array('title' => 'Rekisterinumero', 'key' => 'vh', 'type'=>'VH', 'key_link'=>site_url('virtuaalihevoset/hevonen/'));
+		$vars['headers'][3] = array('title' => 'Tulos', 'key' => 'tulos');
+      $vars['headers'][4] = array('title' => 'Palkinto', 'key' => 'palkinto');
+      $vars['headers'][5] = array('title' => 'Kommentti', 'key' => 'kommentti', 'type'=>'small');
+      $vars['headers'][6] = array('title' => 'Poista', 'key' => 'oid', 'key_link' => site_url($url_poista), 'image' => site_url('assets/images/icons/delete.png'));
+
+		$vars['headers'] = json_encode($vars['headers']);
+					
+		$vars['data'] = json_encode($this->CI->Jaos_model->get_event_horses($id));
         
         return  $this->CI->load->view('misc/taulukko', $vars, TRUE);
         
@@ -402,7 +437,47 @@ class Jaos
       
     }
     
+   ////////////////////////////////////////////////////////
+    // TAPAHTUMAT
+    ///////////////////////////////////////////////////////
     
+     function get_event_form($url, $event=array(), $osallistujat = true){
+      $this->CI->load->library('form_builder', array('submit_value' => 'Tallenna tapahtuma'));
+      $this->CI->load->library("vrl_helper");
+      
+      if(isset($event['pv'])){
+         $event['pv'] = $this->CI->vrl_helper->sql_date_to_normal($event['pv']);
+      }
+
+      $fields = array();
+      $fields['otsikko'] = array('type' => 'text', 'class'=>'form-control', 'required' => TRUE, 'value' => $event['otsikko'] ?? "");
+      $fields['pv'] = array('type' => 'text', 'label'=>'Päivämäärä', 'class'=>'form-control', 'required' => TRUE, 'value' => $event['pv'] ?? "",
+                            'after_html'=>'<span class="form_comment">Muodossa pp.kk.vvvv</span>');
+      if($osallistujat){
+      $fields['osallistujat'] = array('label'=>"Lisää osallistujia", 'type' => 'textarea', 'cols' => 80, 'rows' => 5, 'class' => 'wysiwyg',
+                                      'value' => $event['osallistujat'] ?? "VH00-000-00000;70;KERJ-III;16 + 24 + 16,5 + 5,5 = 70 p. Esimerkkikommentti.	",
+                                      'after_html'=>'<span class="form_comment">Yksi hevonen per rivi. Erottele puolipisteellä seuraavasti.  VH-numero; pisteet; palkinto; kommentti. <br>Kaikki viimeisen puolipisteen jälkeen kirjattu lasketaan kommentiksi. Jos kommenttia ei ole, jätä tyhjäksi (mutta rivin pitää silti sisältää kolme puolipistettä (;).</span>');
+      }
+
+      $this->CI->form_builder->form_attrs = array('method' => 'post', 'action' => site_url($url));
+		        
+      return $this->CI->form_builder->render_template('_layouts/basic_form_template', $fields);
+    }
+    
+    
+    function add_event($user, $jaos, $date, $title, $participant_data){
+      return $this->CI->Jaos_model->add_event($date, $title, $user, $jaos, $participant_data);
+    }
+    
+    function edit_event($id, $jaos, $title, $date){
+      return $this->CI->Jaos_model->edit_event($id, $jaos, $title, $date);
+    }
+
+    
+   function add_participants($id, $participant_data){
+      return $this->CI->Jaos_model->add_event_participants($id, $participant_data);
+    }
+
     
    ////////////////////////////////////////////////////////
     // OMINAISUUDET
@@ -447,6 +522,144 @@ class Jaos
       return true;
     }
     
+    
+    ///////////////////////////////////////////////////////////////////////////////
+    // Kisakalenterin ylläpitofunktiot
+    //////////////////////////////////////////////////////////////////////////////
+    
+    public function competitions_queue_get_next(){
+      $this->_get_next('kisat_kisakalenteri');
+    }
+    
+    public function results_queue_get_next(){
+      $this->_get_next('kisat_tulokset');
+    }
+    
+    
+     private function _get_next($table)
+    {
+        $data = array('success' => false);
+        $date = new DateTime();
+        $date->setTimestamp(time() - 60*15); //nykyhetki miinus 15min, eli ei saa ottaa samaa jonoitemiä uudestaan käsittelyyn 15 minuuttiin
+        
+        $this->CI->db->from($table);
+        $this->CI->db->where('kasitelty IS NULL OR kasitelty < "' . $date->format('Y-m-d H:i:s') . '"');
+        $this->CI->db->order_by("lisatty", "asc"); 
+        $query = $this->CI->db->get();
+        
+        if ($query->num_rows() > 0)
+        {
+            $data = $query->row_array(); 
+
+            $date->setTimestamp(time());
+            $user = $this->CI->ion_auth->user()->row();
+            $update_data = array('kasitelty' => $date->format('Y-m-d H:i:s'), 'kasittelija' => $user->tunnus);
+            
+            $this->CI->db->where('id', $data['id']);
+            $this->CI->db->update($table, $update_data);
+            
+            $data['success'] = true;
+        }
+        
+        return $data;
+    }
+    
+    //palauttaa jonoitemin tiedot lukitsematta
+    public function get_by_id($id)
+    {
+        $data = array('success' => false);
+        
+        $this->CI->db->from($this->db_table);
+        $this->CI->db->where('id', $id);
+        $query = $this->CI->db->get();
+        
+        if ($query->num_rows() > 0)
+        {
+            $data = $query->row_array(); 
+            $data['success'] = true;
+        }
+        
+        return $data;
+    }
+    
+    //palauttaa html:nä tiedot ja käsittelynapit
+    //raw datassa pitää olla Labelinnimi => arvo
+    //käsittelykontrollerin pitää olla <nykyurl>_kasittele ja saa päätöksen sekä id:n parametrina
+    public function format_html($title, $raw_data, $id)
+    {
+        $html = '<div class="container"><h3>' . $title . '</h3>';
+        
+        foreach($raw_data as $key => $value)
+        {
+            if($key != '__extra_param')
+                $html .= "<p>" . $key . ": " . $value . "</p>";
+        }
+        
+        $html .= '</div>';
+        
+        if($title != 'Tallianomus')
+            $html .= '<p><form method="post" action="' . current_url() . '_kasittele/hyvaksy/' . $id . '"><input type="submit" value="Hyväksy"></form>';
+        else
+            $html .= '<p><form method="post" action="' . current_url() . '_kasittele/hyvaksy/' . $id . '">Tallilyhenteen kirjainosa (2-4 merkkiä): <input type="text" value="' . $raw_data['__extra_param'] . '" name="tnro_alpha"><input type="submit" value="Hyväksy"></form>';
+        $html .= '<form method="post" action="' . current_url() . '_kasittele/hylkaa/' . $id . '">Hylkäyssyy: <input type="text" name="rejection_reason"><input type="submit" value="Hylkää"></form>';
+        $html .= '<form method="post" action="' . current_url() . '"><input type="submit" value="Ohita ja ota seuraava"></form></p>';
+        
+        return $html;
+    }
+    
+    //lisää datat db_table poislukien loppupääte _jonossa -tauluun, plus hyvaksyi ja hyvaksytty -kentät
+    //poistaa id:n jonosta
+    //lähettää recipientille msg:n adminilta
+    public function process_queue_item($id, $approved, $insert_data, $msg_recipient, $msg)
+    {
+        $this->CI->load->model('tunnukset_model');
+        $this->CI->tunnukset_model->send_message(1, $msg_recipient, $msg);
+        
+        if($approved == true)
+        {
+            $user = $this->CI->ion_auth->user()->row();
+            $insert_data['hyvaksyi'] = $user->tunnus;
+            $this->CI->db->insert(str_replace("_jonossa", "", $this->db_table), $insert_data);
+        }
+        
+        $this->CI->db->delete($this->db_table, array('id' => $id));
+    }
+    
+    //palauttaa html:nä montako jonossa on ja mikä on vanhimman datetime plus seuraavanhakunappi
+    public function get_queue_frontpage()
+    {
+        $data = array();
+        
+        $this->CI->db->select('lisatty');
+        $this->CI->db->from($this->db_table);
+        $this->CI->db->order_by("lisatty", "asc"); 
+        $query = $this->CI->db->get();
+        
+        if ($query->num_rows() > 0)
+        {
+            $db_data = $query->row_array(); 
+            $data['oldest'] = $db_data['lisatty'];
+            
+            $this->CI->db->from($this->db_table);
+            $data['queue_length'] = $this->CI->db->count_all_results();
+            
+            $date = new DateTime();
+            $date->setTimestamp(time() - 60*15); //nykyhetki miinus 15min, eli ei saa ottaa samaa hakemusta uudestaan käsittelyyn 15 minuuttiin
+            
+            $this->CI->db->from($this->db_table);
+            $this->CI->db->where('kasitelty IS NULL OR kasitelty < "' . $date->format('Y-m-d H:i:s') . '"');
+            $query = $this->CI->db->get();
+            $data['queue_locked_num'] = $data['queue_length'] - $query->num_rows();
+            
+            $data['html'] = "<p>Jonon pituus on " . $data['queue_length'] . ", joista " . $data['queue_locked_num'] . " on lukittuna. Vanhin jonottaja on lisätty " . $data['oldest'] . ".</p>";
+        }
+        else
+        {
+            $data['html'] = "<p>Jono on tyhjä.</p>";
+        }
+        
+        return $data;
+    }
 }
     
 ?>

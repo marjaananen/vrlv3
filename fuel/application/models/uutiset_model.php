@@ -26,7 +26,7 @@ class Uutiset_model extends Base_module_model
             $kid_query = $this->db->get('vrlv3_lista_tiedotuskategoriat');
             $json_row['text'] = $kid_query->row()->kategoria;
             $json_row['weight'] = $row->weight;
-            $json_row['link'] = site_url('tiedotukset/kategoria/' . $row->kid);
+            $json_row['link'] = site_url('liitto/kategoria/' . $row->kid);
             
             $json[] = $json_row;           
             

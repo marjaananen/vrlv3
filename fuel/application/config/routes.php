@@ -73,6 +73,8 @@ $route['yllapito/hevosrekisteri/(:any)/(:any)'] = "yllapito_hevosrekisteri/$1/$2
 $route['yllapito/hevosrekisteri/(:any)/(:any)/(:any)'] = "yllapito_hevosrekisteri/$1/$2/$3";
 
 $route['yllapito/jaokset'] = "yllapito_jaokset";
+$route['yllapito/jaokset/tapahtumat'] = "yllapito_jaokset/tapahtumat/";
+$route['yllapito/jaokset/tapahtumat/(:any)'] = "yllapito_jaokset/tapahtumat/$1";
 $route['yllapito/jaokset/(:any)'] = "yllapito_jaokset/$1";
 $route['yllapito/jaokset/(:any)/(:any)'] = "yllapito_jaokset/$1/$2";
 $route['yllapito/jaokset/(:any)/(:any)/(:any)'] = "yllapito_jaokset/$1/$2/$3";
