@@ -70,6 +70,7 @@ class Virtuaalihevoset extends CI_Controller
 	public function hevosprofiili ($reknro, $sivu = ""){
 		$this->load->library("vrl_helper");
 		$this->load->library("pedigree_printer");
+        $this->load->model("jaos_model");
 				
 		if(empty($reknro) || !$this->vrl_helper->check_vh_syntax($reknro)){
 			$this->fuel->pages->render('misc/naytaviesti', array('msg_type' => 'danger', 'msg' => 'Rekisterinumero on virheellinen.'));
@@ -86,6 +87,7 @@ class Virtuaalihevoset extends CI_Controller
         }
         
         $vars['owners'] = $this->hevonen_model->get_horse_owners($reknro);
+        $vars['palkinnot'] = $this->jaos_model->get_event_horse_prizes($this->vrl_helper->vh_to_number($reknro));
 		$vars['hevonen']['rekisteroity'] = $this->vrl_helper->sanitize_registration_date($vars['hevonen']['rekisteroity']);
         
         if ($sivu == 'varsat'){
@@ -115,7 +117,10 @@ class Virtuaalihevoset extends CI_Controller
             $vars['suku'] = array();
             $this->hevonen_model->get_suku($reknro, "", $vars['suku']);
             $vars['pedigree_printer'] = & $this->pedigree_printer;
-        }       
+        
+        }
+        
+        $vars['vrl_helper'] = & $this->vrl_helper;
 
 		
 		

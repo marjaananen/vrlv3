@@ -125,18 +125,17 @@ class Jaos_model extends Base_module_model
         $event_data['pv'] = $this->CI->vrl_helper->normal_date_to_sql($pvm);
         $event_data['vastuu'] = $user;
         $event_data['jaos_id'] = $jaos;
+        
+        $jaos_info = $this->get_jaos($jaos);
+        
+        $event_data['jaos'] = $jaos_info['lyhenne'];
 
 
     
      $this->db->insert('vrlv3_tapahtumat', $event_data);
      $id = $this->db->insert_id();
         
-     foreach($participant_data as $horse){
-        $horse['tapahtuma'] = $id;
-        $this->db->insert('vrlv3_tapahtumat_osallistujat', $horse);
-
-        
-     }
+     $this->add_event_participants($id, $participant_data);
         
         
         return $id;   
@@ -156,6 +155,7 @@ class Jaos_model extends Base_module_model
         
      foreach($participant_data as $horse){
         $horse['tapahtuma'] = $id;
+        $horse['hyv'] = 1;
         $this->db->insert('vrlv3_tapahtumat_osallistujat', $horse);
 
         
@@ -165,12 +165,32 @@ class Jaos_model extends Base_module_model
         return true;
     }
     
+    function get_event_horse_prizes($reknro){
+        $this->db->select('t.pv, t.otsikko, o.tulos, o.palkinto, o.kommentti, t.jaos');
+        $this->db->from('vrlv3_tapahtumat_osallistujat as o');
+        $this->db->join('vrlv3_tapahtumat as t', 't.id = o.tapahtuma');
+        $this->db->where('o.vh', $reknro);
+        $this->db->where("o.hyv", 1);
+        $this->db->where("t.tulos", 1);
+        $this->db->order_by("t.pv", 'desc');
+        
+         $query = $this->db->get();
+        
+        if ($query->num_rows() > 0)
+        {
+            return $query->result_array(); 
+        }
+        
+        return array();
+    }
+    
     
     
     function get_jaos_list()
     {
         $this->db->select("id, nimi, lyhenne, kuvaus, url, IF(toiminnassa='1', 'toiminnnassa', 'ei toiminnassa') as toiminnassa");
         $this->db->from('vrlv3_kisat_jaokset');
+        
         $query = $this->db->get();
         
         if ($query->num_rows() > 0)
@@ -397,6 +417,9 @@ class Jaos_model extends Base_module_model
         $this->db->delete('vrlv3_kisat_luokat', $data);
         return true;
     }
+    
+    
+    
     
     
 

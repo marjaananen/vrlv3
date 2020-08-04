@@ -54,7 +54,17 @@ if(isset($hevonen['kasvattaja_tunnus'])){
     <h3>Tämä hevonen on kuollut <?=$hevonen['kuol_pvm']?>.</h3>
 <?php endif; ?>
 
-<div class="container">
+<?php if (isset($palkinnot) && sizeof($palkinnot) > 0){
+ echo '<div class="row">';
+ echo '<div class="col-xs-12 col-md-8">';
+}
+
+else {
+ echo '<div class="container">';
+}
+
+?>
+  
     <p><b>Rotu:</b> <?=$hevonen['h_rotunimi']?></p>
     <p><b>Sukupuoli:</b> <?=$hevonen['sukupuoli']?></p>
     <p><b>Säkäkorkeus:</b> <?=$hevonen['sakakorkeus']?>cm</p>
@@ -69,12 +79,40 @@ if(isset($hevonen['kasvattaja_tunnus'])){
     <p><b>Omistajat:</b> <?php echo $omistajatieto; ?></p>
 </div>
 
+<?php
+if (isset($palkinnot) && sizeof($palkinnot) > 0){
+ echo '<div class="col-xs-6 col-md-4">';
+ 
+ 
+ foreach ($palkinnot as $palkinto){
+  echo '<p>';
+  echo '<b>'.$palkinto['palkinto'];
+  if ($palkinto['tulos'] > 0){
+   echo ' ('.$palkinto['tulos'].'p)';
+  }
+ echo '</b>, ' . $vrl_helper->sql_date_to_normal($palkinto['pv']);
+ if(isset($palkinto['jaos'])){
+  echo ', '. $palkinto['jaos'];
+ }
+  echo '</p>';
+
+ }
+ 
+ ?>
+ 
+   <a href="<?php echo base_url('virtuaalihevoset/hevonen/'. $hevonen['reknro'] . '/palkinnot')?>">Tarkemmat kuvaukset palkinnoista</a>
+<?php
+ echo '</div>';
+ echo '</div>';
+}
+?>
+
 
  <ul class="nav nav-tabs">
         <li role="presentation" class="<?php if ($sivu == 'suku' || empty($sivu)){echo "active";}?>"><a href="<?php echo base_url('virtuaalihevoset/hevonen/'. $hevonen['reknro'] . '/suku')?>">Suku</a></li>
         <li role="presentation" class="<?php if ($sivu == 'varsat'){echo "active";}?>"><a href="<?php echo base_url('virtuaalihevoset/hevonen/'. $hevonen['reknro'] . '/varsat')?>">Jälkeläiset</a></li>
+        <li role="presentation" class="<?php if ($sivu == 'palkinnot'){echo "active";}?>"><a href="<?php echo base_url('virtuaalihevoset/hevonen/'. $hevonen['reknro'] . '/palkinnot')?>">Palkinnot</a></li>
         <li role="presentation" class="<?php if ($sivu == 'porrastetut'){echo "active";}?>"><a href="<?php echo base_url('virtuaalihevoset/hevonen/'. $hevonen['reknro'] . '/porrastetut')?>">Ominaisuudet</a></li>
-
         <li role="presentation" class="<?php if ($sivu == 'kilpailut'){echo "active";}?>"><a href="<?php echo base_url('virtuaalihevoset/hevonen/'. $hevonen['reknro'] . '/kilpailut')?>">Kilpailustatistiikka</a></li>
     </ul>
     
@@ -99,6 +137,32 @@ if(isset($hevonen['kasvattaja_tunnus'])){
             echo $kilpailut;
 
         }
+        
+        else if($sivu == "palkinnot"){
+         if (isset($palkinnot) && sizeof($palkinnot) > 0){
+ 
+           foreach ($palkinnot as $palkinto){
+            echo '<p>';
+            echo '<b>'.$palkinto['palkinto'];
+            if ($palkinto['tulos'] > 0){
+             echo ' ('.$palkinto['tulos'].'p)';
+            }
+            echo '</b>';
+            if(isset($palkinto['jaos'])){
+             echo ', '. $palkinto['jaos'];
+            }
+            echo '<br />';
+            echo $vrl_helper->sql_date_to_normal($palkinto['pv']).', '.$palkinto['otsikko'].'<br />';
+            echo $palkinto['kommentti'];
+            echo '</p>';
+          
+           }
+        }
+        
+        else {
+         echo '<p>Ei palkintoja</p>';
+        }
+       }
     
     ?>
 

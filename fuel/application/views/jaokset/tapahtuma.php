@@ -6,11 +6,10 @@
     echo $form;
 }?>
 
-<?php if(isset($horse_form)){
-    echo "<h3>Lisää palkittu hevonen</h3>";
+<h3>Poista tapahtuma</h3>
+<p>Voit poistaa vain tapahtumia joissa ei ole palkittuja hevosia!</p>
+<p><a href="<?php echo site_url($delete_url);?>"><button type="button" class="btn btn-warning">Poista tapahtuma</button></a></p>
 
-    echo $horse_form;
-}?>
 
 
 <?=$palkitut?>
