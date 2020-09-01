@@ -70,9 +70,10 @@ $nav['kilpailutoiminta/porrastetut/luokat'] = array('label' => 'Luokat', 'parent
 $nav['kilpailutoiminta/porrastetut/kilpailulistat'] = array('label' => 'Kilpailulistat', 'parent_id' => 'kilpailutoiminta/porrastetut', 'active' => 'kilpailutoiminta/porrastetut/kilpailulistat');
 
 
-$nav['kilpailutoiminta/kilpailut'] = array('label' => 'Omat kilpailut', 'parent_id' => 'kilpailutoiminta', 'active' => 'kilpailutoiminta/kilpailut');
-$nav['kilpailutoiminta/kilpailut/jarjesta'] = array('label' => 'Järjestä kilpailut', 'parent_id' => 'kilpailutoiminta/kilpailut', 'active' => 'kilpailutoiminta/kisat/jarjesta');
-$nav['kilpailutoiminta/kilpailut/tulokset'] = array('label' => 'Lähetä tulokset', 'parent_id' => 'kilpailutoiminta/kilpailut', 'active' => 'kilpailutoiminta/kisat/tulokset');
+$nav['kilpailutoiminta/omat'] = array('label' => 'Omat kilpailut', 'parent_id' => 'kilpailutoiminta', 'active' => 'kilpailutoiminta/omat');
+$nav['kilpailutoiminta/ilmoita_kilpailut/porrastetut'] = array('label' => 'Järjestä porrastetut kilpailut', 'parent_id' => 'kilpailutoiminta/omat', 'active' => 'kilpailutoiminta/ilmoita_kilpailut/porrastetut$|kilpailutoiminta/ilmoita_kilpailut/porrastetut/:any');
+$nav['kilpailutoiminta/ilmoita_kilpailut/perinteiset'] = array('label' => 'Järjestä perinteiset kilpailut', 'parent_id' => 'kilpailutoiminta/omat', 'active' => 'kilpailutoiminta/ilmoita_kilpailut/perinteiset');
+$nav['kilpailutoiminta/ilmoita_tulokset'] = array('label' => 'Ilmoita tulokset', 'parent_id' => 'kilpailutoiminta/omat', 'active' => 'kilpailutoiminta/ilmoita_tulokset');
 
 
 //porrastettujen jutut, anomisen jutut jne jne
@@ -88,6 +89,9 @@ $nav['yllapito/tiedotukset'] = array('label' => 'Tiedotukset', 'parent_id' => 'y
 $nav['yllapito/tunnukset'] = array('label' => 'Tunnukset', 'parent_id' => 'yllapito', 'active' => 'yllapito/tunnukset');
 $nav['yllapito/hevosrekisteri'] = array('label' => 'Hevosrekisteri', 'parent_id' => 'yllapito', 'active' => 'yllapito/hevosrekisteri');
 $nav['yllapito/jaokset'] = array('label' => 'Jaokset', 'parent_id' => 'yllapito', 'active' => 'yllapito/jaokset');
+$nav['yllapito/kalenterit'] = array('label' => 'Kisakalenterit', 'parent_id' => 'yllapito', 'active' => 'yllapito/kalenterit');
+
+
 
     
 // ylläpito/tunnukset alamenu

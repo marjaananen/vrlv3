@@ -40,10 +40,14 @@ public function __construct()
     }
 	
 	public function handle_jaos_ownerships($mode, $tapa, $adder, $owner, $item, &$fields){
-        return $this->_handle_owners  ($this->taulut['jaos'], $mode, $tapa, $adder, $owner, $item, $fields);
+        $ok = $this->_handle_owners  ($this->taulut['jaos'], $mode, $tapa, $adder, $owner, $item, $fields);
+		$this->CI->load->model("Jaos_model");
+		$this->CI->Jaos_model->edit_jaos_user_rights($owner);
+		return $ok;
+	
     }
 
-private function _handle_owners($taulu, $mode, $tapa, $adder, $owner, $item, &$fields){
+private function _handle_owners($taulu, $mode, $tapa, $adder, &$owner, $item, &$fields){
     $msg ="";
     $type="";
 	
@@ -68,7 +72,8 @@ private function _handle_owners($taulu, $mode, $tapa, $adder, $owner, $item, &$f
                 $ok = false;
             }
             else if($this->CI->vrl_helper->check_vrl_syntax($tunnus) && ($taso == 1 || $taso == 0)){
-                $ok = $this->_add($taulu, $this->CI->vrl_helper->vrl_to_number($tunnus), $item, $taso);
+				$owner = $this->CI->vrl_helper->vrl_to_number($tunnus);
+                $ok = $this->_add($taulu, $owner, $item, $taso);
                 if ($ok){ $type = "success"; $msg = "Lisäys onnistui.";}
                 else {$type = "warning"; $msg = "Lisäys epäonnistui. Tarkasta, että tunnus on kirjoitettu oikein, ja ettei käyttäjä ole jo listalla!";}
             }

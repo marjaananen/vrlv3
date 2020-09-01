@@ -596,7 +596,12 @@ class Virtuaalihevoset extends CI_Controller
         $fields['porr_kilpailee'] = array('label'=>'Kilpailee porrastetuissa', 'type' => 'checkbox', 'checked' => $poni['porr_kilpailee'] ?? false, 'class'=>'form-control');
 
 		$fields['syntymamaa'] = array('type' => 'select', 'options' => $country_options, 'value' => $poni['syntymamaa'] ?? -1, 'class'=>'form-control');
-        $fields['kotitalli'] = array('type' => 'text', 'class'=>'form-control', 'value'=> $poni['kotitalli'] ?? '', 'after_html' => '<span class="form_comment">Tallin tunnus VRL:n rekisterissä.</span>');
+        
+        $option_script = $this->vrl_helper->get_option_script('kotitalli', $tallit);
+
+        $fields['kotitalli'] = array('type' => 'text', 'class'=>'form-control', 'value'=> $poni['kotitalli'] ?? '',
+                                     'after_html'=> '<span class="form_comment">Laita tunnus muodossa XXXX0000. Omat tallisi (klikkaa lisätäksesi): ' .
+                                    $option_script['list'] . '</span>' . $option_script['script']);
 
                 
                

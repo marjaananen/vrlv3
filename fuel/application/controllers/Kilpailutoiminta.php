@@ -8,6 +8,7 @@ class Kilpailutoiminta extends CI_Controller
         $this->load->model('Jaos_model');
         $this->load->library('Jaos');
         $this->load->library('Porrastetut');
+        $this->load->library('Kisajarjestelma');
         $this->load->model('Kisakeskus_model');
 
 
@@ -37,6 +38,17 @@ class Kilpailutoiminta extends CI_Controller
         $vars['jaokset'] = $this->Jaos_model->get_jaokset_full(); 
         $vars['jaoskohtaiset'] = $this->load->view('kilpailutoiminta/jaoskohtaiset_rajaukset', $vars, TRUE);
         $this->fuel->pages->render('kilpailutoiminta/kilpailusaannot', $vars);
+    }
+    
+    function omat(){
+        if(!($this->ion_auth->logged_in()))
+        {
+            $this->fuel->pages->render('misc/naytaviesti', array('msg_type' => 'danger', 'msg' => 'Kirjaudu sisäänm tarkastellaksesi kilpailujasi!'));
+        }else {
+        
+        
+        $this->pipari();
+        }
     }
     
     function porrastetut($sivu = null){
@@ -365,6 +377,66 @@ private function _result_id_search_form($data = array()){
     
     return $this->form_builder->render_template('_layouts/basic_form_template', $fields);
 
+}
+
+
+///////////////////////////////////////////////////////////////////////////////////////
+// ANO KILPAILUJA
+/////////////////////////////////////////////////////////////////////////////////////////
+
+
+public function ilmoita_kilpailut($type, $jaos_id = null){
+    if(!($this->ion_auth->logged_in()))
+    {
+        $this->fuel->pages->render('misc/naytaviesti', array('msg_type' => 'danger', 'msg' => 'Vain rekisteröityneet käyttäjät voivat ilmoittaa kilpailuja kalenteriin!'));
+    }
+    
+    
+    else if ($type == "porrastetut"){
+        $url_begin = "kilpailutoiminta/ilmoita_kilpailut/porrastetut/";
+        if($jaos_id == null){
+            //jos jaosta ei ole annettu, valitaan se
+            if($this->input->post('jaos')){
+                $jaos_id = $this->input->post('jaos');
+                redirect($url_begin.$jaos_id, 'refresh');
+            }else {       
+                $this->load->library('form_builder', array('submit_value' => 'Hae'));
+                //haetaan listaan vain toiminnassa olevat ja porrastettuja tarjoavat kisat
+                $jaos_options = $this->Jaos_model->get_jaos_option_list(true, true);
+        
+                $fields = array();
+                $fields['jaos'] = array('type' => 'select', 'options' => $jaos_options, 'value' => 0, 'class'=>'form-control');
+                $this->form_builder->form_attrs = array('method' => 'post', 'action' => site_url($url_begin));
+                $data['form'] =  $this->form_builder->render_template('_layouts/basic_form_template', $fields);
+                
+                $data['title'] = "Ilmoita porrastettu kilpailu";
+                $data['text_view'] = "<p>Valitse jaos</p>";
+                $data['list'] = "";
+                $this->fuel->pages->render('misc/haku', $data);
+            }
+            
+        }else {
+            
+            $kisa = array();
+            $data['title'] = "Ilmoita porrastetut kilpailut";
+            $data['form'] = $this->kisajarjestelma->get_competition_application ('add', 'kilpailutoiminta/ilmoita_kilpailut/porrastetut', true, $kisa, $jaos_id);
+            $this->fuel->pages->render('misc/haku', $data);
+        }
+        
+        
+        
+        
+
+    }
+    
+    else if ($type == "perinteiset"){
+        $kisa = array();
+        $data['title'] = "Ilmoita perinteiset kilpailut";
+        $data['form'] = $this->kisajarjestelma->get_competition_application ('add', 'kilpailutoiminta/ilmoita_kilpailut/perinteiset', false, $kisa);
+        $this->fuel->pages->render('misc/haku', $data);
+
+    }
+    
 }
     
     

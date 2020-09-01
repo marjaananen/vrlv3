@@ -129,6 +129,26 @@ class Vrl_helper {
     
   }
   
+  public function get_option_script($fieldname, $options = array()){
+    $script = '<script type="text/javascript">
+         function optionsAdd'.$fieldname.'(text){
+         document.getElementById(\''.$fieldname.'\').value = text;
+         }
+         </script>';
+      $lista = "";
+      
+      if (sizeof($options) > 0){
+          foreach ($options as $option_id=>$option){
+         $lista .= '[<a href="#" onClick="optionsAdd'.$fieldname.'(\''.$option_id.'\'); return false">'.$option.'</a>] ';
+         }
+      } else {
+        $lista = "-";
+      }
+      
+      return array("script"=>$script, 'list'=>$lista);
+
+  }
+  
 
 
 }

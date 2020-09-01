@@ -371,6 +371,8 @@ class Tunnukset_model extends Base_module_model
         return $randomString;
     }
     
+    
+    
     //Contacts
     function add_contact($pinnumber, $type, $info, $nayta=0)
     {

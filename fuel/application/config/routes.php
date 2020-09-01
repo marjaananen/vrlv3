@@ -83,6 +83,9 @@ $route['yllapito/jaokset/(:any)/(:any)/(:any)/(:any)/(:any)'] = "yllapito_jaokse
 $route['yllapito/jaokset/(:any)/(:any)/(:any)/(:any)/(:any)/(:any)'] = "yllapito_jaokset/$1/$2/$3/$4/$5/$6";
 
 
+$route['yllapito/kalenterit'] = "yllapito_kalenterit";
+
+
 
 
 //stables

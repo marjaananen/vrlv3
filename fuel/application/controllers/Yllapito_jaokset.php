@@ -2,7 +2,7 @@
 class Yllapito_jaokset extends CI_Controller
 {
     
-    private $allowed_user_groups = array('admin', 'jaosvastaava', 'jaosyllapito');
+    private $allowed_user_groups = array('admin', 'jaos', 'jaos-yp');
     private $url;
     
     function __construct()
@@ -22,7 +22,7 @@ class Yllapito_jaokset extends CI_Controller
     }
     
     private function _is_jaos_admin(){
-        return $this->user_rights->is_allowed(array('admin', 'jaosvastaava'));
+        return $this->user_rights->is_allowed(array('admin', 'jaos'));
     }
     
     public function pipari(){
@@ -455,7 +455,7 @@ $this->pipari();
         }
                 
         //start the list      
-        $data['tulokset'] = $this->jaos->jaostaulukko($this->url.'jaos/poista/', $this->url.'jaos/muokkaa/');
+        $data['tulokset'] = $this->jaos->jaostaulukko($this->url.'jaos/poista/', $this->url.'jaos/muokkaa/',$this->url.'tapahtumat/');
         $this->fuel->pages->render('misc/haku', $data);
 
     }
@@ -515,7 +515,7 @@ $this->pipari();
         
         if($this->input->server('REQUEST_METHOD') == 'POST'){
             $this->jaos->read_jaos_input($jaos);
-            if ($this->jaos->validate_jaos_form('edit', true) == FALSE){
+            if ($this->jaos->validate_jaos_form('edit', $this->_is_jaos_admin()) == FALSE){
                     $data['msg'] = "Tallennus epäonnistui!";
                     $data['msg_type'] = "danger";
             }
@@ -1017,7 +1017,7 @@ $this->pipari();
             $msg = "Kirjaudu sisään muokataksesi!";
 			return false;
 		}//jos et ole admin, pitää olla ko. jaoksen omistaja
-        if(!$this->_is_jaos_admin() && !$this->jaos_model->is_jaos_owner($this->ion_auth->user()->row()->tunnus, $id)){
+        if(!$this->_is_jaos_admin() && !$this->Jaos_model->is_jaos_owner($this->ion_auth->user()->row()->tunnus, $id)){
              $msg = "Vain admin, jaosvastaava ja jaoksen ylläpitäjä voi muokata jaosta.";
              return false;
         }

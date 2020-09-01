@@ -55,7 +55,16 @@ CREATE TABLE `vrlv3_groups` (
 
 INSERT INTO `vrlv3_groups` (`id`, `name`, `description`) VALUES
 (1, 'admin', 'Administrator'),
-(2, 'members', 'General User');
+(2, 'members', 'General User'),
+(3, 'tiedotukset', 'Tiedotusten julkaisija'),
+(4, 'tunnukset', 'Tunnusrekisterin yllapito'),
+(5, 'hevosrekisteri', 'Hevosrekisterityöntekijä'),
+(6, 'tallirekisteri', 'Tallirekisterityöntekijä'),
+(7, 'jaos', 'Jaosvastaava'),
+(8, 'tyovoima', 'Työvoimavastaava'),
+(11, 'kasvattajanimet', 'Kasvattajanimirekisteritiimi'),
+(9, 'jaos-yp', 'Jaoksen ylläpitäjä'),
+(10, 'kisakalenteri', 'Kalenterityöntekijä');
 
 -- --------------------------------------------------------
 

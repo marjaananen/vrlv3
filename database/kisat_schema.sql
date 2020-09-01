@@ -145,6 +145,99 @@ CREATE TABLE `vrlv3_kisat_luokat` (
 LOCK TABLES `vrlv3_kisat_luokat` WRITE;
 /*!40000 ALTER TABLE `vrlv3_kisat_luokat` DISABLE KEYS */;
 INSERT INTO `vrlv3_kisat_luokat` VALUES (1,'40cm (seura)',1,1,1,0,1,NULL,3,1,0),(2,'60cm (seura)',1,1,1,0,1,NULL,3,1,0),(3,'80cm (seura)',1,1,1,0,1,NULL,3,1,0),(4,'80cm (alue)',1,1,1,1,2,NULL,4,1,0),(5,'90cm (seura)',1,1,1,0,1,NULL,3,1,0),(6,'90cm (alue)',1,1,1,1,2,NULL,4,1,0),(7,'100cm (seura)',1,1,1,0,1,NULL,3,1,0),(8,'100cm (alue)',1,1,1,1,2,NULL,4,1,0),(9,'110cm (alue)',1,1,1,2,2,NULL,4,1,0),(10,'110cm (kansallinen)',1,1,1,5,3,NULL,6,1,0),(11,'120cm (alue)',1,1,1,3,2,140,5,1,0),(12,'120cm (kansallinen)',1,1,1,6,3,140,6,1,0),(13,'130cm (alue)',1,1,1,4,2,140,5,1,0),(14,'130cm (kansallinen)',1,1,1,7,3,140,7,1,0),(15,'140cm (alue)',1,1,1,5,2,149,6,1,0),(16,'140cm (kansallinen)',1,1,1,8,3,149,7,1,0),(17,'150cm (kansallinen)',1,1,1,9,3,149,8,1,0),(18,'160cm (kansallinen)',1,1,1,10,3,149,8,1,0),(19,'Helppo C (seura)',2,2,1,0,1,NULL,3,1,0),(20,'KN Special (seura)',2,2,1,0,1,NULL,3,1,0),(21,'Helppo B (seura)',2,2,1,0,1,NULL,3,1,0),(22,'Helppo A (seura)',2,2,1,0,1,NULL,3,1,0),(23,'Helppo C (alue)',2,2,1,1,2,NULL,4,1,0),(24,'KN Special (alue)',2,2,1,1,2,NULL,4,1,0),(25,'Helppo B (alue)',2,2,1,1,2,NULL,4,1,0),(26,'Helppo A (alue)',2,2,1,2,2,NULL,4,1,0),(27,'Helppo A (kansallinen)',2,2,1,4,3,NULL,5,1,0),(28,'Vaativa B (alue)',2,2,1,3,2,140,5,1,0),(29,'Vaativa B (kansallinen)',2,2,1,5,3,140,6,1,0),(30,'Vaativa A (kansallinen)',2,2,1,6,3,149,6,1,0),(31,'Prix St. Georges (kansallinen)',2,2,1,7,3,149,7,1,0),(32,'Intermediate I (kansallinen)',2,2,1,8,3,149,7,1,0),(33,'Intermediate II (kansallinen)',2,2,1,9,3,149,8,1,0),(34,'Grand Prix (kansallinen)',2,2,1,10,3,149,8,1,0),(35,'Aloittelijaluokka (avoin kaikille - seura)',3,3,1,0,1,NULL,3,1,0),(36,'Harrasteluokka (avoin kaikille - seura)',3,3,1,0,1,NULL,3,1,0),(37,'Tutustumisluokka (avoin kaikille - seura)',3,3,1,0,1,NULL,3,1,0),(38,'Aloittelijaluokka (avoin kaikille - alue)',3,3,1,1,2,NULL,4,1,0),(39,'Harrasteluokka (avoin kaikille - alue)',3,3,1,1,2,NULL,4,1,0),(40,'Tutustumisluokka (avoin kaikille - alue)',3,3,1,1,2,NULL,4,1,0),(41,'Helppo (avoin kaikille - alue)',3,3,1,2,2,NULL,4,1,0),(42,'CIC1 (avoin kaikille - alue)',3,3,1,3,2,NULL,5,1,0),(43,'CIC1 (avoin hevosille, ei suomenhevosille - alue)',3,3,1,3,2,149,5,1,0),(44,'CIC2 (avoin poneille sk alle 149cm ja hevosille, ei suomenhevosille - kansallinen)',3,3,1,5,3,140,6,1,0),(45,'CIC2 (avoin hevosille, ei suomenhevosille - kansallinen)',3,3,1,5,3,149,6,1,0),(46,'CIC3 (avoin hevosille, ei suomenhevosille - kansallinen)',3,3,1,6,3,149,6,1,0),(47,'CIC4 (avoin hevosille, ei suomenhevosille - kansallinen)',3,3,1,7,3,149,7,1,0),(48,'noviisi koulukoe (seura)',4,6,1,0,1,NULL,3,1,0),(49,'noviisi tarkkuuskoe (seura)',4,6,1,0,1,NULL,3,1,0),(50,'noviisi kestävyyskoe (seura)',4,6,1,0,1,NULL,3,1,0),(51,'noviisi yhdistetty (seura)',4,6,1,0,1,NULL,3,1,0),(52,'noviisi koulukoe (alue)',4,6,1,1,2,NULL,4,1,0),(53,'noviisi tarkkuuskoe (alue)',4,6,1,1,2,NULL,4,1,0),(54,'noviisi kestävyyskoe (alue)',4,6,1,1,2,NULL,4,1,0),(55,'noviisi yhdistetty (alue)',4,6,1,3,2,NULL,5,1,0),(56,'vaativa koulukoe (alue)',4,6,1,3,2,NULL,5,1,0),(57,'vaativa tarkkuuskoe (alue)',4,6,1,3,2,NULL,5,1,0),(58,'vaativa kestävyyskoe (alue)',4,6,1,3,2,NULL,5,1,0),(59,'vaativa yhdistetty (alue)',4,6,1,5,2,NULL,6,1,0),(60,'vaativa koulukoe (kansallinen)',4,6,1,5,3,NULL,6,1,0),(61,'vaativa tarkkuuskoe (kansallinen)',4,6,1,5,3,NULL,6,1,0),(62,'vaativa kestävyyskoe (kansallinen)',4,6,1,5,3,NULL,6,1,0),(63,'vaativa yhdistetty (kansallinen)',4,6,1,7,3,NULL,7,1,0),(64,'vaikea koulukoe (kansallinen)',4,6,1,7,3,NULL,7,1,0),(65,'vaikea tarkkuuskoe (kansallinen)',4,6,1,7,3,NULL,7,1,0),(66,'vaikea kestävyyskoe (kansallinen)',4,6,1,7,3,NULL,7,1,0),(67,'vaikea yhdistetty (kansallinen)',4,6,1,9,3,NULL,8,1,0),(71,'Helppo D (seura)',2,2,1,0,1,NULL,3,1,0),(72,'CIC1 (avoin kaikille - kansallinen)',3,3,1,4,3,140,5,1,0),(73,'CIC1 (avoin hevosille, ei suomenhevosille - kansallinen)',3,3,1,4,3,149,5,1,0),(74,'Helppo (avoin hevosille, ei suomenhevosille - alue)',3,3,1,2,2,149,4,1,0),(75,'100cm (kansallinen)',1,1,1,4,3,NULL,5,1,0);
+
+
+ALTER TABLE `vrlv3`.`tapahtumat` 
+ENGINE = InnoDB ,
+ADD COLUMN `jaos_id` INT(11) NULL AFTER `tulos`;
+
+ALTER TABLE `vrlv3`.`tapahtumat` 
+ADD INDEX `tapahtumajarjestajatunnus_idx` (`vastuu` ASC),
+ADD INDEX `tapahtumanjarjestajajaos_idx` (`jaos_id` ASC);
+;
+ALTER TABLE `vrlv3`.`tapahtumat` 
+ADD CONSTRAINT `tapahtumajarjestajatunnus`
+  FOREIGN KEY (`vastuu`)
+  REFERENCES `vrlv3`.`vrlv3_tunnukset` (`tunnus`)
+  ON DELETE NO ACTION
+  ON UPDATE NO ACTION,
+ADD CONSTRAINT `tapahtumanjarjestajajaos`
+  FOREIGN KEY (`jaos_id`)
+  REFERENCES `vrlv3`.`vrlv3_kisat_jaokset` (`id`)
+  ON DELETE NO ACTION
+  ON UPDATE NO ACTION;
+  
+  ALTER TABLE `vrlv3`.`tapahtumat` 
+RENAME TO  `vrlv3`.`vrlv3_tapahtumat` ;
+
+
+ALTER TABLE `vrlv3`.`tapahtumat_osallistujat` 
+ENGINE = InnoDB ,
+ADD COLUMN `oid` INT(11) NOT NULL AUTO_INCREMENT FIRST,
+CHANGE COLUMN `id` `tapahtuma` INT(11) NOT NULL ,
+CHANGE COLUMN `vh` `vh` INT(9) ZEROFILL NOT NULL ,
+ADD PRIMARY KEY (`oid`);
+;
+
+ALTER TABLE `vrlv3`.`tapahtumat_osallistujat` 
+ADD CONSTRAINT `tapahtumaid`
+  FOREIGN KEY (`tapahtuma`)
+  REFERENCES `vrlv3`.`vrlv3_tapahtumat` (`id`)
+  ON DELETE NO ACTION
+  ON UPDATE NO ACTION;
+  
+  delete FROM vrlv3.tapahtumat_osallistujat WHERE NOT EXISTS (SELECT*from vrlv3_hevosrekisteri where vrlv3_hevosrekisteri.reknro = tapahtumat_osallistujat.vh) and oid > 0;
+  
+  ALTER TABLE `vrlv3`.`tapahtumat_osallistujat` 
+ADD CONSTRAINT `tapahtumahevo`
+  FOREIGN KEY (`vh`)
+  REFERENCES `vrlv3`.`vrlv3_hevosrekisteri` (`reknro`)
+  ON DELETE NO ACTION
+  ON UPDATE NO ACTION;
+  
+  ALTER TABLE `vrlv3`.`tapahtumat_osallistujat` 
+CHANGE COLUMN `palkinto` `palkinto` VARCHAR(50) NOT NULL , RENAME TO  `vrlv3`.`vrlv3_tapahtumat_osallistujat` ;
+
+UPDATE vrlv3_tapahtumat SET jaos_id = 4 WHERE jaos = 'vvj' and id > 0;
+UPDATE vrlv3_tapahtumat SET jaos_id = 1 WHERE jaos = 'erj' and id > 0;
+UPDATE vrlv3_tapahtumat SET jaos_id = 2 WHERE jaos = 'krj' and id > 0;
+UPDATE vrlv3_tapahtumat SET jaos_id = 3 WHERE jaos = 'kerj' and id > 0;
+UPDATE vrlv3_tapahtumat SET jaos_id = 5 WHERE jaos = 'wrj' and id > 0;
+UPDATE vrlv3_tapahtumat SET jaos_id = 6 WHERE jaos = 'arj' and id > 0;
+
+
+
+ALTER TABLE `vrlv3`.`vrlv3_tapahtumat` 
+CHANGE COLUMN `vip` `vip` DATE NULL ,
+CHANGE COLUMN `ilmo` `ilmo` DATE NULL ,
+CHANGE COLUMN `info` `info` TEXT NULL ,
+CHANGE COLUMN `luokkia` `luokkia` VARCHAR(2) NULL,
+CHANGE COLUMN `tulos` `tulos` TINYINT(1) DEFAULT 1;
+
+
+CREATE TABLE `vrlv3`.`vrlv3_kisat_etuuspisteet` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `tunnus` INT(5) UNSIGNED ZEROFILL NULL,
+  `jaos` INT(11) NULL,
+  `pisteet` DOUBLE(6,2) NULL,
+  `nollattu` TINYINT(1) NULL,
+  `muokattu` DATETIME NULL,
+  INDEX `tunnusdidx` (`tunnus` ASC),
+  INDEX `jaosidx` (`jaos` ASC),
+  UNIQUE INDEX `tunnusjaosunique` (`tunnus` ASC, `jaos` ASC),
+  PRIMARY KEY (`id`),
+  CONSTRAINT `tunnusetuusforein`
+    FOREIGN KEY (`tunnus`)
+    REFERENCES `vrlv3`.`vrlv3_tunnukset` (`tunnus`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE,
+  CONSTRAINT `jaosetuusforein`
+    FOREIGN KEY (`jaos`)
+    REFERENCES `vrlv3`.`vrlv3_kisat_jaokset` (`id`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE);
+
+
 /*!40000 ALTER TABLE `vrlv3_kisat_luokat` ENABLE KEYS */;
 UNLOCK TABLES;
 SET @@SESSION.SQL_LOG_BIN = @MYSQLDUMP_TEMP_LOG_BIN;

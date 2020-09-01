@@ -186,9 +186,15 @@ class Jaos_model extends Base_module_model
     
     
     
-    function get_jaos_list()
+    function get_jaos_list($only_active, $only_porrastetut = false)
     {
         $this->db->select("id, nimi, lyhenne, kuvaus, url, IF(toiminnassa='1', 'toiminnnassa', 'ei toiminnassa') as toiminnassa");
+        if($only_active){
+            $this->db->where("toiminnassa", 1);
+        }if($only_porrastetut){
+                    $this->db->where("s_salli_porrastetut", 1);
+
+        }
         $this->db->from('vrlv3_kisat_jaokset');
         
         $query = $this->db->get();
@@ -201,11 +207,11 @@ class Jaos_model extends Base_module_model
         return array();
     }
     
-    function get_jaos_option_list(){
+    function get_jaos_option_list($only_active = false, $only_porrastetut = false){
         $options = array();
         $options[0] = "";
         
-        $jaos_list = $this->get_jaos_list();
+        $jaos_list = $this->get_jaos_list($only_active, $only_porrastetut);
         
         foreach ($jaos_list as $jaos){
             $options[$jaos['id']] = $jaos['lyhenne'];
@@ -300,6 +306,77 @@ class Jaos_model extends Base_module_model
         
         return array();
     }
+    
+    function edit_jaos_user_rights($tunnus){
+        
+        
+        $this->db->trans_start();
+        
+        $this->db->select('vrlv3_tunnukset.tunnus as omistaja, vrlv3_tunnukset.id as id, taso, count(vrlv3_kisat_jaokset_omistajat.jid)');
+        $this->db->from('vrlv3_kisat_jaokset_omistajat');
+        $this->db->join('vrlv3_tunnukset', 'vrlv3_tunnukset.tunnus = vrlv3_kisat_jaokset_omistajat.tunnus');
+        $this->db->where('vrlv3_tunnukset.tunnus', $tunnus);
+        $this->db->group_by('vrlv3_kisat_jaokset_omistajat.jid');
+
+        $query = $this->db->get();
+        
+        
+        if ($query->num_rows() > 0)
+        {
+            $id = $query->result_array()[0]['id'];
+            echo $id;
+            //henkilöllä on jaoksiin yp tai kalenterioikeuksia (tai molempia)
+            //exclude jaos-yp (9) and kisakalenteri (10)
+            $this->db->delete('vrlv3_users_groups', array('user_id' => $id, 'group_id'=>9));
+            $this->db->delete('vrlv3_users_groups', array('user_id' => $id, 'group_id'=>10));
+            
+            $yp_done = false;
+            $cal_done = false;
+            foreach ($query->result_array() as $rivi){
+                if ($rivi['taso'] == 1 && !$yp_done){
+                    
+                    $this->db->insert('vrlv3_users_groups', array('user_id' => $id, 'group_id'=>9));
+                    $yp_done = true;
+                }
+                else if ($rivi['taso'] == 0 && !$cal_done){
+                    $this->db->insert('vrlv3_users_groups', array('user_id' => $id, 'group_id'=>10));
+                    $cal_done = true;
+                }
+                
+            }
+            
+            
+
+
+        } else {
+            
+            
+           //otetaan jaosoikat pois
+           $id = 0;
+
+           $this->db->select('id');
+           $this->db->from('vrlv3_tunnukset');
+           $this->db->where('tunnus', $tunnus);
+           $query = $this->db->get();
+           
+           if ($query->num_rows() > 0)
+           {
+               $id = $query->row_array()['id']; 
+           }
+            //exclude jaos-yp (9) and kisakalenteri (10)
+            $this->db->delete('vrlv3_users_groups', array('user_id' => $id, 'group_id'=>9));
+            $this->db->delete('vrlv3_users_groups', array('user_id' => $id, 'group_id'=>10));
+
+
+        }
+        
+        $this->db->trans_complete();
+
+        return true;
+        
+        
+        
+    }
 
     function is_name_in_use($name, $id = null)
     {
@@ -340,10 +417,10 @@ class Jaos_model extends Base_module_model
     
     function is_jaos_owner($pinnumber, $id)
     {
-        $this->db->select('omistaja');
+        $this->db->select('tunnus');
         $this->db->from('vrlv3_kisat_jaokset_omistajat');
-        $this->db->where('id', $id);
-        $this->db->where('omistaja', $pinnumber);
+        $this->db->where('jid', $id);
+        $this->db->where('tunnus', $pinnumber);
         $query = $this->db->get();
         
         if ($query->num_rows() > 0)
@@ -352,6 +429,37 @@ class Jaos_model extends Base_module_model
         }
         
         return false;
+    }
+    
+    function get_class_options($jaos = null, $only_usable = true, $only_porrastetut = true){
+         $this->db->select("j.lyhenne, l.nimi, l.id");
+        $this->db->from('vrlv3_kisat_luokat as l');
+        $this->db->join('vrlv3_kisat_jaokset as j', 'j.id = l.jaos');
+        if(isset($jaos)){
+            $this->db->where("l.jaos", $jaos);
+        }else {
+            $this->db->order_by("l.jaos");
+        }
+        $this->db->order_by("l.jarjnro");
+        if($only_porrastetut){
+            $this->db->where("j.s_salli_porrastetut", 1);
+            $this->db->where("l.porrastettu", 1);
+        }
+        if($only_usable){
+            $this->db->where("l.kaytossa", 1);
+        }
+        
+        $options = array();
+        $query = $this->db->get();
+        
+        if ($query->num_rows() > 0)
+        {
+           foreach ($query->result_array() as $class){
+            $options[$class['id']] = $class['lyhenne'] . ": " . $class['nimi'];
+           }
+        }
+        
+        return $options;
     }
     
     function get_class_list($jaos, $only_usable = true, $only_porrastetut = false)
@@ -396,6 +504,7 @@ class Jaos_model extends Base_module_model
     }
     
     
+    
     function add_class($jaos_id, $laji_id, $class){
         $class['jaos'] = $jaos_id;
         $class['laji'] = $laji_id;
@@ -418,11 +527,57 @@ class Jaos_model extends Base_module_model
         return true;
     }
     
+    ///////////////////////////////////////////////////////
+    // Kisakalenterit
+    //////////////////////////////////////////////////////
+        
     
-    
-    
-    
+    function raceApplicationsMaintenance( $jaos, $leveled = false ) {
+        
+        $this->db->select('COUNT(kisa_id) as kpl, MIN(ilmoitettu) as ilmoitettu');
+        $this->db->from('vrlv3_kisat_kisakalenteri');
+        $this->db->where('jaos', $jaos);
+        $this->db->where ('vanha', 0);
+        $this->db->where('porrastettu', $leveled);
+        $this->db->where('hyvaksytty', NULL);
+        if($leveled){
+            $this->CI->load->library("Kisajarjestelma");     
+            $this->db->where('ilmoitettu <', $this->CI->kisajarjestelma->new_leveled_start_time());
 
- 
+        }
+        
+		 $query = $this->db->get();
+        
+        if ($query->num_rows() > 0)
+        {
+            return $query->result_array()[0]; 
+        }else {
+            return array('kpl'=>0, 'ilmoitettu'=>NULL);
+        }
+		
+	}
+    
+    function resultApplicationsMaintenance( $jaos, $leveled = false ) {
+         $this->db->select('COUNT(t.tulos_id) as kpl, MIN(t.ilmoitettu) as ilmoitettu');
+        $this->db->from('vrlv3_kisat_tulokset as t');
+        $this->db->join('vrlv3_kisat_kisakalenteri as k', 't.kisa_id = k.kisa_id');
+        $this->db->where('k.jaos', $jaos);
+        $this->db->where ('k.vanha', 0);
+        $this->db->where('k.porrastettu', $leveled);
+        $this->db->where('t.hyvaksytty', NULL);
+
+        
+		 $query = $this->db->get();
+        
+        if ($query->num_rows() > 0)
+        {
+            return $query->result_array()[0]; 
+        }else {
+            return array('kpl'=>0, 'ilmoitettu'=>NULL);
+        }
+    			
+	}
+
 }
+
 
