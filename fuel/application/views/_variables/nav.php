@@ -25,7 +25,9 @@ $nav['yllapito'] = array('label'=>'Ylläpito', 'hidden'=> TRUE, 'active' => 'yll
 $nav['profiili'] = array('label'=>'Profiili', 'hidden'=> TRUE, 'active' => 'profiili');
 
 //Liitto alamenu
-$nav['liitto/tiedotukset'] = array('label' => 'Tiedotukset', 'parent_id' => 'liitto', 'active' => 'tiedotukset'); 
+$nav['liitto/tiedotukset'] = array('label' => 'Tiedotukset', 'parent_id' => 'liitto', 'active' => 'liitto/tiedotukset');
+$nav['liitto/tiedotus'] = array('hidden'=>TRUE, 'label' => 'Tiedotus', 'parent_id' => 'liitto/tiedotukset', 'active' => 'liitto/tiedotus/:any'); 
+
 $nav['liitto/yllapito'] = array('label' => 'Ylläpito ja yhteydenotto', 'parent_id' => 'liitto', 'active' => 'liitto/yllapito'); //Koodattavaa: työntekijöiden listaus
 $nav['liitto/wiki'] = array('label' => 'Virtuaaliwiki', 'parent_id' => 'liitto', 'active' => 'liitto/wiki');
 $nav['liitto/somessa'] = array('label' => 'VRL sosiaalisessa mediassa', 'parent_id' => 'liitto', 'active' => 'liitto/somessa');
@@ -61,6 +63,10 @@ $nav['kasvatus/varilaskuri'] = array('label' => 'Periytymislaskuri', 'parent_id'
 //kantakirjat, laatikset, rekkaa kasvinimi
 //kilpailutoiminta alamenu
 $nav['kilpailutoiminta/kilpailukalenteri'] = array('label' => 'Kilpailukalenteri', 'parent_id' => 'kilpailutoiminta', 'active' => 'kilpailutoiminta/kilpailukalenteri');
+$nav['kilpailutoiminta/kilpailukalenteri/porrastetut'] = array('label' => 'Porrastetut', 'hidden'=>TRUE, 'parent_id' => 'kilpailutoiminta/kilpailukalenteri', 'active' => 'kilpailutoiminta/kilpailukalenteri/porrastetut');
+
+$nav['kilpailutoiminta/kilpailukalenteri/k'] = array('label' => 'Kilpailukutsu', 'hidden'=>TRUE, 'parent_id' => 'kilpailutoiminta/kilpailukalenteri/porrastetut', 'active' => 'kilpailutoiminta/k|kilpailutoiminta/:any');
+
 $nav['kilpailutoiminta/tulosarkisto'] = array('label' => 'Tulosarkisto', 'parent_id' => 'kilpailutoiminta', 'active' => 'kilpailutoiminta/tulosarkisto');
 
 $nav['kilpailutoiminta/kilpailujaokset'] = array('label' => 'Jaokset', 'parent_id' => 'kilpailutoiminta', 'active' => 'kilpailutoiminta/jaokset');
@@ -116,6 +122,12 @@ $nav['yllapito/jaokset/ominaisuudet'] = array('label' => 'Hallitse ominaisuuksia
 $nav['yllapito/jaokset/jaokset'] = array('label' => 'Jaokset', 'parent_id' => 'yllapito/jaokset', 'active' => 'yllapito/jaokset/jaokset');
 $nav['yllapito/jaokset/lisaa_jaos'] = array('label' => 'Lisää jaos', 'parent_id' => 'yllapito/jaokset', 'active' => 'yllapito/jaokset/lisaa_jaos');
 $nav['yllapito/jaokset/tapahtumat'] = array('label' => 'Hallitse tapahtumia', 'parent_id' => 'yllapito/jaokset', 'active' => 'yllapito/jaokset/tapahtumat');
+
+$nav['yllapito/kalenterit/kisahyvaksynta'] = array('label' => 'Kisahyväksyntä', 'parent_id' => 'yllapito/kalenterit', 'active' => 'yllapito/kalenterit/kisahyvaksynta|yllapito/kalenterit/kisahyvaksynta/:any');
+$nav['yllapito/kalenterit/tuloshyvaksynta'] = array('label' => 'Tuloshyväksyntä', 'parent_id' => 'yllapito/kalenterit', 'active' => 'yllapito/kalenterit/tuloshyvaksynta|yllapito/kalenterit/tuloshyvaksynta/:any');
+$nav['yllapito/kalenterit/hyvaksytytkisat'] = array('label' => 'Selaa hyväksyttyjä kutsuja', 'parent_id' => 'yllapito/kalenterit', 'active' => 'yllapito/kalenterit/hyvaksytytkisat');
+$nav['yllapito/kalenterit/hyvaksytyttulokset'] = array('label' => 'Selaa hyväksyttyjä tuloksia', 'parent_id' => 'yllapito/kalenterit', 'active' => 'yllapito/kalenterit/hyvaksytyttulokset');
+
 
 
 

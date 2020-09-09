@@ -358,7 +358,7 @@ class Jaos
     
    function luokkataulukko($id, $url_poista, $url_muokkaa){
       //start the list		
-		$vars['headers'][1] = array('title' => 'ID', 'key' => 'id');
+		$vars['headers'][1] = array('title' => 'ID', 'key' => 'ihd');
 		$vars['headers'][2] = array('title' => 'Järj. nro', 'key' => 'jarjnro');
 		$vars['headers'][3] = array('title' => 'Nimi', 'key' => 'nimi');
       $vars['headers'][4] = array('title' => 'Porras- tettu', 'key' => 'porrastettu');

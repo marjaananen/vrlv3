@@ -84,6 +84,21 @@ $route['yllapito/jaokset/(:any)/(:any)/(:any)/(:any)/(:any)/(:any)'] = "yllapito
 
 
 $route['yllapito/kalenterit'] = "yllapito_kalenterit";
+$route['yllapito/kalenterit/kisahyvaksynta'] = "yllapito_kalenterit/kisahyvaksynta";
+$route['yllapito/kalenterit/kisahyvaksynta/(:any)'] = "yllapito_kalenterit/kisahyvaksynta/$1";
+$route['yllapito/kalenterit/kisahyvaksynta/(:any)/(:any)'] = "yllapito_kalenterit/kisahyvaksynta/$1/$2";
+$route['yllapito/kalenterit/kisahyvaksynta/(:any)/(:any)/(:any)'] = "yllapito_kalenterit/kisahyvaksynta/$1/$2/$3";
+$route['yllapito/kalenterit/tuloshyvaksynta'] = "yllapito_kalenterit/tuloshyvaksynta";
+$route['yllapito/kalenterit/tuloshyvaksynta/(:any)'] = "yllapito_kalenterit/tuloshyvaksynta/$1";
+$route['yllapito/kalenterit/tuloshyvaksynta/(:any)/(:any)'] = "yllapito_kalenterit/tuloshyvaksynta/$1/$2";
+$route['yllapito/kalenterit/tulosyvaksynta/(:any)/(:any)/(:any)'] = "yllapito_kalenterit/tuloshyvaksynta/$1/$2/$3";
+$route['yllapito/kalenterit/hyvaksytyttulokset'] = "yllapito_kalenterit/hyvaksytyttulokset";
+$route['yllapito/kalenterit/hyvaksytytkisat'] = "yllapito_kalenterit/hyvaksytytkisat";
+
+
+
+
+
 
 
 

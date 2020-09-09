@@ -21,12 +21,12 @@
 ?>
         <div class="panel panel-default">
           <div class="panel-heading">
-            <h3 class="panel-title"><?php echo $tiedotus['otsikko']; ?> - <?php echo $tiedotus['aika']; ?></h3>
+            <h3 class="panel-title"><?php echo $tiedotus['otsikko']; ?> - <?php echo date('d.m.Y H:i', strtotime($tiedotus['aika'])); ?></h3>
           </div>
           <div class="panel-body">
             <?php echo $tiedotus['teksti']; ?>
-            <?php if (substr($tiedotus['teksti'], -3) == "...") { echo "<p><a href=\"" . site_url('liitto/tiedotukset/tiedotus/'.$tiedotus['tid']) . "\">Lue koko teksti</a></p>"; }?>
-            <?php $tagit = array(); foreach ($tiedotus['kategoriat'] as $kat){$tagit[]= "<a href=\"" . site_url('liitto/kategoria/'.$kat['kid']) . "\">".$kat ['kat']."</a>"; }?>
+            <?php if (substr($tiedotus['teksti'], -3) == "...") { echo "<p><a href=\"" . site_url('liitto/tiedotus/'.$tiedotus['tid']) . "\">Lue koko teksti</a></p>"; }?>
+            <?php $tagit = array(); foreach ($tiedotus['kategoriat'] as $kat){$tagit[]= "#<a href=\"" . site_url('liitto/kategoria/'.$kat['kid']) . "\">".$kat ['kat']."</a>"; }?>
           </div>
           <div class="panel-footer"><a href="<?php site_url('tunnus/VRL-'.$tiedotus['lahettaja']); ?>">VRL-<?php echo $tiedotus['lahettaja']; ?></a> <strong><?php echo $tiedotus['lahettaja_nick'];?></strong> (<?php echo implode(" | ", $tagit); ?>)</div>
         </div>

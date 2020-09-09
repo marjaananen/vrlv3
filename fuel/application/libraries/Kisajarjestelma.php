@@ -6,8 +6,14 @@ class Kisajarjestelma
         {
                     $this->CI =& get_instance();
                     $this->CI->load->model('Jaos_model');
+                    $this->CI->load->library('Vrl_helper');
 
         }
+        
+        
+    ////////////////////////////////////////////////////
+    // SETTINGS
+    ///////////////////////////////////////////////////
         
         
     private  $old_leveled_to_new = '2020-08-30'; // ÄLÄ MUOKKAA
@@ -16,12 +22,19 @@ class Kisajarjestelma
     public function new_leveled_start_time (){
         return $this->old_leveled_to_new;
     }
+
+    
+    public function nayttelyjaos($jaos_id){
+        //todo tarkempi selvitys
+         if ( $jaos_id == 7 ) { return true;}
+         else { return false;}
+    }
     
     public function sijoittuu($osallistujia, $jaos_id){
     
         $sijoittuu = 0;
         //NJ:ssä ei sijoituta samalla tavalla.
-        if ( $jaos_id == 7 ) { $sijoittuu = 0; }
+        if ( $this->nayttelyjaos($jaos_id )) { $sijoittuu = 0; }
         else if( $osallistujia >= 1 AND $osallistujia <= 3 ) 	{	$sijoittuu = 1;	} 
         elseif( $osallistujia >= 4 AND $osallistujia <= 8 ) 	{	$sijoittuu = 2;	} 
         elseif( $osallistujia >= 9 AND $osallistujia <= 15 ) 	{	$sijoittuu = 3;	} 
@@ -38,6 +51,55 @@ class Kisajarjestelma
                 
     }
     
+    public function sallitutKisamaarat($etuuspisteet, $jaos_id){
+        //nj:ssä ei sijoituta samalla tavalla
+         if ( $this->nayttelyjaos($jaos_id) ) { $jarjestettavia = 1; }
+        
+        #### KUINKA MONTA KISAA MAHDOLLISUUS JÄRJESTÄÄ ####
+		/*
+			EP		KUTSUT
+			0-1		1 avoin kutsu
+			2-4		3 avointa kutsua
+			5-9		5 avointa kutsua
+			10-24	7 avointa kutsua
+			25-49	10 avointa kutsua
+			50-99	20 avointa kutsua, kutsut suoraan kalenteriin
+			100+	rajattomasti avoimia kutsuja, kutsut suoraan kalenteriin
+		*/
+		
+		$jarjestettavia = 0;
+		if(	$etuuspisteet <= 1.99 ) {
+			$jarjestettavia = 1;
+		} elseif ( $etuuspisteet >= 2.00 AND $etuuspisteet <= 4.99 ) {
+			$jarjestettavia = 3;
+		} elseif ( $etuuspisteet >= 5.00  AND  $etuuspisteet <= 9.99 ) {
+			$jarjestettavia = 5;
+		} elseif ( $etuuspisteet >= 10.00 AND $etuuspisteet <= 24.99 ) {
+			$jarjestettavia = 7;
+		} elseif ( $etuuspisteet >= 25.00 AND $etuuspisteet <= 49.99 ) {
+			$jarjestettavia = 10;
+		} elseif ( $etuuspisteet >= 50.00 AND $etuuspisteet <= 99.99 ) {
+			$jarjestettavia = 20;
+		} elseif ( $etuuspisteet >= 100 ) {
+			$jarjestettavia = 100; 
+		}
+        return $jarjestettavia;
+		
+    }
+    
+    public function directlyCalender($etuuspisteet, $jaos_id){
+        if ( $this->nayttelyjaos($jaos_id) ) { return false; }
+        else if ( $etuuspisteet >= 50.00) {return true; }
+        else { return false;}
+    
+
+    }
+    
+    //Maksimiosallistujamäärä
+    public function max_hevosia_per_luokka_per_ratsastaja($max_hevosia_per_luokka){
+        return min(ceil($max_hevosia_per_luokka*0.1),10);
+        
+    }
 
     //sisältää kaikki vanhat ja uudet arvontatavat, myös käytöstä poistuneet
     public function arvontatavat_options_legacy(){
@@ -67,13 +129,17 @@ class Kisajarjestelma
     
     //kisapäivämäärät
     
+    public function competition_date_days_from_vip(){
+        return 1;
+    }
+    
     public function competition_date_max(){
       $lastDateOfNextMonth =strtotime('last day of next month') ;
       return date('Y-m-d', $lastDateOfNextMonth);
     }
     
     public function competition_date_min($vip_date){
-     return date('Y-m-d', strtotime($vip_date.' + 1 day'));
+     return date('Y-m-d', strtotime($vip_date.' + '.$this->competition_date_days_from_vip().' day'));
     }
     
     public function competition_vip_date_normal_min(){
@@ -93,6 +159,7 @@ class Kisajarjestelma
     
     
     
+    
     //////////////////////////////////////////////////////////////
     // Kisakalenterin lomakkeet
     //////////////////////////////////////////////////////////////
@@ -107,15 +174,15 @@ class Kisajarjestelma
       $this->CI->load->library("vrl_helper");
       $this->CI->load->model("Tallit_model");     
 
-      
-      if(isset($event['kp'])){
+      //jos tähän on muutettu SQL-date, korjataan tavalliseksi
+      if(isset($event['kp']) && $this->CI->vrl_helper->validateDate($event['kp'], 'Y-m-d')){
          $event['kp'] = $this->CI->vrl_helper->sql_date_to_normal($event['kp']);
       }
       
-      if(isset($event['vip'])){
+      if(isset($event['vip']) && $this->CI->vrl_helper->validateDate($event['vip'], 'Y-m-d')){
          $event['vip'] = $this->CI->vrl_helper->sql_date_to_normal($event['vip']);
       }
-      
+      //TODO_ Takaaja
    
       //haetaan tallivaihtoehdot ja valintaskripti
       $tunnus = "";
@@ -138,8 +205,21 @@ class Kisajarjestelma
         $jaos_options = $this->CI->Jaos_model->get_jaos_option_list(true);
         $fields['jaos'] = array('type' => 'select', 'options' => $jaos_options, 'value' => $event['jaos'] ?? -1, 'class'=>'form-control');
       }
-      $fields['kp'] = array('type' => 'date', 'first-day' => 1, 'date_format'=>'d.m.Y', 'label'=>'Päivämäärä', 'class'=>'form-control', 'required' => TRUE, 'value' => $event['kp'] ?? "");
-      $fields['vip'] = array('type' => 'date', 'first-day' => 1, 'date_format'=>'d.m.Y', 'label'=>'Viimeinen ilmoittautumispäivä', 'class'=>'form-control', 'required' => TRUE, 'value' => $event['vip'] ?? "");
+      
+      $viptext = "";
+      $comptext = "Vähintään ". $this->competition_date_days_from_vip() . " päivää viimeisen ilmoittautumispäivän jälkeen. Korkeintaan " . date('d.m.Y', strtotime($this->competition_date_max())) .".";
+      
+      if($porrastettu){
+        $viptext = "Tänään ilmoitetulla kilpailulla aikaisintaan ".date('d.m.Y', strtotime($this->competition_vip_date_leveled_min())).".";
+      }else {
+            $viptext = "Tänään ilmoitetulla kilpailulla aikaisintaan ".date('d.m.Y', strtotime($this->competition_vip_date_normal_min()))
+            ." (poikkeuksena suoraan kalenteriin menevillä kilpailuilla aikaisintaan ". date('d.m.Y', strtotime($this->competition_vip_date_direct_min())) . ")";
+      }
+      
+      $fields['kp'] = array('type' => 'date', 'first-day' => 1, 'date_format'=>'d.m.Y', 'label'=>'Päivämäärä', 'class'=>'form-control', 'required' => TRUE,
+                            'value' => $event['kp'] ?? "", 'after_html'=> '<span class="form_comment">'.$comptext.'</span>');
+      $fields['vip'] = array('type' => 'date', 'first-day' => 1, 'date_format'=>'d.m.Y', 'label'=>'Viimeinen ilmoittautumispäivä', 'class'=>'form-control',
+                             'required' => TRUE, 'value' => $event['vip'] ?? "", 'after_html'=> '<span class="form_comment">'.$viptext.'</span>');
       
       if(!$porrastettu){
         $arvontatapa_options = $this->arvontatavat_options();
@@ -154,13 +234,13 @@ class Kisajarjestelma
       
       if($porrastettu){
         $jaos = $this->CI->Jaos_model->get_jaos($jaos_id);
-        $fields['s_hevosia_per_luokka'] = array('label' => 'Ratsukoita/luokka max', 'type' => 'number',
+        $fields['s_hevosia_per_luokka'] = array('label' => 'Ratsukoita/luokka max', 'type' => 'number', 'required'=>TRUE,
                                                 'min' => $jaos['s_hevosia_per_luokka_min'], 'max'=>$jaos['s_hevosia_per_luokka_max'],
                                                 'value' => $event['s_hevosia_per_luokka'] ?? $jaos['s_hevosia_per_luokka_max'],
                                                 'after_html' => '<span class="form_comment">Ratsastaja voi ilmoittaa yhteen luokkaan 10% tästä lukemasta, eli esim.
                                                 3 jos ratsukkomäärä on 30, ja 10, jos ratsukkomäärä on 100.</span>',
                                                 'class'=>'form-control', 'represents' => 'int|smallint|mediumint|bigint', 'negative' => FALSE, 'decimal' => FALSE);
-       $fields['s_luokkia_per_hevonen'] = array('label' => 'Luokkia/hevonen max', 'type' => 'number',
+       $fields['s_luokkia_per_hevonen'] = array('label' => 'Luokkia/hevonen max', 'type' => 'number', 'required'=>TRUE,
                                                 'min' => $jaos['s_luokkia_per_hevonen_min'], 'max'=>$jaos['s_luokkia_per_hevonen_max'],
                                                 'value' => $event['s_luokkia_per_hevonen'] ?? $jaos['s_luokkia_per_hevonen_max'],
                                                 'class'=>'form-control', 'represents' => 'int|smallint|mediumint|bigint', 'negative' => FALSE, 'decimal' => FALSE); 
@@ -178,260 +258,261 @@ class Kisajarjestelma
 
     }
     
+    public function validate_competition_application($porrastettu = false){
+    
+      $this->CI->load->library('form_validation');
+      
+      $this->CI->form_validation->set_rules('kp', 'Kisapäivä', 'min_length[10]|max_length[10]|required');
+      $this->CI->form_validation->set_rules('vip', 'Viimeinen ilmoittautumispäivä', 'min_length[10]|max_length[10]|required');
+      $this->CI->form_validation->set_rules('jarj_talli', 'Talli', 'min_length[6]|max_length[10]|required');
+      $this->CI->form_validation->set_rules('info', 'Info', 'min_length[5]|max_length[300]');
+
+      
+       if(!$porrastettu){
+            $this->CI->form_validation->set_rules('jaos', 'Jaos', 'min_length[1]|max_length[3]|numeric|required');
+            $this->CI->form_validation->set_rules('arvontatapa', 'Arvontatapa', 'min_length[1]|max_length[3]|numeric|required');
+            $this->CI->form_validation->set_rules('url', 'Kutsun osoite', 'min_length[15]|max_length[300]|required');
+
+
+       }
+       
+       if($porrastettu){
+            $this->CI->form_validation->set_rules('s_hevosia_per_luokka', 'Hevosia per luokka', 'min_length[1]|max_length[3]|numeric|required');
+            $this->CI->form_validation->set_rules('s_luokkia_per_hevonen', 'Luokkia per hevonen', 'min_length[1]|max_length[3]|numeric|required');
+            $this->CI->form_validation->set_rules('luokat[]','Luokat', 'required');
+
+
+       }
+    
+       $ok = $this->CI->form_validation->run();
+        return $ok;
+    
+    }
+    
+    public function parse_competition_application(){
+        $application = array();
+        if ($this->CI->input->post('kp')){
+            $application['kp'] = $this->CI->input->post('kp');
+        }
+        if ($this->CI->input->post('vip')){
+            $application['vip'] = $this->CI->input->post('vip');
+        }
+        if ($this->CI->input->post('jarj_talli')){
+            $application['jarj_talli'] = $this->CI->input->post('jarj_talli');
+        }
+        if ($this->CI->input->post('info')){
+            $application['info'] = $this->CI->input->post('info');
+        }
+        if ($this->CI->input->post('jaos')){
+            $application['jaos'] = $this->CI->input->post('jaos');
+        }
+        if ($this->CI->input->post('url')){
+            $application['url'] = $this->CI->input->post('url');
+        }
+        if ($this->CI->input->post('arvontatapa')){
+            $application['arvontatapa'] = $this->CI->input->post('arvontatapa');
+        }
+        if ($this->CI->input->post('s_luokkia_per_hevonen')){
+            $application['s_luokkia_per_hevonen'] = $this->CI->input->post('s_luokkia_per_hevonen');
+        }
+        if ($this->CI->input->post('s_hevosia_per_luokka')){
+            $application['s_hevosia_per_luokka'] = $this->CI->input->post('s_hevosia_per_luokka');
+        }
+        if ($this->CI->input->post('luokat')){
+            $application['luokat'] = $this->CI->input->post('luokat');
+        }
+        if ($this->CI->input->post('takaaja')){
+            $application['takaaja'] = $this->CI->input->post('takaaja');
+        }
+        
+        return $application;
+        
+        
+    }
+    
+    
+public function check_competition_info($mode = "add", &$kisa, &$msg, $direct = false, $nollattu = false){
+    if($kisa['porrastettu']){
+        $kisa['arvontatapa'] = 3;
+    }
+    if($this->nayttelyjaos($kisa['jaos'])){
+        $kisa['arvontatapa'] = 5;
+    }
+
+    //jos kisa ei ole porrastettu tai näyttely, ja lisäävän käyttäjän pisteet on nollattu, pitää olla oikea takaaja.
+    if (!$kisa['porrastettu'] && !$this->nayttelyjaos($kisa['jaos']) && $mode == "add" && $nollattu
+             && !(isset($kisa['takaaja']) && $kisa['takaaja'] != $kisa['tunnus'] && $this->vrl_helper->check_vrl_syntax($kisa['takaaja'])
+                 && $this->tunnukset_model->onko_tunnus($this->vrl_helper->vrl_to_number($kisa['takaaja'])))){
+        $msg = "Tarvitset kilpailullesi takaajan. Sen tulee olla olemassaoleva VRL-tunnus";
+        return false;
+                
+
+    }  //jos takaaja on jostain syystä annettu vaikkei olisi pakko, tarkastetaan silti 
+    if(isset($kisa['takaaja']) && !($kisa['takaaja'] != $kisa['tunnus'] && $this->vrl_helper->check_vrl_syntax($kisa['takaaja'])
+                 && $this->tunnukset_model->onko_tunnus($this->vrl_helper->vrl_to_number($kisa['takaaja'])))){
+        $msg  = "Annoit virheellisen takaajan tunnuksen.";
+        return false;
+    }
+    
+    
+    //tarkastetaan päivämäärät
+    if (!($this->CI->vrl_helper->validateDate($kisa['kp'])
+        && $this->CI->vrl_helper->validateDate($kisa['vip']))){
+        
+        $msg = "Virheellinen kilpailupäivä tai viimeinen ilmoittautumispäivä.";
+        return false;
+        
+    }
+    
+    else{
+        
+        $vip_date = date('Y-m-d', strtotime($kisa['vip']));
+        $comp_date = date('Y-m-d', strtotime($kisa['kp']));
+        
+        if($kisa['porrastettu']){
+            //porrastetut menevät aina suoraan kalenteriin
+            if ( $vip_date < $this->competition_vip_date_leveled_min()){
+            $msg = 'Porrastettujen kilpailujen viimeinen ilmoittautumispäivä on liian lähellä nykyhetkeä.';
+            return false;
+            }
+        }else if(!$this->nayttelyjaos($kisa['jaos'])) {
+            //perinteiset menevät kalenteriin omalla tavallaan
+            if($direct && $vip_date < $this->competition_vip_date_direct_min()){
+                $msg = 'Suoraan kalenteriin menevän perinteisen kilpailun viimeinen ilmoittautumispäivä on liian lähellä nykyhetkeä.';
+                return false;
+            }else if(!$direct && $vip_date < $this->competition_vip_date_normal_min()){
+                $msg = 'Hakemusjonoon menevän perinteisen kilpailun viimeinen ilmoittautumispäivä on liian lähellä nykyhetkeä.';
+                return false;
+            }
+            
+        } else {
+            //TODO: Miten näyttelyjaos tarkastetaan?
+        }
+        
+        if($comp_date < $this->competition_date_min($vip_date)){
+            $msg = 'Kisapäivän pitää olla vasta viimeisen ilmoittautumispäivän jälkeen.';
+            return false;
+        }
+        
+        if( !($comp_date == $this->competition_date_max()) || $comp_date < $this->competition_date_max()){
+            $msg = 'Kisapäivä saa olla korkeintaan seuraavan kuun lopussa ('. $comp_date . ' < ' . $this->competition_date_max() . ')';
+            return false;
+        }
+    
+    }
+    
+        if (!(($kisa['porrastettu'] && $kisa['arvontatapa'] == 3)
+            || ($this->nayttelyjaos($kisa['jaos']) && $kisa['arvontatapa'] == 5)
+            || array_key_exists($kisa['arvontatapa'] ,$this->arvontatavat_options()))){
+            $msg = "Virheellinen arvontatapa";
+            return false;
+        }
+        
+        $this->CI->load->model('Tallit_model');
+        if(!$this->CI->Tallit_model->is_tnro_in_use($kisa['jarj_talli'])){
+            $msg = 'Järjestävää tallia ei ole olemassa.';
+            return false;
+        }
+        
+        if(!$this->CI->Kisakeskus_model->check_date_for_competition ($kisa['tunnus'], $kisa['jarj_talli'], $this->CI->vrl_helper->normal_date_to_sql($kisa['kp']), $kisa['jaos'])){
+            $msg = 'Et voi järjestää samalla tallilla useampia kuin yhdet saman jaoksen kilpailut/päivä';
+            return false;
+        }
+        
+        
+        $jaos = $this->CI->Jaos_model->get_jaos($kisa['jaos']);
+        if(sizeof($jaos) == 0 || $jaos['toiminnassa'] == false){
+            $msg = 'Virheellinen tai ei toiminnassa oleva jaos.';
+            return false;
+        }else {
+            $kisa['laji'] = $jaos['laji'];
+
+        }
+        
+        if($kisa['porrastettu']){
+            if($jaos['s_salli_porrastetut'] == false){
+                $msg = "Yrität järjestää porrastettuja kilpailuja jaoksella, jolla ei ole porrastetut sallittuja.";
+                return false;
+            }
+            if(($kisa['s_luokkia_per_hevonen'] > $jaos['s_luokkia_per_hevonen_max'])
+               || ($kisa['s_luokkia_per_hevonen'] < $jaos['s_luokkia_per_hevonen_min']) ){
+                $msg = "Hevosen luokkaosallistumisrajoitus ei vastaa jaoksen sääntöjä " . $jaos['s_luokkia_per_hevonen_min'] . "-" . $jaos['s_luokkia_per_hevonen_max'] . " luokkaa/hevonen.";
+                return false;
+            }
+            if(($kisa['s_hevosia_per_luokka'] > $jaos['s_hevosia_per_luokka_max'])
+               || ($kisa['s_hevosia_per_luokka'] < $jaos['s_hevosia_per_luokka_min']) ){
+                $msg = "Luokan maksimiosallistujamäärä ei vastaa jaoksen sääntöjä " . $jaos['s_hevosia_per_luokka_min'] . "-" . $jaos['s_hevosia_per_luokka_max'] . " ratsukkoa/luokka.";
+                return false;
+            }
+            if((sizeof($kisa['luokat']) > $jaos['s_luokkia_per_kisa_max'])
+               || (sizeof($kisa['luokat']) < $jaos['s_luokkia_per_kisa_min'])){
+                $msg = "Luokkamäärä ei vastaa jaoksen sääntöjä ". $jaos['s_luokkia_per_kisa_min'] . "-".$jaos['s_luokkia_per_kisa_max'] . " luokkaa/kilpailu.";
+                return false;
+            }
+            
+            $sallitut_luokat = $this->CI->Jaos_model->get_class_options($jaos['id'], true, true);
+            
+            foreach ($kisa['luokat'] as $luokka){
+                if(!array_key_exists($luokka, $sallitut_luokat)){
+                    $msg = "Virheellinen luokka (".$luokka.").";
+                    return false;
+                    break;
+                
+                }
+            }
+        }
+            
+    return true;    
+    }
+    
+    public function add_new_competition($kutsu, &$msg, $direct){
+        $this->CI->load->model('Kisakeskus_model');
+        $luokat = array();
+        if(isset($kutsu['luokat'])){
+            $luokat = $kutsu['luokat'];
+            unset($kutsu['luokat']);
+        }
+        return $this->CI->Kisakeskus_model->insertNewCompetition($kutsu, $luokat, $direct, $msg);
+    }
+    
+
     
     ///////////////////////////////////////////////////////////////////////////////
-    // Kisakalenterin ylläpitofunktiot
+    // Kisakalenterin ylläpito
     //////////////////////////////////////////////////////////////////////////////
-    
-    
-    ### funktio mahis, joka laskee voiko ko. hlö pitää jaoksenalaisia kisoja
 
-function mahis ($jaosnimi, $vrl_tunnus) {
+
+    /*
+function allowedCompetitions ($jaos, $vrl_tunnus, $etuuspisteet = null) {
 
 	# Tunnukselle kertyneet etuuspisteet
-	$etuuspisteet =  mysql_query("SELECT ".$jaosnimi." FROM tunnukset_etuuspisteet WHERE tunnus = ".$vrl_tunnus);
-	$ep = mysql_fetch_array($etuuspisteet);
-
-	$ep['pisteet'] = $ep[$jaosnimi];
 	
-	$haejaosID =  mysql_query("SELECT jaos_id FROM lista_jaokset WHERE lyhenne = '".$jaosnimi."'");
-	$jaos_id = mysql_fetch_array($haejaosID) or die( mysql_error() );
-	$jaos = $jaos_id['jaos_id'];
-
-	// Jos pisteitä ei ole vielä annettu
-	if(empty($ep['pisteet'])) { $ep['pisteet'] = 0; }
-
-	#### KUINKA MONTA KISAA MAHDOLLISUUS JÄRJESTÄÄ ####
-		/*
-			EP		KUTSUT
-			0-1		1 avoin kutsu
-			2-4		3 avointa kutsua
-			5-9		5 avointa kutsua
-			10-24	7 avointa kutsua
-			25-49	10 avointa kutsua
-			50-99	20 avointa kutsua, kutsut suoraan kalenteriin
-			100+	rajattomasti avoimia kutsuja, kutsut suoraan kalenteriin
-		*/
-		
-		$jarjestettavia = 0;
-		
-		if(	$ep['pisteet'] >= 0 AND $ep['pisteet'] <= 1.99 ) {
-			$jarjestettavia = 1;
-		} elseif ( $ep['pisteet'] >= 2.00 AND $ep['pisteet'] <= 4.99 ) {
-			$jarjestettavia = 3;
-		} elseif ( $ep['pisteet'] >= 5.00  AND  $ep['pisteet'] <= 9.99 ) {
-			$jarjestettavia = 5;
-		} elseif ( $ep['pisteet'] >= 10.00 AND $ep['pisteet'] <= 24.99 ) {
-			$jarjestettavia = 7;
-		} elseif ( $ep['pisteet'] >= 25.00 AND $ep['pisteet'] <= 49.99 ) {
-			$jarjestettavia = 10;
-		} elseif ( $ep['pisteet'] >= 50.00 AND $ep['pisteet'] <= 99.99 ) {
-			$jarjestettavia = 20;
-		} elseif ( $ep['pisteet'] >= 100 ) {
-			$jarjestettavia = 0.145; // infinity
-		} else {
-			$jarjestettavia = 0;
-		}
-		
-		/*
-		Katsotaan paljonko avoimia kutsuja kalenterissa
-		Miinustetaan avoimet järjestettävistä $jarjestettavia
-		
-		$jarjestettavia = $jarjestettavia - $avoimet;
-		*/
-		
-		$laske_avoimet =  mysql_query("
-			SELECT COUNT(kisa_id) AS avoimia 
-			FROM kisat_kisakalenteri 
-			WHERE
-				jaos = ".$jaos." AND
-				vanha = 0 AND
-				tunnus = ".$vrl_tunnus." AND
-				hyvaksytty != '0000-00-00 00:00:00' AND
-				(tulokset = 0 OR tulokset IS NULL)
-				"); 
-			/* */
-			
-		$avoimia_kalenterissa = mysql_fetch_array($laske_avoimet);
-		if(empty($avoimia_kalenterissa['avoimia'])) { $avoimia_kalenterissa['avoimia'] = 0;}
-		
-		$laske_tulosjono =  mysql_query("
-			SELECT COUNT(tulos_id) as avoimia 
-			FROM kisat_tulokset
-			LEFT JOIN kisat_kisakalenteri ON kisat_tulokset.kisa_id = kisat_kisakalenteri.kisa_id
-			WHERE
-				kisat_kisakalenteri.jaos = ".$jaos." AND
-				kisat_tulokset.tunnus = ".$vrl_tunnus." AND
-				kisat_kisakalenteri.vanha = 0 AND
-				kisat_kisakalenteri.hyvaksytty IS NOT NULL AND
-				(kisat_tulokset.hyvaksytty IS NULL OR kisat_tulokset.hyvaksytty = '0000-00-00 00:00:00')
-			");
-			
-		$tulosjonossa = mysql_fetch_array($laske_tulosjono);
-		if(empty($tulosjonossa['avoimia'])) { $tulosjonossa['avoimia'] = 0;}
-		
-		$voi_jarjestaa = $jarjestettavia - $avoimia_kalenterissa['avoimia'];
-		
-		if($voi_jarjestaa > 0 AND $voi_jarjestaa != 0.145 ) {
-			$mahis = 'Voi järjestää vielä '.$voi_jarjestaa.' kpl '.$jaosnimi.':n alaisia kisoja. Avoimia kalenterissa: '.$avoimia_kalenterissa['avoimia'].' kpl';
-			
-		} elseif ($voi_jarjestaa == 0.145) {
-			$mahis = 'Voi järjestää rajattomasti kisoja.';
-			
-		} elseif ($voi_jarjestaa == 0 OR $voi_jarjestaa < 0) {
-			$mahis = '<span class="red" style="margin: 0;">Ei voi järjestää '.$jaosnimi.':n alaisia kisoja, koska kalenterissa avoimia kisoja. ';
-			
-			if($tulosjonossa['avoimia'] > 0) {
-				$mahis .= 'Tulosjonossa käsittelemättömiä tuloshakemuksia '.$tulosjonossa['avoimia'].' kpl.';
-			}
-			
-			$mahis .= '</span>';
-			
-		} else {
-			$mahis = '<span class="red">Virhe '.$jaosnimi.':n etuuspisteiden laskussa! Pisteitä '.$ep['pisteet'].' ep.</span>';
-		}
-		
-		return $mahis;
+    if(!isset($etuuspisteet)){
+        $etuuspisteet =  $this->CI->Jaos_model->GetEtuuspisteet($jaos, $vrl_tunnus);
+    }
+	$ep = 0;
+    if(sizeof($etuuspisteet) > 0 && !empty($etuuspisteet['pisteet'])){
+        $ep = $etuuspisteet['pisteet'];
+    }
 	
+    # Miten monta kisaa on mahdollisuus järjestää
+    $jarjestettavia = $this->sallitutKisamaarat($ep, $jaos);
+		
+    
+    Katsotaan paljonko avoimia kutsuja kalenterissa
+    Miinustetaan avoimet järjestettävistä $jarjestettavia
+    
+    $jarjestettavia = $jarjestettavia - $avoimet;
+    
+		
+		$avoimet = $this->CI->Jaos_model->usersOpenCompetitions($jaos, $vrl_tunnus);
+		
+		
+		return $jarjestettavia - $avoimet;
+		
+
+			
 }
-    
-    
-    
-    
-    /*
-    
-    public function competitions_queue_get_next(){
-      $this->_get_next('kisat_kisakalenteri');
-    }
-    
-    public function results_queue_get_next(){
-      $this->_get_next('kisat_tulokset');
-    }
-    
-    
-     private function _get_next($table)
-    {
-        $data = array('success' => false);
-        $date = new DateTime();
-        $date->setTimestamp(time() - 60*15); //nykyhetki miinus 15min, eli ei saa ottaa samaa jonoitemiä uudestaan käsittelyyn 15 minuuttiin
-        
-        $this->CI->db->from($table);
-        $this->CI->db->where('kasitelty IS NULL OR kasitelty < "' . $date->format('Y-m-d H:i:s') . '"');
-        $this->CI->db->order_by("lisatty", "asc"); 
-        $query = $this->CI->db->get();
-        
-        if ($query->num_rows() > 0)
-        {
-            $data = $query->row_array(); 
-
-            $date->setTimestamp(time());
-            $user = $this->CI->ion_auth->user()->row();
-            $update_data = array('kasitelty' => $date->format('Y-m-d H:i:s'), 'kasittelija' => $user->tunnus);
-            
-            $this->CI->db->where('id', $data['id']);
-            $this->CI->db->update($table, $update_data);
-            
-            $data['success'] = true;
-        }
-        
-        return $data;
-    }
-    
-    //palauttaa jonoitemin tiedot lukitsematta
-    public function get_by_id($id)
-    {
-        $data = array('success' => false);
-        
-        $this->CI->db->from($this->db_table);
-        $this->CI->db->where('id', $id);
-        $query = $this->CI->db->get();
-        
-        if ($query->num_rows() > 0)
-        {
-            $data = $query->row_array(); 
-            $data['success'] = true;
-        }
-        
-        return $data;
-    }
-    
-    //palauttaa html:nä tiedot ja käsittelynapit
-    //raw datassa pitää olla Labelinnimi => arvo
-    //käsittelykontrollerin pitää olla <nykyurl>_kasittele ja saa päätöksen sekä id:n parametrina
-    public function format_html($title, $raw_data, $id)
-    {
-        $html = '<div class="container"><h3>' . $title . '</h3>';
-        
-        foreach($raw_data as $key => $value)
-        {
-            if($key != '__extra_param')
-                $html .= "<p>" . $key . ": " . $value . "</p>";
-        }
-        
-        $html .= '</div>';
-        
-        if($title != 'Tallianomus')
-            $html .= '<p><form method="post" action="' . current_url() . '_kasittele/hyvaksy/' . $id . '"><input type="submit" value="Hyväksy"></form>';
-        else
-            $html .= '<p><form method="post" action="' . current_url() . '_kasittele/hyvaksy/' . $id . '">Tallilyhenteen kirjainosa (2-4 merkkiä): <input type="text" value="' . $raw_data['__extra_param'] . '" name="tnro_alpha"><input type="submit" value="Hyväksy"></form>';
-        $html .= '<form method="post" action="' . current_url() . '_kasittele/hylkaa/' . $id . '">Hylkäyssyy: <input type="text" name="rejection_reason"><input type="submit" value="Hylkää"></form>';
-        $html .= '<form method="post" action="' . current_url() . '"><input type="submit" value="Ohita ja ota seuraava"></form></p>';
-        
-        return $html;
-    }
-    
-    //lisää datat db_table poislukien loppupääte _jonossa -tauluun, plus hyvaksyi ja hyvaksytty -kentät
-    //poistaa id:n jonosta
-    //lähettää recipientille msg:n adminilta
-    public function process_queue_item($id, $approved, $insert_data, $msg_recipient, $msg)
-    {
-        $this->CI->load->model('tunnukset_model');
-        $this->CI->tunnukset_model->send_message(1, $msg_recipient, $msg);
-        
-        if($approved == true)
-        {
-            $user = $this->CI->ion_auth->user()->row();
-            $insert_data['hyvaksyi'] = $user->tunnus;
-            $this->CI->db->insert(str_replace("_jonossa", "", $this->db_table), $insert_data);
-        }
-        
-        $this->CI->db->delete($this->db_table, array('id' => $id));
-    }
-    
-    //palauttaa html:nä montako jonossa on ja mikä on vanhimman datetime plus seuraavanhakunappi
-    public function get_queue_frontpage()
-    {
-        $data = array();
-        
-        $this->CI->db->select('lisatty');
-        $this->CI->db->from($this->db_table);
-        $this->CI->db->order_by("lisatty", "asc"); 
-        $query = $this->CI->db->get();
-        
-        if ($query->num_rows() > 0)
-        {
-            $db_data = $query->row_array(); 
-            $data['oldest'] = $db_data['lisatty'];
-            
-            $this->CI->db->from($this->db_table);
-            $data['queue_length'] = $this->CI->db->count_all_results();
-            
-            $date = new DateTime();
-            $date->setTimestamp(time() - 60*15); //nykyhetki miinus 15min, eli ei saa ottaa samaa hakemusta uudestaan käsittelyyn 15 minuuttiin
-            
-            $this->CI->db->from($this->db_table);
-            $this->CI->db->where('kasitelty IS NULL OR kasitelty < "' . $date->format('Y-m-d H:i:s') . '"');
-            $query = $this->CI->db->get();
-            $data['queue_locked_num'] = $data['queue_length'] - $query->num_rows();
-            
-            $data['html'] = "<p>Jonon pituus on " . $data['queue_length'] . ", joista " . $data['queue_locked_num'] . " on lukittuna. Vanhin jonottaja on lisätty " . $data['oldest'] . ".</p>";
-        }
-        else
-        {
-            $data['html'] = "<p>Jono on tyhjä.</p>";
-        }
-        
-        return $data;
-    }*/
+    */
 
 }

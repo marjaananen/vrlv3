@@ -16,7 +16,7 @@ Toimintaan on helppo tulla mukaan. Ensikertalaisen kannattaa aloittaa Mikä on v
 
 <h2>Tiedotukset</h2>
 <?php foreach ($tiedotukset as $tiedotus){
-   echo date( "d.m.Y", strtotime($tiedotus['aika'])) ." - <a href='". site_url("tiedotukset/tiedotus/".$tiedotus['tid']) . "'>". $tiedotus['otsikko'] . "</a><br>";  
+   echo date( "d.m.Y", strtotime($tiedotus['aika'])) ." - <a href='". site_url("liitto/tiedotus/".$tiedotus['tid']) . "'>". $tiedotus['otsikko'] . "</a><br>";  
     
 }?>
 

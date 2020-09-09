@@ -3,13 +3,69 @@
 
 class Kisakeskus_model extends CI_Model
 {
+    private $CI;
       function __construct()
     {
 	// Call the Model constructor
 	parent::__construct();
 	$this->load->database();
+    $this->CI =& get_instance();
+
     }
     
+    
+    public function insertNewCompetition ($kutsu, $luokka_idt, $direct, &$msg){
+          
+	    $kutsu['kp'] = date("Y-m-d",strtotime($kutsu['kp']));
+        $kutsu['vip'] = date("Y-m-d",strtotime($kutsu['vip']));
+        if(isset($kutsu['info'])){
+            $kutsu['info'] = htmlspecialchars($kutsu['info']);
+        }
+        $kutsu['ilmoitettu'] = date("Y-m-d H:i:s");
+        
+        if($kutsu['porrastettu'] || $direct){
+            $kutsu['hyvaksytty'] = date("Y-m-d H:i:s");
+            $kutsu['kasitelty'] = date("Y-m-d H:i:s");
+            $kutsu['hyvaksyi'] = "00000";
+        }
+	    
+	    
+	    $this->db->trans_start();
+	    $this->db->insert('vrlv3_kisat_kisakalenteri', $kutsu);
+        echo $this->db->last_query();
+        $kutsu_id = $this->db->insert_id();
+	    
+        if($kutsu['porrastettu']){
+            $kisaluokat = array();	    
+            foreach ($luokka_idt as $luokka){
+              $kisaluokat[] = array('luokka_id' => $luokka, 'kisa_id' => $kutsu_id);
+               
+            }
+	    	    
+            $this->db->insert_batch('vrlv3_kisat_kisaluokat', $kisaluokat);
+                    echo $this->db->last_query();
+
+        }
+	    $this->db->trans_complete();
+        
+        
+        
+        if ($this->db->trans_status() === FALSE)
+        {
+            $msg = "Virhe kutsun lisäämisessä. Yritä hetken kuluttua uudelleen, tai ole yhteydessä ylläpitoon.";
+                        var_dump($kutsu);
+
+                return false;
+        }
+        else {
+            return true;
+        }
+    }
+        
+      
+    
+    
+
     //hae kisakalenterissa olevat tiedot
     public function get_calendar($porrastettu = null, $arvontatapa = null, $jaos = null){ 
         $this->db->select('vip, kp, j.id as jaos, j.lyhenne as jaoslyhenne, k.url, k.info, jarj_talli, t.nimi as tallinimi, kisa_id, porrastettu, k.hyvaksytty');
@@ -100,6 +156,83 @@ class Kisakeskus_model extends CI_Model
         
     }
     
+    //tarkistetaan onko samalla päivällä jo tallilla + tunnuksella kisa
+    public function check_date_for_competition ($tunnus, $jarj_talli, $pvm, $jaos){
+        $this->db->select('*');
+        $this->db->from('vrlv3_kisat_kisakalenteri');
+        $this->db->where('tunnus', $tunnus);
+        $this->db->where('jarj_talli', $jarj_talli);
+        $this->db->where('kp', $pvm);
+        $this->db->where('jaos', $jaos);
+        
+        $query = $this->db->get();
+        
+        if ($query->num_rows() > 0)
+        {        
+            return false;
+        }else {
+            return true;
+        }
+        
+        
+    }
+    
+    
+          
+    //Tiedot kutsuun
+    public function hae_kutsutiedot($id, $user = null){
+      $this->db->select('*');
+      $this->db->where('kisa_id', $id);
+      if (isset($user)){
+        $this->db->where('tunnus', $user);
+      }
+      $query = $this->db->get('vrlv3_kisat_kisakalenteri');
+      
+      $kisa = array();
+      $kisa = $query->result_array();
+      
+      if (empty($kisa)){
+        return array();
+        
+      }
+      
+      else {
+        $kisa = $kisa[0];
+        $kisa['luokat'] = $this->hae_kisaluokat($id);
+        return $kisa;
+      }
+      
+    }
+    
+    //Luokat kutsuun
+    public function hae_kisaluokat($id){
+      $this->db->select('l.id, kl.id as kisaluokka_id, l.taso, l.aste, l.minheight, l.min_age, l.nimi');
+      $this->db->where('kl.kisa_id', $id);	
+      $this->db->join('vrlv3_kisat_luokat as l', 'kl.luokka_id = l.id');
+      $this->db->order_by("l.jarjnro", "asc");
+      $this->db->order_by("l.taso", "asc");
+      $this->db->order_by("l.aste", "asc");
+      $query = $this->db->get('vrlv3_kisat_kisaluokat as kl');
+      
+      
+      $luokkalista = array();
+      $luokkalista = $query->result_array();
+      
+      
+      foreach ($luokkalista as &$luokka){
+        $this->db->select('rimpsu');
+        $this->db->where('kisa_id', $id);
+        $this->db->where('kisaluokka_id', $luokka['kisaluokka_id']);
+        $query = $this->db->get('vrlv3_kisat_kisaosallis');
+
+        $luokka['osallistujat'] = $query->result_array();
+      }	    
+      
+      return $luokkalista;	    
+    }
+    /*
+        //////////////////////WANHAT
+    
     //Luokat luontilomakkeelle
       public function hae_luokat($porrastettu = 1, $laji = -1){
 	    $this->db->select('luokka_id, teksti, porr_vaikeus, laji');
@@ -136,30 +269,7 @@ class Kisakeskus_model extends CI_Model
 	    
       }
       
-      //Luokat kutsuun
-      public function hae_kisaluokat($id){
-	    $this->db->select('kilvat_luokat.luokka_id, kilvat_luokat.porr_vaikeus, kilvat_kisaluokat.russeille, kilvat_kisaluokat.karus_cup, kisaluokka_id, teksti');
-	    $this->db->where('kisa_id', $id);	
-	    $this->db->join('kilvat_luokat', 'kilvat_luokat.luokka_id = kilvat_kisaluokat.luokka_id');
-	    $this->db->order_by("porr_vaikeus", "asc");
-	    $this->db->order_by("luokka_id", "asc");
-	    $query = $this->db->get('kilvat_kisaluokat');
-	    
-	    $luokkalista = array();
-	    $luokkalista = $query->result_array();
-	    
-	    
-	    foreach ($luokkalista as &$luokka){
-		  $this->db->select('rimpsu');
-		  $this->db->where('kisa_id', $id);
-		  $this->db->where('kisaluokka_id', $luokka['kisaluokka_id']);
-		  $query = $this->db->get('kilvat_kisaosallis');
-		  
-		  $luokka['osallistujat'] = $query->result_array();
-	    }	    
-	    
-	    return $luokkalista;	    
-      }
+    
       
       public function onko_vain_russeille($id){
 	    $this->db->select('russeille');
@@ -199,31 +309,7 @@ class Kisakeskus_model extends CI_Model
 	    
 	    return $kisat;
       }
-      
-      //Tiedot kutsuun
-      public function hae_kutsutiedot($id, $user = -1){
-	    $this->db->select('*');
-	    $this->db->where('id', $id);
-	    if ($user != -1){
-		  $this->db->where('user', $user);
-	    }
-	    $query = $this->db->get('kilvat_kutsut');
-	    
-	    $kisa = array();
-	    $kisa = $query->result_array();
-	    
-	    if (empty($kisa)){
-		  return array();
-		  
-	    }
-	    
-	    else {
-		  $kisa = $kisa[0];
-		  $kisa['luokat'] = $this->hae_kisaluokat($id);
-		  return $kisa;
-	    }
-	    
-      }
+
       
       //Mihin hittoon tätä?
       public function hae_pvm_laji($id){
@@ -310,10 +396,10 @@ class Kisakeskus_model extends CI_Model
 	    
      }
      
-     
+     */
 
     //Osallistumiset h
-      public function lisaa_osallistuja_luokkaan ($kisa_id, $luokka_id, $vh, $vrl, $rimpsu){
+      private function _lisaa_osallistuja_luokkaan ($kisa_id, $luokka_id, $vh, $vrl, $rimpsu){
 	    
 	      $lisattava = array();
 	  
@@ -324,15 +410,15 @@ class Kisakeskus_model extends CI_Model
 		  $lisattava['rimpsu'] = $rimpsu;		  
 	      
 	      
-	      $this->db->insert('kilvat_kisaosallis', $lisattava);              
+	      $this->db->insert('vrlv3_kisat_kisaosallis', $lisattava);              
      }
      
-     public function voi_osallistua($vh, $vrl, $kisa, $luokka){
+     public function osallistuminen($vh, $vrl, $kisa, $luokka, $rimpsu){
 	    
 	    $this->db->trans_start();
-	    $this->db->select('max_os_luokka, max_hevo_luokka, max_start_hevo, vip');
-	    $this->db->where('id', $kisa);	    
-	    $query = $this->db->get('kilvat_kutsut');
+	    $this->db->select('s_hevosia_per_luokka as max_os_luokka, s_luokkia_per_hevonen as max_start_hevo, vip');
+	    $this->db->where('kisa_id', $kisa);	    
+	    $query = $this->db->get('vrlv3_kisat_kisakalenteri');
 	    $kutsu = $query->result_array();
 	    
 	    $return_array = array();
@@ -342,7 +428,7 @@ class Kisakeskus_model extends CI_Model
 		  $return_array['result'] = false;
 		  $return_array['message'] = "Kutsua ei ole olemassa";
 		  return $return_array();
-	    }
+	    } 
 	    
 	    $ExpDate = new DateTime($kutsu[0]['vip']);
 	    $Today = new DateTime(date("Y-m-d"));
@@ -350,7 +436,11 @@ class Kisakeskus_model extends CI_Model
 	    $interval = $interval->format('%R%a days');  //<--- to diffenernce by days.
 		
 
-	    
+        $this->CI->load->library('Kisajarjestelma');
+        $this->CI->load->model('Tunnukset_model');
+        $this->CI->load->model('Hevonen_model');
+        $kutsu[0]['max_hevo_luokka'] = $this->CI->kisajarjestelma->max_hevosia_per_luokka_per_ratsastaja($kutsu[0]['max_os_luokka']);    
+        
 	    //Kutsua ei ole, tai VIP on mennyt
 	    if ($interval > 0){
 		  
@@ -358,54 +448,66 @@ class Kisakeskus_model extends CI_Model
 		  $return_array['message'] = "Kutsua ei ole olemassa, tai VIP on mennyt.";
 		  
 	    }
+        else if(!$this->Tunnukset_model->onko_tunnus($vrl)){
+          $return_array['result'] = false;
+		  $return_array['message'] = "VRL-tunnusta ei ole olemassa";
+        }
+        else if(!$this->Hevonen_model->onko_tunnus($vh)){
+          $return_array['result'] = false;
+		  $return_array['message'] = "VH-tunnusta ei ole olemassa";
+        }
 	    
-	    else if ($this->hevonen_jo_luokassa($vh, $kisa, $luokka)){
+	    else if ($this->_hevonen_jo_luokassa($vh, $kisa, $luokka)){
 		  $return_array['result'] = false;
 		  $return_array['message'] = "Hevonen on jo luokassa kertaalleen.";
 		  
 	    }
 	    
-	    else if ($this->montako_starttia_hevosella($vh, $kisa) >= $kutsu[0]['max_start_hevo']){
+	    else if ($this->_montako_starttia_hevosella($vh, $kisa) >= $kutsu[0]['max_start_hevo']){
 		  $return_array['result'] = false;
 		  $return_array['message'] = "Hevonen saa osallistua maksimissaan " . $kutsu[0]['max_start_hevo'] . " luokkaan.";
 		  
 	    }
 	    
-	    else if ($this->montako_hevosta_ratsastajalla($vrl, $kisa, $luokka) >= $kutsu[0]['max_hevo_luokka']){
+	    else if ($this->_montako_hevosta_ratsastajalla($vrl, $kisa, $luokka) >= $kutsu[0]['max_hevo_luokka']){
 		  $return_array['result'] = false;
 		  $return_array['message'] = "Ratsastaja saa ilmoittaa yhteen luokkaan korkeintaan " . $kutsu[0]['max_hevo_luokka'] . " hevosta.";		  
 		  
 	    }
 	    
-	    else if ($this->montako_hevosta_luokassa($kisa, $luokka) >= $kutsu[0]['max_os_luokka']){
+	    else if ($this->_montako_hevosta_luokassa($kisa, $luokka) >= $kutsu[0]['max_os_luokka']){
 		  
 		  $return_array['result'] = false;
 		  $return_array['message'] = "Luokka on täynnä.";
 	    }
+        
+        else if($return_array['result'] === true){
+            $this->_lisaa_osallistuja_luokkaan ($kisa, $luokka, $vh, $vrl, $rimpsu);
+        }
 	    $this->db->trans_complete();
 	    return $return_array;
       
      }
      
-     public function montako_starttia_hevosella($vh, $kisa){
+     private function _montako_starttia_hevosella($vh, $kisa){
       
 	    $this->db->select('count(*)');       
 	    $this->db->where('kisa_id', $kisa);
 	    $this->db->where('VH', $vh); 
-	    $this->db->from('kilvat_kisaosallis');
+	    $this->db->from('vrlv3_kisat_kisaosallis');
 	    $lkm = $this->db->count_all_results();
 	
 	    return $lkm;
 	
      }
 
-     public function hevonen_jo_luokassa($vh, $kisa, $luokka){
+     private function _hevonen_jo_luokassa($vh, $kisa, $luokka){
       
 	    $this->db->select('*');       
 	    $this->db->where('kisaluokka_id', $luokka);
 	    $this->db->where('VH', $vh);
 	    $this->db->where('kisa_id', $kisa);
-	    $query = $this->db->get('kilvat_kisaosallis');
+	    $query = $this->db->get('vrlv3_kisat_kisaosallis');
 	
 	    $result = $query->result_array();
 	 
@@ -421,13 +523,13 @@ class Kisakeskus_model extends CI_Model
 	
      }
      
-      public function montako_hevosta_ratsastajalla($vrl, $kisa, $luokka){
+      private function _montako_hevosta_ratsastajalla($vrl, $kisa, $luokka){
       
 	    $this->db->select('count(*) as kpl');       
 	    $this->db->where('kisaluokka_id', $luokka);
 	    $this->db->where('VRL', $vrl);
 	    $this->db->where('kisa_id', $kisa);
-	    $this->db->from('kilvat_kisaosallis');
+	    $this->db->from('vrlv3_kisat_kisaosallis');
 	    $lkm = $this->db->count_all_results();
 	
 	    return $lkm;
@@ -435,13 +537,13 @@ class Kisakeskus_model extends CI_Model
      }
      
      
-      public function montako_hevosta_luokassa($kisa, $luokka){
+      private function _montako_hevosta_luokassa($kisa, $luokka){
       
 	    
 	    $this->db->select('count(*) as kpl');       
 	    $this->db->where('kisaluokka_id', $luokka);
 	    $this->db->where('kisa_id', $kisa);
-	     $this->db->from('kilvat_kisaosallis');
+	     $this->db->from('vrlv3_kisat_kisaosallis');
 	    $lkm = $this->db->count_all_results();
 	
 	    return $lkm;

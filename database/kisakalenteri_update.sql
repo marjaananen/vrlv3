@@ -97,6 +97,7 @@ CREATE TABLE `vrlv3_kisat_kisakalenteri` (
 
 
 
+
 insert into vrlv3_kisat_kisakalenteri (kisa_id, vip, laji, jaos, url, info, tunnus, jarj_talli, 
 jarj_seura, arvontatapa, takaaja, ilmoitettu, seuralle, hyvaksytty, kasitelty, tulokset, hyvaksyi, seura_hyv, siirretty, vanha, porrastettu)
 select kisa_id, vip, laji, jaos, url, info, tunnus, jarj_talli, 
@@ -109,10 +110,13 @@ CHANGE COLUMN `kisa_id` `kisa_id` INT(11) NOT NULL AUTO_INCREMENT ;
 
 ALTER TABLE `vrlv3`.`kisat_tulokset` 
 DROP FOREIGN KEY `kisat_tulokset_ibfk_1`;
-ALTER TABLE `vrlv3`.`kisat_tulokset` 
+ALTER TABLE `vrlv3`.`kisat_tulokset`
+ADD COLUMN `kasittelija` INT(5) ZEROFILL UNSIGNED NULL DEFAULT NULL AFTER `kasitelty`,
 ADD INDEX `kisat_tulokset_ibfk_1_idx` (`kisa_id` ASC),
 ADD INDEX `tunnus_idx_tulos` (`tunnus` ASC),
-ADD INDEX `hyvaksyi_tulokset_idx` (`hyvaksyi` ASC);
+ADD INDEX `hyvaksyi_tulokset_idx` (`hyvaksyi` ASC),
+ADD INDEX `kasittelija_idx` (`kasittelija` ASC);
+;
 ALTER TABLE `vrlv3`.`kisat_tulokset` 
 RENAME TO  `vrlv3`.`vrlv3_kisat_tulokset`,
 ADD CONSTRAINT `kisat_tulokset_ibfk_1`
@@ -129,4 +133,32 @@ ADD CONSTRAINT `hyvaksyi_tulokset`
   FOREIGN KEY (`hyvaksyi`)
   REFERENCES `vrlv3`.`vrlv3_tunnukset` (`tunnus`)
   ON DELETE NO ACTION
-  ON UPDATE NO ACTION;
+  ON UPDATE NO ACTION,
+ADD CONSTRAINT `kasittelija_tunnus`
+  FOREIGN KEY (`tunnus`)
+  REFERENCES `vrlv3`.`vrlv3_tunnukset` (`tunnus`)
+  ON DELETE SET NULL
+  ON UPDATE CASCADE;
+  
+
+
+
+ALTER TABLE `vrlv3`.`vrlv3_kisat_kisakalenteri` 
+ADD COLUMN `kasittelija` INT(5) ZEROFILL UNSIGNED NULL DEFAULT NULL AFTER `kasitelty`,
+ADD INDEX `kasittelija_idx` (`kasittelija` ASC);
+;
+ALTER TABLE `vrlv3`.`vrlv3_kisat_kisakalenteri` 
+ADD CONSTRAINT `kasittelija_tunnus`
+  FOREIGN KEY (`tunnus`)
+  REFERENCES `vrlv3`.`vrlv3_tunnukset` (`tunnus`)
+  ON DELETE SET NULL
+  ON UPDATE CASCADE;
+
+  
+  
+  insert into vrlv3_kisat_etuuspisteet (tunnus, jaos, pisteet, nollattu, muokattu) SELECT tunnus, 1, ERJ, nollattu, muokattu FROM vrlv3.tunnukset_etuuspisteet;
+insert into vrlv3_kisat_etuuspisteet (tunnus, jaos, pisteet, nollattu, muokattu) SELECT tunnus, 2, KRJ, nollattu, muokattu FROM vrlv3.tunnukset_etuuspisteet;
+insert into vrlv3_kisat_etuuspisteet (tunnus, jaos, pisteet, nollattu, muokattu) SELECT tunnus, 3, KERJ, nollattu, muokattu FROM vrlv3.tunnukset_etuuspisteet;
+insert into vrlv3_kisat_etuuspisteet (tunnus, jaos, pisteet, nollattu, muokattu) SELECT tunnus, 4, VVJ, nollattu, muokattu FROM vrlv3.tunnukset_etuuspisteet;
+insert into vrlv3_kisat_etuuspisteet (tunnus, jaos, pisteet, nollattu, muokattu) SELECT tunnus, 5, WRJ, nollattu, muokattu FROM vrlv3.tunnukset_etuuspisteet;
+insert into vrlv3_kisat_etuuspisteet (tunnus, jaos, pisteet, nollattu, muokattu) SELECT tunnus, 6, ARJ, nollattu, muokattu FROM vrlv3.tunnukset_etuuspisteet;

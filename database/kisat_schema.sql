@@ -205,6 +205,11 @@ UPDATE vrlv3_tapahtumat SET jaos_id = 3 WHERE jaos = 'kerj' and id > 0;
 UPDATE vrlv3_tapahtumat SET jaos_id = 5 WHERE jaos = 'wrj' and id > 0;
 UPDATE vrlv3_tapahtumat SET jaos_id = 6 WHERE jaos = 'arj' and id > 0;
 
+ALTER TABLE `vrlv3`.`vrlv3_kisat_kisakalenteri` 
+ADD COLUMN `s_luokkia_per_hevonen` INT(3) NULL AFTER `porrastettu`,
+ADD COLUMN `s_hevosia_per_luokka` INT(3) NULL AFTER `s_luokkia_per_hevonen`;
+
+
 
 
 ALTER TABLE `vrlv3`.`vrlv3_tapahtumat` 
@@ -217,9 +222,9 @@ CHANGE COLUMN `tulos` `tulos` TINYINT(1) DEFAULT 1;
 
 CREATE TABLE `vrlv3`.`vrlv3_kisat_etuuspisteet` (
   `id` INT NOT NULL AUTO_INCREMENT,
-  `tunnus` INT(5) UNSIGNED ZEROFILL NULL,
-  `jaos` INT(11) NULL,
-  `pisteet` DOUBLE(6,2) NULL,
+  `tunnus` INT(5) UNSIGNED ZEROFILL NOT NULL,
+  `jaos` INT(11) NOT NULL,
+  `pisteet` DOUBLE(6,2) NOT NULL,
   `nollattu` TINYINT(1) NULL,
   `muokattu` DATETIME NULL,
   INDEX `tunnusdidx` (`tunnus` ASC),
@@ -236,6 +241,56 @@ CREATE TABLE `vrlv3`.`vrlv3_kisat_etuuspisteet` (
     REFERENCES `vrlv3`.`vrlv3_kisat_jaokset` (`id`)
     ON DELETE CASCADE
     ON UPDATE CASCADE);
+
+
+CREATE TABLE `vrlv3`.`vrlv3_kisat_kisaluokat` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `kisa_id` INT(11) NOT NULL,
+  `luokka_id` INT(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  INDEX `kisaluokat_kisaid` (`kisa_id` ASC),
+  INDEX `kisaluokat_luokkaid` (`luokka_id` ASC),
+  CONSTRAINT `kisaluokkaf`
+    FOREIGN KEY (`luokka_id`)
+    REFERENCES `vrlv3`.`vrlv3_kisat_luokat` (`id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `kisaluokkaff`
+    FOREIGN KEY (`kisa_id`)
+    REFERENCES `vrlv3`.`vrlv3_kisat_kisakalenteri` (`kisa_id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION);
+
+
+CREATE TABLE IF NOT EXISTS `vrlv3_kisat_kisaosallis` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `kisa_id` int(11) NOT NULL,
+  `kisaluokka_id` int(11) NOT NULL,
+  `VH` INT(9) unsigned zerofill NOT NULL,
+  `VRL` int(5) unsigned zerofill NOT NULL,
+  `rimpsu` varchar(220) NOT NULL,
+  `osallistui` timestamp NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`),
+  KEY `kisa_id` (`kisa_id`),
+  KEY `kisaluokka_id` (`kisaluokka_id`),
+    KEY `VH` (`VH`),
+    KEY `VRL` (`VRL`)
+
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1;
+
+--
+-- Rajoitteet vedostauluille
+--
+
+--
+-- Rajoitteet taululle `kilvat_kisaosallis`
+--
+ALTER TABLE `vrlv3_kisat_kisaosallis`
+  ADD CONSTRAINT `kilvat_kisaosallis_ibfk_1` FOREIGN KEY (`kisa_id`) REFERENCES `vrlv3_kisat_kisakalenteri` (`kisa_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `kilvat_kisaosallis_ibfk_2` FOREIGN KEY (`kisaluokka_id`) REFERENCES `vrlv3_kisat_kisaluokat` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+    ADD CONSTRAINT `kilvat_kisaosallis_ibfk_3` FOREIGN KEY (`VH`) REFERENCES `vrlv3_hevosrekisteri` (`reknro`) ON DELETE CASCADE ON UPDATE CASCADE,
+        ADD CONSTRAINT `kilvat_kisaosallis_ibfk_4` FOREIGN KEY (`VRL`) REFERENCES `vrlv3_tunnukset` (`tunnus`) ON DELETE CASCADE ON UPDATE CASCADE;
+
 
 
 /*!40000 ALTER TABLE `vrlv3_kisat_luokat` ENABLE KEYS */;

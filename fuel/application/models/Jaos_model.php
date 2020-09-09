@@ -186,7 +186,7 @@ class Jaos_model extends Base_module_model
     
     
     
-    function get_jaos_list($only_active, $only_porrastetut = false)
+    function get_jaos_list($only_active = false, $only_porrastetut = false)
     {
         $this->db->select("id, nimi, lyhenne, kuvaus, url, IF(toiminnassa='1', 'toiminnnassa', 'ei toiminnassa') as toiminnassa");
         if($only_active){
@@ -532,51 +532,51 @@ class Jaos_model extends Base_module_model
     //////////////////////////////////////////////////////
         
     
-    function raceApplicationsMaintenance( $jaos, $leveled = false ) {
-        
-        $this->db->select('COUNT(kisa_id) as kpl, MIN(ilmoitettu) as ilmoitettu');
-        $this->db->from('vrlv3_kisat_kisakalenteri');
-        $this->db->where('jaos', $jaos);
-        $this->db->where ('vanha', 0);
-        $this->db->where('porrastettu', $leveled);
-        $this->db->where('hyvaksytty', NULL);
-        if($leveled){
-            $this->CI->load->library("Kisajarjestelma");     
-            $this->db->where('ilmoitettu <', $this->CI->kisajarjestelma->new_leveled_start_time());
-
-        }
-        
-		 $query = $this->db->get();
-        
-        if ($query->num_rows() > 0)
-        {
-            return $query->result_array()[0]; 
-        }else {
-            return array('kpl'=>0, 'ilmoitettu'=>NULL);
-        }
-		
-	}
+  
     
-    function resultApplicationsMaintenance( $jaos, $leveled = false ) {
-         $this->db->select('COUNT(t.tulos_id) as kpl, MIN(t.ilmoitettu) as ilmoitettu');
-        $this->db->from('vrlv3_kisat_tulokset as t');
-        $this->db->join('vrlv3_kisat_kisakalenteri as k', 't.kisa_id = k.kisa_id');
-        $this->db->where('k.jaos', $jaos);
-        $this->db->where ('k.vanha', 0);
-        $this->db->where('k.porrastettu', $leveled);
-        $this->db->where('t.hyvaksytty', NULL);
-
+    function getEtuuspisteet($jaos, $tunnus){
+        $this->db->select('*');
+        $this->db->from('vrlv3_kisat_etuuspisteet');
+        $this->db->where('tunnus', $tunnus);
+        $this->db->where('jaos', $jaos);
         
-		 $query = $this->db->get();
+         $query = $this->db->get();
         
         if ($query->num_rows() > 0)
         {
             return $query->result_array()[0]; 
         }else {
-            return array('kpl'=>0, 'ilmoitettu'=>NULL);
+            return array();
         }
     			
-	}
+        
+    }
+    
+    
+    function usersOpenCompetitions($jaos, $tunnus, $porrastettu = false){
+        $this->db->select('count(kisa_id) as avoimia');
+        $this->db->from('vrlv3_kisat_kisakalenteri');
+        $this->db->where('jaos', $jaos);
+        $this->db->where('tunnus', $tunnus);
+        if($porrastettu){
+            $this->db->where('porrastettu', 1);
+
+        }else {
+            $this->db->where('porrastettu', 0);
+
+        }
+        $this->db->where('vanha', 0);
+        $this->db->where('tulokset', 0);
+        
+        $query = $this->db->get();
+        
+        if ($query->num_rows() > 0)
+        {
+            return $query->result_array()[0]['avoimia']; 
+        }else {
+            return 0;
+        }
+    }
 
 }
 
