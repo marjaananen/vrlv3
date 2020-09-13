@@ -32,7 +32,6 @@ class Kisakeskus_model extends CI_Model
 	    
 	    $this->db->trans_start();
 	    $this->db->insert('vrlv3_kisat_kisakalenteri', $kutsu);
-        echo $this->db->last_query();
         $kutsu_id = $this->db->insert_id();
 	    
         if($kutsu['porrastettu']){
@@ -43,7 +42,6 @@ class Kisakeskus_model extends CI_Model
             }
 	    	    
             $this->db->insert_batch('vrlv3_kisat_kisaluokat', $kisaluokat);
-                    echo $this->db->last_query();
 
         }
 	    $this->db->trans_complete();
@@ -61,8 +59,6 @@ class Kisakeskus_model extends CI_Model
             return true;
         }
     }
-        
-      
     
     
 
@@ -155,6 +151,115 @@ class Kisakeskus_model extends CI_Model
         }
         
     }
+    
+    public function search_competitions($jaos, $parameters){
+        $where = array();
+        $this->db->select('vip, kp, j.id as jaos, j.lyhenne as jaoslyhenne, k.tunnus, k.url, k.info, jarj_talli, kisa_id, porrastettu, k.hyvaksytty, k.hyvaksyi');
+        $this->db->from('vrlv3_kisat_kisakalenteri as k');
+        $this->db->join('vrlv3_kisat_jaokset as j', 'j.id = k.jaos');
+        $this->db->where('jaos', $jaos);
+        if(isset($parameters['id'])){
+            $this->db->where('kisa_id', $parameters['id']);
+
+        }else {
+            unset($parameters['id_type']);
+            
+            foreach ($parameters as $key=>$parameter){
+                $where['k.'.$key] = $parameter;
+            }
+            if(isset($where['k.tunnus'])){
+                $where['k.tunnus'] = $this->CI->vrl_helper->vrl_to_number($where['k.tunnus']);
+            }
+            if(isset($where['k.hyvaksyi'])){
+                $where['k.hyvaksyi'] = $this->CI->vrl_helper->vrl_to_number($where['k.hyvaksyi']);
+            }
+            if(isset($where['k.kp'])){
+                $where['k.kp'] = date('Y-m-d',strtotime($where['k.kp']));
+            }
+            if(isset($where['k.vip'])){
+                $where['k.vip'] = date('Y-m-d',strtotime($where['k.vip']));
+            }
+            if(isset($where['k.hyvaksytty'])){
+                $where['k.hyvaksytty'] = date('Y-m-d',strtotime($where['k.hyvaksytty']));
+            }
+                $this->db->where($where);
+                
+        }         
+        
+        $this->db->where('k.hyvaksytty is NOT NULL', NULL, FALSE);
+        $this->db->order_by('hyvaksytty', 'desc');
+        $this->db->limit('1000');
+                
+        $query = $this->db->get();
+        
+        if ($query->num_rows() > 0)
+        {
+            return $query->result_array();
+        } else {
+            return array();
+        }     
+        
+    }
+    
+    
+    
+     public function search_results($jaos, $parameters){
+        $this->db->select('kp, j.id as jaos, j.lyhenne as jaoslyhenne, u.hyvaksytty, u.tunnus, k.url, tulos_id, jarj_talli, k.kisa_id, porrastettu, u.hyvaksyi');
+        $this->db->from('vrlv3_kisat_kisakalenteri as k');
+        $this->db->join('vrlv3_kisat_jaokset as j', 'j.id = k.jaos');
+        $this->db->join('vrlv3_kisat_tulokset as u', 'k.kisa_id = u.kisa_id');
+
+        if(isset($parameters['id_type']) && $parameters['id_type'] == "kisa_id" && isset($parameters['id'])){
+            $this->db->where('k.kisa_id', $parameters['id']);
+
+        }  else if(isset($parameters['id_type']) && $parameters['id_type'] == "tulos_id" && isset($parameters['id'])){
+            $this->db->where('tulos_id', $parameters['id']);
+
+        }else {
+            unset($parameters['id_type']);
+            unset($parameters['id']);
+
+            
+            foreach ($parameters as $key=>$parameter){
+                $where['k.'.$key] = $parameter;
+            }
+            if(isset($where['k.tunnus'])){
+                $where['k.tunnus'] = $this->CI->vrl_helper->vrl_to_number($where['k.tunnus']);
+            }
+            if(isset($where['k.hyvaksyi'])){
+                $where['u.hyvaksyi'] = $this->CI->vrl_helper->vrl_to_number($where['k.hyvaksyi']);
+                unset($where['k.hyvaksyi']);
+            }
+            if(isset($where['k.kp'])){
+                $where['k.kp'] = date('Y-m-d',strtotime($where['k.kp']));
+            }
+            if(isset($where['k.vip'])){
+                $where['k.vip'] = date('Y-m-d',strtotime($where['k.vip']));
+            }
+            if(isset($where['k.hyvaksytty'])){
+                $where['u.hyvaksytty'] = date('Y-m-d',strtotime($where['k.hyvaksytty']));
+                unset($where['k.hyvaksytty']);
+            }
+                $this->db->where($where);        }  
+
+        $this->db->where('k.tulokset', 1);
+        $this->db->where('u.hyvaksytty !=','0000-00-00 00:00:00');
+
+        $this->db->order_by('u.hyvaksytty', 'desc');
+        $this->db->limit('1000');
+                
+        $query = $this->db->get();
+        
+        if ($query->num_rows() > 0)
+        {
+            return $query->result_array();
+        }else {
+            return array();
+        }
+        
+    }
+    
+
     
     //tarkistetaan onko samalla päivällä jo tallilla + tunnuksella kisa
     public function check_date_for_competition ($tunnus, $jarj_talli, $pvm, $jaos){

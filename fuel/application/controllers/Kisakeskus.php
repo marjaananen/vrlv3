@@ -17,7 +17,7 @@ class Kisakeskus extends CI_Controller {
 	 * map to /index.php/welcome/<method_name>
 	 * @see http://codeigniter.com/user_guide/general/urls.html
 	 */
-	public function index($head_data = array())
+	/*public function index($head_data = array())
 	{
 		
 		$data = array();
@@ -38,11 +38,11 @@ class Kisakeskus extends CI_Controller {
 			if ($kisa['VRL_kisa_id'] == 0){
 				$kisa['hilight_notnumbered'] = true;
 			}
-			if (date('Ymd') == date('Ymd', strtotime($kisa['vip']))){
+			if (date('Y-m-d') == date('Y-m-d', strtotime($kisa['vip']))){
 				$kisa['hilight_vip'] = true;
 			}
 			
-			else if (date('Ymd') > date('Ymd', strtotime($kisa['vip']))){
+			else if (date('Y-m-d') > date('Y-m-d', strtotime($kisa['vip']))){
 				$kisa['downhilight_pvm'] = true;
 			}
 			$user = $this->ion_auth->user($kisa['user'])->row();
@@ -55,7 +55,7 @@ class Kisakeskus extends CI_Controller {
 		
 		
 	}
-	
+	*/
 	public function stats (){
 		$this->load->model('Kisakeskus_model');
 		$data = array();

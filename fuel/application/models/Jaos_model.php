@@ -41,7 +41,7 @@ class Jaos_model extends Base_module_model
     //names
     function get_users_jaos($pinnumber)
     {
-        $this->db->select('vrlv3_kisat_jaokset.id, nimi, toiminnassa');
+        $this->db->select('vrlv3_kisat_jaokset.id, nimi, lyhenne, toiminnassa');
         $this->db->from('vrlv3_kisat_jaokset');
         $this->db->join('vrlv3_kisat_jaokset_omistajat', 'vrlv3_kisat_jaokset.id = vrlv3_kisat_jaokset_omistajat.jid');
         $this->db->where('vrlv3_kisat_jaokset_omistajat.tunnus', $pinnumber);
@@ -415,12 +415,16 @@ class Jaos_model extends Base_module_model
         return false;
     }
     
-    function is_jaos_owner($pinnumber, $id)
+    function is_jaos_owner($pinnumber, $id, $taso = null)
     {
         $this->db->select('tunnus');
         $this->db->from('vrlv3_kisat_jaokset_omistajat');
         $this->db->where('jid', $id);
         $this->db->where('tunnus', $pinnumber);
+        if(isset($taso)){
+            $this->db->where('taso', $taso);
+
+        }
         $query = $this->db->get();
         
         if ($query->num_rows() > 0)

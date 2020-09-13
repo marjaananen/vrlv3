@@ -445,7 +445,7 @@ class Tallit_model extends Base_module_model
     }
 	
 	
-	function mark_update($tnro, $text=""){
+	function mark_update($tnro, $text=null){
 		$data = array('tnro' => $tnro, 'paivitti' => $this->ion_auth->user()->row()->tunnus, 'aika' => date("Y-m-d H:i:s"), 'text' => $text);
 		$this->db->insert('vrlv3_tallirekisteri_paivitetty', $data);
 	}

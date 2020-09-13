@@ -446,21 +446,26 @@ class Tallit extends CI_Controller
 		if(!($this->ion_auth->logged_in())){
             $msg = "Kirjaudu sisään muokataksesi tallia!";
 			return false;
-		}
+        }
 		
-		//are you admin or editor?
-		
-		//only admin, editor and owner can edit
-		if(!($this->ion_auth->is_admin()) && !$this->user_rights->is_allowed() && !($this->tallit_model->is_stable_owner($this->ion_auth->user()->row()->tunnus, $tnro))){
-			$msg = "Jos et ole ylläpitäjä, voit muokata vain omaa talliasi";
-			return false;
-		}
-		
-		//does the stable exist?
+        
+        //does the stable exist?
 		if(!$this->tallit_model->is_tnro_in_use($tnro)){
 			$msg = "Tallia ei ole olemassa.";
 			return false;
 		}
+		
+		//are you admin or editor?
+        
+        
+		//only admin, editor and owner can edit
+		if(!($this->ion_auth->is_admin() || $this->user_rights->is_allowed()
+           || ($this->tallit_model->is_stable_owner($this->ion_auth->user()->row()->tunnus, $tnro)))){
+			$msg = "Jos et ole ylläpitäjä, voit muokata vain omaa talliasi";
+			return false;
+		}
+		
+
 		
 		return true;		
 		

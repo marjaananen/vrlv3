@@ -31,7 +31,7 @@ class Yllapito_jaokset extends CI_Controller
     
 
     function index(){
-$this->pipari();
+        $this->pipari();
     }
    
     
@@ -409,54 +409,56 @@ $this->pipari();
     }
     
     public function lisaa_jaos($msg = ""){
-        if(!$this->_is_jaos_admin()){
+        if($this->_is_jaos_admin()){   
+        
+            $data['msg'] = $msg;
+            $data['title'] = 'Lisää jaos';
+            $data['text_view'] = "";
+   
+           //start the form
+               
+           if($this->input->server('REQUEST_METHOD') == 'POST'){
+               $tid = 0;
+               $jaos = array();
+               $jaos = $this->jaos->read_jaos_input($jaos);
+   
+               if ($this->jaos->validate_jaos_form('new', true) == FALSE)
+                   {
+                       $data['msg'] = "Tallennus epäonnistui!";
+                       $data['msg_type'] = "danger";
+                       $data['form'] = $this->jaos->get_jaos_form($this->url . "lisaa_jaos", "new", true, $jaos);
+                   }
+               else if ($this->jaos->validate_jaos("new", true, $jaos, $data['msg']) == false){
+                   $data['msg_type'] = "danger";
+                   $data['form'] = $this->jaos->get_jaos_form($this->url . "lisaa_jaos", "new", true, $jaos);
+               }
+   
+               else
+                   {
+                      $data['form'] = $this->jaos->get_jaos_form($this->url . "lisaa_jaos", "new", true);
+                       //add 
+                      $tid = $this->Jaos_model->add_jaos($data['msg'], $jaos);
+                      $data['msg_type'] = "danger";
+   
+                      if ($tid !== false){
+                      
+                       $data['msg'] = "Jaoksen luonti onnistui onnistui!";
+                       $data['msg_type'] = "success";
+                       }
+                   }
+           }
+           
+           else  {
+               $data['form'] = $this->jaos->get_jaos_form($this->url . "lisaa_jaos", "new", true);
+           }
+                   
+           //start the list      
+           $data['tulokset'] = $this->jaos->jaostaulukko($this->url.'jaos/poista/', $this->url.'jaos/muokkaa/',$this->url.'tapahtumat/');
+           $this->fuel->pages->render('misc/haku', $data);
+        } else {
             $this->fuel->pages->render('misc/naytaviesti', array('msg_type' => 'danger', 'msg' => "Vain VRL:n ylläpidolla ja jaosvastaavalla on oikeus muokata näitä tietoja."));
             return;
         }
-        
-         $data['msg'] = $msg;
-         $data['title'] = 'Lisää jaos';
-         $data['text_view'] = "";
-
-        //start the form
-            
-        if($this->input->server('REQUEST_METHOD') == 'POST'){
-            $tid = 0;
-            $jaos = $this->jaos->read_jaos_input();
-
-            if ($this->jaos->validate_jaos_form('new', true) == FALSE)
-                {
-                    $data['msg'] = "Tallennus epäonnistui!";
-                    $data['msg_type'] = "danger";
-                    $data['form'] = $this->jaos->get_jaos_form($this->url . "lisaa_jaos", "new", true, $jaos);
-                }
-            else if ($this->jaos->validate_jaos("new", true, $jaos, $data['msg']) == false){
-                $data['msg_type'] = "danger";
-                $data['form'] = $this->jaos->get_jaos_form($this->url . "lisaa_jaos", "new", true, $jaos);
-            }
-
-            else
-                {
-                   $data['form'] = $this->jaos->get_jaos_form($this->url . "lisaa_jaos", "new", true);
-                    //add 
-                   $tid = $this->Jaos_model->add_jaos($data['msg'], $jaos);
-                   $data['msg_type'] = "danger";
-
-                   if ($tid !== false){
-                   
-                    $data['msg'] = "Jaoksen luonti onnistui onnistui!";
-                    $data['msg_type'] = "success";
-                    }
-                }
-        }
-        
-        else  {
-            $data['form'] = $this->jaos->get_jaos_form($this->url . "lisaa_jaos", "new", true);
-        }
-                
-        //start the list      
-        $data['tulokset'] = $this->jaos->jaostaulukko($this->url.'jaos/poista/', $this->url.'jaos/muokkaa/',$this->url.'tapahtumat/');
-        $this->fuel->pages->render('misc/haku', $data);
 
     }
     
@@ -1017,7 +1019,7 @@ $this->pipari();
             $msg = "Kirjaudu sisään muokataksesi!";
 			return false;
 		}//jos et ole admin, pitää olla ko. jaoksen omistaja
-        if(!$this->_is_jaos_admin() && !$this->Jaos_model->is_jaos_owner($this->ion_auth->user()->row()->tunnus, $id)){
+        if(!$this->_is_jaos_admin() && !$this->Jaos_model->is_jaos_owner($this->ion_auth->user()->row()->tunnus, $id, 1)){
              $msg = "Vain admin, jaosvastaava ja jaoksen ylläpitäjä voi muokata jaosta.";
              return false;
         }

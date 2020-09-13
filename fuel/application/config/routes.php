@@ -51,7 +51,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 */
 
-//Admin urls, 
+//Admin urls,
+$route['yllapito'] = "main/yllapito";
 $route['yllapito/tunnukset'] = "yllapito_tunnukset/hakemusjono_etusivu";
 $route['yllapito/tunnukset/hyvaksy'] = "yllapito_tunnukset/hakemusjono";
 $route['yllapito/tunnukset/muokkaa'] = "yllapito_tunnukset/muokkaa";
@@ -94,6 +95,10 @@ $route['yllapito/kalenterit/tuloshyvaksynta/(:any)/(:any)'] = "yllapito_kalenter
 $route['yllapito/kalenterit/tulosyvaksynta/(:any)/(:any)/(:any)'] = "yllapito_kalenterit/tuloshyvaksynta/$1/$2/$3";
 $route['yllapito/kalenterit/hyvaksytyttulokset'] = "yllapito_kalenterit/hyvaksytyttulokset";
 $route['yllapito/kalenterit/hyvaksytytkisat'] = "yllapito_kalenterit/hyvaksytytkisat";
+$route['yllapito/kalenterit/hyvaksytytkisat/delete/(:any)'] = "yllapito_kalenterit/hyvaksytytkisat/delete/$1";
+$route['yllapito/kalenterit/hyvaksytyttulokset/delete/(:any)'] = "yllapito_kalenterit/hyvaksytyttulokset/delete/$1";
+
+
 
 
 
@@ -130,6 +135,7 @@ $route['profiili/tunnus'] = "jasenyys/tunnus/";
 
 
 $route['default_controller'] = 'Main';
+
 
 $route['404_override'] = 'fuel/page_router';
 $route['translate_uri_dashes'] = FALSE;

@@ -100,6 +100,7 @@ CREATE TABLE `vrlv3_tallirekisteri_paivitetty` (
   `tnro` varchar(8) NOT NULL,
   `paivitti` int(5) UNSIGNED ZEROFILL NOT NULL,
   `aika` datetime NOT NULL
+  `text` text DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --

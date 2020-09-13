@@ -18,6 +18,16 @@ class Kasvatus extends CI_Controller
 		$this->_kasvattajanimihaku();
 	}
     
+    public function kasvatit(){
+        if(!$this->ion_auth->logged_in()){
+            $this->fuel->pages->render('misc/naytaviesti', array('msg_type' => 'danger', 'msg' => 'Kirjaudu sisään selataksesi kasvattejasi.'));
+      
+        }
+        else {
+            $this->pipari();
+        }
+    }
+    
     public function varijalostus(){
 		$this->fuel->pages->render('kasvatus/varijalostus');
 	}
@@ -210,7 +220,7 @@ class Kasvatus extends CI_Controller
 	
 	
 	private function _kasvattajanimi($nimi, $sivu){
-		if(empty($timi))
+		if(empty($nimi))
 			$this->fuel->pages->render('misc/naytaviesti', array('msg_type' => 'danger', 'msg' => 'Kasvattajanimi-id puuttuu'));
 
 		
@@ -225,12 +235,12 @@ class Kasvatus extends CI_Controller
 		$fields['owners'] = $this->kasvattajanimi_model->get_names_owners($nimi);
 		
 		if($this->ion_auth->logged_in()){		
-			if($sivu == 'kasvatit'){				
-					$fields['foals'] = $this->_nimen_kasvatit($nimi);
-				}
-				else if($sivu == 'rodut'){				
-					$fields['breeds'] = $this->_nimen_rodut($nimi);
-				}	
+                if($sivu == 'kasvatit'){				
+                        $fields['foals'] = $this->_nimen_kasvatit($nimi);
+                }
+                else if($sivu == 'rodut'){				
+                    $fields['breeds'] = $this->_nimen_rodut($nimi);
+                }	
 			}
 			else {
 				$fields['foals'] = "Kirjaudu sisään nähdäksesi tiedot.";
@@ -560,7 +570,7 @@ class Kasvatus extends CI_Controller
        
 	
 	
-	private $allowed_user_groups = array('admin', 'kasvattajanimirekisteri');
+	private $allowed_user_groups = array('admin', 'kasvattajanimet');
 
     
 	private function _is_editing_allowed($id, &$msg){

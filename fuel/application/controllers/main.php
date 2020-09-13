@@ -15,6 +15,11 @@ class Main extends CI_Controller
         $this->fuel->pages->render('index', $vars);
     }
     
+    function yllapito(){
+                $this->fuel->pages->render('yllapito/index');
+
+    }
+    
 
     
 }

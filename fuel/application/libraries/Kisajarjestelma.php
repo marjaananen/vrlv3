@@ -394,7 +394,7 @@ public function check_competition_info($mode = "add", &$kisa, &$msg, $direct = f
             return false;
         }
         
-        if( !($comp_date == $this->competition_date_max()) || $comp_date < $this->competition_date_max()){
+        if( !($comp_date == $this->competition_date_max() || $comp_date < $this->competition_date_max())){
             $msg = 'Kisapäivä saa olla korkeintaan seuraavan kuun lopussa ('. $comp_date . ' < ' . $this->competition_date_max() . ')';
             return false;
         }

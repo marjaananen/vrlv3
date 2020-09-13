@@ -21,6 +21,10 @@ class Virtuaalihevoset extends CI_Controller
 		$this->haku();
 	}
     
+    public function hevosrekisteri(){
+        $this->haku();
+    }
+    
     
 	
 	public function haku()
@@ -155,31 +159,32 @@ class Virtuaalihevoset extends CI_Controller
     
     function omat(){
         
-         if(!($this->ion_auth->logged_in()))
+        if(!($this->ion_auth->logged_in()))
         {
             	$this->fuel->pages->render('misc/naytaviesti', array('msg_type' => 'danger', 'msg' => 'Kirjaudu sisään nähdäksesi hevosesi!'));
-        }
+        }else {
 
-		$vars['title'] = "Omat hevoset";
-		
-		$vars['msg'] = '';
-		
-		$vars['text_view'] = "";		
-	
-		
-			$vars['headers'][1] = array('title' => 'Rekisterinumero', 'key' => 'reknro', 'key_link' => site_url('virtuaalihevoset/hevonen/'), 'type'=>'VH');
-			$vars['headers'][2] = array('title' => 'Nimi', 'key' => 'nimi');
-			$vars['headers'][3] = array('title' => 'Rotu', 'key' => 'rotu');
-			$vars['headers'][4] = array('title' => 'Sukupuoli', 'key' => 'sukupuoli');
-			$vars['headers'][5] = array('title' => 'Editoi', 'key' => 'reknro', 'key_link' => site_url('virtuaalihevoset/muokkaa/'), 'image' => site_url('assets/images/icons/edit.png'));
-			
-			
-			$vars['headers'] = json_encode($vars['headers']);
-						
-			$vars['data'] = json_encode($this->hevonen_model->get_owners_horses($this->ion_auth->user()->row()->tunnus));
-		
-		
-            $this->fuel->pages->render('misc/taulukko', $vars);
+            $vars['title'] = "Omat hevoset";
+            
+            $vars['msg'] = '';
+            
+            $vars['text_view'] = "";		
+        
+            
+                $vars['headers'][1] = array('title' => 'Rekisterinumero', 'key' => 'reknro', 'key_link' => site_url('virtuaalihevoset/hevonen/'), 'type'=>'VH');
+                $vars['headers'][2] = array('title' => 'Nimi', 'key' => 'nimi');
+                $vars['headers'][3] = array('title' => 'Rotu', 'key' => 'rotu');
+                $vars['headers'][4] = array('title' => 'Sukupuoli', 'key' => 'sukupuoli');
+                $vars['headers'][5] = array('title' => 'Editoi', 'key' => 'reknro', 'key_link' => site_url('virtuaalihevoset/muokkaa/'), 'image' => site_url('assets/images/icons/edit.png'));
+                
+                
+                $vars['headers'] = json_encode($vars['headers']);
+                            
+                $vars['data'] = json_encode($this->hevonen_model->get_owners_horses($this->ion_auth->user()->row()->tunnus));
+            
+            
+                $this->fuel->pages->render('misc/taulukko', $vars);
+        }
     
     }
 
@@ -596,7 +601,14 @@ class Virtuaalihevoset extends CI_Controller
         $fields['porr_kilpailee'] = array('label'=>'Kilpailee porrastetuissa', 'type' => 'checkbox', 'checked' => $poni['porr_kilpailee'] ?? false, 'class'=>'form-control');
 
 		$fields['syntymamaa'] = array('type' => 'select', 'options' => $country_options, 'value' => $poni['syntymamaa'] ?? -1, 'class'=>'form-control');
+        $this->load->model("Tallit_model");
+        $tallilista  = $this->Tallit_model->get_users_stables($this->ion_auth->user()->row()->tunnus);
         
+        $tallit = array();
+        foreach ($tallilista as $talli){
+           $tallit[$talli['tnro']] = $talli['tnro'];
+        }
+
         $option_script = $this->vrl_helper->get_option_script('kotitalli', $tallit);
 
         $fields['kotitalli'] = array('type' => 'text', 'class'=>'form-control', 'value'=> $poni['kotitalli'] ?? '',
@@ -608,8 +620,11 @@ class Virtuaalihevoset extends CI_Controller
         $fields['sukutiedot'] = array('type'=>'hidden', 'before_html' => '</div></div></div><div class="panel panel-default"><div class="panel-heading">Suku- ja kasvattajatiedot (vain suvullisille)</div> <div class="panel-body"><div class="form-group">');
         
         $fields['kasvattajanimi'] = array('type' => 'text', 'class'=>'form-control', 'value'=> $poni['kasvattajanimi'] ?? '', 'class'=>'form-control', 'after_html' => '<span class="form_comment">Jätä tyhjäksi, jos kyseessä evm-hevonen.</span>');
-        $fields['kasvattaja_talli'] = array('type' => 'text', 'class'=>'form-control', 'value'=> $poni['kasvattaja_talli'] ?? '', 'class'=>'form-control', 'after_html' => '<span class="form_comment">Kasvattaneen tallin tunnus VRL:ssä. Jätä tyhjäksi, jos kyseessä evm-hevonen.</span>');
-        $fields['kasvattaja_tunnus'] = array('type' => 'text', 'class'=>'form-control', 'value'=> $poni['kasvattaja_tunnus'] ?? '', 'class'=>'form-control', 'after_html' => '<span class="form_comment">Kasvattajan VRL-tunnus. Jätä tyhjäksi, jos kyseessä evm-hevonen.</span>');
+        
+        $option_script = $this->vrl_helper->get_option_script('kasvattaja_talli', $tallit);
+        $fields['kasvattaja_talli'] = array('type' => 'text', 'class'=>'form-control', 'value'=> $poni['kasvattaja_talli'] ?? '', 'class'=>'form-control',
+                                    'after_html'=> '<span class="form_comment">Laita tunnus muodossa XXXX0000. Jätä tyhjäksi jos kyseessä on evm-hevonen. Omat tallisi (klikkaa lisätäksesi): ' .
+                                    $option_script['list'] . '</span>' . $option_script['script']);        $fields['kasvattaja_tunnus'] = array('type' => 'text', 'class'=>'form-control', 'value'=> $poni['kasvattaja_tunnus'] ?? '', 'class'=>'form-control', 'after_html' => '<span class="form_comment">Kasvattajan VRL-tunnus. Jätä tyhjäksi, jos kyseessä evm-hevonen.</span>');
         $fields['i_nro'] = array('type' => 'text', 'label'=> 'Isän rekisterinumero','class'=>'form-control', 'value'=> $poni['i_nro'] ?? '', 'class'=>'form-control', 'after_html' => '<span class="form_comment">Isän rekisterinumero.</span>');
         $fields['e_nro'] = array('type' => 'text', 'label'=> 'Emän rekisterinumero', 'class'=>'form-control', 'value'=> $poni['e_nro'] ?? '', 'class'=>'form-control', 'after_html' => '<span class="form_comment">Emän rekisterinumero. </span>');
         

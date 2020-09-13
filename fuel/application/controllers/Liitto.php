@@ -15,6 +15,8 @@ class Liitto extends CI_Controller
         $vars['message'] = $this->session->flashdata('message');
         $this->fuel->pages->render('liitto/index', $vars);
     }
+    
+
 	
 	function yllapito ()
     {
@@ -31,9 +33,7 @@ class Liitto extends CI_Controller
         $vars['users']['kasvattajanimet'] = $this->_get_groups_users("kasvattajanimet", "Kasvattajanimirekisteritiimi");
 
 
-        
     
-        
         
         $this->fuel->pages->render('liitto/yllapito', $vars);
     }
@@ -97,6 +97,7 @@ class Liitto extends CI_Controller
 	$this->fuel->pages->render('tiedotukset/tiedotukset', $vars);
     }
     
+
     
     
     function kategoria($kat)
