@@ -201,7 +201,7 @@ class Kisajarjestelma
 
       
       $fields = array();
-      if(!$porrastettu){
+        if($mode == "add" && !$porrastettu){
         $jaos_options = $this->CI->Jaos_model->get_jaos_option_list(true);
         $fields['jaos'] = array('type' => 'select', 'options' => $jaos_options, 'value' => $event['jaos'] ?? -1, 'class'=>'form-control');
       }
@@ -215,20 +215,23 @@ class Kisajarjestelma
             $viptext = "Tänään ilmoitetulla kilpailulla aikaisintaan ".date('d.m.Y', strtotime($this->competition_vip_date_normal_min()))
             ." (poikkeuksena suoraan kalenteriin menevillä kilpailuilla aikaisintaan ". date('d.m.Y', strtotime($this->competition_vip_date_direct_min())) . ")";
       }
-      
-      $fields['kp'] = array('type' => 'date', 'first-day' => 1, 'date_format'=>'d.m.Y', 'label'=>'Päivämäärä', 'class'=>'form-control', 'required' => TRUE,
-                            'value' => $event['kp'] ?? "", 'after_html'=> '<span class="form_comment">'.$comptext.'</span>');
-      $fields['vip'] = array('type' => 'date', 'first-day' => 1, 'date_format'=>'d.m.Y', 'label'=>'Viimeinen ilmoittautumispäivä', 'class'=>'form-control',
-                             'required' => TRUE, 'value' => $event['vip'] ?? "", 'after_html'=> '<span class="form_comment">'.$viptext.'</span>');
-      
+      if($mode == "add"){
+        $fields['kp'] = array('type' => 'date', 'first-day' => 1, 'date_format'=>'d.m.Y', 'label'=>'Päivämäärä', 'class'=>'form-control', 'required' => TRUE,
+                              'value' => $event['kp'] ?? "", 'after_html'=> '<span class="form_comment">'.$comptext.'</span>');
+        $fields['vip'] = array('type' => 'date', 'first-day' => 1, 'date_format'=>'d.m.Y', 'label'=>'Viimeinen ilmoittautumispäivä', 'class'=>'form-control',
+                               'required' => TRUE, 'value' => $event['vip'] ?? "", 'after_html'=> '<span class="form_comment">'.$viptext.'</span>');
+      }
       if(!$porrastettu){
         $arvontatapa_options = $this->arvontatavat_options();
         $fields['url'] = array('type' => 'text', 'class'=>'form-control', 'required' => TRUE, 'value' => $event['url'] ?? "http://");
         $fields['arvontatapa'] = array('type' => 'select', 'options' => $arvontatapa_options, 'value' => $event['arvontatapa'] ?? 1, 'class'=>'form-control', 'required' => TRUE);
       }
-      $fields['jarj_talli'] = array('type' => 'text', 'label'=>'Järjestävä talli', 'class'=>'form-control', 'required' => TRUE, 'value' => $event['jarj_talli'] ?? "",
+      
+      if($mode == "add"){
+        $fields['jarj_talli'] = array('type' => 'text', 'label'=>'Järjestävä talli', 'class'=>'form-control', 'required' => TRUE, 'value' => $event['jarj_talli'] ?? "",
                                     'after_html'=> '<span class="form_comment">Laita tunnus muodossa XXXX0000. Omat tallisi (klikkaa lisätäksesi): ' .
                                     $option_script['list'] . '</span>' . $option_script['script']);
+      }
 
       $fields['info'] = array('type' => 'text', 'class'=>'form-control', 'required' => FALSE, 'value' => $event['info'] ?? "");
       
@@ -245,11 +248,12 @@ class Kisajarjestelma
                                                 'value' => $event['s_luokkia_per_hevonen'] ?? $jaos['s_luokkia_per_hevonen_max'],
                                                 'class'=>'form-control', 'represents' => 'int|smallint|mediumint|bigint', 'negative' => FALSE, 'decimal' => FALSE); 
         
-        
+        if($mode == "add"){
         $class_options = $this->CI->Jaos_model->get_class_options($jaos_id, true, true);
         $fields['luokat'] = array('type' => 'multi', 'mode' => 'checkbox', 'required' => TRUE,
                                   'before_html' => '<span class="form_comment">Valitse '.$jaos['s_luokkia_per_kisa_min'].'-'.min($jaos['s_luokkia_per_kisa_max'],sizeof($class_options)).' luokkaa.</span>',
                                   'options' => $class_options, 'value'=>$event['luokat'] ?? array(), 'class'=>'form-control', 'wrapper_tag' => 'li');
+        }
 
       }
       
@@ -258,18 +262,22 @@ class Kisajarjestelma
 
     }
     
-    public function validate_competition_application($porrastettu = false){
+    public function validate_competition_application($porrastettu = false, $new = true){
     
       $this->CI->load->library('form_validation');
-      
+            if($new){
+
       $this->CI->form_validation->set_rules('kp', 'Kisapäivä', 'min_length[10]|max_length[10]|required');
       $this->CI->form_validation->set_rules('vip', 'Viimeinen ilmoittautumispäivä', 'min_length[10]|max_length[10]|required');
-      $this->CI->form_validation->set_rules('jarj_talli', 'Talli', 'min_length[6]|max_length[10]|required');
+         $this->CI->form_validation->set_rules('jarj_talli', 'Talli', 'min_length[6]|max_length[10]|required');
+      }
       $this->CI->form_validation->set_rules('info', 'Info', 'min_length[5]|max_length[300]');
 
       
        if(!$porrastettu){
+        if($new){
             $this->CI->form_validation->set_rules('jaos', 'Jaos', 'min_length[1]|max_length[3]|numeric|required');
+        }
             $this->CI->form_validation->set_rules('arvontatapa', 'Arvontatapa', 'min_length[1]|max_length[3]|numeric|required');
             $this->CI->form_validation->set_rules('url', 'Kutsun osoite', 'min_length[15]|max_length[300]|required');
 
@@ -279,7 +287,9 @@ class Kisajarjestelma
        if($porrastettu){
             $this->CI->form_validation->set_rules('s_hevosia_per_luokka', 'Hevosia per luokka', 'min_length[1]|max_length[3]|numeric|required');
             $this->CI->form_validation->set_rules('s_luokkia_per_hevonen', 'Luokkia per hevonen', 'min_length[1]|max_length[3]|numeric|required');
-            $this->CI->form_validation->set_rules('luokat[]','Luokat', 'required');
+            if($new){
+                $this->CI->form_validation->set_rules('luokat[]','Luokat', 'required');
+            }
 
 
        }
@@ -289,21 +299,21 @@ class Kisajarjestelma
     
     }
     
-    public function parse_competition_application(){
+    public function parse_competition_application($new = true){
         $application = array();
-        if ($this->CI->input->post('kp')){
+        if ($new && $this->CI->input->post('kp')){
             $application['kp'] = $this->CI->input->post('kp');
         }
-        if ($this->CI->input->post('vip')){
+        if ($new && $this->CI->input->post('vip')){
             $application['vip'] = $this->CI->input->post('vip');
         }
-        if ($this->CI->input->post('jarj_talli')){
+        if ($new && $this->CI->input->post('jarj_talli')){
             $application['jarj_talli'] = $this->CI->input->post('jarj_talli');
         }
         if ($this->CI->input->post('info')){
             $application['info'] = $this->CI->input->post('info');
         }
-        if ($this->CI->input->post('jaos')){
+        if ($new && $this->CI->input->post('jaos')){
             $application['jaos'] = $this->CI->input->post('jaos');
         }
         if ($this->CI->input->post('url')){
@@ -318,7 +328,7 @@ class Kisajarjestelma
         if ($this->CI->input->post('s_hevosia_per_luokka')){
             $application['s_hevosia_per_luokka'] = $this->CI->input->post('s_hevosia_per_luokka');
         }
-        if ($this->CI->input->post('luokat')){
+        if ($new && $this->CI->input->post('luokat')){
             $application['luokat'] = $this->CI->input->post('luokat');
         }
         if ($this->CI->input->post('takaaja')){
@@ -329,29 +339,70 @@ class Kisajarjestelma
         
         
     }
+
+public function check_competition_edit_info($kisa, &$msg){
+    
+     //jos takaaja on jostain syystä annettu vaikkei olisi pakko, tarkastetaan silti 
+        if(isset($kisa['takaaja']) && $kisa['takaaja'] != 00000 && !($kisa['takaaja'] != $kisa['tunnus'] && $this->CI->vrl_helper->check_vrl_syntax($kisa['takaaja'])
+                     && $this->CI->Tunnukset_model->onko_tunnus($this->CI->vrl_helper->vrl_to_number($kisa['takaaja'])))){
+            $msg  = "Annoit virheellisen takaajan tunnuksen.";
+            return false;
+        }
+        
+        if($kisa['porrastettu']){
+            $jaos = $this->CI->Jaos_model->get_jaos($kisa['jaos']);
+            if($kisa['arvontatapa'] != 3){
+                $msg = "Virheellinen arvontatapa porrastetulla.";
+                return false;
+            }
+
+            if($jaos['s_salli_porrastetut'] == false){
+                $msg = "Yrität järjestää porrastettuja kilpailuja jaoksella, jolla ei ole porrastetut sallittuja.";
+                return false;
+            }
+            if(($kisa['s_luokkia_per_hevonen'] > $jaos['s_luokkia_per_hevonen_max'])
+               || ($kisa['s_luokkia_per_hevonen'] < $jaos['s_luokkia_per_hevonen_min']) ){
+                $msg = "Hevosen luokkaosallistumisrajoitus ei vastaa jaoksen sääntöjä " . $jaos['s_luokkia_per_hevonen_min'] . "-" . $jaos['s_luokkia_per_hevonen_max'] . " luokkaa/hevonen.";
+                return false;
+            }
+            if(($kisa['s_hevosia_per_luokka'] > $jaos['s_hevosia_per_luokka_max'])
+               || ($kisa['s_hevosia_per_luokka'] < $jaos['s_hevosia_per_luokka_min']) ){
+                $msg = "Luokan maksimiosallistujamäärä ei vastaa jaoksen sääntöjä " . $jaos['s_hevosia_per_luokka_min'] . "-" . $jaos['s_hevosia_per_luokka_max'] . " ratsukkoa/luokka.";
+                return false;
+            }
+
+        }
+            
+    return true;    
+    }
     
     
 public function check_competition_info($mode = "add", &$kisa, &$msg, $direct = false, $nollattu = false){
-    if($kisa['porrastettu']){
-        $kisa['arvontatapa'] = 3;
-    }
-    if($this->nayttelyjaos($kisa['jaos'])){
-        $kisa['arvontatapa'] = 5;
-    }
+    
+    if($mode == "add" ){
+        if($kisa['porrastettu']){
+            $kisa['arvontatapa'] = 3;
+        }
+        else if($this->nayttelyjaos($kisa['jaos'])){
+            $kisa['arvontatapa'] = 5;
+        }
 
-    //jos kisa ei ole porrastettu tai näyttely, ja lisäävän käyttäjän pisteet on nollattu, pitää olla oikea takaaja.
-    if (!$kisa['porrastettu'] && !$this->nayttelyjaos($kisa['jaos']) && $mode == "add" && $nollattu
-             && !(isset($kisa['takaaja']) && $kisa['takaaja'] != $kisa['tunnus'] && $this->vrl_helper->check_vrl_syntax($kisa['takaaja'])
-                 && $this->tunnukset_model->onko_tunnus($this->vrl_helper->vrl_to_number($kisa['takaaja'])))){
-        $msg = "Tarvitset kilpailullesi takaajan. Sen tulee olla olemassaoleva VRL-tunnus";
-        return false;
-                
+        
 
-    }  //jos takaaja on jostain syystä annettu vaikkei olisi pakko, tarkastetaan silti 
-    if(isset($kisa['takaaja']) && !($kisa['takaaja'] != $kisa['tunnus'] && $this->vrl_helper->check_vrl_syntax($kisa['takaaja'])
-                 && $this->tunnukset_model->onko_tunnus($this->vrl_helper->vrl_to_number($kisa['takaaja'])))){
-        $msg  = "Annoit virheellisen takaajan tunnuksen.";
-        return false;
+        //jos kisa ei ole porrastettu tai näyttely, ja lisäävän käyttäjän pisteet on nollattu, pitää olla oikea takaaja.
+        if (!$kisa['porrastettu'] && !$this->nayttelyjaos($kisa['jaos']) && $mode == "add" && $nollattu
+                 && !(isset($kisa['takaaja']) && $kisa['takaaja'] != $kisa['tunnus'] && $this->CI->vrl_helper->check_vrl_syntax($kisa['takaaja'])
+                     && $this->CI->Tunnukset_model->onko_tunnus($this->CI->vrl_helper->vrl_to_number($kisa['takaaja'])))){
+            $msg = "Tarvitset kilpailullesi takaajan. Sen tulee olla olemassaoleva VRL-tunnus";
+            return false;
+                    
+    
+        }  //jos takaaja on jostain syystä annettu vaikkei olisi pakko, tarkastetaan silti 
+        if(isset($kisa['takaaja']) && !($kisa['takaaja'] != $kisa['tunnus'] && $this->CI->vrl_helper->check_vrl_syntax($kisa['takaaja'])
+                     && $this->CI->Tunnukset_model->onko_tunnus($this->CI->vrl_helper->vrl_to_number($kisa['takaaja'])))){
+            $msg  = "Annoit virheellisen takaajan tunnuksen.";
+            return false;
+        }
     }
     
     
@@ -473,6 +524,15 @@ public function check_competition_info($mode = "add", &$kisa, &$msg, $direct = f
             unset($kutsu['luokat']);
         }
         return $this->CI->Kisakeskus_model->insertNewCompetition($kutsu, $luokat, $direct, $msg);
+    }
+    
+    public function edit_competition($id, $jaos, $kutsu_new, $msg){
+        $this->CI->db->where('kisa_id', $id);
+	    $this->CI->db->where('jaos', $jaos);
+	    $this->CI->db->update('vrlv3_kisat_kisakalenteri', $kutsu_new);
+        
+        return true;
+        
     }
     
 

@@ -182,6 +182,7 @@ class Kisakeskus_model extends CI_Model
             if(isset($where['k.hyvaksytty'])){
                 $where['k.hyvaksytty'] = date('Y-m-d',strtotime($where['k.hyvaksytty']));
             }
+
                 $this->db->where($where);
                 
         }         
@@ -285,11 +286,15 @@ class Kisakeskus_model extends CI_Model
     
           
     //Tiedot kutsuun
-    public function hae_kutsutiedot($id, $user = null){
+    public function hae_kutsutiedot($id, $user = null, $tulokselliset = null){
       $this->db->select('*');
       $this->db->where('kisa_id', $id);
       if (isset($user)){
         $this->db->where('tunnus', $user);
+      }
+      if(isset($tulokselliset)){
+        $this->db->where('tulokset', $tulokselliset);
+
       }
       $query = $this->db->get('vrlv3_kisat_kisakalenteri');
       

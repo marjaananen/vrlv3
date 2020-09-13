@@ -139,6 +139,55 @@ class Yllapito_kalenterit extends CI_Controller
             }else {
                 $this->fuel->pages->render('misc/naytaviesti', array('msg_type' => 'danger', 'msg' => 'Kilpailu #'.$id.' poisto epäonnistui! ' . $msg));
             }
+        }else if($tapa == "edit"){
+            $msg = "";
+            $kutsu = $this->Kisakeskus_model->hae_kutsutiedot($id, null, 0);
+            
+            if(sizeof($kutsu)>0){
+                $jaos = $kutsu['jaos'];
+                if($this->_is_jaos_owner($jaos) || $this->_is_jaos_admin()){
+                    if($this->input->server('REQUEST_METHOD') == 'POST'){
+                        $kutsu_new = $this->kisajarjestelma->parse_competition_application(false);
+                        if(!$this->kisajarjestelma->validate_competition_application($kutsu['porrastettu'], false)){
+                                $data['msg_type'] = 'danger';
+                                $data['msg'] = "Virhe syötetyissä tiedoissa.";
+                                
+                        }else if(!$this->kisajarjestelma->check_competition_edit_info(array_merge($kutsu, $kutsu_new), $msg)){
+                            $data['msg_type'] = 'danger';
+                            $data['msg'] = $msg;
+                        }else if (!$this->kisajarjestelma->edit_competition($id, $jaos, $kutsu_new, $msg)){
+                            $data['msg_type'] = 'danger';
+                            $data['msg'] = $msg;
+                        }else {
+                            $data['msg_type'] = 'success';
+                            $data['msg'] = "Kilpailun muokkaus onnistui";
+                        
+                        }
+                        $kutsu = array_merge($kutsu, $kutsu_new);
+                    
+                    }
+                
+                    
+                    
+                    $data['form'] = $this->kisajarjestelma->get_competition_application ("edit", $this->url."hyvaksytytkisat/edit/".$kutsu['kisa_id'],  $kutsu['porrastettu'], $kutsu, $kutsu['jaos']);           
+                    $data['title'] = "Muokkaa kilpailukutsua (#".$kutsu['kisa_id'];
+                    if($kutsu['porrastettu']){
+                        $data['title'] .= ", porrastettu)";
+                    }else {
+                        $data['title'] .= ")";
+                    }
+                    $this->fuel->pages->render('misc/haku', $data);
+                    
+                }else {
+                    $this->fuel->pages->render('misc/naytaviesti', array('msg_type' => 'danger', 'msg' => 'Vain ylläpitäjillä, jaosvastaavalla tai jaoksen ylläpitäkällä on oikeus muokata kutsuja.'));
+    
+                }
+            }else {
+                $this->fuel->pages->render('misc/naytaviesti', array('msg_type' => 'danger', 'msg' => 'Kutsua ei löydy, tai sillä on jo hyväksytyt tai ilmoitetut tulokset!'));
+
+            }
+
+            
         }else {      
         
             $data = $this->_hyvaksytyt_selaa(false, true, $this->url."hyvaksytytkisat");
@@ -148,6 +197,10 @@ class Yllapito_kalenterit extends CI_Controller
             $this->fuel->pages->render('misc/haku', $data);
         }
 
+    }
+    
+    public function muokkaakisat(){
+        
     }
 
     
@@ -288,6 +341,12 @@ private function _read_search_form(){
     $this->_read_basic_input_field($data, 'hyvaksyi');
     $this->_read_basic_input_field($data, 'url');
     $this->_read_basic_input_field($data, 'arvontatapa');
+    
+    if($this->input->post('porrastettu')){
+        $data['porrastettu'] = 1;
+    }else {
+        $data['porrastettu'] = 0;
+    }
 
     return $data;
 }

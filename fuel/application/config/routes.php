@@ -96,6 +96,7 @@ $route['yllapito/kalenterit/tulosyvaksynta/(:any)/(:any)/(:any)'] = "yllapito_ka
 $route['yllapito/kalenterit/hyvaksytyttulokset'] = "yllapito_kalenterit/hyvaksytyttulokset";
 $route['yllapito/kalenterit/hyvaksytytkisat'] = "yllapito_kalenterit/hyvaksytytkisat";
 $route['yllapito/kalenterit/hyvaksytytkisat/delete/(:any)'] = "yllapito_kalenterit/hyvaksytytkisat/delete/$1";
+$route['yllapito/kalenterit/hyvaksytytkisat/edit/(:any)'] = "yllapito_kalenterit/hyvaksytytkisat/edit/$1";
 $route['yllapito/kalenterit/hyvaksytyttulokset/delete/(:any)'] = "yllapito_kalenterit/hyvaksytyttulokset/delete/$1";
 
 

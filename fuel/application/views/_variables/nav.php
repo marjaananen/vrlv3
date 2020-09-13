@@ -128,6 +128,7 @@ $nav['yllapito/kalenterit/kisahyvaksynta'] = array('label' => 'Kisahyväksyntä'
 $nav['yllapito/kalenterit/tuloshyvaksynta'] = array('label' => 'Tuloshyväksyntä', 'parent_id' => 'yllapito/kalenterit', 'active' => 'yllapito/kalenterit/tuloshyvaksynta|yllapito/kalenterit/tuloshyvaksynta/:any');
 $nav['yllapito/kalenterit/hyvaksytytkisat'] = array('label' => 'Selaa hyväksyttyjä kutsuja', 'parent_id' => 'yllapito/kalenterit', 'active' => 'yllapito/kalenterit/hyvaksytytkisat');
 $nav['yllapito/kalenterit/hyvaksytyttulokset'] = array('label' => 'Selaa hyväksyttyjä tuloksia', 'parent_id' => 'yllapito/kalenterit', 'active' => 'yllapito/kalenterit/hyvaksytyttulokset');
+$nav['yllapito/kalenterit/hyvaksytytkisat/edit'] = array('label' => 'Muokkaa kutsua', 'hidden'=>true, 'parent_id' => 'yllapito/kalenterit/hyvaksytytkisat', 'active' => 'yllapito/kalenterit/hyvaksytytkisat/edit/:any');
 
 
 
