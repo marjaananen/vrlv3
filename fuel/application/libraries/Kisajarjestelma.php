@@ -34,7 +34,7 @@ class Kisajarjestelma
     
         $sijoittuu = 0;
         //NJ:ssä ei sijoituta samalla tavalla.
-        if ( $this->nayttelyjaos($jaos_id )) { $sijoittuu = 0; }
+        if ( isset($jaos_id) && $this->nayttelyjaos($jaos_id )) { $sijoittuu = 0; }
         else if( $osallistujia >= 1 AND $osallistujia <= 3 ) 	{	$sijoittuu = 1;	} 
         elseif( $osallistujia >= 4 AND $osallistujia <= 8 ) 	{	$sijoittuu = 2;	} 
         elseif( $osallistujia >= 9 AND $osallistujia <= 15 ) 	{	$sijoittuu = 3;	} 
@@ -87,9 +87,17 @@ class Kisajarjestelma
 		
     }
     
+    public function limitlessCompetitions ($etuuspisteet, $jaos_id){
+        if($etuuspisteet>=100){
+            return true;
+        }else {
+            return false;
+        }
+    }
+    
     public function directlyCalender($etuuspisteet, $jaos_id){
-        if ( $this->nayttelyjaos($jaos_id) ) { return false; }
-        else if ( $etuuspisteet >= 50.00) {return true; }
+        if ( isset($jaos_id) && $this->nayttelyjaos($jaos_id) ) { return false; }
+        else if ( $etuuspisteet >= 25.00) {return true; }
         else { return false;}
     
 
@@ -157,6 +165,62 @@ class Kisajarjestelma
         return date('Y-m-d', strtotime($date.' + 1 day'));
     }
     
+    
+    ////////////////////////////////////////////////////////////////////
+    // Etuuspisteet
+    ///////////////////////////////////////////////////////////////////
+    
+    public function add_etuuspisteet($tunnus, $jaos, $kisapv, $ilmoitettu, $takaaja = false){
+        
+        $amount = 0;
+        $ilmoitettu = date('Y-m-d', strtotime($ilmoitettu));
+        $shouldbe = date('Y-m-d', strtotime("+ 7 days", strtotime($kisapv) )); // Viimeinen aika, jolloin tulokset pitäisi lähettää, että saisi etuuspisteet.
+        $threeweeks = date('Y-m-d', strtotime("+ 21 days", strtotime($kisapv))); // Viimeinen aika, jolloin tulokset pitäisi lähettää ylipäätään, ennen kuin etuuspisteet voidaan nollata.
+        $fourweeks = date('Y-m-d', strtotime("+ 28 days", strtotime($kisapv))); // Takaajan aikaraja, jotta saisi +2 etuuspistettä.
+        $sevenweeks = date('Y-m-d', strtotime("+ 49 days", strtotime($kisapv))); // Takaajan aikaraja, jotta saisi +1 etuuspistettä.
+        
+        if(!$takaaja && $ilmoitettu <= $shouldbe){
+            $amount = 1;
+        }
+        else if($takaaja && $ilmoitettu <= $fourweeks){
+            $amount = 2;
+        } else if ($takaaja && $ilmoitettu <= $sevenweeks){
+            $amount = 1;
+        }
+        
+        //jos tulee etuuspisteitä
+        if($amount > 0){
+            $this->CI->db->where(array('tunnus'=>$tunnus, 'jaos'=>$jaos));
+            $query = $this->CI->db->get('vrlv3_kisat_etuuspisteet');
+        
+            $result = $query->result_array();
+         
+            if (empty($result)){
+                $rivi = array();
+                $rivi['tunnus'] = $tunnus;
+                $rivi['jaos'] = $jaos;
+                $rivi['pisteet'] = 2; //ekat etuuspisteet -> 2
+                $rivi['nollattu'] = 0;
+                $rivi['muokattu'] = date('Y-m-d H:i:s');
+                $this->CI->db->insert('vrlv3_kisat_etuuspisteet', $rivi);
+    
+            
+            }
+            
+            else {
+                $rivi = array();
+                $rivi['muokattu'] = date('Y-m-d H:i:s');
+                $rivi['pisteet'] = $result['pisteet'] + $amount;
+      
+      
+              $this->CI->db->where('id', $result['id']);
+              $this->CI->db->update('vrlv3_kisat_etuuspisteet', $rivi);
+            }
+        }
+        
+
+        
+    }
     
     
     
@@ -536,43 +600,5 @@ public function check_competition_info($mode = "add", &$kisa, &$msg, $direct = f
     }
     
 
-    
-    ///////////////////////////////////////////////////////////////////////////////
-    // Kisakalenterin ylläpito
-    //////////////////////////////////////////////////////////////////////////////
-
-
-    /*
-function allowedCompetitions ($jaos, $vrl_tunnus, $etuuspisteet = null) {
-
-	# Tunnukselle kertyneet etuuspisteet
-	
-    if(!isset($etuuspisteet)){
-        $etuuspisteet =  $this->CI->Jaos_model->GetEtuuspisteet($jaos, $vrl_tunnus);
-    }
-	$ep = 0;
-    if(sizeof($etuuspisteet) > 0 && !empty($etuuspisteet['pisteet'])){
-        $ep = $etuuspisteet['pisteet'];
-    }
-	
-    # Miten monta kisaa on mahdollisuus järjestää
-    $jarjestettavia = $this->sallitutKisamaarat($ep, $jaos);
-		
-    
-    Katsotaan paljonko avoimia kutsuja kalenterissa
-    Miinustetaan avoimet järjestettävistä $jarjestettavia
-    
-    $jarjestettavia = $jarjestettavia - $avoimet;
-    
-		
-		$avoimet = $this->CI->Jaos_model->usersOpenCompetitions($jaos, $vrl_tunnus);
-		
-		
-		return $jarjestettavia - $avoimet;
-		
-
-			
-}
-    */
 
 }

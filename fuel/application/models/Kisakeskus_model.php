@@ -126,8 +126,8 @@ class Kisakeskus_model extends CI_Model
     
     
     //hae_yksittäinen_tulos
-    public function get_result($result_id = null, $kisa_id = null){
-        $this->db->select('t.*, k.kp, k.vip, t.ilmoitettu, k.tunnus as tunnus, k.url, t.tunnus as tulosten_lah, k.jarj_talli, k.tunnus, k.jaos, k.arvontatapa');
+    public function get_result($result_id = null, $kisa_id = null, $hyvaksytty = true){
+        $this->db->select('t.*, k.kp, k.vip, t.ilmoitettu, k.tunnus as tunnus, k.url, t.tunnus as tulosten_lah, k.jarj_talli, k.info, k.tunnus, k.jaos, k.arvontatapa');
         $this->db->from('vrlv3_kisat_tulokset as t');
         $this->db->join('vrlv3_kisat_kisakalenteri as k', 'k.kisa_id = t.kisa_id');
 
@@ -137,10 +137,16 @@ class Kisakeskus_model extends CI_Model
         if(isset($kisa_id)){
             $this->db->where('t.kisa_id', $kisa_id);
         }
+        $this->db->where('k.tulokset', 1);
 
-        $this->db->where('t.tulokset', 1);
-        $this->db->where('t.hyvaksytty !=','0000-00-00 00:00:00');
+        if($hyvaksytty){
+            $this->db->where('t.hyvaksytty is NOT NULL', NULL, FALSE);
+            $this->db->where('t.hyvaksytty !=','0000-00-00 00:00:00');
+        } else {
+            $this->db->where('t.hyvaksytty','0000-00-00 00:00:00');
                 
+                
+        }
         $query = $this->db->get();
         
         if ($query->num_rows() > 0)
@@ -148,6 +154,29 @@ class Kisakeskus_model extends CI_Model
             return $query->row_array();
         }else {
             return array();
+        }
+        
+    }
+    
+     //hae_yksittäinen_tulos
+    public function get_latest_result_classes($jaos, $user){
+        $this->db->select('t.luokat');
+        $this->db->from('vrlv3_kisat_tulokset as t');
+        $this->db->join('vrlv3_kisat_kisakalenteri as k', 'k.kisa_id = t.kisa_id');
+        $this->db->where('k.jaos', $jaos);
+        $this->db->where('t.tunnus', $user);
+        $this->db->where('t.tulokset', 1);
+        $this->db->order_by('t.ilmoitettu', 'desc');
+        $this->db->limit(1);
+        
+        
+        $query = $this->db->get();
+        
+        if ($query->num_rows() > 0)
+        {        
+            return $query->row_array()['luokat'];
+        }else {
+            return null;
         }
         
     }
@@ -298,6 +327,8 @@ class Kisakeskus_model extends CI_Model
       }
       $query = $this->db->get('vrlv3_kisat_kisakalenteri');
       
+
+      
       $kisa = array();
       $kisa = $query->result_array();
       
@@ -340,6 +371,64 @@ class Kisakeskus_model extends CI_Model
       
       return $luokkalista;	    
     }
+    
+    
+    public function get_users_competitions($user, $jonossa, $avoin, $tjonossa, $tulokset, $porrastettu = null){ 
+        $this->db->select('vip, kp, j.lyhenne as jaoslyhenne, k.url, k.info, jarj_talli, k.ilmoitettu as kisailmoitettu, t.ilmoitettu as tulosilmoitettu, k.kisa_id, t.tulos_id, porrastettu, k.hyvaksytty');
+        $this->db->from('vrlv3_kisat_kisakalenteri as k');     
+        $this->db->join('vrlv3_kisat_tulokset as t', 'k.kisa_id = t.kisa_id', 'left');
+        $this->db->join('vrlv3_kisat_jaokset as j', 'j.id = k.jaos');
+        $this->db->where('k.tunnus', $user);
+        $this->db->where('k.vanha', 0);
+
+        if(isset($porrastettu)){
+            $this->db->where('porrastettu', $porrastettu);
+        }
+        
+        if($jonossa){
+            $this->db->where('k.tulokset', 0);
+            $this->db->group_start();
+            $this->db->where('k.hyvaksytty IS NULL OR k.hyvaksytty = \'0000-00-00 00:00:00\'');
+            $this->db->group_end();
+            $this->db->order_by('k.ilmoitettu', 'desc');
+
+        }
+        
+        else if($tjonossa){
+            $this->db->where('k.tulokset', 1);
+            $this->db->group_start();
+            $this->db->where('t.hyvaksytty IS NULL OR t.hyvaksytty = \'0000-00-00 00:00:00\'');
+            $this->db->group_end();
+            $this->db->order_by('t.ilmoitettu', 'desc');
+
+        } else if($avoin){
+            $this->db->where('k.tulokset', 0);
+            $this->db->where('k.hyvaksytty is NOT NULL', NULL, FALSE);
+            $this->db->order_by('k.kp', 'asc');
+
+        } else if ($tulokset){
+            $this->db->where('k.tulokset', 1);
+            $this->db->where('t.hyvaksytty IS NOT NULL', NULL, FALSE);
+            $this->db->order_by('k.kp', 'desc');
+
+        }
+        
+        $this->db->limit('1000');
+                
+        $query = $this->db->get();
+        
+        if ($query->num_rows() > 0)
+        {
+            return $query->result_array();
+        }else {
+            return array();
+        }
+        
+    }
+    
+    
+    
+    
     /*
         //////////////////////WANHAT
     

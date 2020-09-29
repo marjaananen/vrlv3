@@ -47,6 +47,17 @@ class Porrastetut
         return $level;
         
     }
+    
+    public function is_horse_allowed_in_class_level($horselevel, $classlevel){
+        // Hevonen saa kilpailla vaan omalla tasollaan ja yhtä ylemmällä tasolla. 			
+				// Jos hevosen taso on 2 ja luokan taso 0
+				// Jos hevosen taso on sama kuin luokan taso
+				// Jos hevosen taso on yhtä isompi kuin luokan taso | hevonen lv 2 voi osallistua lk lv3
+        return ( ($horselevel == 1 && $classlevel = 0) OR
+					( $horselevel == 2 && $classlevel == 1 ) OR
+					$horselevel == $classlevel OR 
+					($horselevel+1) == $classlevel);
+    }
 
     
     public function get_porrastetut_jaokset(){
@@ -197,7 +208,18 @@ class Porrastetut
         $ageNow = 0;
 						
     }else {
-        $today = strtotime( date("Y-m-d") ); // today's timestamp
+        $ageNow = $this->calculate_age($age);   
+    }
+	
+	// print '-'.$ageNow.'-';
+	return $ageNow;
+}
+
+public function calculate_age($age, $today = null){
+    
+    if (!isset($today)){
+        $today = date('Y-m-d');
+    }
     
         if( $age['3vuotta'] != '0000-00-00' AND !empty($age['3vuotta']) ) {
         
@@ -225,13 +247,291 @@ class Porrastetut
         } else {
             $ageNow = 0;
         }
-    }
-	
-	// print '-'.$ageNow.'-';
-	return $ageNow;
+        
+        return $ageNow;
+}
+
+public function get_resultless_leveled_competitions($max = 100){
+        $this->CI->db->select('kisa_id');
+        $this->CI->db->from('vrlv3_kisat_kisakalenteri as k');
+        $this->CI->db->where('k.vanha', 0);
+        $this->CI->db->where('k.porrastettu', 1);
+        $this->CI->db->where('k.tulokset', 0);
+        $this->CI->db->where('k.kp <=', date('Y-m-d'));
+        $this->CI->db->where('k.hyvaksytty is NOT NULL', NULL, FALSE);
+        $this->CI->db->where("EXISTS(SELECT * FROM vrlv3_kisat_kisaluokat as l WHERE l.kisa_id = k.kisa_id)");
+        $this->CI->db->order_by('k.kp', 'asc');
+        $this->CI->db->limit($max);
+
+        $query = $this->CI->db->get();
+        
+        if ($query->num_rows() > 0)
+        {
+            return $query->result_array();
+        }else {
+            return array();
+        }
 }
     
     
+    ////////////////////////////////////////////////////////////////////777
+    // ARVO TULOKSET
+    ///////////////////////////////////////////////////////////////////////////7
+    
+    public function generate_results_automatically($max = 10){
+        $kpl = 0;
+        $kisat = $this->get_resultless_leveled_competitions($max);
+        foreach($kisat as $kisa){
+            $this->CI->db->trans_start();
+            $kisa =  $this->CI->Kisakeskus_model->hae_kutsutiedot($kisa['kisa_id'], null, 0);
+            var_dump($kisa);
+            if($kisa['tulokset'] == 0){
+                $this->ilmoita_tulokset_porrastetut($kisa, 00000);
+                $kpl = $kpl + 1;
+            }
+            $this->CI->db->trans_complete();
+
+            
+        }
+        
+        return $kpl;
+        
+        
+    }
+    
+    public function ilmoita_tulokset_porrastetut($kisa, $user){ 
+    
+    $kantaan_luokat = "";
+    $kantaan_tulokset = "";
+    $kantaan_hylsyt = "";
+    
+    foreach ($kisa['luokat'] as $luokka){
+        
+        $classinfo = $luokka;
+        $participants = array();
+        foreach ($luokka['osallistujat'] as $rivi){
+            $participants[] = $rivi['rimpsu'];
+        }
+        
+        $this->handle_porrastettu_class_results($kisa['jaos'], $kisa, $classinfo, $participants, $kantaan_luokat, $kantaan_tulokset, $kantaan_hylsyt);
+
+        
+    }
+    
+        $tulos = array();
+        $tulos['tunnus'] = $user;
+        $tulos['ilmoitettu'] = date('Y-m-d H:i:s');
+        $tulos['tulokset'] = $kantaan_tulokset;
+        $tulos['hylatyt'] = $kantaan_hylsyt;
+        $tulos['luokat'] = $kantaan_luokat;
+        $tulos['kisa_id'] = $kisa['kisa_id'];
+    
+
+        $this->CI->db->insert('vrlv3_kisat_tulokset', $tulos);
+        $this->CI->db->set('tulokset', 1);
+        $this->CI->db->where('kisa_id', $tulos['kisa_id']);
+        $this->CI->db->update('vrlv3_kisat_kisakalenteri');
+        
+        return true;     
+                
+    }
+    
+    
+    private function _get_leveled_info($vhs){
+        if(sizeof($vhs) > 0){
+            $this->CI->db->from('vrlv3_hevosrekisteri as h');
+            $this->CI->db->join('vrlv3_hevosrekisteri_ikaantyminen as i', 'h.reknro = i.reknro', 'LEFT');
+            $this->CI->db->join('vrlv3_hevosrekisteri_ominaisuudet as o', 'h.reknro = o.reknro', 'LEFT');
+    
+            $this->CI->db->where_in('h.reknro', $vhs);
+            
+            $query = $this->CI->db->get();
+            ECHO $this->CI->db->last_query();
+            
+            if ($query->num_rows() > 0)
+            {
+                return $query->result_array(); 
+            }else {
+                return array();
+            }
+        }
+        
+        else {
+            return array();
+        }
+
+    }
+    
+    private function _parse_leveled_info_horses($list){
+        $horses = array();
+        foreach ($list as $row){
+            $horses[$row['reknro']] = $row;
+        }
+        
+        return $horses;
+        
+    }
+    
+    private function _parse_leveled_info_skills($list, $needed_skills){
+        $horses = array();
+        foreach ($list as $row){
+            if(in_array($row['ominaisuus'], $needed_skills)){
+                
+                if(isset($horses[$row['reknro']])){
+                    $horses[$row['reknro']] = $horses[$row['reknro']] + $row['arvo'];
+                }else {
+                 $horses[$row['reknro']] = $row['arvo'];   
+                }
+                
+                
+            }
+        }
+        
+        return $horses;
+    }
+    
+    
+public function handle_porrastettu_class_results($jaos, $kisa, $classinfo, $participants, &$kantaan_luokat, &$kantaan_tulokset, &$kantaan_hylsyt){
+
+    list($accepted, $failed) = $this->_generateResults ( $kisa['kp'], $participants, $classinfo, $kisa['jaos']  );
+
+    $kantaan_luokat = $kantaan_luokat . $classinfo['nimi'] . "\n";
+    
+     // Listataan tulokset tietokantamuotoon				
+
+    $rank = 0;		
+    foreach ($accepted as $key => $list) {
+        $rank++; 
+        $kantaan_tulokset .= $rank.'. '.$list['horse']." \n";
+    }
+    
+    // Listataan tulokset tietokantamuotoon				
+    foreach ($failed as $key => $list) {
+        $rank++; 
+        $kantaan_hylsyt .= $list['horse']." (".$list['reason'].") \n";
+    }
+    
+    $kantaan_tulokset = $kantaan_tulokset .  "~";
+    $kantaan_hylsyt = $kantaan_hylsyt .  "~";
+}
+
+
+        
+    
+    private function _generateResults ( $date, $participants, $classinfo, $jaos  ) {
+
+        //haetaan luokkien ja ominaisuuksien tiedot
+        $ominaisuudetlist = $this->CI->Trait_model->get_trait_array_by_jaos($jaos);
+        
+      
+        //haetaan osallistuneiden VH-numerot        
+        $vh_list = array();
+        
+        $participants = array_diff( $participants, array(''));  
+        foreach ($participants as $rivi){
+            //VH-tunnus-tarkistelu
+					$tunnuksia = preg_match_all('/\VH[0-9]{2}\-[0-9]{3}\-[0-9]{4}/', $rivi , $osumat);
+					
+					if ($tunnuksia == 1){
+                        $vh_list[] =  $this->CI->vrl_helper->vh_to_number($osumat[0]);
+
+                    }
+        }
+
+        
+        //Haetaan kaikki hevosten tieto valmiksi
+        
+        $leveled_info = $this->_get_leveled_info($vh_list);
+        $leveled_info_horses = $this->_parse_leveled_info_horses($leveled_info);
+        $leveled_info_skills = $this->_parse_leveled_info_skills($leveled_info, $ominaisuudetlist);
+    
+        $accepted = array();
+        $failed = array();
+        // print_r( $participants ); print '<hr />';
+        
+        for ($i = 0; $i < count($participants); $i++) {
+            $horse = $participants[$i];
+            $tunnuksia = preg_match_all('/\VH[0-9]{2}\-[0-9]{3}\-[0-9]{4}/', $horse , $osumat);
+            // 1. Tarkistetaan, onko rivillä VH-tunnusta ja löytyykö se infotaulukosta
+            if( $tunnuksia == 1 && isset($leveled_info_horses[$this->CI->vrl_helper->vh_to_number($osumat[0])])) {
+                // 1.0 Otetaan VH-tunnus talteen ja jatketaan
+                $vh = $this->CI->vrl_helper->vh_to_number($osumat[0]);
+    
+                
+                // 1.1. Tarkista hevosen ikä ja millä tasolla hevgonen on 
+                $age = $this->calculate_age($leveled_info_horses[$vh], $date);
+                $horselevel = 0;
+                if(isset($leveled_info_skills[$vh])){
+                    $horselevel = $this->get_level_by_points($leveled_info_skills[$vh]);
+                } else {
+                    $horselevel = $this->get_level_by_points(0);
+                }
+                
+                // 1.2. Tarkasta hevosen säkäkorkeus ja rotu
+                $height = $leveled_info_horses[$vh]['sakakorkeus'];
+                $breed = $leveled_info_horses[$vh]['rotu'];
+                
+                
+                if ( $age >= 3 ) {
+                    
+                    if ($this->is_horse_allowed_in_class_level($horselevel, $classinfo['taso'] ))
+                        {
+                    
+                        if ( $height >= $classinfo['minheight'] ) {
+    
+                            
+                            // print $classinfo[0]['minheight'].'vs'.$height;
+                            
+                            // 1.3. Hae hevosen ominaisuuspisteet
+                            $horsePropertyPoints = $leveled_info_skills[$vh];
+                            
+                            // 1.4. Laske hevoselle pistemäärä ja lisää se taulukkoon $accepted
+                            
+                            $pointsInClass = ( $horsePropertyPoints / 3 )+(rand(0,100)/100) * ( (rand(0,100)/100) + (rand(0,100)/100) + (rand(0,100)/100) + 1.00);
+                            $accepted[] = array('vh' => $vh, 'horse' => $participants[$i], 'points' => $pointsInClass);
+                            
+                            
+                        } else {
+                            $failed[] = array('horse' => $horse, 'reason' => 'Hevosella ei ole riittävää säkäkorkeutta');
+                        }
+                        
+                    } else {
+                        $failed[] = array('horse' => $horse, 'reason' => 'Hevosen taso ei ole riittävä tai se on liian korkea: lk. '.$classinfo['taso'].' vs. hevonen '.$horselevel);
+                    }
+                } else {
+                    $failed[] = array('horse' => $horse, 'reason' => 'Hevonen on liian nuori kilpailemaan');
+                }
+                
+                
+            } else if ( !empty($horse) AND $horse != '' ) {
+                $failed[] = array('horse' => $horse, 'reason' => 'Hevosella ei ole VH-tunnusta');
+                
+            }
+        }
+        
+        // 2.0 Järjestä kaikki osallistujat taulukossa $accepted
+        foreach ($accepted as $key => $row) {
+            $points[$key] = $row['points'];
+            $vhIdentification[$key]  = $row['vh'];
+        }
+        
+        array_multisort($points, SORT_DESC, $vhIdentification, SORT_DESC, $accepted);
+        
+        // print_r($accepted);
+        
+        // 2.5 Järjestä failed-taulussa kaikki osallistujat
+        foreach ($failed as $key => $row) {
+            $horseIdentification[$key]  = $row['horse'];
+            $reason[$key] = $row['reason'];
+        }
+        
+        array_multisort($horseIdentification, SORT_DESC, $reason, SORT_DESC, $failed);
+            
+        $results = array($accepted, $failed);
+        
+        // 3. Palauta $results
+        return $results;
+    }
     
     
     

@@ -535,7 +535,6 @@ class Jaos_model extends Base_module_model
     // Kisakalenterit
     //////////////////////////////////////////////////////
         
-    
   
     
     function getEtuuspisteet($jaos, $tunnus){

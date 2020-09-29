@@ -92,15 +92,23 @@ $route['yllapito/kalenterit/kisahyvaksynta/(:any)/(:any)/(:any)'] = "yllapito_ka
 $route['yllapito/kalenterit/tuloshyvaksynta'] = "yllapito_kalenterit/tuloshyvaksynta";
 $route['yllapito/kalenterit/tuloshyvaksynta/(:any)'] = "yllapito_kalenterit/tuloshyvaksynta/$1";
 $route['yllapito/kalenterit/tuloshyvaksynta/(:any)/(:any)'] = "yllapito_kalenterit/tuloshyvaksynta/$1/$2";
-$route['yllapito/kalenterit/tulosyvaksynta/(:any)/(:any)/(:any)'] = "yllapito_kalenterit/tuloshyvaksynta/$1/$2/$3";
+$route['yllapito/kalenterit/tuloshyvaksynta/(:any)/(:any)/(:any)'] = "yllapito_kalenterit/tuloshyvaksynta/$1/$2/$3";
 $route['yllapito/kalenterit/hyvaksytyttulokset'] = "yllapito_kalenterit/hyvaksytyttulokset";
 $route['yllapito/kalenterit/hyvaksytytkisat'] = "yllapito_kalenterit/hyvaksytytkisat";
 $route['yllapito/kalenterit/hyvaksytytkisat/delete/(:any)'] = "yllapito_kalenterit/hyvaksytytkisat/delete/$1";
 $route['yllapito/kalenterit/hyvaksytytkisat/edit/(:any)'] = "yllapito_kalenterit/hyvaksytytkisat/edit/$1";
 $route['yllapito/kalenterit/hyvaksytyttulokset/delete/(:any)'] = "yllapito_kalenterit/hyvaksytyttulokset/delete/$1";
+$route['yllapito/kalenterit/porrastetut_run'] = "yllapito_kalenterit/porrastetut_run";
 
 
 
+
+
+
+$route['kilpailutoiminta/ilmoita_tulokset'] = "kilpailutoiminta/omat/avoimet";
+$route['kilpailutoiminta/ilmoita_tulokset/(:any)'] = "kilpailutoiminta/ilmoita_tulokset/$1";
+$route['kilpailutoiminta/omat/tulosjonossa/delete/(:any)'] = "kilpailutoiminta/omat_delete/tulos/$1";
+$route['kilpailutoiminta/omat/jonossa/delete/(:any)'] = "kilpailutoiminta/omat_delete/kisa/$1";
 
 
 

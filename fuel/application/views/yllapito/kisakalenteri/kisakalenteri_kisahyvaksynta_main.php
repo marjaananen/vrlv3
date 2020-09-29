@@ -9,13 +9,14 @@
     <?php } ?>
 
 <?php
-
-foreach ($jaokset as $jaos){
-  echo '<p><strong>'.$jaos['lyhenne'].'</strong><br>';
-  echo '<a href="'.site_url($url. 'kisahyvaksynta/'.$jaos['id']).'">Käsittele kutsujonoa</a>.'; 
-  echo "Tällä hetkellä " . $jaos['hakemukset_norm']." kisa-anomusta ". latest('hakemukset_norm', $jaos)."</p>";
-
-    
+if(isset($jaokset)){
+  foreach ($jaokset as $jaos){
+    echo '<p><strong>'.$jaos['lyhenne'].'</strong><br>';
+    echo '<a href="'.site_url($url. 'kisahyvaksynta/'.$jaos['id']).'">Käsittele kutsujonoa</a>.'; 
+    echo "Tällä hetkellä " . $jaos['hakemukset_norm']." kisa-anomusta ". latest('hakemukset_norm', $jaos)."</p>";
+  
+      
+  }
 }
 
 ?>

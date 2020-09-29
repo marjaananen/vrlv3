@@ -1,5 +1,11 @@
+<H1>Kilpailukalenterien hallinta</H1>
 
+<p>
+Arvontajonossa on <?php if ($porrastetut_amount < 100) { echo $porrastetut_amount;} else { echo "yli 100"; } ?> porrastettua kisaa joiden kilpailupäivä on mennyt.
+Käynnistä arvonta klikkaamalla <a href="<?php echo site_url('yllapito/kalenterit/porrastetut_run');?>">tästä</a>. Jonain päivänä tämä alkaa tapahtua automaattisesti.
+</p>
 
+<hr />
 <?php
 
 foreach ($jaokset as $jaos){
