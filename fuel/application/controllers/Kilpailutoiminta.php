@@ -981,7 +981,6 @@ private function _send_result($kisa, $user, &$msg = array()){
     
         if($kisa['porrastettu'] == 0){
             $nro = 1;
-            
             while (true) {
                 $luokka = $this->input->post('tulos_'.$nro.'_luokka');
                 if(isset($luokka) && strlen($luokka) > 5){              
@@ -1000,14 +999,13 @@ private function _send_result($kisa, $user, &$msg = array()){
             
             $nro = 1;
 
-            
             while (true) {
                 $class = $this->input->post('tulos_'.$nro.'_luokka');
-                if(isset($luokka) && strlen($luokka) > 0){
+                if(isset($class) && strlen($class) > 0){
                     $classinfo = $this->Jaos_model->get_class($class, $kisa['jaos']);
                     $participants = explode("\n", $this->input->post('tulos_'.$nro.'_os'));
 
-                    $this->porrastetut->handle_porrastettu_class_results($jaos, $kisa, $classinfo, $participants, $kantaan_luokat, $kantaan_tulokset, $kantaan_hylsyt);
+                    $this->porrastetut->handle_porrastettu_class_results($kisa['jaos'], $kisa, $classinfo, $participants, $kantaan_luokat, $kantaan_tulokset, $kantaan_hylsyt);
                     
                     $nro = $nro+1;
                 }else {

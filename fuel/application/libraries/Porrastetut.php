@@ -216,11 +216,12 @@ class Porrastetut
 }
 
 public function calculate_age($age, $today = null){
-    
     if (!isset($today)){
-        $today = date('Y-m-d');
+        $today = strtotime( date("Y-m-d") );
+    }else {
+       $today =  strtotime($today);
     }
-    
+
         if( $age['3vuotta'] != '0000-00-00' AND !empty($age['3vuotta']) ) {
         
             if( empty($age['4vuotta']) OR $age['4vuotta'] == '0000-00-00' ) { $age['4vuotta'] = strtotime( "+1 year", $today ); }
@@ -300,7 +301,6 @@ public function get_resultless_leveled_competitions($max = 100){
     }
     
     public function ilmoita_tulokset_porrastetut($kisa, $user){ 
-    
     $kantaan_luokat = "";
     $kantaan_tulokset = "";
     $kantaan_hylsyt = "";
@@ -346,7 +346,6 @@ public function get_resultless_leveled_competitions($max = 100){
             $this->CI->db->where_in('h.reknro', $vhs);
             
             $query = $this->CI->db->get();
-            ECHO $this->CI->db->last_query();
             
             if ($query->num_rows() > 0)
             {
@@ -422,8 +421,7 @@ public function handle_porrastettu_class_results($jaos, $kisa, $classinfo, $part
 
         //haetaan luokkien ja ominaisuuksien tiedot
         $ominaisuudetlist = $this->CI->Trait_model->get_trait_array_by_jaos($jaos);
-        
-      
+              
         //haetaan osallistuneiden VH-numerot        
         $vh_list = array();
         
@@ -433,10 +431,12 @@ public function handle_porrastettu_class_results($jaos, $kisa, $classinfo, $part
 					$tunnuksia = preg_match_all('/\VH[0-9]{2}\-[0-9]{3}\-[0-9]{4}/', $rivi , $osumat);
 					
 					if ($tunnuksia == 1){
-                        $vh_list[] =  $this->CI->vrl_helper->vh_to_number($osumat[0]);
+            
+                        array_push($vh_list, $this->CI->vrl_helper->vh_to_number($osumat[0][0]));
 
                     }
         }
+        
 
         
         //Haetaan kaikki hevosten tieto valmiksi
@@ -453,9 +453,11 @@ public function handle_porrastettu_class_results($jaos, $kisa, $classinfo, $part
             $horse = $participants[$i];
             $tunnuksia = preg_match_all('/\VH[0-9]{2}\-[0-9]{3}\-[0-9]{4}/', $horse , $osumat);
             // 1. Tarkistetaan, onko rivillä VH-tunnusta ja löytyykö se infotaulukosta
-            if( $tunnuksia == 1 && isset($leveled_info_horses[$this->CI->vrl_helper->vh_to_number($osumat[0])])) {
+            if( $tunnuksia == 1 && isset($leveled_info_horses[$this->CI->vrl_helper->vh_to_number($osumat[0][0])])) {
+                $osuma = $this->CI->vrl_helper->vh_to_number($osumat[0][0]);
+
                 // 1.0 Otetaan VH-tunnus talteen ja jatketaan
-                $vh = $this->CI->vrl_helper->vh_to_number($osumat[0]);
+                $vh = $this->CI->vrl_helper->vh_to_number($osuma);
     
                 
                 // 1.1. Tarkista hevosen ikä ja millä tasolla hevgonen on 
@@ -510,11 +512,15 @@ public function handle_porrastettu_class_results($jaos, $kisa, $classinfo, $part
         }
         
         // 2.0 Järjestä kaikki osallistujat taulukossa $accepted
+        $points = array();
+        $vhIdentification = array();
+        $horseIdentification = array();
+        $reason = array();
         foreach ($accepted as $key => $row) {
             $points[$key] = $row['points'];
             $vhIdentification[$key]  = $row['vh'];
         }
-        
+                
         array_multisort($points, SORT_DESC, $vhIdentification, SORT_DESC, $accepted);
         
         // print_r($accepted);

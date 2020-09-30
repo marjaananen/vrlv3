@@ -803,6 +803,10 @@ private function _read_basic_input_field(&$data, $field){
             else {
                     $where_data = array('kisa_id' => $kisa_id, 'kasittelija' => $vrl);
                     $this->db->delete('vrlv3_kisat_tulokset', $where_data);
+                    $insert_data = array('tulokset'=>0);
+                    $where_data = array('jaos'=> $jaos, 'kisa_id' => $kisa_id);
+                    $this->db->where($where_data);
+                    $this->db->update('vrlv3_kisat_kisakalenteri', $insert_data);
                     $this->load->model('Tunnukset_model');
                     $this->Tunnukset_model->send_message($vrl, $query->result_array()[0]['tunnus'] ,
                                                          "Kilpailukutsun #".$query->result_array()[0]['kisa_id']." tulokset on hylätty! Syy: " . $disapprove_msg);

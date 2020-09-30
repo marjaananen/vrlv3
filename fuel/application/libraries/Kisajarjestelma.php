@@ -208,6 +208,7 @@ class Kisajarjestelma
             }
             
             else {
+                $result = $result[0];
                 $rivi = array();
                 $rivi['muokattu'] = date('Y-m-d H:i:s');
                 $rivi['pisteet'] = $result['pisteet'] + $amount;
@@ -225,8 +226,50 @@ class Kisajarjestelma
     
     
     //////////////////////////////////////////////////////////////
-    // Kisakalenterin lomakkeet
+    // Statistiikka
     //////////////////////////////////////////////////////////////
+    
+    public function add_horses_stats($jaos, $classes, $porr = false){
+        $vhs = array();
+        
+        $bulk_insert = array();
+        $bulk_edit = array();
+        
+        foreach ($classes as  $class){
+            if(isset($stats_info[$horse])){
+                if(!isset($stats_info[$horse]['os'])){
+                    $bulk_insert[] = array("reknro"=> $horse);
+                }
+                
+            }
+        
+        
+        }
+    }
+    
+    private function _get_horses_stats_info($vhs, $jaos){
+        $stats_data = array();
+        
+        if(sizeof($vhs) > 0){
+            $this->CI->db->from('vrlv3_hevosrekisteri as h');
+            $this->CI->db->join('vrlv3_hevosrekisteri_kisatiedot as k', 'h.reknro = k.reknro', 'LEFT');
+    
+            $this->CI->db->where_in('h.reknro', $vhs);
+            
+            $query = $this->CI->db->get();
+            ECHO $this->CI->db->last_query();
+            
+            if ($query->num_rows() > 0)
+            {
+                foreach ($query->result_array() as $row){
+                    $stats_data[$row['reknro']] = $row;
+                }
+            }
+        }
+        
+        return $stats_data;
+
+    }
     
     ///////////////////////////////////////////////////////////////////////////////
     // Kisojen anonta
