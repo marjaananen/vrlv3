@@ -69,7 +69,10 @@ class Tallit extends CI_Controller
 	
 	public function talliprofiili($tnro="", $sivu ="")
     {
-		
+		$tnro = str_replace('%C3%96', 'Ö', $tnro);
+        $tnro = str_replace('%C3%84', 'Ä', $tnro);
+        $tnro = str_replace('%C3%85', 'Å', $tnro);
+        
 		if(empty($tnro))
 			$this->fuel->pages->render('misc/naytaviesti', array('msg_type' => 'danger', 'msg' => 'Tallitunnus puuttuu'));
 
@@ -78,7 +81,6 @@ class Tallit extends CI_Controller
 			$this->fuel->pages->render('misc/naytaviesti', array('msg_type' => 'danger', 'msg' => 'Tallitunnusta ei ole olemassa'));
 
 			$this->load->library('Vrl_helper');
-
 		$fields['sivu'] = $sivu;			
 		$fields['stable'] = $this->tallit_model->get_stable($tnro);
 		$fields['stable']['perustettu'] = $this->vrl_helper->sanitize_registration_date($fields['stable']['perustettu']);
@@ -502,7 +504,7 @@ class Tallit extends CI_Controller
 		
 		//submit buttons
 		$submit = array();
-		$submit['application'] = array("text"=>"Rekisteröi talli", "url"=> site_url('tallit/rekisteroiNTI'));
+		$submit['application'] = array("text"=>"Rekisteröi talli", "url"=> site_url('tallit/rekisterointi'));
 		$submit['edit'] = array("text"=>"Muokkaa", "url"=> site_url('tallit/muokkaa') . '/' . $tnro);
 		$submit['admin'] = array("text"=>"Muokkaa", "url"=> site_url('tallit/muokkaa') . '/' . $tnro);
 		
@@ -546,7 +548,7 @@ class Tallit extends CI_Controller
 
         if($mode == 'application')
         {
-            $this->form_validation->set_rules('lyhehd', 'Lyhenne ehdotus', "required|min_length[2]|max_length[4]");
+            $this->form_validation->set_rules('lyhehd', 'Lyhenne ehdotus', "min_length[2]|max_length[4]");
         }
         
         if($mode == 'admin')
