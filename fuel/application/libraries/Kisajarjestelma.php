@@ -229,21 +229,157 @@ class Kisajarjestelma
     // Statistiikka
     //////////////////////////////////////////////////////////////
     
-    public function add_horses_stats($jaos, $classes, $porr = false){
-        $vhs = array();
+    public function add_stats($tulos, $jaos, $porr = false){
         
+        $voi = array(); //voittajat
+        $sij = array(); //sijoittuneet
+        $os = array(); //osallistumiset
+        
+        $vh_list = array(); //kaikki vh:t
+    
+        # Rikotaan ensin luokat rivinvaihdon kohdalta
+        $luokat = explode("\n",$tulos['luokat']);
+        $luokkien_maara = sizeof($luokat);
+    
+        # Sitten rikotaan tulokset ~- merkin kohdalta, eli mikä merkitsee luokan loppua
+        $tulokset = explode("~",$tulos['tulokset']);
+        
+        # Sitten rikotaan hylsyt ~- merkin kohdalta, eli mikä merkitsee luokan loppua
+        $hylsyt = explode("~",$tulos['hylatyt']);
+				
+		// Käydään läpi jokainen luokka
+		for($i = 0; $i <= $luokkien_maara-1; $i++) {
+			/*print	'<p>'.
+					'<strong>'.$luokat[$i].'</strong> <br >';*/
+			
+			$voittajat = explode("\n",$tulokset[$i]);
+			$voittajat_maara = sizeof($voittajat);
+			
+			if ($voittajat_maara > 100) {$voittajat_maara = 100;}
+			
+			########### PORRASTETUT-OSIO
+			/*if( $porr ) {
+			
+				// haetaan tietokannasta luokan tiedot 
+				$class = getClassInfo ( $luokat[$i] );
+				
+				// lisätään osallistujien määrä sekä luokan taso
+				$classinfo['participants'] = $voittajat_maara;
+				$classinfo['difficulty'] = $class[0]['taso'];
+				
+				// lisätään lajin ominaisuudet
+				$properties = getPropertiesSport( $_POST['jaosid'] );
+				$classinfo['property1'] = $properties[0];
+				$classinfo['property2'] = $properties[1];
+				
+			} else {
+				$classinfo = array();
+			}*/
+			
+			for($j = 0; $j <= $voittajat_maara-1; $j++) {
+
+                //haetaan osallistumisriviltä VH
+                $tunnuksia = preg_match_all('/\VH[0-9]{2}\-[0-9]{3}\-[0-9]{4}/', $voittajat[$j] , $osumat);
+					
+				if ($tunnuksia > 0){
+                
+                    foreach($osumat[0] as $osuma){
+                        // Otetaan se talteen.
+                        $vh = $this->CI->vrl_helper->vh_to_number($osuma);
+                        array_push($vh_list, $vh);
+                        
+                        //jos kyse voitosta tai sijoituksesta
+                        if($this->sijoittuu($voittajat_maara, $jaos) >= ($j+1)){
+                            //voitto
+                            if($j == 0){
+                                $this->_sort_stats_temp_array($vh, $voi);
+                            }
+                            //sijoitus
+                            else {
+                                $this->_sort_stats_temp_array($vh, $sij);
+
+                            }
+                            
+                        }
+                        
+                        //osallistuminen lisätään kaikille
+                        $this->_sort_stats_temp_array($vh, $os);
+                    }
+                }
+            }
+                        
+                
+        $stats_info = $this->_get_horses_stats_info($vh_list, $jaos);
+                
         $bulk_insert = array();
         $bulk_edit = array();
+        $pre_txt = "";
+        if($porr){ $pre_txt = "porr_";}
         
-        foreach ($classes as  $class){
-            if(isset($stats_info[$horse])){
-                if(!isset($stats_info[$horse]['os'])){
-                    $bulk_insert[] = array("reknro"=> $horse);
-                }
+        foreach ($stats_info as $horse=>$data){
+              $new_data = array();
+              $new_data['reknro'] = $horse;
+              $stats_ok = false;
+              
+            //jos hevosella ei ole tuloksia aiemmalti
+            if(!isset($data['jaos'])){       
+                $new_data['jaos'] = $jaos;        
                 
+                if(isset($voi[$horse])){
+                    $new_data[$pre_txt.'voi'] = $voi[$horse];
+                    $stats_ok = true;
+                }
+                if(isset($sij[$horse])){
+                    $new_data[$pre_txt.'sij'] = $sij[$horse];
+                    $stats_ok = true;
+                }
+                if(isset($os[$horse])){
+                    $new_data[$pre_txt.'os'] = $os[$horse];
+                    $stats_ok = true;
+                }
+                //jos statistiikkatietoja oli, lisätään
+                if($stats_ok){
+                    $bulk_add[] = $new_data;
+                }
+            } //jos hevosella on aiempia tuloksia
+            else {
+                 if(isset($voi[$horse])){
+                    $new_data[$pre_txt.'voi'] = $data[$pre_txt.'voi'] + $voi[$horse];
+                    $stats_ok = true;
+                }
+                if(isset($sij[$horse])){
+                    $new_data[$pre_txt.'sij'] = $data[$pre_txt.'sij'] + $sij[$horse];
+                    $stats_ok = true;
+                }
+                if(isset($os[$horse])){
+                    $new_data[$pre_txt.'os'] = $data[$pre_txt.'os'] + $os[$horse];
+                    $stats_ok = true;
+                }
+                //jos statistiikkatietoja oli, lisätään
+                if($stats_ok){
+                    $bulk_edit[] = $new_data;
+                }
             }
+            
+        }
         
+        if(sizeof($bulk_edit)>0){
+            $this->CI->db->update_batch('vrlv3_hevosrekisteri_kisatiedot',$bulk_edit, 'reknro'); 
+        }
         
+        else if(sizeof($bulk_add)>0){
+            $this->CI->db->insert_batch('vrlv3_hevosrekisteri_kisatiedot',$bulk_add); 
+        }
+        
+
+    }
+    
+    private function _sort_stats_temp_array($vh, &$taulu){
+        if(isset($taulu$vh])){
+                $taulu[$vh] = $taulu[$vh] + 1;
+        }
+        else {
+            $taulu[$vh] = 1;
         }
     }
     
