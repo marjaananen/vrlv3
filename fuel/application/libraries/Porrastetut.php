@@ -48,6 +48,40 @@ class Porrastetut
         
     }
     
+    private function _calculate_propertyPoints($classinfo, $participants, $sija){
+    
+            // maksimit
+        
+        if ( $classinfo['taso'] >= 0 AND $classinfo['taso'] <= 3 ) {
+            // Tasot 0-3
+            $max = 0.5; // max. 15p
+        
+        } elseif ( $classinfo['taso'] >= 4 AND $classinfo['taso'] <= 6 ) {
+            // Tasot 4-6
+            $max = 1; // max. 20p
+        
+        } elseif ( $classinfo['taso'] >= 7 AND $classinfo['taso'] < 9 ) {
+            // Tasot 7-9
+            $max = 1.5; // max. 25p
+        
+        } else {
+            // Tasot 10-
+            $max = 2; // max. 30p
+        
+        }
+        
+        //laskukaava
+        $points = 100 / $participants * ( ($participants -  $sija + 0.4 ) / 10);
+        $points = ($points * ( 1 + $max / $sija ) );
+        $points =  $points - ( $points / 10 );
+        $points =  round($points, 2);
+        
+        //Taikakerroin on kerroin jolla säädellään porrastettujen pistesaantitasoa kulloisenkin virtuaalimaailmantilanteen mukaan.
+        $taikakerroin = 8.7;
+                                
+        return $taikakerroin * $points;
+    }
+    
     public function is_horse_allowed_in_class_level($horselevel, $classlevel){
         // Hevonen saa kilpailla vaan omalla tasollaan ja yhtä ylemmällä tasolla. 			
 				// Jos hevosen taso on 2 ja luokan taso 0
@@ -285,7 +319,6 @@ public function get_resultless_leveled_competitions($max = 100){
         foreach($kisat as $kisa){
             $this->CI->db->trans_start();
             $kisa =  $this->CI->Kisakeskus_model->hae_kutsutiedot($kisa['kisa_id'], null, 0);
-            var_dump($kisa);
             if($kisa['tulokset'] == 0){
                 $this->ilmoita_tulokset_porrastetut($kisa, 00000);
                 $kpl = $kpl + 1;
@@ -304,18 +337,40 @@ public function get_resultless_leveled_competitions($max = 100){
     $kantaan_luokat = "";
     $kantaan_tulokset = "";
     $kantaan_hylsyt = "";
+    $kantaan_op = array();
     
-    foreach ($kisa['luokat'] as $luokka){
-        
-        $classinfo = $luokka;
-        $participants = array();
-        foreach ($luokka['osallistujat'] as $rivi){
-            $participants[] = $rivi['rimpsu'];
+    if(isset($kisa['luokat']) && sizeof($kisa['luokat']) > 0){
+    
+        foreach ($kisa['luokat'] as $luokka){
+            
+            $classinfo = $luokka;
+            $participants = array();
+            foreach ($luokka['osallistujat'] as $rivi){
+                $participants[] = $rivi['rimpsu'];
+            }
+            
+            $this->handle_porrastettu_class_results($kisa['jaos'], $kisa, $classinfo, $participants, $kantaan_luokat, $kantaan_tulokset, $kantaan_hylsyt, $kantaan_op);
+    
+            
         }
-        
-        $this->handle_porrastettu_class_results($kisa['jaos'], $kisa, $classinfo, $participants, $kantaan_luokat, $kantaan_tulokset, $kantaan_hylsyt);
+    }
+    
+    else {
+            $nro = 1;
 
-        
+            while (true) {
+                $class = $this->CI->input->post('tulos_'.$nro.'_luokka');
+                if(isset($class) && strlen($class) > 0){
+                    $classinfo = $this->CI->Jaos_model->get_class($class, $kisa['jaos']);
+                    $participants = explode("\n", $this->CI->input->post('tulos_'.$nro.'_os'));
+
+                    $this->handle_porrastettu_class_results($kisa['jaos'], $kisa, $classinfo, $participants, $kantaan_luokat, $kantaan_tulokset, $kantaan_hylsyt, $kantaan_op);
+                    
+                    $nro = $nro+1;
+                }else {
+                    break;
+                }
+            }
     }
     
         $tulos = array();
@@ -328,10 +383,17 @@ public function get_resultless_leveled_competitions($max = 100){
     
 
         $this->CI->db->insert('vrlv3_kisat_tulokset', $tulos);
+        $tulos_id =  $this->CI->db->insert_id();
+
+        
         $this->CI->db->set('tulokset', 1);
         $this->CI->db->where('kisa_id', $tulos['kisa_id']);
         $this->CI->db->update('vrlv3_kisat_kisakalenteri');
         
+        //lisätään ominaisuuspisteet jonoon
+       
+       $this->add_propertyPoints_to_queue($kantaan_op, $tulos_id);
+
         return true;     
                 
     }
@@ -390,21 +452,26 @@ public function get_resultless_leveled_competitions($max = 100){
     }
     
     
-public function handle_porrastettu_class_results($jaos, $kisa, $classinfo, $participants, &$kantaan_luokat, &$kantaan_tulokset, &$kantaan_hylsyt){
+public function handle_porrastettu_class_results($jaos, $kisa, $classinfo, $participants, &$kantaan_luokat, &$kantaan_tulokset, &$kantaan_hylsyt, &$kantaan_op){
 
-    list($accepted, $failed) = $this->_generateResults ( $kisa['kp'], $participants, $classinfo, $kisa['jaos']  );
+    //haetaan luokkien ja ominaisuuksien tiedot
+    $ominaisuudetlist = $this->CI->Trait_model->get_trait_array_by_jaos($jaos);
+
+    list($accepted, $failed) = $this->_generateResults ( $kisa['kp'], $participants, $classinfo, $kisa['jaos'], $ominaisuudetlist  );
 
     $kantaan_luokat = $kantaan_luokat . $classinfo['nimi'] . "\n";
     
-     // Listataan tulokset tietokantamuotoon				
-
+     // Listataan tulokset tietokantamuotoon ja jaetaan hevoselle pisteet
     $rank = 0;		
     foreach ($accepted as $key => $list) {
         $rank++; 
-        $kantaan_tulokset .= $rank.'. '.$list['horse']." \n";
-    }
+        $kantaan_tulokset .= $rank.'. '.$list['horse']." \n";        
+        $this->_handle_propertyPoints($list['horse'], $kantaan_op, $classinfo, $rank, sizeof($participants), $ominaisuudetlist);
+        
+        }
+        
     
-    // Listataan tulokset tietokantamuotoon				
+    // Listataan tulokset tietokantamuotoon			
     foreach ($failed as $key => $list) {
         $rank++; 
         $kantaan_hylsyt .= $list['horse']." (".$list['reason'].") \n";
@@ -417,10 +484,8 @@ public function handle_porrastettu_class_results($jaos, $kisa, $classinfo, $part
 
         
     
-    private function _generateResults ( $date, $participants, $classinfo, $jaos  ) {
+    private function _generateResults ( $date, $participants, $classinfo, $jaos, $ominaisuudetlist  ) {
 
-        //haetaan luokkien ja ominaisuuksien tiedot
-        $ominaisuudetlist = $this->CI->Trait_model->get_trait_array_by_jaos($jaos);
               
         //haetaan osallistuneiden VH-numerot        
         $vh_list = array();
@@ -515,14 +580,17 @@ public function handle_porrastettu_class_results($jaos, $kisa, $classinfo, $part
         $points = array();
         $vhIdentification = array();
         $horseIdentification = array();
+        $earned_points = array();
         $reason = array();
         foreach ($accepted as $key => $row) {
             $points[$key] = $row['points'];
             $vhIdentification[$key]  = $row['vh'];
+
         }
                 
         array_multisort($points, SORT_DESC, $vhIdentification, SORT_DESC, $accepted);
         
+
         // print_r($accepted);
         
         // 2.5 Järjestä failed-taulussa kaikki osallistujat
@@ -531,12 +599,112 @@ public function handle_porrastettu_class_results($jaos, $kisa, $classinfo, $part
             $reason[$key] = $row['reason'];
         }
         
+        
+        
         array_multisort($horseIdentification, SORT_DESC, $reason, SORT_DESC, $failed);
             
         $results = array($accepted, $failed);
         
         // 3. Palauta $results
         return $results;
+    }
+    
+     private function _handle_propertyPoints($horse, &$kantaan_op, $classinfo, $rank, $participants, $ominaisuudetlist){
+        
+        $tunnuksia = preg_match_all('/\VH[0-9]{2}\-[0-9]{3}\-[0-9]{4}/', $horse , $osumat);
+        foreach ($osumat[0] as $vh){
+            $vh = $this->CI->vrl_helper->vh_to_number($vh);
+            
+            $points = $this->_add_propertyPoints($vh, $classinfo, $rank, $participants, $ominaisuudetlist);
+            
+            if(isset($kantaan_op[$vh])){
+                foreach($points as $ominaisuus=>$amount){
+                    if(isset($kantaan_op[$vh][$ominaisuus])){
+                        $kantaan_op[$vh][$ominaisuus] = $kantaan_op[$vh][$ominaisuus] + $amount;
+                    }else {
+                        $kantaan_op[$vh][$ominaisuus] = $amount;
+                    }
+                }
+                
+            }else {
+                $kantaan_op[$vh] = $points;
+            }
+        }
+     }
+    
+    private function _add_propertyPoints ( $vh, $classinfo, $sija, $participants, $properties ) {
+            
+    
+        $points = $this->_calculate_propertyPoints ($classinfo, $participants, $sija);
+        
+        // 3. Jaa ominaisuuspisteet ominaisuuksien kesken
+        
+        $earned_points = array();
+        
+        $properties_amount = sizeof($properties);
+        $percentage_min = 15;
+        $percentage_max = 75;
+    
+        
+        $percentages = array();
+        while(true){
+            $percentages = array();
+            $percentages_sum = 0;
+            //haetaan ominaisuuksien määrä - 1 prosenttilukua
+            while(sizeof($percentages) < ($properties_amount-1)){
+                $rand_percentage = rand ($percentage_min, $percentage_max );
+                $percentages[] = $rand_percentage;
+                $percentages_sum = $percentages_sum + $rand_percentage;
+            }
+            
+            //lasketaan yhteen ja katsotaan mitä jäi jäljelle
+            $last_percentage = 100 - $percentages_sum;
+            
+            if($last_percentage > $percentage_min && $last_percentage < $percentage_max){
+                $percentages[] = $last_percentage;
+                break;
+            }
+            
+            
+        }
+        
+        foreach ($properties as $id=>$property){
+            $earned_points[$property] = round($points * ($percentages[$id]/100),2);
+        }
+        
+       return $earned_points;
+    }
+    
+    public function add_propertyPoints_to_queue($kantaan_op, $tulos_id){
+         $bulk_insert = array();
+        foreach ($kantaan_op as $vh =>$ominaisuudet){
+            
+            foreach($ominaisuudet as $id=>$arvo){
+                $temp_data = array();
+
+                $temp_data['reknro'] = $vh;
+                $temp_data['tulos_id'] = $tulos_id;
+                $temp_data['ominaisuus'] = $id;
+                $temp_data['arvo'] = $arvo;
+                $bulk_insert[] = $temp_data;
+
+            }
+            
+        }
+        if(sizeof($bulk_insert)>0){
+            $this->CI->db->insert_batch('vrlv3_hevosrekisteri_ominaisuudet_jonossa',$bulk_insert); 
+        }
+    }
+    
+    public function approve_propertyPoints_from_queue($tulos_id){
+
+                    $this->CI->db->query('UPDATE vrlv3_hevosrekisteri_ominaisuudet o
+                        JOIN vrlv3_hevosrekisteri_ominaisuudet_jonossa j ON o.reknro = j.reknro
+                        SET o.arvo = o.arvo + j.arvo
+                        WHERE o.ominaisuus = j.ominaisuus AND j.tulos_id = '.$tulos_id);
+                    
+                    $this->CI->db->delete('vrlv3_hevosrekisteri_ominaisuudet_jonossa', array("tulos_id"=>$tulos_id));
+                
     }
     
     

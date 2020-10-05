@@ -762,7 +762,7 @@ private function _read_basic_input_field(&$data, $field){
         $processing_ok = false;
         $vrl = $this->ion_auth->user()->row()->tunnus;
         $this->db->trans_start();
-        $this->db->select('vrlv3_kisat_kisakalenteri.*, vrlv3_kisat_tulokset.tunnus as ilmoittaja, vrlv3_kisat_tulokset.ilmoitettu as ilmoitettu, vrlv3_kisat_tulokset.luokat, vrlv3_kisat_tulokset.tulokset, vrlv3_kisat_tulokset.hylatyt');
+        $this->db->select('vrlv3_kisat_kisakalenteri.*, vrlv3_kisat_tulokset.tunnus as ilmoittaja, vrlv3_kisat_tulokset.ilmoitettu as ilmoitettu, vrlv3_kisat_tulokset.luokat, vrlv3_kisat_tulokset.tulokset, vrlv3_kisat_tulokset.hylatyt, vrlv3_kisat_tulokset.tulos_id');
         $this->db->from('vrlv3_kisat_kisakalenteri');
         $this->db->join('vrlv3_kisat_tulokset', 'vrlv3_kisat_kisakalenteri.kisa_id = vrlv3_kisat_tulokset.kisa_id ');
         $this->db->where('jaos', $jaos);
@@ -798,8 +798,19 @@ private function _read_basic_input_field(&$data, $field){
                     }
                     $this->kisajarjestelma->add_etuuspisteet($ilmo_tunnus, $jaos, $query->result_array()[0]['kp'], $query->result_array()[0]['ilmoitettu'], $takaaja);
                 }
+                //ominaisuuspisteet
+                else {
+                    $tulos_id = $query->result_array()[0]['tulos_id'];
+                    $this->porrastetut->approve_propertyPoints_from_queue($tulos_id);
+                }
+                
+                
+
+                    
+                
                 //pikaviesti
                 $this->load->model('Tunnukset_model');
+                
                 $this->Tunnukset_model->send_message($vrl, $query->result_array()[0]['ilmoittaja'] , "Kilpailukutsun #".$query->result_array()[0]['kisa_id']." tulokset on hyväksytty!");
             }
             

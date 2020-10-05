@@ -291,9 +291,8 @@ ALTER TABLE `vrlv3_kisat_kisaosallis`
     ADD CONSTRAINT `kilvat_kisaosallis_ibfk_3` FOREIGN KEY (`VH`) REFERENCES `vrlv3_hevosrekisteri` (`reknro`) ON DELETE CASCADE ON UPDATE CASCADE,
         ADD CONSTRAINT `kilvat_kisaosallis_ibfk_4` FOREIGN KEY (`VRL`) REFERENCES `vrlv3_tunnukset` (`tunnus`) ON DELETE CASCADE ON UPDATE CASCADE;
 
-
-CREATE TABLE `vrlv3`.`hevosrekisteri_ominaisuudet_jonossa` (
-  `id` INT NOT NULL,
+CREATE TABLE `vrlv3`.`vrlv3_hevosrekisteri_ominaisuudet_jonossa` (
+  `id` INT NOT NULL AUTO_INCREMENT,
   `reknro` INT(9) ZEROFILL UNSIGNED NOT NULL,
   `ominaisuus` INT(8) NOT NULL,
   `arvo` DECIMAL(8,2) NOT NULL,
@@ -302,22 +301,21 @@ CREATE TABLE `vrlv3`.`hevosrekisteri_ominaisuudet_jonossa` (
   INDEX `hevosrekisteri_reknro` (`reknro` ASC),
   INDEX `hevosrekisteri_ominaisuus` (`ominaisuus` ASC),
   INDEX `kisakalenteri_tulos` (`tulos_id` ASC),
-  CONSTRAINT `reknroff`
+  CONSTRAINT `reknrofff`
     FOREIGN KEY (`reknro`)
     REFERENCES `vrlv3`.`vrlv3_hevosrekisteri` (`reknro`)
     ON DELETE CASCADE
     ON UPDATE CASCADE,
-  CONSTRAINT `ominaisuusff`
+  CONSTRAINT `ominaisuusfff`
     FOREIGN KEY (`ominaisuus`)
     REFERENCES `vrlv3`.`vrlv3_lista_ominaisuudet` (`id`)
     ON DELETE CASCADE
     ON UPDATE CASCADE,
-  CONSTRAINT `tulosff`
+  CONSTRAINT `tulosfff`
     FOREIGN KEY (`tulos_id`)
     REFERENCES `vrlv3`.`vrlv3_kisat_tulokset` (`tulos_id`)
     ON DELETE CASCADE
     ON UPDATE CASCADE);
-
 
 
 /*!40000 ALTER TABLE `vrlv3_kisat_luokat` ENABLE KEYS */;

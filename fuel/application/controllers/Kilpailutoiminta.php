@@ -978,6 +978,8 @@ private function _send_result($kisa, $user, &$msg = array()){
             $kantaan_luokat = "";
             $kantaan_tulokset = "";
             $kantaan_hylsyt = "";
+            $kantaan_op = array();
+            
     
         if($kisa['porrastettu'] == 0){
             $nro = 1;
@@ -993,29 +995,7 @@ private function _send_result($kisa, $user, &$msg = array()){
                 }
             }
             
-            
-        }
-        else {
-            
-            $nro = 1;
-
-            while (true) {
-                $class = $this->input->post('tulos_'.$nro.'_luokka');
-                if(isset($class) && strlen($class) > 0){
-                    $classinfo = $this->Jaos_model->get_class($class, $kisa['jaos']);
-                    $participants = explode("\n", $this->input->post('tulos_'.$nro.'_os'));
-
-                    $this->porrastetut->handle_porrastettu_class_results($kisa['jaos'], $kisa, $classinfo, $participants, $kantaan_luokat, $kantaan_tulokset, $kantaan_hylsyt);
-                    
-                    $nro = $nro+1;
-                }else {
-                    break;
-                }
-            }
-            
-        }
-        
-        $tulos = array();
+            $tulos = array();
             $tulos['tunnus'] = $user;
             $tulos['ilmoitettu'] = date('Y-m-d H:i:s');
             $tulos['tulokset'] = $kantaan_tulokset;
@@ -1030,6 +1010,16 @@ private function _send_result($kisa, $user, &$msg = array()){
                 $this->db->where('kisa_id', $tulos['kisa_id']);
                 $this->db->update('vrlv3_kisat_kisakalenteri');
             }
+            
+            
+        }
+        else {
+            
+            $this->porrastetut->ilmoita_tulokset_porrastetut($kisa, $user);
+            
+        }
+        
+
             $this->db->trans_complete();
             return true;
 

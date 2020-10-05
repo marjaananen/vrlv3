@@ -240,6 +240,8 @@ class Kisajarjestelma
         # Rikotaan ensin luokat rivinvaihdon kohdalta
         $luokat = explode("\n",$tulos['luokat']);
         $luokkien_maara = sizeof($luokat);
+        
+        var_dump($luokat);
     
         # Sitten rikotaan tulokset ~- merkin kohdalta, eli mikä merkitsee luokan loppua
         $tulokset = explode("~",$tulos['tulokset']);
@@ -257,24 +259,6 @@ class Kisajarjestelma
 			
 			if ($voittajat_maara > 100) {$voittajat_maara = 100;}
 			
-			########### PORRASTETUT-OSIO
-			/*if( $porr ) {
-			
-				// haetaan tietokannasta luokan tiedot 
-				$class = getClassInfo ( $luokat[$i] );
-				
-				// lisätään osallistujien määrä sekä luokan taso
-				$classinfo['participants'] = $voittajat_maara;
-				$classinfo['difficulty'] = $class[0]['taso'];
-				
-				// lisätään lajin ominaisuudet
-				$properties = getPropertiesSport( $_POST['jaosid'] );
-				$classinfo['property1'] = $properties[0];
-				$classinfo['property2'] = $properties[1];
-				
-			} else {
-				$classinfo = array();
-			}*/
 			
 			for($j = 0; $j <= $voittajat_maara-1; $j++) {
 
@@ -307,6 +291,7 @@ class Kisajarjestelma
                     }
                 }
             }
+        }
                         
                 
         $stats_info = $this->_get_horses_stats_info($vh_list, $jaos);
@@ -375,7 +360,7 @@ class Kisajarjestelma
     }
     
     private function _sort_stats_temp_array($vh, &$taulu){
-        if(isset($taulu$vh])){
+        if(isset($taulu[$vh])){
                 $taulu[$vh] = $taulu[$vh] + 1;
         }
         else {
