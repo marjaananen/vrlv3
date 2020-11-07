@@ -186,14 +186,18 @@ class Jaos_model extends Base_module_model
     
     
     
-    function get_jaos_list($only_active = false, $only_porrastetut = false)
+    function get_jaos_list($only_active = false, $only_porrastetut = false, $skip_shows = true, $only_shows = false)
     {
-        $this->db->select("id, nimi, lyhenne, kuvaus, url, IF(toiminnassa='1', 'toiminnnassa', 'ei toiminnassa') as toiminnassa");
+        $this->db->select("id, nimi, lyhenne, kuvaus, url, IF(toiminnassa='1', 'toiminnassa', 'ei toiminnassa') as toiminnassa, nayttelyt as nayttelyjaos, IF(nayttelyt='1', 'nayttelyjaos', 'kisajaos') as nayttelyt");
         if($only_active){
             $this->db->where("toiminnassa", 1);
         }if($only_porrastetut){
                     $this->db->where("s_salli_porrastetut", 1);
 
+        }if ($skip_shows){
+            $this->db->where("nayttelyt", 0);
+        }else if ($only_shows){
+            $this->db->where("nayttelyt", 1);
         }
         $this->db->from('vrlv3_kisat_jaokset');
         
@@ -207,11 +211,15 @@ class Jaos_model extends Base_module_model
         return array();
     }
     
-    function get_jaos_option_list($only_active = false, $only_porrastetut = false){
+    function get_jaos_option_list($only_active = false, $only_porrastetut = false, $skip_shows = true, $only_show = false){
         $options = array();
-        $options[0] = "";
         
-        $jaos_list = $this->get_jaos_list($only_active, $only_porrastetut);
+        //jos näyttelyt, NJ on oletus, muilla tyhjä on oletus
+        if(!$only_show){
+            $options[0] = "";
+        }
+        
+        $jaos_list = $this->get_jaos_list($only_active, $only_porrastetut, $skip_shows, $only_show);
         
         foreach ($jaos_list as $jaos){
             $options[$jaos['id']] = $jaos['lyhenne'];
@@ -234,10 +242,17 @@ class Jaos_model extends Base_module_model
         return array();
     }
     
-    function get_jaokset_all()
+    function get_jaokset_all($only_nayttelyt = false, $only_basic = false)
     {
         $this->db->select("*");
         $this->db->from('vrlv3_kisat_jaokset');
+        if($only_nayttelyt){
+        $this->db->where('nayttelyt', 1) ;
+        }
+        if($only_basic){
+            $this->db->where('nayttelyt', 0) ;
+
+        }
         $query = $this->db->get();
         
         if ($query->num_rows() > 0)
@@ -248,9 +263,9 @@ class Jaos_model extends Base_module_model
         return array();
     }
     
-    function get_jaokset_full()
+    function get_jaokset_full($only_nayttelyt = false, $only_basic = false)
     {
-        $jaokset = $this->get_jaokset_all();
+        $jaokset = $this->get_jaokset_all($only_nayttelyt, $only_basic);
         foreach ($jaokset as &$jaos){
             $jaos['yllapito'] = $this->get_jaos_handlers($jaos['id']);
             $jaos['luokat_porr'] = $this->get_class_list($jaos['id'], true, true);
@@ -324,7 +339,6 @@ class Jaos_model extends Base_module_model
         if ($query->num_rows() > 0)
         {
             $id = $query->result_array()[0]['id'];
-            echo $id;
             //henkilöllä on jaoksiin yp tai kalenterioikeuksia (tai molempia)
             //exclude jaos-yp (9) and kisakalenteri (10)
             $this->db->delete('vrlv3_users_groups', array('user_id' => $id, 'group_id'=>9));

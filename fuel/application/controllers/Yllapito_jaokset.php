@@ -468,7 +468,6 @@ class Yllapito_jaokset extends CI_Controller
         $data = array();
         $data['jaos'] = $this->Jaos_model->get_jaos($id);
 
-
             
         if(sizeof($data['jaos']) == 0){
                 $this->fuel->pages->render('misc/naytaviesti', array('msg_type' => 'danger', 'msg' => "Jaosta jota yritit muokata, ei ole olemassa."));
@@ -492,11 +491,11 @@ class Yllapito_jaokset extends CI_Controller
                 $this->_handle_tiedot_edit($id, $data, $edit_url);
             }else if($sivu == "online"){
                 $this->_handle_toiminnassa_edit($id, $data, $edit_url);
-            }else if($sivu == "saannot"){
+            }else if($sivu == "saannot" && $data['jaos']['nayttelyt'] == 0){
                 $this->_handle_saannot_edit($id, $data, $edit_url);
-            }else if($sivu == "luokat"){
+            }else if($sivu == "luokat" && $data['jaos']['nayttelyt'] == 0){
                 $this->_handle_luokat_edit($id, $data, $edit_url, $tapa2, $sub_id);
-            }else if($sivu == "ominaisuudet"){
+            }else if($sivu == "ominaisuudet" && $data['jaos']['nayttelyt'] == 0){
                 $this->_handle_ominaisuudet_edit($id, $data, $edit_url);
             }else if($sivu == "omistajat"){
                 $this->_handle_jaos_owners($id, $tapa2, $sub_id, $data, $data['url']);

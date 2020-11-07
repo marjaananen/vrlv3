@@ -18,13 +18,14 @@ class Jaos
 		$vars['headers'][2] = array('title' => 'Nimi', 'key' => 'nimi');
 		$vars['headers'][3] = array('title' => 'Lyhenne', 'key' => 'lyhenne');
       $vars['headers'][4] = array('title' => 'Toiminnassa', 'key' => 'toiminnassa');
-      $vars['headers'][5] = array('title' => 'Poista', 'key' => 'id', 'key_link' => site_url($url_poista), 'image' => site_url('assets/images/icons/delete.png'));
-      $vars['headers'][6] = array('title' => 'Editoi', 'key' => 'id', 'key_link' => site_url($url_muokkaa), 'image' => site_url('assets/images/icons/edit.png'));
-      $vars['headers'][7] = array('title' => 'Tapahtumat', 'key' => 'id', 'key_link' => site_url($url_tapahtumat), 'image' => site_url('assets/images/icons/award_star_gold_2.png'));
+      $vars['headers'][5] = array('title' => 'Tyyppi', 'key' => 'nayttelyt');
+      $vars['headers'][6] = array('title' => 'Poista', 'key' => 'id', 'key_link' => site_url($url_poista), 'image' => site_url('assets/images/icons/delete.png'));
+      $vars['headers'][7] = array('title' => 'Editoi', 'key' => 'id', 'key_link' => site_url($url_muokkaa), 'image' => site_url('assets/images/icons/edit.png'));
+      $vars['headers'][8] = array('title' => 'Tapahtumat', 'key' => 'id', 'key_link' => site_url($url_tapahtumat), 'image' => site_url('assets/images/icons/award_star_gold_2.png'));
 
 		$vars['headers'] = json_encode($vars['headers']);
 					
-		$vars['data'] = json_encode($this->CI->Jaos_model->get_jaos_list());
+		$vars['data'] = json_encode($this->CI->Jaos_model->get_jaos_list(false, false, false));
         
         return  $this->CI->load->view('misc/taulukko', $vars, TRUE);
         
@@ -80,8 +81,7 @@ class Jaos
     
     
 	public function get_jaos_form ($url, $mode = "new", $admin = false, $jaos = array()) {
-        
-        
+
         $sport_options = $this->CI->Sport_model->get_sport_option_list();
          $sport_options[-1] = "";        
 
@@ -91,6 +91,9 @@ class Jaos
             $fields['nimi'] = array('type' => 'text', 'class'=>'form-control', 'required' => TRUE,'value' => $jaos['nimi'] ?? "" );
             $fields['lyhenne'] = array('type' => 'text', 'class'=>'form-control','required' => TRUE, 'value' => $jaos['lyhenne'] ?? "");
             $fields['laji'] = array('type' => 'select', 'options' => $sport_options, 'value' => $jaos['laji'] ?? -1, 'class'=>'form-control');
+            var_dump($jaos['nayttelyt']);
+            $fields['nayttelyt'] = array('label'=> 'Näyttelyjaos', 'type' => 'checkbox', 'value' => $jaos['nayttelyt'] ?? false, 'class'=>'form-control');
+
 
         }
             
@@ -160,6 +163,11 @@ class Jaos
       if($this->CI->input->post("nimi")){
           $jaos['nimi'] = $this->CI->input->post("nimi");
       }
+      if($this->CI->input->post("nayttelyt")){
+          $jaos['nayttelyt'] = $this->CI->input->post("nayttelyt");
+      }else {
+         $jaos['nayttelyt'] = 0;
+      }
       if($this->CI->input->post("lyhenne")){
          $jaos['lyhenne'] = $this->CI->input->post("lyhenne");
       }
@@ -190,10 +198,12 @@ class Jaos
          $fields = array();
          $fields['toiminnassa'] = array('type' => 'checkbox', 'label'=> "Toiminnassa", 'checked' => $jaos['toiminnassa'] ?? false, 'class'=>'form-control',
                                         'after_html' => '<span class="form_comment">Jos jaos ei ole toiminnassa, sen alaisia kilpailuja ei voi järjestää. Tarkasta säännöt ja sallitut luokat ennen jaoksen merkitsemistä toimivaksi.</span>');
-         $fields['s_salli_porrastetut'] = array('type' => 'checkbox', 'label'=> "Salli porrastetut", 'checked' => $jaos['s_salli_porrastetut'] ?? false, 'class'=>'form-control',
+         
+         if($jaos['nayttelyt'] == 0){
+            $fields['s_salli_porrastetut'] = array('type' => 'checkbox', 'label'=> "Salli porrastetut", 'checked' => $jaos['s_salli_porrastetut'] ?? false, 'class'=>'form-control',
                                                 'after_html' => '<span class="form_comment">Jos jaos ei salliporrastettuja, niitä ei voi järjestää. Tarkasta säännöt, sallitut luokat ja vaikuttavat ominaisuudet ennen porrastettujen sallimista.
                                                 <b>Vaikuttavia ominaisuuksia ei voi enää muokata kun porrastetut on asetettu sallituksi!</b></span>');
-         
+         }
           $this->CI->form_builder->form_attrs = array('method' => 'post', 'action' => site_url($url));
 		        
          return $this->CI->form_builder->render_template('_layouts/basic_form_template', $fields);
@@ -241,12 +251,8 @@ class Jaos
     
     function jaos_ready($id, &$msg){
       $ok = true;
-         $luokat = $this->get_classes($id);
          $owners = $this->get_owners($id);       
-         if(sizeof($luokat) < 1){
-            $msg .= " Jaokselle ei ole vielä asetettu luokkia!";
-            $ok = false;
-         } if(sizeof($omistajat) < 1){
+          if(sizeof($omistajat) < 1){
             $msg .= " Jaokselle ei ole vielä ylläpitäjiä!";
             $ok = false;
          }

@@ -61,6 +61,24 @@ class Kisakeskus_model extends CI_Model
     }
     
     
+     public function insertNewShow ($kutsu, &$msg){
+          
+	    $kutsu['kp'] = date("Y-m-d",strtotime($kutsu['kp']));
+        $kutsu['vip'] = date("Y-m-d",strtotime($kutsu['vip']));
+        if(isset($kutsu['info'])){
+            $kutsu['info'] = htmlspecialchars($kutsu['info']);
+        }
+        $kutsu['ilmoitettu'] = date("Y-m-d H:i:s");
+        
+        unset($kutsu['porrastettu']);
+	    
+	    $this->db->insert('vrlv3_kisat_nayttelykalenteri', $kutsu);
+        $kutsu_id = $this->db->insert_id();
+	    
+       return true;
+    }
+    
+    
 
     //hae kisakalenterissa olevat tiedot
     public function get_calendar($porrastettu = null, $arvontatapa = null, $jaos = null){ 
@@ -74,6 +92,29 @@ class Kisakeskus_model extends CI_Model
         if(isset($arvontatapa)){
             $this->db->where('arvontatapa', $arvontatapa);
         }
+
+        $this->db->where('tulokset', 0);
+        $this->db->where('k.hyvaksytty is NOT NULL', NULL, FALSE);
+
+        $this->db->order_by('kp', 'desc');
+        $this->db->limit('1000');
+                
+        $query = $this->db->get();
+        
+        if ($query->num_rows() > 0)
+        {
+            return $query->result_array();
+        }else {
+            return array();
+        }
+        
+    }
+    
+    public function get_calendar_show(){ 
+        $this->db->select('vip, kp, j.id as jaos, j.lyhenne as jaoslyhenne, k.url, k.info, jarj_talli, t.nimi as tallinimi, kisa_id, k.hyvaksytty');
+        $this->db->from('vrlv3_kisat_nayttelykalenteri as k');
+        $this->db->join('vrlv3_tallirekisteri as t', 't.tnro = k.jarj_talli');
+        $this->db->join('vrlv3_kisat_jaokset as j', 'j.id = k.jaos');
 
         $this->db->where('tulokset', 0);
         $this->db->where('k.hyvaksytty is NOT NULL', NULL, FALSE);
@@ -384,6 +425,58 @@ class Kisakeskus_model extends CI_Model
         if(isset($porrastettu)){
             $this->db->where('porrastettu', $porrastettu);
         }
+        
+        if($jonossa){
+            $this->db->where('k.tulokset', 0);
+            $this->db->group_start();
+            $this->db->where('k.hyvaksytty IS NULL OR k.hyvaksytty = \'0000-00-00 00:00:00\'');
+            $this->db->group_end();
+            $this->db->order_by('k.ilmoitettu', 'desc');
+
+        }
+        
+        else if($tjonossa){
+            $this->db->where('k.tulokset', 1);
+            $this->db->group_start();
+            $this->db->where('t.hyvaksytty IS NULL OR t.hyvaksytty = \'0000-00-00 00:00:00\'');
+            $this->db->group_end();
+            $this->db->order_by('t.ilmoitettu', 'desc');
+
+        } else if($avoin){
+            $this->db->where('k.tulokset', 0);
+            $this->db->where('k.hyvaksytty is NOT NULL', NULL, FALSE);
+            $this->db->order_by('k.kp', 'asc');
+
+        } else if ($tulokset){
+            $this->db->where('k.tulokset', 1);
+            $this->db->where('t.hyvaksytty IS NOT NULL', NULL, FALSE);
+            $this->db->order_by('k.kp', 'desc');
+
+        }
+        
+        $this->db->limit('1000');
+                
+        $query = $this->db->get();
+        
+        if ($query->num_rows() > 0)
+        {
+            return $query->result_array();
+        }else {
+            return array();
+        }
+        
+    }
+    
+    
+    
+    public function get_users_shows($user, $jonossa, $avoin, $tjonossa, $tulokset){ 
+        $this->db->select('vip, kp, j.lyhenne as jaoslyhenne, k.url, k.info, jarj_talli, k.ilmoitettu as kisailmoitettu, t.ilmoitettu as tulosilmoitettu,
+                          k.kisa_id, t.tulos_id, k.hyvaksytty');
+        $this->db->from('vrlv3_kisat_nayttelykalenteri as k');     
+        $this->db->join('vrlv3_kisat_tulokset as t', 'k.kisa_id = t.kisa_id', 'left');
+        $this->db->join('vrlv3_kisat_jaokset as j', 'j.id = k.jaos');
+        $this->db->where('k.tunnus', $user);
+        $this->db->where('k.vanha', 0);
         
         if($jonossa){
             $this->db->where('k.tulokset', 0);

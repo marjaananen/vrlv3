@@ -1,7 +1,7 @@
 <h1>Etuuspistejärjestelmä</h1>
 
 <p>
-Jokainen VRL:n jäsen kerää etuuspisteitä anoessaan kisoja ja lähettäessään näistä tulokset ajoissa.
+Jokainen VRL:n jäsen kerää etuuspisteitä järjestäessään kisoja ja lähettäessään näistä tulokset ajoissa.
 Etuuspisteet säätelevät sitä, kuinka monta avointa kutsua kalenterissa kyseisellä ihmisellä voi olla yhtä aikaa.
 Rajoitukset ovat tehty sen vuoksi että kilpailuista saataisiin tulokset ajallaan, ja että vain tunnollisiksi
 osoittautuneet kisanjärjestäjät voivat järjestää useita kisoja kerralla.</p>
@@ -13,7 +13,7 @@ osoittautuneet kisanjärjestäjät voivat järjestää useita kisoja kerralla.</
             <p>
 Etuuspisteitä kerrytetään lähettämällä tulokset viimeistään viikon kuluttua kisapäivästä.
 Mikäli vastuuhenkilö hoitaa ensimmäiset kilpailunsa ajoissa loppuun, hän saa tuplapisteet, eli siirtyy suoraan seuraavalle etuuspistetasolle.
-            </p><p><strong>Porrastetut kilpailut eivät kerrytä eivätkä vaadi etuuspisteitä!</strong></p>
+            </p><p><strong>Näytteluyt tai porrastetut kilpailut eivät kerrytä eivätkä vaadi etuuspisteitä!</strong></p>
       </div>
   </div>
 

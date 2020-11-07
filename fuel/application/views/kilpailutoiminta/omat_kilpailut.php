@@ -10,18 +10,38 @@
     </div>
     
     <?php } ?>
+    
+ <h3>Kilpailut</h3>
+
 
  <ul class="nav nav-tabs">
-        <li role="presentation" class="<?php if ($sivu == 'jonossa'){echo "active";}?>"><a href="<?php echo base_url('kilpailutoiminta/omat/jonossa'); ?>">Kutsujonossa</a></li>
-        <li role="presentation" class="<?php if ($sivu == 'porrastetut'){echo "active";}?>"><a href="<?php echo base_url('kilpailutoiminta/omat/porrastetut'); ?>">Avoimet (porrastetut)</a></li>
-        <li role="presentation" class="<?php if ($sivu == 'avoimet'){echo "active";}?>"><a href="<?php echo base_url('kilpailutoiminta/omat/avoimet'); ?>">Avoimet (perinteiset)</a></li>
-        <li role="presentation" class="<?php if ($sivu == 'tulosjonossa'){echo "active";}?>"><a href="<?php echo base_url('kilpailutoiminta/omat/tulosjonossa'); ?>">Tulosjonossa</a></li>
-        <li role="presentation" class="<?php if ($sivu == 'omat'){echo "active";}?>"><a href="<?php echo base_url('kilpailutoiminta/omat/menneet'); ?>">Tulokselliset</a></li>
+        <li role="presentation" class="<?php if ($category == 'kisat' && $sivu == 'jonossa'){echo "active";}?>"><a href="<?php echo base_url('kilpailutoiminta/omat/kisat/jonossa'); ?>">Kutsujonossa</a></li>
+        <li role="presentation" class="<?php if ($category == 'kisat' && $sivu == 'porrastetut'){echo "active";}?>"><a href="<?php echo base_url('kilpailutoiminta/omat/kisat/porrastetut'); ?>">Avoimet (porrastetut)</a></li>
+        <li role="presentation" class="<?php if ($category == 'kisat' && $sivu == 'avoimet'){echo "active";}?>"><a href="<?php echo base_url('kilpailutoiminta/omat/kisat/avoimet'); ?>">Avoimet (perinteiset)</a></li>
+        <li role="presentation" class="<?php if ($category == 'kisat' && $sivu == 'tulosjonossa'){echo "active";}?>"><a href="<?php echo base_url('kilpailutoiminta/omat/kisat/tulosjonossa'); ?>">Tulosjonossa</a></li>
+        <li role="presentation" class="<?php if ($category == 'kisat' && $sivu == 'menneet'){echo "active";}?>"><a href="<?php echo base_url('kilpailutoiminta/omat/kisat/menneet'); ?>">Tulokselliset</a></li>
         
 
-    </ul>
+ </ul>
     
     
     <?php if(isset($kisat)){
         echo $kisat;
+    }?>
+
+
+<h3>Näyttelyt</h3>
+
+ <ul class="nav nav-tabs">
+        <li role="presentation" class="<?php if ($category == 'nayttelyt' && $sivu == 'jonossa'){echo "active";}?>"><a href="<?php echo base_url('kilpailutoiminta/omat/nayttelyt/jonossa'); ?>">Kutsujonossa</a></li>
+        <li role="presentation" class="<?php if ($category == 'nayttelyt' && $sivu == 'avoimet'){echo "active";}?>"><a href="<?php echo base_url('kilpailutoiminta/omat/nayttelyt/avoimet'); ?>">Avoimet</a></li>
+        <li role="presentation" class="<?php if ($category == 'nayttelyt' && $sivu == 'tulosjonossa'){echo "active";}?>"><a href="<?php echo base_url('kilpailutoiminta/omat/nayttelyt/tulosjonossa'); ?>">Tulosjonossa</a></li>
+        <li role="presentation" class="<?php if ($category == 'nayttelyt' && $sivu == 'menneet'){echo "active";}?>"><a href="<?php echo base_url('kilpailutoiminta/omat/nayttelyt/menneet'); ?>">Tulokselliset</a></li>
+        
+
+ </ul>
+    
+    
+    <?php if(isset($nayttelyt)){
+        echo $nayttelyt;
     }?>

@@ -40,17 +40,34 @@ class Kilpailutoiminta extends CI_Controller
         $this->fuel->pages->render('kilpailutoiminta/kilpailusaannot', $vars);
     }
     
-    function omat($type = null, $msg = array()){
-        $url = "kilpailutoiminta/omat";
+    function kilpailujarjestaminen(){
+        $vars = array();
+        $vars['jaokset'] = $this->Jaos_model->get_jaokset_full(false, true); 
+        $vars['jaoskohtaiset'] = $this->load->view('kilpailutoiminta/jaoskohtaiset_rajaukset', $vars, TRUE);
+        $this->fuel->pages->render('kilpailutoiminta/kilpailusaannot_kilpailut', $vars);
+    }
+    
+    function nayttelysaannot(){
+        $vars = array();
+        $vars['jaokset'] = $this->Jaos_model->get_jaokset_full(true, false); 
+        $vars['jaoskohtaiset'] = $this->load->view('kilpailutoiminta/jaoskohtaiset_rajaukset', $vars, TRUE);
+        $this->fuel->pages->render('kilpailutoiminta/kilpailusaannot_nayttelyt', $vars);
+    }
+    
+    function omat($category = null, $type = null, $msg = array()){
+        $url = "kilpailutoiminta/omat/".$category;
         if(!($this->ion_auth->logged_in()))
         {
             $this->fuel->pages->render('misc/naytaviesti', array('msg_type' => 'danger', 'msg' => 'Kirjaudu sisään tarkastellaksesi omia tietojasi!'));
         }else {
+            
             $vars = array();
             $data = array();
             $user = $this->ion_auth->user()->row()->tunnus;
             
-            if($type == "etuuspisteet"){
+     
+            
+            if($category == "etuuspisteet"){
                  $jaosdata = array();
                 $tunnus = $this->ion_auth->user()->row()->tunnus;
                 $jaokset = $this->Jaos_model->get_jaos_list();
@@ -68,68 +85,126 @@ class Kilpailutoiminta extends CI_Controller
             }
             
             else {
-                if($type == "porrastetut"){
-                    $vars['headers'][1] = array('title' => 'ID', 'key' => 'kisa_id', 'prepend_text' => "#");    
-                    $vars['headers'][2] = array('title' => 'KP', 'key' => 'kp', 'type'=>'date');
-                    $vars['headers'][3] = array('title' => 'VIP', 'key' => 'vip', 'type'=>'date');
-                    $vars['headers'][4] = array('title' => 'Jaos', 'key' => 'jaoslyhenne');
-                    $vars['headers'][5] = array('title' => 'Järjestäjä', 'key' => 'jarj_talli', 'reknro', 'key_link' => site_url('virtuaalitallit/talli/'));
-                    $vars['headers'][6] = array('title'=> 'Kutsu', 'key'=>'kisa_id', 'type'=>'url', 'static_text'=>'Kutsu', 'key_link' => site_url('kilpailutoiminta/k/'));
-                    $vars['headers'][7] = array('title' => 'Info', 'key' => 'info', 'type'=>'small');
-                    $vars['headers'][8] = array('title' => 'Hyväksytty', 'key' => 'hyvaksytty', 'type'=>'date');
-                    
-                    $vars['data'] = json_encode($this->Kisakeskus_model->get_users_competitions($user, false, true, false, false, true));
-                    $vars['headers'] = json_encode($vars['headers']);        
-                    $data['kisat'] = $this->load->view('misc/taulukko', $vars, TRUE);
-
-                
-                } else {
-                    $vars['headers'][1] = array('title' => 'ID', 'key' => 'kisa_id', 'prepend_text' => "#");
-                    $vars['headers'][2] = array('title' => 'KP', 'key' => 'kp', 'type'=>'date');
-                    $vars['headers'][3] = array('title' => 'VIP', 'key' => 'vip', 'type'=>'date');
-                    $vars['headers'][4] = array('title' => 'Jaos', 'key' => 'jaoslyhenne');
-                    $vars['headers'][5] = array('title' => 'Järjestäjä', 'key' => 'jarj_talli', 'reknro', 'key_link' => site_url('virtuaalitallit/talli'));
-                    $vars['headers'][6] = array('title'=> 'Kutsu', 'key'=>'url', 'type'=>'url', 'static_text'=>"Kutsu");
-                    $vars['headers'][7] = array('title' => 'Info', 'key' => 'info', 'type'=>'small');
-                    
-                    if($type == "jonossa"){
-                       $vars['headers'][8] = array('title' => 'Anottu', 'key' => 'kisailmoitettu', 'type'=>'date');
-                       $vars['headers'][9] = array('title' => 'Poista', 'key' => 'kisa_id', 'key_link' => site_url($url) . "/".$type. "/delete/", 'image' => site_url('assets/images/icons/delete.png'));           
-                       $vars['data'] = json_encode($this->Kisakeskus_model->get_users_competitions($user, true, false, false, false));
-    
-                    }else if($type == "tulosjonossa"){
-                        $vars['headers'][8] = array('title' => 'Ilmoitettu', 'key' => 'tulosilmoitettu', 'type'=>'date');
-                        $vars['headers'][9] = array('title' => 'Poista', 'key' => 'kisa_id', 'key_link' => site_url($url) ."/". $type. "/delete/", 'image' => site_url('assets/images/icons/delete.png'));  
-                        $vars['data'] = json_encode($this->Kisakeskus_model->get_users_competitions($user, false, false, true, false));
-    
-                    }
-                    else if($type == "avoimet"){
-                        $vars['headers'][8] = array('title' => 'Ilmoita tulokset', 'key' => 'kisa_id', 'key_link' => site_url('kilpailutoiminta/ilmoita_tulokset/'), 'image' => site_url('assets/images/icons/medal_gold_add.png'));
-        
-                        $vars['data'] = json_encode($this->Kisakeskus_model->get_users_competitions($user, false, true, false, false, false));
-    
-                    
-                    }else if($type == "menneet"){
-                        $vars['headers'][6] = array('title' => 'Porrastettu', 'key' => 'porrastettu');
-                        $vars['headers'][7] = array('title' => 'Info', 'key' => 'info', 'type'=>'small');
-                        $vars['headers'][8] = array('title' => 'Tulos', 'key' => 'tulos_id', 'key_link'=> site_url('kilpailutoiminta/tulosarkisto/tulos/'));
-                        $vars['data'] = json_encode($this->Kisakeskus_model->get_users_competitions($user, false, false, false, true));
-    
-                    }
-                
-                    $vars['headers'] = json_encode($vars['headers']);        
-                    $data['kisat'] = $this->load->view('misc/taulukko', $vars, TRUE);
+                if($category == "nayttelyt"){
+                    $data['nayttelyt'] = $this->_omat_nayttelyt_list($type, $user, $url);
+  
                 }
-            
-            
-                        
+                else {
+                    $data['kisat'] = $this->_omat_kisat_list($type, $user, $url);
+
+                }
+                
                 $data['sivu'] = $type;
+                $data['category'] = $category;
+
                 $data['msg'] = $msg;
                 
                 $this->fuel->pages->render('kilpailutoiminta/omat_kilpailut', $data);
+
             }
+            
+            
 
         }
+    }
+    
+    private function _omat_kisat_list($type, $user, $url){
+        $vars = array();
+        
+        if($type == "porrastetut"){
+            $vars['headers'][1] = array('title' => 'ID', 'key' => 'kisa_id', 'prepend_text' => "#");    
+            $vars['headers'][2] = array('title' => 'KP', 'key' => 'kp', 'type'=>'date');
+            $vars['headers'][3] = array('title' => 'VIP', 'key' => 'vip', 'type'=>'date');
+            $vars['headers'][4] = array('title' => 'Jaos', 'key' => 'jaoslyhenne');
+            $vars['headers'][5] = array('title' => 'Järjestäjä', 'key' => 'jarj_talli', 'reknro', 'key_link' => site_url('virtuaalitallit/talli/'));
+            $vars['headers'][6] = array('title'=> 'Kutsu', 'key'=>'kisa_id', 'type'=>'url', 'static_text'=>'Kutsu', 'key_link' => site_url('kilpailutoiminta/k/'));
+            $vars['headers'][7] = array('title' => 'Info', 'key' => 'info', 'type'=>'small');
+            $vars['headers'][8] = array('title' => 'Hyväksytty', 'key' => 'hyvaksytty', 'type'=>'date');
+            
+            $vars['data'] = json_encode($this->Kisakeskus_model->get_users_competitions($user, false, true, false, false, true));
+    
+                    
+            }
+            else {
+                $vars['headers'][1] = array('title' => 'ID', 'key' => 'kisa_id', 'prepend_text' => "#");
+                $vars['headers'][2] = array('title' => 'KP', 'key' => 'kp', 'type'=>'date');
+                $vars['headers'][3] = array('title' => 'VIP', 'key' => 'vip', 'type'=>'date');
+                $vars['headers'][4] = array('title' => 'Jaos', 'key' => 'jaoslyhenne');
+                $vars['headers'][5] = array('title' => 'Järjestäjä', 'key' => 'jarj_talli', 'reknro', 'key_link' => site_url('virtuaalitallit/talli'));
+                $vars['headers'][6] = array('title'=> 'Kutsu', 'key'=>'url', 'type'=>'url', 'static_text'=>"Kutsu");
+                $vars['headers'][7] = array('title' => 'Info', 'key' => 'info', 'type'=>'small');
+                
+                if($type == "jonossa"){
+                   $vars['headers'][8] = array('title' => 'Anottu', 'key' => 'kisailmoitettu', 'type'=>'date');
+                   $vars['headers'][9] = array('title' => 'Poista', 'key' => 'kisa_id', 'key_link' => site_url($url) . "/".$type. "/delete/", 'image' => site_url('assets/images/icons/delete.png'));           
+                   $vars['data'] = json_encode($this->Kisakeskus_model->get_users_competitions($user, true, false, false, false));
+
+                }else if($type == "tulosjonossa"){
+                    $vars['headers'][8] = array('title' => 'Ilmoitettu', 'key' => 'tulosilmoitettu', 'type'=>'date');
+                    $vars['headers'][9] = array('title' => 'Poista', 'key' => 'kisa_id', 'key_link' => site_url($url) ."/". $type. "/delete/", 'image' => site_url('assets/images/icons/delete.png'));  
+                    $vars['data'] = json_encode($this->Kisakeskus_model->get_users_competitions($user, false, false, true, false));
+
+                }
+                else if($type == "avoimet"){
+                    $vars['headers'][8] = array('title' => 'Ilmoita tulokset', 'key' => 'kisa_id', 'key_link' => site_url('kilpailutoiminta/ilmoita_tulokset/'), 'image' => site_url('assets/images/icons/medal_gold_add.png'));
+                    $vars['data'] = json_encode($this->Kisakeskus_model->get_users_competitions($user, false, true, false, false, false));
+
+                
+                }
+                else if($type == "menneet"){
+                    $vars['headers'][6] = array('title' => 'Porrastettu', 'key' => 'porrastettu');
+                    $vars['headers'][7] = array('title' => 'Info', 'key' => 'info', 'type'=>'small');
+                    $vars['headers'][8] = array('title' => 'Tulos', 'key' => 'tulos_id', 'key_link'=> site_url('kilpailutoiminta/tulosarkisto/tulos/'));
+                    $vars['data'] = json_encode($this->Kisakeskus_model->get_users_competitions($user, false, false, false, true));
+
+                }
+            }
+        
+            
+            $vars['headers'] = json_encode($vars['headers']);        
+            return $this->load->view('misc/taulukko', $vars, TRUE);
+    }
+    
+    
+    private function _omat_nayttelyt_list($type, $user, $url){
+        $vars = array();
+
+        $vars['headers'][1] = array('title' => 'ID', 'key' => 'kisa_id', 'prepend_text' => "#");
+        $vars['headers'][2] = array('title' => 'KP', 'key' => 'kp', 'type'=>'date');
+        $vars['headers'][3] = array('title' => 'VIP', 'key' => 'vip', 'type'=>'date');
+        $vars['headers'][4] = array('title' => 'Jaos', 'key' => 'jaoslyhenne');
+        $vars['headers'][5] = array('title' => 'Järjestäjä', 'key' => 'jarj_talli', 'reknro', 'key_link' => site_url('virtuaalitallit/talli'));
+        $vars['headers'][6] = array('title'=> 'Kutsu', 'key'=>'url', 'type'=>'url', 'static_text'=>"Kutsu");
+        $vars['headers'][7] = array('title' => 'Info', 'key' => 'info', 'type'=>'small');
+        
+        if($type == "jonossa"){
+           $vars['headers'][8] = array('title' => 'Anottu', 'key' => 'kisailmoitettu', 'type'=>'date');
+           $vars['headers'][9] = array('title' => 'Poista', 'key' => 'kisa_id', 'key_link' => site_url($url) . "/".$type. "/delete/", 'image' => site_url('assets/images/icons/delete.png'));           
+           $vars['data'] = json_encode($this->Kisakeskus_model->get_users_shows($user, true, false, false, false));
+
+        }else if($type == "tulosjonossa"){
+            $vars['headers'][8] = array('title' => 'Ilmoitettu', 'key' => 'tulosilmoitettu', 'type'=>'date');
+            $vars['headers'][9] = array('title' => 'Poista', 'key' => 'kisa_id', 'key_link' => site_url($url) ."/". $type. "/delete/", 'image' => site_url('assets/images/icons/delete.png'));  
+            $vars['data'] = json_encode($this->Kisakeskus_model->get_users_shows($user, false, false, true, false));
+
+        }
+        else if($type == "avoimet"){
+            $vars['headers'][8] = array('title' => 'Ilmoita tulokset', 'key' => 'kisa_id', 'key_link' => site_url('kilpailutoiminta/ilmoita_tulokset/'), 'image' => site_url('assets/images/icons/medal_gold_add.png'));
+            $vars['data'] = json_encode($this->Kisakeskus_model->get_users_shows($user, false, true, false, false, false));
+
+        
+        }
+        else if($type == "menneet"){
+            $vars['headers'][6] = array('title' => 'Porrastettu', 'key' => 'porrastettu');
+            $vars['headers'][7] = array('title' => 'Info', 'key' => 'info', 'type'=>'small');
+            $vars['headers'][8] = array('title' => 'Tulos', 'key' => 'tulos_id', 'key_link'=> site_url('kilpailutoiminta/tulosarkisto/tulos/'));
+            $vars['data'] = json_encode($this->Kisakeskus_model->get_users_shows($user, false, false, false, true));
+
+        }
+        
+            
+        $vars['headers'] = json_encode($vars['headers']);        
+        return $this->load->view('misc/taulukko', $vars, TRUE);
     }
     
     function etuuspisteet(){
@@ -386,6 +461,34 @@ class Kilpailutoiminta extends CI_Controller
 /////////////////////////////////////////////////////////////////////////////////////////////////////77
 // KILPAILUKALENTERI
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
+
+function nayttelykalenteri (){
+
+	$vars['msg'] = '';
+		
+	$vars['text_view'] = "";
+        
+    $vars['headers'][1] = array('title' => 'KP', 'key' => 'kp', 'type'=>'date');
+    $vars['headers'][2] = array('title' => 'VIP', 'key' => 'vip', 'type'=>'date');
+    $vars['headers'][3] = array('title' => 'Jaos', 'key' => 'jaoslyhenne');
+    $vars['headers'][4] = array('title' => 'Järjestäjä', 'key' => 'jarj_talli', 'reknro', 'key_link' => site_url('virtuaalitallit/talli'));
+    $vars['headers'][5] = array('title'=> 'Kutsu', 'key'=>'url', 'type'=>'url', 'static_text'=>"Kutsu");
+    $vars['headers'][6] = array('title' => 'Info', 'key' => 'info', 'type'=>'small');
+    $vars['headers'][7] = array('title' => 'Hyväksytty', 'key' => 'hyvaksytty', 'type'=>'date');
+        
+   
+    $vars['headers'] = json_encode($vars['headers']);
+                
+    $vars['data'] = json_encode(    $this->Kisakeskus_model->get_calendar_show());
+
+	$vars['kalenteri'] = $this->load->view('misc/taulukko', $vars, TRUE);
+	
+    $vars['title'] = "Näyttelykalenteri";
+
+    $this->fuel->pages->render('kilpailutoiminta/nayttelykalenteri', $vars);
+    
+    
+}
 
 function kilpailukalenteri ($type = "perinteiset"){
 
@@ -701,6 +804,8 @@ private function _result_id_search_form($data = array()){
 
 
 public function ilmoita_kilpailut($type, $jaos_id = null){
+    $porrastettu = false;
+    $nayttelyt = false;
     if(!($this->ion_auth->logged_in()))
     {
         $this->fuel->pages->render('misc/naytaviesti', array('msg_type' => 'danger', 'msg' => 'Vain rekisteröityneet käyttäjät voivat ilmoittaa kilpailuja kalenteriin!'));
@@ -737,12 +842,12 @@ public function ilmoita_kilpailut($type, $jaos_id = null){
             $porrastettu = true;
 
             if ($this->input->server('REQUEST_METHOD') == 'POST'){
-                $this->_handle_competition_application($porrastettu, $kisa, $data, $jaos_id);
+                $this->_handle_competition_application($porrastettu, $nayttelyt, $kisa, $data, $jaos_id);
                 
             }
             
             $data['title'] = "Ilmoita porrastetut kilpailut";
-            $data['form'] = $this->kisajarjestelma->get_competition_application ('add', 'kilpailutoiminta/ilmoita_kilpailut/porrastetut/'.$jaos_id, true, $kisa, $jaos_id);
+            $data['form'] = $this->kisajarjestelma->get_competition_application ('add', 'kilpailutoiminta/ilmoita_kilpailut/porrastetut/'.$jaos_id, $porrastettu, $nayttelyt, $kisa, $jaos_id);
             $this->fuel->pages->render('misc/haku', $data);
         }
         
@@ -755,22 +860,41 @@ public function ilmoita_kilpailut($type, $jaos_id = null){
     else if ($type == "perinteiset"){
         $data = array();
         $kisa = array();
-        $porrastettu = false;
         
         if ($this->input->server('REQUEST_METHOD') == 'POST'){
-                $this->_handle_competition_application($porrastettu, $kisa, $data);
+                $this->_handle_competition_application($porrastettu, $nayttelyt,  $kisa, $data);
                 
         }
             
         $data['title'] = "Ilmoita perinteiset kilpailut";
-        $data['form'] = $this->kisajarjestelma->get_competition_application ('add', 'kilpailutoiminta/ilmoita_kilpailut/perinteiset', false, $kisa);
+        $data['form'] = $this->kisajarjestelma->get_competition_application ('add', 'kilpailutoiminta/ilmoita_kilpailut/perinteiset', $porrastettu, $nayttelyt, $kisa);
         $this->fuel->pages->render('misc/haku', $data);
 
     }
     
+    else if ($type == "nayttelyt"){
+        $data = array();
+        $kisa = array();
+        $nayttelyt = true;
+        
+        if ($this->input->server('REQUEST_METHOD') == 'POST'){
+                $this->_handle_competition_application($porrastettu, $nayttelyt, $kisa, $data);
+                
+        }
+            
+        $data['title'] = "Ilmoita näyttelyt";
+        $data['form'] = $this->kisajarjestelma->get_competition_application ('add', 'kilpailutoiminta/ilmoita_kilpailut/nayttelyt', $porrastettu, $nayttelyt, $kisa);
+        $this->fuel->pages->render('misc/haku', $data);
+
+    }
+    else
+    {
+        $this->fuel->pages->render('misc/naytaviesti', array('msg_type' => 'danger', 'msg' => 'Vain rekisteröityneet käyttäjät voivat ilmoittaa kilpailuja kalenteriin!'));
+    }
+    
 }
 
-private function _handle_competition_application($porrastettu, &$kisa, &$data, $jaos_id = null){
+private function _handle_competition_application($porrastettu, $nayttelyt, &$kisa, &$data, $jaos_id = null){
     $kisa = $this->kisajarjestelma->parse_competition_application();
     
     //jos kisa on porrastettu, jaos ei tule lomakkeelta ja lisätään erikseen
@@ -780,9 +904,10 @@ private function _handle_competition_application($porrastettu, &$kisa, &$data, $
     }else {
         $kisa['porrastettu'] = false;
     }
+    
     //varmistetaan loput tiedot
                 
-    if(!$this->kisajarjestelma->validate_competition_application($porrastettu)){
+    if(!$this->kisajarjestelma->validate_competition_application($porrastettu, $nayttelyt)){
         $data['msg_type'] = 'danger';
         $data['msg'] = "Virhe syötetyissä tiedoissa.";
         
@@ -792,7 +917,7 @@ private function _handle_competition_application($porrastettu, &$kisa, &$data, $
         $onnollattu = false;
         $direct = false;
         $sallitut = 0;
-        if(!$kisa['porrastettu']){
+        if(!$kisa['porrastettu'] && !$nayttelyt){
         
             //tsekataan etuuspisteet ihan ekana
             $etuuspisteet = $this->Jaos_model->GetEtuuspisteet($kisa['jaos'], $kisa['tunnus']);
@@ -811,14 +936,17 @@ private function _handle_competition_application($porrastettu, &$kisa, &$data, $
         }
         
         
-        if(!$kisa['porrastettu'] && $sallitut < 1){
+        if(!$kisa['porrastettu'] && !$nayttelyt && $sallitut < 1){
             $data['msg_type'] = 'danger';
             $data['msg'] = "Etuuspisteesi (".$ep."p) eivät riitä. Sinulla on kalenterissa ". $avoimet_kisat . " avointa kilpailua.";
         }                
         else if(!$this->kisajarjestelma->check_competition_info('add', $kisa, $msg, $direct, $onnollattu)){
             $data['msg_type'] = 'danger';
             $data['msg'] = $msg;
-        }else if (!$this->kisajarjestelma->add_new_competition($kisa, $msg, $direct)){
+        }else if (!$nayttelyt && !$this->kisajarjestelma->add_new_competition($kisa, $msg, $direct)){
+            $data['msg_type'] = 'danger';
+            $data['msg'] = $msg;
+        }else if ($nayttelyt && !$this->kisajarjestelma->add_new_show($kisa, $msg)){
             $data['msg_type'] = 'danger';
             $data['msg'] = $msg;
         }else {

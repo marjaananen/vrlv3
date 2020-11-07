@@ -7,9 +7,18 @@
 
    <ul class="nav nav-tabs">
       <li role="presentation" class="<?php if ($sivu == 'tiedot'){echo "active";}?>"><a href="<?php echo base_url($url . 'tiedot')?>">Tiedot</a></li>
+      <?php
+       if ($jaos['nayttelyt'] == 0){
+        
+        ?>
+      
       <li role="presentation" class="<?php if ($sivu == 'saannot'){echo "active";}?>"><a href="<?php echo base_url($url . 'saannot')?>">Säännot</a></li>
       <li role="presentation" class="<?php if ($sivu == 'luokat'){echo "active";}?>"><a href="<?php echo base_url($url . 'luokat')?>">Luokat</a></li>
       <li role="presentation" class="<?php if ($sivu == 'ominaisuudet'){echo "active";}?>"><a href="<?php echo base_url($url . 'ominaisuudet')?>">Ominaisuudet</a></li>
+      
+      <?php
+       }
+       ?>
       <li role="presentation" class="<?php if ($sivu == 'omistajat'){echo "active";}?>"><a href="<?php echo base_url($url . 'omistajat')?>">Ylläpito</a></li>
       <li role="presentation" class="<?php if ($sivu == 'online'){echo "active";}?>"><a href="<?php echo base_url($url . 'online')?>">Toiminnassa</a></li>
     </ul>

@@ -19,7 +19,7 @@ $nav['tallit'] = array('label' => 'Virtuaalitallit', 'active' => 'tallit$|tallit
 $nav['virtuaalihevoset'] = array('label' => 'Virtuaalihevoset', 'active' => 'virtuaalihevoset$|virtuaalihevoset/:any'); //Koodattavaa: Hevoshaku
 $nav['kasvatus'] = array('label' => 'Kasvatus', 'active' => 'kasvatus$|kasvatus/:any'); //Koodattavaa: Hevoshaku
 $nav['kilpailutoiminta'] = 'Kilpailutoiminta';
-$nav['nayttelytoiminta'] = 'Näyttelytoiminta';
+$nav['muutoiminta'] = 'Muu toiminta';
 //Piilotetut
 $nav['yllapito'] = array('label'=>'Ylläpito', 'hidden'=> TRUE, 'active' => 'yllapito$|yllapito/:any');
 $nav['profiili'] = array('label'=>'Profiili', 'hidden'=> TRUE, 'active' => 'profiili');
@@ -63,43 +63,69 @@ $nav['kasvatus/varilaskuri'] = array('label' => 'Periytymislaskuri', 'parent_id'
 
 //kantakirjat, laatikset, rekkaa kasvinimi
 //kilpailutoiminta alamenu
+$nav['kilpailutoiminta/nayttelykalenteri'] = array('label' => 'Näyttelykalenteri', 'parent_id' => 'kilpailutoiminta', 'active' => 'kilpailutoiminta/nayttelykalenteri');
 $nav['kilpailutoiminta/kilpailukalenteri'] = array('label' => 'Kilpailukalenteri', 'parent_id' => 'kilpailutoiminta', 'active' => 'kilpailutoiminta/kilpailukalenteri');
 $nav['kilpailutoiminta/kilpailukalenteri/porrastetut'] = array('label' => 'Porrastetut', 'hidden'=>TRUE, 'parent_id' => 'kilpailutoiminta/kilpailukalenteri', 'active' => 'kilpailutoiminta/kilpailukalenteri/porrastetut');
-
 $nav['kilpailutoiminta/kilpailukalenteri/k'] = array('label' => 'Kilpailukutsu', 'hidden'=>TRUE, 'parent_id' => 'kilpailutoiminta/kilpailukalenteri/porrastetut', 'active' => 'kilpailutoiminta/k|kilpailutoiminta/k/:any');
 
-$nav['kilpailutoiminta/tulosarkisto'] = array('label' => 'Tulosarkisto', 'parent_id' => 'kilpailutoiminta', 'active' => 'kilpailutoiminta/tulosarkisto');
 
+$nav['kilpailutoiminta/tulosarkisto'] = array('label' => 'Tulosarkisto', 'parent_id' => 'kilpailutoiminta', 'active' => 'kilpailutoiminta/tulosarkisto');
 $nav['kilpailutoiminta/kilpailujaokset'] = array('label' => 'Jaokset', 'parent_id' => 'kilpailutoiminta', 'active' => 'kilpailutoiminta/jaokset');
+
 $nav['kilpailutoiminta/kilpailusaannot'] = array('label' => 'Yleiset kilpailusäännöt', 'parent_id' => 'kilpailutoiminta', 'active' => 'kilpailutoiminta/kilpailusaannot');
+$nav['kilpailutoiminta/porrastetut'] = array('label' => 'Porrastetut kilpailut', 'parent_id' => 'kilpailutoiminta/kilpailusaannot', 'active' => 'kilpailutoiminta/kilpailusaannot/porrastetut');
+$nav['kilpailutoiminta/porrastetut/luokat'] = array('label' => 'Luokat', 'parent_id' => 'kilpailutoiminta/porrastetut', 'active' => 'kilpailutoiminta/kilpailusaannot/porrastetut/luokat');
+$nav['kilpailutoiminta/porrastetut/kilpailulistat'] = array('label' => 'Kilpailulistat', 'parent_id' => 'kilpailutoiminta/porrastetut', 'active' => 'kilpailutoiminta/kilpailusaannot/porrastetut/kilpailulistat');
+
+
+$nav['kilpailutoiminta/nayttelysaannot'] = array('label' => 'Näyttelyiden järjestäminen', 'parent_id' => 'kilpailutoiminta/kilpailusaannot', 'active' => 'kilpailutoiminta/nayttelysaannot');
+$nav['kilpailutoiminta/kilpailujarjestaminen'] = array('label' => 'Kilpailujen järjestäminen', 'parent_id' => 'kilpailutoiminta/kilpailusaannot', 'active' => 'kilpailutoiminta/kilpailujarjestaminen');
 $nav['kilpailutoiminta/etuuspisteet'] = array('label' => 'Etuuspisteet', 'parent_id' => 'kilpailutoiminta/kilpailusaannot', 'active' => 'kilpailutoiminta/etuuspisteet');
-$nav['kilpailutoiminta/porrastetut'] = array('label' => 'Porrastetut kilpailut', 'parent_id' => 'kilpailutoiminta', 'active' => 'kilpailutoiminta/porrastetut');
-$nav['kilpailutoiminta/porrastetut/luokat'] = array('label' => 'Luokat', 'parent_id' => 'kilpailutoiminta/porrastetut', 'active' => 'kilpailutoiminta/porrastetut/luokat');
-$nav['kilpailutoiminta/porrastetut/kilpailulistat'] = array('label' => 'Kilpailulistat', 'parent_id' => 'kilpailutoiminta/porrastetut', 'active' => 'kilpailutoiminta/porrastetut/kilpailulistat');
+
 
 
 $nav['kilpailutoiminta/omat'] = array('label' => 'Omat kilpailut', 'parent_id' => 'kilpailutoiminta', 'active' => 'kilpailutoiminta/omat');
-$nav['kilpailutoiminta/omat/porrastetut'] = array('hidden'=>true, 'label' => 'Avoimet (Porrastetut)', 'parent_id' => 'kilpailutoiminta/omat', 'active' => 'kilpailutoiminta/omat/porrastetut');
-$nav['kilpailutoiminta/omat/avoimet'] = array('hidden'=>true, 'label' => 'Avoimet (Perinteiset)', 'parent_id' => 'kilpailutoiminta/omat', 'active' => 'kilpailutoiminta/omat/avoimet');
-$nav['kilpailutoiminta/omat/jonossa'] = array('hidden'=>true, 'label' => 'Kutsujonossa', 'parent_id' => 'kilpailutoiminta/omat', 'active' => 'kilpailutoiminta/omat/jonossa$|kilpailutoiminta/omat/jonossa/:any');
-$nav['kilpailutoiminta/omat/tulosjonossa'] = array('hidden'=>true, 'label' => 'Tulosjonossa', 'parent_id' => 'kilpailutoiminta/omat', 'active' => 'kilpailutoiminta/omat/tulosjonossa$|kilpailutoiminta/omat/tulosjonossa/:any');
-$nav['kilpailutoiminta/omat/menneet'] = array('hidden'=>true, 'label' => 'Tulokselliset', 'parent_id' => 'kilpailutoiminta/omat', 'active' => 'kilpailutoiminta/omat/menneet');
+$nav['kilpailutoiminta/omat/kisat'] = array('label' => 'Kilpailut', 'hidden'=>'true', 'parent_id' => 'kilpailutoiminta/omat', 'active' => 'kilpailutoiminta/omat/kisat');
+$nav['kilpailutoiminta/omat/nayttelyt'] = array('label' => 'Näyttelyt', 'hidden'=>'true', 'parent_id' => 'kilpailutoiminta/omat', 'active' => 'kilpailutoiminta/omat/nayttelyt');
+
+$nav['kilpailutoiminta/omat/kisat/porrastetut'] = array('hidden'=>true, 'label' => 'Avoimet (Porrastetut)', 'parent_id' => 'kilpailutoiminta/omat/kisat', 'active' => 'kilpailutoiminta/omat/kisat/porrastetut');
+$nav['kilpailutoiminta/omat/kisat/avoimet'] = array('hidden'=>true, 'label' => 'Avoimet (Perinteiset)', 'parent_id' => 'kilpailutoiminta/omat/kisat', 'active' => 'kilpailutoiminta/omat/kisat/avoimet');
+$nav['kilpailutoiminta/omat/kisat/jonossa'] = array('hidden'=>true, 'label' => 'Kutsujonossa', 'parent_id' => 'kilpailutoiminta/omat/kisat', 'active' => 'kilpailutoiminta/omat/kisat/jonossa$|kilpailutoiminta/omat/kisat/jonossa/:any');
+$nav['kilpailutoiminta/omat/kisat/tulosjonossa'] = array('hidden'=>true, 'label' => 'Tulosjonossa', 'parent_id' => 'kilpailutoiminta/omat/kisat', 'active' => 'kilpailutoiminta/omat/kisat/tulosjonossa$|kilpailutoiminta/omat/kisat/tulosjonossa/:any|kilpailutoiminta/omat/kisat/tulosjonossa/:any/:any|');
+$nav['kilpailutoiminta/omat/kisat/menneet'] = array('hidden'=>true, 'label' => 'Tulokselliset', 'parent_id' => 'kilpailutoiminta/omat/kisat', 'active' => 'kilpailutoiminta/omat/kisat/menneet');
+
+$nav['kilpailutoiminta/omat/nayttelyt/avoimet'] = array('hidden'=>true, 'label' => 'Avoimet (Perinteiset)', 'parent_id' => 'kilpailutoiminta/omat/nayttelyt', 'active' => 'kilpailutoiminta/omat/nayttelyt/avoimet');
+$nav['kilpailutoiminta/omat/nayttelyt/jonossa'] = array('hidden'=>true, 'label' => 'Kutsujonossa', 'parent_id' => 'kilpailutoiminta/omat/nayttelyt', 'active' => 'kilpailutoiminta/omat/nayttelyt/jonossa$|kilpailutoiminta/omat/nayttelyt/jonossa/:any');
+$nav['kilpailutoiminta/omat/nayttelyt/tulosjonossa'] = array('hidden'=>true, 'label' => 'Tulosjonossa', 'parent_id' => 'kilpailutoiminta/omat/nayttelyt', 'active' => 'kilpailutoiminta/omat/nayttelyt/tulosjonossa$|kilpailutoiminta/omat/tulosjonossa/:any');
+$nav['kilpailutoiminta/omat/nayttelyt/menneet'] = array('hidden'=>true, 'label' => 'Tulokselliset', 'parent_id' => 'kilpailutoiminta/omat/nayttelyt', 'active' => 'kilpailutoiminta/omat/nayttelyt/menneet');
+
+
+
 
 $nav['kilpailutoiminta/omat/etuuspisteet'] = array('label' => 'Omat etuuspisteet', 'parent_id' => 'kilpailutoiminta/omat', 'active' => 'kilpailutoiminta/omat/etuuspisteet');
 
 $nav['kilpailutoiminta/ilmoita_kilpailut/porrastetut'] = array('label' => 'Järjestä porrastetut kilpailut', 'parent_id' => 'kilpailutoiminta/omat', 'active' => 'kilpailutoiminta/ilmoita_kilpailut/porrastetut$|kilpailutoiminta/ilmoita_kilpailut/porrastetut/:any');
 $nav['kilpailutoiminta/ilmoita_kilpailut/perinteiset'] = array('label' => 'Järjestä perinteiset kilpailut', 'parent_id' => 'kilpailutoiminta/omat', 'active' => 'kilpailutoiminta/ilmoita_kilpailut/perinteiset');
-$nav['kilpailutoiminta/ilmoita_tulokset'] = array('label' => 'Ilmoita tulokset', 'parent_id' => 'kilpailutoiminta/omat', 'active' => 'kilpailutoiminta/ilmoita_tulokset');
+$nav['kilpailutoiminta/ilmoita_kilpailut/nayttelyt'] = array('label' => 'Järjestä näyttelyt', 'parent_id' => 'kilpailutoiminta/omat', 'active' => 'kilpailutoiminta/ilmoita_kilpailut/nayttelyt');
+
+$nav['kilpailutoiminta/ilmoita_tulokset/kisat'] = array('label' => 'Ilmoita kisatulokset', 'parent_id' => 'kilpailutoiminta/omat', 'active' => 'kilpailutoiminta/ilmoita_tulokset/kisat');
+$nav['kilpailutoiminta/ilmoita_tulokset/nayttelyt'] = array('label' => 'Ilmoita näyttelytulokset', 'parent_id' => 'kilpailutoiminta/omat', 'active' => 'kilpailutoiminta/ilmoita_tulokset/nayttelyt');
+
+
+$nav['muutoiminta/kantakirjat'] = array('label' => 'Kantakirjat', 'parent_id' => 'muutoiminta', 'active' => 'muutoiminta/kantakirjat');
+$nav['muutoiminta/yhdistykset'] = array('label' => 'Yhdistykset', 'parent_id' => 'muutoiminta', 'active' => 'muutoiminta/yhdistykset');
+$nav['muutoiminta/laatuarvostelut'] = array('label' => 'Laatuarvostelut', 'parent_id' => 'muutoiminta', 'active' => 'muutoiminta/laatuarvostelut');
+
 
 
 //porrastettujen jutut, anomisen jutut jne jne
 //nayttelytoiminta alamenu
-$nav['kilpailutoiminta/saannot'] = array('label' => 'Näyttelysäännöt', 'parent_id' => 'nayttelytoiminta', 'active' => 'nayttelytoiminta/saannot');
+/*$nav['kilpailutoiminta/saannot'] = array('label' => 'Näyttelysäännöt', 'parent_id' => 'nayttelytoiminta', 'active' => 'nayttelytoiminta/saannot');
 $nav['kilpailutoiminta/nayttelykalenteri'] = array('label' => 'Näyttelykalenteri', 'parent_id' => 'nayttelytoiminta', 'active' => 'nayttelytoiminta/nayttelykalenteri');
 $nav['kilpailutoiminta/bislista'] = array('label' => 'BIS-lista', 'parent_id' => 'nayttelytoiminta', 'active' => 'nayttelytoiminta/bislista');
 $nav['kilpailutoiminta/nayttelyiden-kermaa'] = array('label' => 'Näyttelyiden kermaa', 'parent_id' => 'nayttelytoiminta', 'active' => 'nayttelytoiminta/nayttelyiden-kermaa');
 $nav['kilpailutoiminta/jarjestaminen'] = array('label' => 'Näyttelyiden järjestäminen', 'parent_id' => 'nayttelytoiminta', 'active' => 'nayttelytoiminta/jarjestaminen');
-
+*/
 // ylläpito alamenu
 $nav['yllapito/tiedotukset'] = array('label' => 'Tiedotukset', 'parent_id' => 'yllapito', 'active' => 'yllapito/tiedotukset');
 $nav['yllapito/tunnukset'] = array('label' => 'Tunnukset', 'parent_id' => 'yllapito', 'active' => 'yllapito/tunnukset');

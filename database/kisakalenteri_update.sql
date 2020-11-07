@@ -98,9 +98,9 @@ CREATE TABLE `vrlv3_kisat_kisakalenteri` (
 
 
 
-insert into vrlv3_kisat_kisakalenteri (kisa_id, vip, laji, jaos, url, info, tunnus, jarj_talli, 
+insert into vrlv3_kisat_kisakalenteri (kisa_id, kp, vip, laji, jaos, url, info, tunnus, jarj_talli, 
 jarj_seura, arvontatapa, takaaja, ilmoitettu, seuralle, hyvaksytty, kasitelty, tulokset, hyvaksyi, seura_hyv, siirretty, vanha, porrastettu)
-select kisa_id, vip, laji, jaos, url, info, tunnus, jarj_talli, 
+select kisa_id, kp, vip, laji, jaos, url, info, tunnus, jarj_talli, 
 jarj_seura, arvontatapa, takaaja, ilmoitettu, seuralle, hyvaksytty, kasitelty, tulokset, hyvaksyi, seura_hyv, siirretty, vanha, porrastettu from kisat_kisakalenteri;
 
   ALTER TABLE `vrlv3`.`vrlv3_kisat_kisakalenteri` 

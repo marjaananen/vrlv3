@@ -93,7 +93,9 @@ CREATE TABLE `vrlv3_lista_painotus` (
 
 LOCK TABLES `vrlv3_lista_painotus` WRITE;
 /*!40000 ALTER TABLE `vrlv3_lista_painotus` DISABLE KEYS */;
-INSERT INTO `vrlv3_lista_painotus` VALUES (1,'esteratsastus','re.'),(2,'kouluratsastus','ko.'),(3,'kenttäratsastus','kent.'),(4,'matkaratsastus','matk.'),(5,'lännenratsastus','länn.'),(6,'valjakkoajo','valj.'),(7,'askellajiratsastus','askel'),(8,'ravit','ravit'),(9,'työhevosajo','työh.'),(10,'laukat','lauk.');
+INSERT INTO `vrlv3_lista_painotus` VALUES (1,'esteratsastus','re.'),(2,'kouluratsastus','ko.'),(3,'kenttäratsastus','kent.'),
+(4,'matkaratsastus','matk.'),(5,'lännenratsastus','länn.'),(6,'valjakkoajo','valj.'),(7,'askellajiratsastus','askel'),(8,'ravit','ravit'),
+(9,'työhevosajo','työh.'),(10,'laukat','lauk.'), (11, 'näyttelyt', 'n.');
 /*!40000 ALTER TABLE `vrlv3_lista_painotus` ENABLE KEYS */;
 UNLOCK TABLES;
 

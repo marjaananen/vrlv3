@@ -105,10 +105,18 @@ $route['yllapito/kalenterit/porrastetut_run'] = "yllapito_kalenterit/porrastetut
 
 
 
-$route['kilpailutoiminta/ilmoita_tulokset'] = "kilpailutoiminta/omat/avoimet";
-$route['kilpailutoiminta/ilmoita_tulokset/(:any)'] = "kilpailutoiminta/ilmoita_tulokset/$1";
-$route['kilpailutoiminta/omat/tulosjonossa/delete/(:any)'] = "kilpailutoiminta/omat_delete/tulos/$1";
-$route['kilpailutoiminta/omat/jonossa/delete/(:any)'] = "kilpailutoiminta/omat_delete/kisa/$1";
+$route['kilpailutoiminta/ilmoita_tulokset'] = "kilpailutoiminta/omat/kisat/avoimet";
+$route['kilpailutoiminta/ilmoita_tulokset/kisat'] = "kilpailutoiminta/omat/kisat/avoimet";
+$route['kilpailutoiminta/ilmoita_tulokset/nayttelyt'] = "kilpailutoiminta/omat/nayttelyt/avoimet";
+
+$route['kilpailutoiminta/ilmoita_tulokset/kisat/(:any)'] = "kilpailutoiminta/ilmoita_tulokset/$1";
+$route['kilpailutoiminta/ilmoita_tulokset/nayttelyt/(:any)'] = "kilpailutoiminta/ilmoita_tulokset/$1";
+
+$route['kilpailutoiminta/omat/kisat/tulosjonossa/delete/(:any)'] = "kilpailutoiminta/omat_delete/tulos/$1";
+$route['kilpailutoiminta/omat/kisat/jonossa/delete/(:any)'] = "kilpailutoiminta/omat_delete/kisa/$1";
+
+$route['kilpailutoiminta/omat/nayttelyt/tulosjonossa/delete/(:any)'] = "kilpailutoiminta/omat_delete/tulos/$1";
+$route['kilpailutoiminta/omat/nayttelyt/jonossa/delete/(:any)'] = "kilpailutoiminta/omat_delete/kisa/$1";
 
 
 

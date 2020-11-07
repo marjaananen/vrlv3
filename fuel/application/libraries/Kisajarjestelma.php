@@ -24,9 +24,13 @@ class Kisajarjestelma
     }
 
     
-    public function nayttelyjaos($jaos_id){
-        //todo tarkempi selvitys
-         if ( $jaos_id == 7 ) { return true;}
+    public function nayttelyjaos($jaos_id, $jaos = array()){
+        
+        if(!isset($jaos['nayttelyt'])){
+            $jaos = $this->CI->Jaos_model->get_jaos($jaos_id);
+        }
+        
+         if ( $jaos['nayttelyt'] == 1 ) { return true;}
          else { return false;}
     }
     
@@ -137,22 +141,31 @@ class Kisajarjestelma
     
     //kisapäivämäärät
     
-    public function competition_date_days_from_vip(){
-        return 1;
+    public function competition_date_days_from_vip($nayttelyt = false){
+        if ($nayttelyt){
+            return 7;
+        }else {
+            return 1;
+        }
     }
     
-    public function competition_date_max(){
+    public function competition_date_max($nayttelyt = false){
       $lastDateOfNextMonth =strtotime('last day of next month') ;
       return date('Y-m-d', $lastDateOfNextMonth);
     }
     
-    public function competition_date_min($vip_date){
-     return date('Y-m-d', strtotime($vip_date.' + '.$this->competition_date_days_from_vip().' day'));
+    public function competition_date_min($vip_date, $nayttelyt = false){
+     return date('Y-m-d', strtotime($vip_date.' + '.$this->competition_date_days_from_vip($nayttelyt).' day'));
     }
     
-    public function competition_vip_date_normal_min(){
+    public function competition_vip_date_normal_min($nayttelyt = false){
         $date = date('Y-m-d');
-        return date('Y-m-d', strtotime($date.' + 14 days'));
+        if($nayttelyt){
+          return date('Y-m-d', strtotime($date.' + 4 days'));
+
+        }else {
+            return date('Y-m-d', strtotime($date.' + 14 days'));
+        }
     }
     
     public function competition_vip_date_direct_min(){
@@ -396,7 +409,7 @@ class Kisajarjestelma
     // Kisojen anonta
     ///////////////////////////////////////////////////////////////////////////////
     
-    function get_competition_application ($mode = "add", $url,  $porrastettu = false, $event = array(), $jaos_id = null){
+    function get_competition_application ($mode = "add", $url,  $porrastettu = false, $nayttelyt = false, $event = array(), $jaos_id = null){
       
       $this->CI->load->library('form_builder', array('submit_value' => 'Ilmoita kilpailu'));
       $this->CI->load->library("vrl_helper");
@@ -429,19 +442,24 @@ class Kisajarjestelma
 
       
       $fields = array();
-        if($mode == "add" && !$porrastettu){
-        $jaos_options = $this->CI->Jaos_model->get_jaos_option_list(true);
+    if($mode == "add" && !$porrastettu){
+        $jaos_options = $this->CI->Jaos_model->get_jaos_option_list(true, $porrastettu, !$nayttelyt, $nayttelyt);
+
         $fields['jaos'] = array('type' => 'select', 'options' => $jaos_options, 'value' => $event['jaos'] ?? -1, 'class'=>'form-control');
+        
       }
       
       $viptext = "";
-      $comptext = "Vähintään ". $this->competition_date_days_from_vip() . " päivää viimeisen ilmoittautumispäivän jälkeen. Korkeintaan " . date('d.m.Y', strtotime($this->competition_date_max())) .".";
+      $comptext = "Vähintään ". $this->competition_date_days_from_vip($nayttelyt) . " päivää viimeisen ilmoittautumispäivän jälkeen.
+      Korkeintaan " . date('d.m.Y', strtotime($this->competition_date_max($nayttelyt))) .".";
       
       if($porrastettu){
         $viptext = "Tänään ilmoitetulla kilpailulla aikaisintaan ".date('d.m.Y', strtotime($this->competition_vip_date_leveled_min())).".";
       }else {
-            $viptext = "Tänään ilmoitetulla kilpailulla aikaisintaan ".date('d.m.Y', strtotime($this->competition_vip_date_normal_min()))
-            ." (poikkeuksena suoraan kalenteriin menevillä kilpailuilla aikaisintaan ". date('d.m.Y', strtotime($this->competition_vip_date_direct_min())) . ")";
+            $viptext = "Tänään ilmoitetulla kilpailulla aikaisintaan ".date('d.m.Y', strtotime($this->competition_vip_date_normal_min($nayttelyt)));
+            if(!$nayttelyt){
+                $viptext = $viptext ." (poikkeuksena suoraan kalenteriin menevillä kilpailuilla aikaisintaan ". date('d.m.Y', strtotime($this->competition_vip_date_direct_min())) . ")";
+            }
       }
       if($mode == "add"){
         $fields['kp'] = array('type' => 'date', 'first-day' => 1, 'date_format'=>'d.m.Y', 'label'=>'Päivämäärä', 'class'=>'form-control', 'required' => TRUE,
@@ -450,9 +468,11 @@ class Kisajarjestelma
                                'required' => TRUE, 'value' => $event['vip'] ?? "", 'after_html'=> '<span class="form_comment">'.$viptext.'</span>');
       }
       if(!$porrastettu){
-        $arvontatapa_options = $this->arvontatavat_options();
-        $fields['url'] = array('type' => 'text', 'class'=>'form-control', 'required' => TRUE, 'value' => $event['url'] ?? "http://");
-        $fields['arvontatapa'] = array('type' => 'select', 'options' => $arvontatapa_options, 'value' => $event['arvontatapa'] ?? 1, 'class'=>'form-control', 'required' => TRUE);
+        $fields['url'] = array('type' => 'text', 'label'=>'Kutsu','class'=>'form-control', 'required' => TRUE, 'value' => $event['url'] ?? "http://");
+        if(!$nayttelyt){
+            $arvontatapa_options = $this->arvontatavat_options();
+            $fields['arvontatapa'] = array('type' => 'select', 'options' => $arvontatapa_options, 'value' => $event['arvontatapa'] ?? 1, 'class'=>'form-control', 'required' => TRUE);
+        }
       }
       
       if($mode == "add"){
@@ -490,23 +510,24 @@ class Kisajarjestelma
 
     }
     
-    public function validate_competition_application($porrastettu = false, $new = true){
+    public function validate_competition_application($porrastettu = false, $nayttelyt = false, $new = true){
     
       $this->CI->load->library('form_validation');
-            if($new){
-
-      $this->CI->form_validation->set_rules('kp', 'Kisapäivä', 'min_length[10]|max_length[10]|required');
-      $this->CI->form_validation->set_rules('vip', 'Viimeinen ilmoittautumispäivä', 'min_length[10]|max_length[10]|required');
-         $this->CI->form_validation->set_rules('jarj_talli', 'Talli', 'min_length[6]|max_length[10]|required');
-      }
-      $this->CI->form_validation->set_rules('info', 'Info', 'min_length[5]|max_length[300]');
+        if($new){
+            $this->CI->form_validation->set_rules('kp', 'Kisapäivä', 'min_length[10]|max_length[10]|required');
+            $this->CI->form_validation->set_rules('vip', 'Viimeinen ilmoittautumispäivä', 'min_length[10]|max_length[10]|required');
+            $this->CI->form_validation->set_rules('jarj_talli', 'Talli', 'min_length[6]|max_length[10]|required');
+          }
+        $this->CI->form_validation->set_rules('info', 'Info', 'min_length[5]|max_length[300]');
 
       
        if(!$porrastettu){
         if($new){
             $this->CI->form_validation->set_rules('jaos', 'Jaos', 'min_length[1]|max_length[3]|numeric|required');
         }
-            $this->CI->form_validation->set_rules('arvontatapa', 'Arvontatapa', 'min_length[1]|max_length[3]|numeric|required');
+            if(!$nayttelyt){
+                $this->CI->form_validation->set_rules('arvontatapa', 'Arvontatapa', 'min_length[1]|max_length[3]|numeric|required');
+            }
             $this->CI->form_validation->set_rules('url', 'Kutsun osoite', 'min_length[15]|max_length[300]|required');
 
 
@@ -607,18 +628,19 @@ public function check_competition_edit_info($kisa, &$msg){
     
 public function check_competition_info($mode = "add", &$kisa, &$msg, $direct = false, $nollattu = false){
     
+    $nayttelyt = false;    
     if($mode == "add" ){
         if($kisa['porrastettu']){
             $kisa['arvontatapa'] = 3;
         }
         else if($this->nayttelyjaos($kisa['jaos'])){
             $kisa['arvontatapa'] = 5;
+            $nayttelyt = true;
         }
-
-        
+    
 
         //jos kisa ei ole porrastettu tai näyttely, ja lisäävän käyttäjän pisteet on nollattu, pitää olla oikea takaaja.
-        if (!$kisa['porrastettu'] && !$this->nayttelyjaos($kisa['jaos']) && $mode == "add" && $nollattu
+        if (!$kisa['porrastettu'] && !$nayttelyt && $mode == "add" && $nollattu
                  && !(isset($kisa['takaaja']) && $kisa['takaaja'] != $kisa['tunnus'] && $this->CI->vrl_helper->check_vrl_syntax($kisa['takaaja'])
                      && $this->CI->Tunnukset_model->onko_tunnus($this->CI->vrl_helper->vrl_to_number($kisa['takaaja'])))){
             $msg = "Tarvitset kilpailullesi takaajan. Sen tulee olla olemassaoleva VRL-tunnus";
@@ -654,7 +676,7 @@ public function check_competition_info($mode = "add", &$kisa, &$msg, $direct = f
             $msg = 'Porrastettujen kilpailujen viimeinen ilmoittautumispäivä on liian lähellä nykyhetkeä.';
             return false;
             }
-        }else if(!$this->nayttelyjaos($kisa['jaos'])) {
+        }else if(!$nayttelyt) {
             //perinteiset menevät kalenteriin omalla tavallaan
             if($direct && $vip_date < $this->competition_vip_date_direct_min()){
                 $msg = 'Suoraan kalenteriin menevän perinteisen kilpailun viimeinen ilmoittautumispäivä on liian lähellä nykyhetkeä.';
@@ -665,15 +687,18 @@ public function check_competition_info($mode = "add", &$kisa, &$msg, $direct = f
             }
             
         } else {
-            //TODO: Miten näyttelyjaos tarkastetaan?
+            if(!$direct && $vip_date < $this->competition_vip_date_normal_min($nayttelyt)){
+                $msg = 'Näyttelyn viimeinen ilmoittautumispäivä on liian lähellä nykyhetkeä.';
+                return false;
+            }
         }
         
-        if($comp_date < $this->competition_date_min($vip_date)){
-            $msg = 'Kisapäivän pitää olla vasta viimeisen ilmoittautumispäivän jälkeen.';
+        if($comp_date < $this->competition_date_min($vip_date, $nayttelyt)){
+            $msg = 'Kisapäivän pitää olla vasta viimeisen ilmoittautumispäivän jälkeen ('. $comp_date . ' < ' . $this->competition_date_min($vip_date, $nayttelyt) . ')';
             return false;
         }
         
-        if( !($comp_date == $this->competition_date_max() || $comp_date < $this->competition_date_max())){
+        if( !($comp_date == $this->competition_date_max($nayttelyt) || $comp_date < $this->competition_date_max($nayttelyt))){
             $msg = 'Kisapäivä saa olla korkeintaan seuraavan kuun lopussa ('. $comp_date . ' < ' . $this->competition_date_max() . ')';
             return false;
         }
@@ -752,6 +777,12 @@ public function check_competition_info($mode = "add", &$kisa, &$msg, $direct = f
             unset($kutsu['luokat']);
         }
         return $this->CI->Kisakeskus_model->insertNewCompetition($kutsu, $luokat, $direct, $msg);
+    }
+    
+    
+    public function add_new_show($kutsu, &$msg){
+        $this->CI->load->model('Kisakeskus_model');
+        return $this->CI->Kisakeskus_model->insertNewShow($kutsu, $msg);
     }
     
     public function edit_competition($id, $jaos, $kutsu_new, $msg){
