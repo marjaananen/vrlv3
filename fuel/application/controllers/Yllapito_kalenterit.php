@@ -514,7 +514,10 @@ private function _read_basic_input_field(&$data, $field){
         $msg = "";
         
         if(empty($jaos)){
-            $data['jaokset'] = $this->Jaos_model->get_jaos_list();
+            $only_active = false;
+         $skip_shows = false;
+        $only_leveled = false;
+        $data['jaokset'] = $this->Jaos_model->get_jaos_list($only_active, $only_leveled, $skip_shows);
             $data['url'] = $this->url;
             
             foreach ($data['jaokset'] as &$jaos){
@@ -594,7 +597,10 @@ private function _read_basic_input_field(&$data, $field){
         $msg = "";
         
         if(empty($jaos)){
-            $data['jaokset'] = $this->Jaos_model->get_jaos_list();
+            $only_active = false;
+        $skip_shows = false;
+        $only_leveled = false;
+        $data['jaokset'] = $this->Jaos_model->get_jaos_list($only_active, $only_leveled, $skip_shows);
             $data['url'] = $this->url;
             
             foreach ($data['jaokset'] as &$jaos){

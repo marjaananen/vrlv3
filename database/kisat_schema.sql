@@ -318,6 +318,37 @@ CREATE TABLE `vrlv3`.`vrlv3_hevosrekisteri_ominaisuudet_jonossa` (
     ON UPDATE CASCADE);
 
 
+CREATE TABLE `vrlv3_kisat_jaokset_palkinnot` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `kuvaus` text NOT NULL,
+  `jaos` int(11) NOT NULL,
+  `palkinto` varchar(32) NOT NULL,
+  `kaytossa` tinyint(3) unsigned NOT NULL DEFAULT '1',
+  `jarjnro` int(3) unsigned NOT NULL DEFAULT '999',
+  PRIMARY KEY (`id`),
+  KEY `jaos_idxi` (`jaos`),
+  CONSTRAINT `jaos_linki` FOREIGN KEY (`jaos`) REFERENCES `vrlv3_kisat_jaokset` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
+
+INSERT INTO `vrlv3`.`vrlv3_kisat_jaokset_palkinnot` (`kuvaus`, `jaos`, `palkinto`, `jarjnro`) VALUES ('irtoSERT', '7', 'irtoSERT', '2');
+INSERT INTO `vrlv3`.`vrlv3_kisat_jaokset_palkinnot` (`kuvaus`, `jaos`, `palkinto`, `jarjnro`) VALUES ('MVA-SERT', '7', 'MVA-SERT', '1');
+INSERT INTO `vrlv3`.`vrlv3_kisat_jaokset_palkinnot` (`kuvaus`, `jaos`, `palkinto`, `jarjnro`) VALUES ('Paras Maitovarsa', '7', 'Paras maitovarsa', '3');
+INSERT INTO `vrlv3`.`vrlv3_kisat_jaokset_palkinnot` (`kuvaus`, `jaos`, `palkinto`, `jarjnro`) VALUES ('Paras nuori', '7', 'Paras nuori', '4');
+INSERT INTO `vrlv3`.`vrlv3_kisat_jaokset_palkinnot` (`kuvaus`, `jaos`, `palkinto`, `jarjnro`) VALUES ('Paras ruuna', '7', 'Paras ruuna', '5');
+INSERT INTO `vrlv3`.`vrlv3_kisat_jaokset_palkinnot` (`kuvaus`, `jaos`, `palkinto`, `kaytossa`) VALUES ('BIS1', '7', 'BIS1', '0');
+INSERT INTO `vrlv3`.`vrlv3_kisat_jaokset_palkinnot` (`kuvaus`, `jaos`, `palkinto`, `kaytossa`) VALUES ('BIS2', '7', 'BIS2', '0');
+INSERT INTO `vrlv3`.`vrlv3_kisat_jaokset_palkinnot` (`kuvaus`, `jaos`, `palkinto`, `kaytossa`) VALUES ('BIS3', '7', 'BIS3', '0');
+INSERT INTO `vrlv3`.`vrlv3_kisat_jaokset_palkinnot` (`kuvaus`, `jaos`, `palkinto`, `kaytossa`) VALUES ('BIS4', '7', 'BIS4', '0');
+INSERT INTO `vrlv3`.`vrlv3_kisat_jaokset_palkinnot` (`kuvaus`, `jaos`, `palkinto`, `kaytossa`) VALUES ('BIS5', '7', 'BIS5', '0');
+INSERT INTO `vrlv3`.`vrlv3_kisat_jaokset_palkinnot` (`kuvaus`, `jaos`, `palkinto`, `kaytossa`) VALUES ('BIS6', '7', 'BIS6', '0');
+INSERT INTO `vrlv3`.`vrlv3_kisat_jaokset_palkinnot` (`kuvaus`, `jaos`, `palkinto`, `kaytossa`) VALUES ('BIS7', '7', 'BIS7', '0');
+INSERT INTO `vrlv3`.`vrlv3_kisat_jaokset_palkinnot` (`kuvaus`, `jaos`, `palkinto`, `kaytossa`) VALUES ('BIS8', '7', 'BIS8', '0');
+INSERT INTO `vrlv3`.`vrlv3_kisat_jaokset_palkinnot` (`kuvaus`, `jaos`, `palkinto`, `kaytossa`) VALUES ('BIS9', '7', 'BIS9', '0');
+INSERT INTO `vrlv3`.`vrlv3_kisat_jaokset_palkinnot` (`kuvaus`, `jaos`, `palkinto`, `kaytossa`) VALUES ('BIS10', '7', 'BIS10', '0');
+
+
+
+
 /*!40000 ALTER TABLE `vrlv3_kisat_luokat` ENABLE KEYS */;
 UNLOCK TABLES;
 SET @@SESSION.SQL_LOG_BIN = @MYSQLDUMP_TEMP_LOG_BIN;

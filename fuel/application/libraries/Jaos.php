@@ -91,8 +91,7 @@ class Jaos
             $fields['nimi'] = array('type' => 'text', 'class'=>'form-control', 'required' => TRUE,'value' => $jaos['nimi'] ?? "" );
             $fields['lyhenne'] = array('type' => 'text', 'class'=>'form-control','required' => TRUE, 'value' => $jaos['lyhenne'] ?? "");
             $fields['laji'] = array('type' => 'select', 'options' => $sport_options, 'value' => $jaos['laji'] ?? -1, 'class'=>'form-control');
-            var_dump($jaos['nayttelyt']);
-            $fields['nayttelyt'] = array('label'=> 'Näyttelyjaos', 'type' => 'checkbox', 'value' => $jaos['nayttelyt'] ?? false, 'class'=>'form-control');
+            $fields['nayttelyt'] = array('label'=> 'Näyttelyjaos', 'type' => 'checkbox', 'checked' => $jaos['nayttelyt'] ?? false, 'class'=>'form-control');
 
 
         }
@@ -364,7 +363,7 @@ class Jaos
     
    function luokkataulukko($id, $url_poista, $url_muokkaa){
       //start the list		
-		$vars['headers'][1] = array('title' => 'ID', 'key' => 'ihd');
+		$vars['headers'][1] = array('title' => 'ID', 'key' => 'id');
 		$vars['headers'][2] = array('title' => 'Järj. nro', 'key' => 'jarjnro');
 		$vars['headers'][3] = array('title' => 'Nimi', 'key' => 'nimi');
       $vars['headers'][4] = array('title' => 'Porras- tettu', 'key' => 'porrastettu');
@@ -446,6 +445,77 @@ class Jaos
     function delete_class($id, $jaos_id, &$msg){
       //TODO: Katso kisaluokat
       return $this->CI->Jaos_model->delete_class($id, $jaos_id);
+      
+    }
+    
+     ////////////////////////////////////////////////////////
+    // PALKINNOT
+    ///////////////////////////////////////////////////////
+    
+    
+    
+   function palkintotaulukko($id, $url_poista, $url_muokkaa){
+      //start the list		
+		$vars['headers'][2] = array('title' => 'ID', 'key' => 'id');
+		$vars['headers'][1] = array('title' => 'Järj. nro', 'key' => 'jarjnro');
+		$vars['headers'][3] = array('title' => 'Palkinto', 'key' => 'palkinto');
+      $vars['headers'][4] = array('title' => 'Kuvaus', 'key' => 'kuvaus');
+      $vars['headers'][5] = array('title' => 'Käytössä', 'key' => 'kaytossa');
+      $vars['headers'][6] = array('title' => '&nbsp;', 'key' => 'id', 'key_link' => site_url($url_poista), 'image' => site_url('assets/images/icons/delete.png'));
+      $vars['headers'][7] = array('title' => '&nbsp;', 'key' => 'id', 'key_link' => site_url($url_muokkaa), 'image' => site_url('assets/images/icons/edit.png')); 
+		$vars['headers'] = json_encode($vars['headers']);				
+		$vars['data'] = json_encode($this->CI->Jaos_model->get_reward_list($id, false));
+        
+        return  $this->CI->load->view('misc/taulukko', $vars, TRUE);       
+    }
+    
+    
+    function get_reward_form($url, $class){
+      $this->CI->load->library('form_builder', array('submit_value' => 'Tallenna'));
+
+      $fields = array();
+      $fields['palkinto'] = array('type' => 'text', 'class'=>'form-control', 'required' => TRUE, 'value' => $class['palkinto'] ?? "");
+      $fields['kuvaus'] = array('type' => 'text', 'class'=>'form-control', 'required' => TRUE, 'value' => $class['kuvaus'] ?? "");
+
+      $fields['jarjnro'] = array('label' => 'Järjestysnumero', 'type' => 'number', 'value' => $class['jarjnro'] ?? 999, 'class'=>'form-control', 'represents' => 'int|smallint|mediumint|bigint', 'negative' => FALSE, 'decimal' => FALSE,
+                                 'after_html' => '<span class="form_comment">Palkinnot listataan tuloksissa ja tuloslomakkeella järjestyksessä tämän mukaan (pienin ylimpänä).
+                                 Jos kahdella palkinnolla on sama numero, esitetään aakkosjärjestyksessä.</span>');    
+      $fields['kaytossa'] = array('type' => 'checkbox', 'label'=> "Käytössä", 'checked' => $class['kaytossa'] ?? true, 'class'=>'form-control',
+                                  'after_html' => '<span class="form_comment">Vain käytössä oleviksi merkityt palkinnot näkyvät tuloslähetyslomakkeella. </span>');
+
+      $this->CI->form_builder->form_attrs = array('method' => 'post', 'action' => site_url($url));
+		        
+         return $this->CI->form_builder->render_template('_layouts/basic_form_template', $fields);
+    }
+    
+    function read_reward_input(&$class){
+         $class['palkinto'] = $this->CI->input->post('palkinto');
+         $class['kuvaus'] = $this->CI->input->post('kuvaus');
+         $class['jarjnro'] = $this->CI->input->post('jarjnro');
+         if($this->CI->input->post('kaytossa')){
+            $class['kaytossa'] = $this->CI->input->post('kaytossa');
+         }else {
+            $class['kaytossa'] = 0;
+         }
+    }
+    
+    function validate_reward_form(){
+      $this->CI->load->library('form_validation');
+      $this->CI->form_validation->set_rules('palkinto', 'Palkinto', 'min_length[1]|max_length[32]|required');
+      $this->CI->form_validation->set_rules('jarjnro', 'Järjestysnumero', 'min_length[1]|max_length[3]|numeric|required');
+      
+      return $this->CI->form_validation->run();
+      
+    }
+    
+    function validate_reward($type="add", $admin, $class, &$msg){
+      //todo onko jo olemassa
+      return true;
+    }
+    
+    function delete_reward($id, $jaos_id, &$msg){
+      //TODO: Katso kisaluokat
+      return $this->CI->Jaos_model->delete_reward($id, $jaos_id);
       
     }
     

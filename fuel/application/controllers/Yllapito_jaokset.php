@@ -495,6 +495,8 @@ class Yllapito_jaokset extends CI_Controller
                 $this->_handle_saannot_edit($id, $data, $edit_url);
             }else if($sivu == "luokat" && $data['jaos']['nayttelyt'] == 0){
                 $this->_handle_luokat_edit($id, $data, $edit_url, $tapa2, $sub_id);
+            }else if($sivu == "palkinnot" && $data['jaos']['nayttelyt'] == 1){
+                $this->_handle_palkinnot_edit($id, $data, $edit_url, $tapa2, $sub_id);
             }else if($sivu == "ominaisuudet" && $data['jaos']['nayttelyt'] == 0){
                 $this->_handle_ominaisuudet_edit($id, $data, $edit_url);
             }else if($sivu == "omistajat"){
@@ -680,6 +682,98 @@ class Yllapito_jaokset extends CI_Controller
         }
         
         $data['list'] = $this->jaos->luokkataulukko($id, $edit_url."/poista/", $edit_url."/muokkaa/");
+        $this->fuel->pages->render('jaokset/muokkaa', $data);
+        
+    }
+    
+    
+     private function _handle_palkinnot_edit($id, $data, $edit_url, $tapa, $reward_id){
+
+
+        $jaos = $data['jaos'];
+        $reward = array();
+        if($tapa == "lisaa"){            
+            if($this->input->server('REQUEST_METHOD') == 'POST'){
+                $this->jaos->read_reward_input($reward);
+                $data['form'] = $this->jaos->get_reward_form($edit_url."/".$tapa, $reward);
+
+                if ($this->jaos->validate_reward_form() == FALSE){
+                        $data['msg'] = "Tallennus epäonnistui!";
+                        $data['msg_type'] = "danger";
+                }
+                else if ($this->jaos->validate_reward("add", $this->_is_jaos_admin(), $reward, $data['msg']) == false){
+                    $data['msg_type'] = "danger";
+
+                }
+                else  {
+                       $tid = $this->Jaos_model->add_reward($id, $reward);
+                       $data['msg_type'] = "danger";
+    
+                       if ($tid !== false){                 
+                            $data['msg'] = "Palkinnon tallennus onnistui!";
+                            $data['msg_type'] = "success";
+                            $data['jaos'] = $jaos;
+                            $data['form'] = null;
+
+                        }
+                }
+            }else {           
+                $data['form'] = $this->jaos->get_reward_form($edit_url."/".$tapa, $reward);
+            }
+            
+        }
+        
+        else if($tapa == "muokkaa"){
+            $reward = $this->Jaos_model->get_reward($reward_id, $id);
+            
+            if(sizeof($reward) == 0){
+                $this->fuel->pages->render('misc/naytaviesti', array('msg_type' => 'danger', 'msg' => "Palkintoa jota yritit muokata, ei ole olemassa."));
+                return;
+            }
+            
+            else if($this->input->server('REQUEST_METHOD') == 'POST'){
+                $this->jaos->read_reward_input($reward);
+                $data['form'] = $this->jaos->get_reward_form($edit_url."/".$tapa."/".$reward_id, $reward);
+                if ($this->jaos->validate_reward_form() == FALSE){
+                        $data['msg'] = "Tallennus epäonnistui!";
+                        $data['msg_type'] = "danger";
+                }
+                else if ($this->jaos->validate_reward("edit", $this->_is_jaos_admin(), $reward, $data['msg']) == false){
+                    $data['msg_type'] = "danger";
+                }
+                else  {
+                       $tid = $this->Jaos_model->edit_reward($reward_id, $reward);
+                       $data['msg_type'] = "danger";
+    
+                       if ($tid !== false){                 
+                            $data['msg'] = "Palkinnon tallennus onnistui!";
+                            $data['msg_type'] = "success";
+                            $data['jaos'] = $jaos;
+                            $data['form'] = null;
+                        }
+                }
+            }else {
+                $data['form'] = $this->jaos->get_reward_form($edit_url."/".$tapa."/".$reward_id, $reward);
+            }
+            
+        }else if($tapa == "poista"){
+            $reward = $this->Jaos_model->get_reward($reward_id, $id);
+            
+            if(sizeof($reward) == 0){
+                $this->fuel->pages->render('misc/naytaviesti', array('msg_type' => 'danger', 'msg' => "Palkintoa jota yritit muokata, ei ole olemassa."));
+                return;
+            }else if($reward['kaytossa'] == 1){
+                $this->fuel->pages->render('misc/naytaviesti', array('msg_type' => 'danger', 'msg' => "Et voi poistaa käytössä olevaa Palkintoa."));
+                return;
+                
+            }else {
+                $this->Jaos_model->delete_reward($reward_id, $id);
+                $data['msg'] = "Palkinnon poisto onnistui!";
+                $data['msg_type'] = "success";
+            }
+        }
+        
+        $data['list'] = $this->jaos->palkintotaulukko($id, $edit_url."/poista/", $edit_url."/muokkaa/");
         $this->fuel->pages->render('jaokset/muokkaa', $data);
         
     }

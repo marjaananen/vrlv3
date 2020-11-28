@@ -17,7 +17,13 @@
       <li role="presentation" class="<?php if ($sivu == 'ominaisuudet'){echo "active";}?>"><a href="<?php echo base_url($url . 'ominaisuudet')?>">Ominaisuudet</a></li>
       
       <?php
+       } else {
+        
+        ?>
+              <li role="presentation" class="<?php if ($sivu == 'palkinnot'){echo "active";}?>"><a href="<?php echo base_url($url . 'palkinnot')?>">Palkinnot</a></li>
+<?php
        }
+       
        ?>
       <li role="presentation" class="<?php if ($sivu == 'omistajat'){echo "active";}?>"><a href="<?php echo base_url($url . 'omistajat')?>">Ylläpito</a></li>
       <li role="presentation" class="<?php if ($sivu == 'online'){echo "active";}?>"><a href="<?php echo base_url($url . 'online')?>">Toiminnassa</a></li>
@@ -56,6 +62,15 @@
          
       echo '<p>Jaoksella voi olla useita ylläpitäjiä (taso 1) ja kalenteriityöntekijöitä (taso 0).
       Ylläpitäjä pystyy muokkaamaan jaoksen sääntöjä, ylläpitäjiä ja työntekijöitä. Kalenterityöntekijällä on oikeus hyväksyä ja muokata kilpailuja ja tuloksia.</p>';
+      }
+      
+      else if($sivu == 'palkinnot'){
+         
+      echo '<p>Tällä sivulla voit määritellä mitä palkintoja jaoksesi näyttelyistä voi saada. Vain tänne listatut palkinnot tulevat tulosten
+      lähetyksen myötä näkyviin hevosten profiileissa.</p>';
+      
+       echo '<a href="'.base_url($url . $sivu . "/lisaa") . '">Lisää uusi palkinto</a>';
+
       }
        
        echo fuel_var('form', '');

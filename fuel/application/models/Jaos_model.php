@@ -545,6 +545,72 @@ class Jaos_model extends Base_module_model
         return true;
     }
     
+    //////////////////////////////////////////////////////7
+    // PALKINNOT
+    ///////////////////////////////////////////////////77/
+    
+    function get_reward_list($jaos, $only_usable = true)
+    {
+        $this->db->select("*");
+        $this->db->from('vrlv3_kisat_jaokset_palkinnot');
+        $this->db->where("jaos", $jaos);
+        $this->db->order_by("jarjnro");
+    
+        if($only_usable){
+            $this->db->where("kaytossa", 1);
+        }
+        $query = $this->db->get();
+        
+        if ($query->num_rows() > 0)
+        {
+            return $query->result_array(); 
+        }
+        
+        return array();
+    }
+    
+    function get_reward($id, $jaos_id)
+    {
+        $this->db->select("*");
+        $this->db->from('vrlv3_kisat_jaokset_palkinnot');
+        $this->db->where("id", $id);
+        $this->db->where("jaos", $jaos_id);
+
+        $query = $this->db->get();
+        
+        if ($query->num_rows() > 0)
+        {
+            $array = $query->result_array();
+            return $array[0];
+        }
+        
+        return array();
+    }
+    
+    
+    
+    function add_reward($jaos_id, $class){
+        $class['jaos'] = $jaos_id;
+        $this->db->insert('vrlv3_kisat_jaokset_palkinnot', $class);
+        $id = $this->db->insert_id();
+        return $id;
+    }
+    
+     function edit_reward($class_id, $class){        
+        unset($class['jaos']);
+        $this->db->where('id', $class_id);
+        $this->db->update('vrlv3_kisat_jaokset_palkinnot', $class);
+        return true;
+    }
+    
+    function delete_reward($id, $jaos_id){
+        //todo delete luokat, ominaisuudet
+        $data = array('id' => $id, 'jaos'=>$jaos_id);
+        $this->db->delete('vrlv3_kisat_jaokset_palkinnot', $data);
+        return true;
+    }
+    
+    
     ///////////////////////////////////////////////////////
     // Kisakalenterit
     //////////////////////////////////////////////////////
