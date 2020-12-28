@@ -1,10 +1,10 @@
 
-<h2><?php echo "Ilmoita tulokset kilpailuun #" . $kisa_id . ")"; ?></h2>
+<h2><?php echo "Ilmoita tulokset kilpailuun #" . $kisa_id ; ?></h2>
 
  <table class="table table-striped">
                  <tr>
                 <th scope="row">Jaos</th> <td> <?php echo $jaos['nimi']." (".$jaos['lyhenne'].")"; ?></td>
-                <th scope="row">Kutsu</th> <td><a href="<?php echo $url;?>"></a>kutsu</a></td>
+                <th scope="row">Kutsu</th> <td><a href="<?php echo $url;?>">kutsu</a></td>
             </tr>
             <tr>
                 <th scope="row">Päivämäärä</th> <td> <?php echo $kp; ?></td>
@@ -21,8 +21,12 @@
  
  
  <?php
- 
- if(isset($luokat) && $luokat == true){
+ if($jaos['nayttelyt'] == 1){
+  echo "<p>Tulokset ilmoitetaan vapaana tekstinä jaoksen vaatimassa muodossa.
+  Palkinnon saaneet hevosten rekisterinumerot merkitään myös erikseen omiin kenttiinsä,
+  jotta ne tulevat hevosen profiilisivulle näkyviin. <b>Muista varmistaa jaoksen sivuilta jaoskohtaiset säännöt!</b>";
+ }
+ else if(isset($luokat) && $luokat == true){
     echo "<h2>Ilmoita järjestetyt luokat</h2>";
     echo "<p>Järjestelmä hakee lomakkeelle oletuksena edellisten saman lajin kilpailujesi luokat. Voit muokata niitä vaapasti. Ilmoita kaikki luokat, vaikka niitä ei oltaisi (esim. osallistujien puutteessa) järjestetty.</p>";
  }else {

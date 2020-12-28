@@ -167,16 +167,32 @@ class Kisakeskus_model extends CI_Model
     
     
     //hae_yksittäinen_tulos
-    public function get_result($result_id = null, $kisa_id = null, $hyvaksytty = true){
+    public function get_result($result_id = null, $kisa_id = null, $hyvaksytty = true, $nayttelyt = false){
         $this->db->select('t.*, k.kp, k.vip, t.ilmoitettu, k.tunnus as tunnus, k.url, t.tunnus as tulosten_lah, k.jarj_talli, k.info, k.tunnus, k.jaos, k.arvontatapa');
-        $this->db->from('vrlv3_kisat_tulokset as t');
-        $this->db->join('vrlv3_kisat_kisakalenteri as k', 'k.kisa_id = t.kisa_id');
+        
+        if($nayttelyt){
+            $this->db->from('vrlv3_kisat_nayttelytulokset as t');
+            $this->db->join('vrlv3_kisat_nayttelykalenteri as k', 'k.kisa_id = t.nayttely_id');
+            
+        }else {
+            $this->db->from('vrlv3_kisat_tulokset as t');
+            $this->db->join('vrlv3_kisat_kisakalenteri as k', 'k.kisa_id = t.kisa_id');
+        }
 
         if(isset($result_id)){
-            $this->db->where('t.tulos_id', $result_id);
+            if($nayttelyt){
+                $this->db->where('t.bis_id', $result_id);
+            }else {
+                $this->db->where('t.tulos_id', $result_id);
+            }
         }
         if(isset($kisa_id)){
-            $this->db->where('t.kisa_id', $kisa_id);
+            if($nayttelyt){
+                $this->db->where('t.nayttely_id', $kisa_id);
+
+            }else {
+                $this->db->where('t.kisa_id', $kisa_id);
+            }
         }
         $this->db->where('k.tulokset', 1);
 
@@ -356,7 +372,7 @@ class Kisakeskus_model extends CI_Model
     
           
     //Tiedot kutsuun
-    public function hae_kutsutiedot($id, $user = null, $tulokselliset = null){
+    public function hae_kutsutiedot($id, $user = null, $tulokselliset = null, $nayttelyt = false){
       $this->db->select('*');
       $this->db->where('kisa_id', $id);
       if (isset($user)){
@@ -366,17 +382,26 @@ class Kisakeskus_model extends CI_Model
         $this->db->where('tulokset', $tulokselliset);
 
       }
-      $query = $this->db->get('vrlv3_kisat_kisakalenteri');
       
+        $kisa = array();
+        $query = null;
 
-      
-      $kisa = array();
+       if($nayttelyt){
+              $query = $this->db->get('vrlv3_kisat_nayttelykalenteri');
+       }else {
+        
+        $query = $this->db->get('vrlv3_kisat_kisakalenteri');
+       }
+
       $kisa = $query->result_array();
       
       if (empty($kisa)){
         return array();
         
       }
+       else if($nayttelyt){
+        return $kisa[0];
+       }
       
       else {
         $kisa = $kisa[0];
@@ -471,9 +496,9 @@ class Kisakeskus_model extends CI_Model
     
     public function get_users_shows($user, $jonossa, $avoin, $tjonossa, $tulokset){ 
         $this->db->select('vip, kp, j.lyhenne as jaoslyhenne, k.url, k.info, jarj_talli, k.ilmoitettu as kisailmoitettu, t.ilmoitettu as tulosilmoitettu,
-                          k.kisa_id, t.tulos_id, k.hyvaksytty');
+                          k.kisa_id, t.bis_id as tulos_id, k.hyvaksytty');
         $this->db->from('vrlv3_kisat_nayttelykalenteri as k');     
-        $this->db->join('vrlv3_kisat_tulokset as t', 'k.kisa_id = t.kisa_id', 'left');
+        $this->db->join('vrlv3_kisat_nayttelytulokset as t', 'k.kisa_id = t.nayttely_id', 'left');
         $this->db->join('vrlv3_kisat_jaokset as j', 'j.id = k.jaos');
         $this->db->where('k.tunnus', $user);
         $this->db->where('k.vanha', 0);

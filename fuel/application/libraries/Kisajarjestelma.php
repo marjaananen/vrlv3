@@ -143,7 +143,7 @@ class Kisajarjestelma
     
     public function competition_date_days_from_vip($nayttelyt = false){
         if ($nayttelyt){
-            return 7;
+            return 1;
         }else {
             return 1;
         }
@@ -391,7 +391,6 @@ class Kisajarjestelma
             $this->CI->db->where_in('h.reknro', $vhs);
             
             $query = $this->CI->db->get();
-            ECHO $this->CI->db->last_query();
             
             if ($query->num_rows() > 0)
             {
@@ -518,7 +517,7 @@ class Kisajarjestelma
             $this->CI->form_validation->set_rules('vip', 'Viimeinen ilmoittautumispäivä', 'min_length[10]|max_length[10]|required');
             $this->CI->form_validation->set_rules('jarj_talli', 'Talli', 'min_length[6]|max_length[10]|required');
           }
-        $this->CI->form_validation->set_rules('info', 'Info', 'min_length[5]|max_length[300]');
+        $this->CI->form_validation->set_rules('info', 'Info', 'min_length[2]|max_length[300]');
 
       
        if(!$porrastettu){

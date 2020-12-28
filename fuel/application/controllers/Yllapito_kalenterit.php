@@ -598,9 +598,9 @@ private function _read_basic_input_field(&$data, $field){
         
         if(empty($jaos)){
             $only_active = false;
-        $skip_shows = false;
-        $only_leveled = false;
-        $data['jaokset'] = $this->Jaos_model->get_jaos_list($only_active, $only_leveled, $skip_shows);
+            $skip_shows = false;
+            $only_leveled = false;
+            $data['jaokset'] = $this->Jaos_model->get_jaos_list($only_active, $only_leveled, $skip_shows);
             $data['url'] = $this->url;
             
             foreach ($data['jaokset'] as &$jaos){
@@ -609,8 +609,6 @@ private function _read_basic_input_field(&$data, $field){
 
             }
             $this->fuel->pages->render('yllapito/kisakalenteri/kisakalenteri_tuloshyvaksynta_main', $data);
-
-        
         } 
         
         else if(sizeof($jaos_data) == 0){
@@ -695,17 +693,26 @@ private function _read_basic_input_field(&$data, $field){
     }
     
     private function _results_queue_get_next($jaos, $porrastettu = false){
-        $this->db->select('t.*, k.kp, k.vip, t.ilmoitettu, k.tunnus as tunnus, k.url, k.porrastettu, t.tunnus as tulosten_lah, k.jarj_talli, k.info, k.tunnus, k.jaos, k.arvontatapa');
-        $this->db->from('vrlv3_kisat_kisakalenteri as k');
-        $this->db->join('vrlv3_kisat_tulokset as t', 'k.kisa_id = t.kisa_id');
-      return $this->_get_next('vrlv3_kisat_tulokset', $jaos);
+        if($this->kisajarjestelma->nayttelyjaos($jaos)){
+            $this->db->select('t.*, k.kp, k.vip, t.ilmoitettu, k.tunnus as tunnus, k.url, t.tunnus as tulosten_lah, k.jarj_talli, k.info, k.tunnus, k.jaos, k.arvontatapa');
+            $this->db->from('vrlv3_kisat_nayttelykalenteri as k');
+            $this->db->join('vrlv3_kisat_nayttelytulokset as t', 'k.kisa_id = t.nayttely_id');
+          return $this->_get_next('vrlv3_kisat_nayttelytulokset', $jaos);
+        }
+        
+        else {
+            $this->db->select('t.*, k.kp, k.vip, t.ilmoitettu, k.tunnus as tunnus, k.url, k.porrastettu, t.tunnus as tulosten_lah, k.jarj_talli, k.info, k.tunnus, k.jaos, k.arvontatapa');
+            $this->db->from('vrlv3_kisat_kisakalenteri as k');
+            $this->db->join('vrlv3_kisat_tulokset as t', 'k.kisa_id = t.kisa_id');
+          return $this->_get_next('vrlv3_kisat_tulokset', $jaos);
+        }
     }
     
     
      private function _get_next($table, $jaos)
     {
         $letter = 'k';
-        if($table == "vrlv3_kisat_tulokset"){
+        if($table == "vrlv3_kisat_tulokset" || $table == 'vrlv3_kisat_nayttelytulokset'){
             $letter = "t";
         }
         $data = array();

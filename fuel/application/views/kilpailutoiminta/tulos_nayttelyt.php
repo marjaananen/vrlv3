@@ -1,0 +1,42 @@
+<?php
+
+print	'<hr /> <h3>Tulokset</h3>';
+
+
+	$tulostettavat_tulokset = array();
+        echo "<p>";
+	while ($bistulos = mysql_fetch_array($bistulokset, MYSQL_ASSOC)) {
+            if ($bistulos['vh'] != "000000000"){
+                $reknro = "VH".substr($bistulos['vh'], 0, 2)."-".substr($bistulos['vh'], 2, 3)."-".substr($bistulos['vh'], 5, 4);
+            }
+            else {
+                $reknro = "(ei rek)";
+            }
+            
+            IF (strpos($bistulos['palkinto'], "BIS") !== false){
+                 echo "<b>".$bistulos['palkinto'] . "</b> " . $bistulos['vh_nimi'] . " " . $reknro . " <br />";
+            }
+            
+            else {
+                $tulostettavat_tulokset[$bistulos['palkinto']][] = $bistulos['vh_nimi'] . " " . $reknro;
+            }
+     
+        }
+        
+        echo "</p>";
+        
+        
+        unset($tulostettavat_tulokset['MVA-SERT']);
+        
+        foreach ($tulostettavat_tulokset as $key=>$bisrivi){
+            
+            echo "<b>" .  $key . "</b><p>";
+            foreach ($bisrivi as $hevonen){
+                echo $hevonen . "<br />";
+            }
+            echo "</p>";              
+            
+        }
+        
+        
+        ?>
