@@ -3,9 +3,17 @@
 print	'<hr /> <h3>Tulokset</h3>';
 
 
-	$tulostettavat_tulokset = array();
+if(strlen($tulokset['tulokset']) > 1){
+    echo $tulokset['tulokset'];
+    
+    
+} else {
+
+//vanhanmalliset tulokset
+
+    $tulostettavat_tulokset = array();
         echo "<p>";
-	while ($bistulos = mysql_fetch_array($bistulokset, MYSQL_ASSOC)) {
+	foreach ($bistulokset as $bistulos) {
             if ($bistulos['vh'] != "000000000"){
                 $reknro = "VH".substr($bistulos['vh'], 0, 2)."-".substr($bistulos['vh'], 2, 3)."-".substr($bistulos['vh'], 5, 4);
             }
@@ -37,6 +45,13 @@ print	'<hr /> <h3>Tulokset</h3>';
             echo "</p>";              
             
         }
-        
+
+	
+}
+
+
         
         ?>
+        
+        <h3>Hevosten profiileihin sijoitetut palkinnot</h3>
+        <?php echo $bistaulu;?>

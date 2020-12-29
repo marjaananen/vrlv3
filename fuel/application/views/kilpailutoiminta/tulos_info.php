@@ -61,7 +61,17 @@
 				?> 		
 		</td>
 	</tr>
-			
+	
+	<?php
+	if(isset($tulos['paatuomari_nimi'])){
+		?>
+		<tr>
+	
+		<th scope="row">Päätuomari</th> <td> <?php echo $tulos['paatuomari_nimi']; ?></td>
+		<th scope="row">Luokkatuomarit</th> <td> <?php echo $tulos['luokkatuomarit_nimi']; ?></td>
+	</tr>
+		<?php	
+	}?>
 
 			
 </table>

@@ -111,7 +111,7 @@ class Kisakeskus_model extends CI_Model
     }
     
     public function get_calendar_show(){ 
-        $this->db->select('vip, kp, j.id as jaos, j.lyhenne as jaoslyhenne, k.url, k.info, jarj_talli, t.nimi as tallinimi, kisa_id, k.hyvaksytty');
+        $this->db->select('vip, kp, j.id as jaos, j.lyhenne as jaoslyhenne, k.url, k.moiinfo, jarj_talli, t.nimi as tallinimi, kisa_id, k.hyvaksytty');
         $this->db->from('vrlv3_kisat_nayttelykalenteri as k');
         $this->db->join('vrlv3_tallirekisteri as t', 't.tnro = k.jarj_talli');
         $this->db->join('vrlv3_kisat_jaokset as j', 'j.id = k.jaos');
@@ -132,6 +132,52 @@ class Kisakeskus_model extends CI_Model
         }
         
     }
+    
+        public function get_showresults($jaos = null){ 
+            $this->db->select('vip, kp, j.id as jaos, j.lyhenne as jaoslyhenne, k.url, k.info, jarj_talli, ta.nimi as tallinimi, k.ilmoitettu as kisailmoitettu, t.ilmoitettu as tulosilmoitettu,
+                              k.kisa_id, t.bis_id as tulos_id, k.hyvaksytty');
+            $this->db->from('vrlv3_kisat_nayttelykalenteri as k');     
+            $this->db->join('vrlv3_kisat_nayttelytulokset as t', 'k.kisa_id = t.nayttely_id', 'left');
+            $this->db->join('vrlv3_tallirekisteri as ta', 'ta.tnro = k.jarj_talli');
+            $this->db->join('vrlv3_kisat_jaokset as j', 'j.id = k.jaos');
+            $this->db->where('k.vanha', 0);
+            
+    
+    
+                $this->db->where('k.tulokset', 1);
+                $this->db->where('t.hyvaksytty IS NOT NULL', NULL, FALSE);
+                $this->db->order_by('k.kp', 'desc');
+    
+            
+            
+            $this->db->limit('1000');
+                    
+            $query = $this->db->get();
+            
+            if ($query->num_rows() > 0)
+            {
+                return $query->result_array();
+            }else {
+                return array();
+            }
+        }
+        
+        public function get_showresult_rewards($bis_id){
+            $this->db->select('tt.*, IFNULL(t.nimi, IFNULL(tt.vh_nimi, "Nimi puuttuu")) as nimi, IFNULL(t.reknro, IFNULL(tt.vh, "(Ei rek)")) as vh_id');
+            $this->db->from('vrlv3_kisat_bis_tulosrivit as tt');
+            $this->db->join('vrlv3_hevosrekisteri as t', 't.reknro = tt.vh_id', 'left');
+
+            $this->db->where('bis_id', $bis_id);
+            
+            $query = $this->db->get();
+            if ($query->num_rows() > 0)
+            {
+                return $query->result_array();
+            }else {
+                return array();
+            }
+            
+        }
     
     
      public function get_results($porrastettu = null, $arvontatapa = null, $jaos = null){ 
@@ -168,13 +214,15 @@ class Kisakeskus_model extends CI_Model
     
     //hae_yksittäinen_tulos
     public function get_result($result_id = null, $kisa_id = null, $hyvaksytty = true, $nayttelyt = false){
-        $this->db->select('t.*, k.kp, k.vip, t.ilmoitettu, k.tunnus as tunnus, k.url, t.tunnus as tulosten_lah, k.jarj_talli, k.info, k.tunnus, k.jaos, k.arvontatapa');
         
         if($nayttelyt){
+            $this->db->select('t.*, k.kp, k.vip, t.ilmoitettu, k.tunnus as tunnus, k.url, t.tunnus as tulosten_lah, k.jarj_talli, k.info, k.tunnus, k.jaos, k.arvontatapa');
             $this->db->from('vrlv3_kisat_nayttelytulokset as t');
             $this->db->join('vrlv3_kisat_nayttelykalenteri as k', 'k.kisa_id = t.nayttely_id');
             
         }else {
+            $this->db->select('t.*, k.kp, k.vip, t.ilmoitettu, k.tunnus as tunnus, porrastettu, k.url, t.tunnus as tulosten_lah, k.jarj_talli, k.info, k.tunnus, k.jaos, k.arvontatapa');
+
             $this->db->from('vrlv3_kisat_tulokset as t');
             $this->db->join('vrlv3_kisat_kisakalenteri as k', 'k.kisa_id = t.kisa_id');
         }
@@ -205,7 +253,6 @@ class Kisakeskus_model extends CI_Model
                 
         }
         $query = $this->db->get();
-        
         if ($query->num_rows() > 0)
         {        
             return $query->row_array();

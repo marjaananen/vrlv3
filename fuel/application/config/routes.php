@@ -102,9 +102,6 @@ $route['yllapito/kalenterit/porrastetut_run'] = "yllapito_kalenterit/porrastetut
 
 
 
-
-
-
 $route['kilpailutoiminta/ilmoita_tulokset'] = "kilpailutoiminta/omat/kisat/avoimet";
 $route['kilpailutoiminta/ilmoita_tulokset/kisat'] = "kilpailutoiminta/omat/kisat/avoimet";
 $route['kilpailutoiminta/ilmoita_tulokset/nayttelyt'] = "kilpailutoiminta/omat/nayttelyt/avoimet";

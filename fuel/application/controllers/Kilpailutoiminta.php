@@ -722,22 +722,31 @@ function tulosarkisto ($type = "perinteiset", $id = null, $id_type = null){
         
         $porrastettu = null;
         $arvontatapa = null;
+        $nayttelyt = false;
             
         if($this->input->server('REQUEST_METHOD') == 'POST' && !isset($id))
         {
             if($this->input->post('id_type')){
-    
-                $this->tulosarkisto("tulos", $this->input->post('id'), $this->input->post('id_type'));
+                if($this->input->post('type') == '1'){
+                    $this->tulosarkisto("bis", $this->input->post('id'), $this->input->post('id_type'));
+                    $nayttelyt = true;
+                }else {
+                    $this->tulosarkisto("tulos", $this->input->post('id'), $this->input->post('id_type'));
+
+                }
             }
         }
         
-        else if($type == "tulos"){
+        else if($type == "tulos" || $type == "bis"){
+            if($type == "bis"){
+                $nayttelyt = true;
+            }
             $tulos_info = array();
             if($id_type == "kisa_id"){
-                $tulos_info = $this->Kisakeskus_model->get_result(null, $id);
+                $tulos_info = $this->Kisakeskus_model->get_result(null, $id, true, $nayttelyt);
                 
             }else {
-                $tulos_info = $this->Kisakeskus_model->get_result($id);
+                $tulos_info = $this->Kisakeskus_model->get_result($id, null, true, $nayttelyt);
             }
                     
             if(sizeof($tulos_info) == 0){
@@ -757,8 +766,35 @@ function tulosarkisto ($type = "perinteiset", $id = null, $id_type = null){
                     $tulos_info['hyvaksyi'] = $this->ion_auth->user($this->Tunnukset_model->get_users_id($tulos_info['hyvaksyi']))->row();
                 }
                 $tulos_info['jarjestelma']= & $this->kisajarjestelma;
+                
+                if($nayttelyt){
+                    $tulos_info['tulos_id'] = $tulos_info['bis_id'];
+                    $tulos_info['kisa_id'] = $tulos_info['nayttely_id'];
+                    $tulos_info['porrastettu'] = false;
+                    
+                }
                 $info = $this->load->view('kilpailutoiminta/tulos_info', array("tulos" => $tulos_info), TRUE);
-                $luokat = $this->load->view('kilpailutoiminta/tulos_luokat', array("tulos" => $tulos_info), TRUE);
+                $luokat = "";
+                if($nayttelyt){
+                    
+                    $bis_rivit = $this->Kisakeskus_model->get_showresult_rewards($tulos_info['bis_id']);
+                    $taulu['headers'][1] = array('title' => 'Palkinto', 'key' => 'palkinto');
+                    $taulu['headers'][2] = array('title' => 'Hevonen', 'key' => 'vh_nimi');
+                    $taulu['headers'][3] = array('title' => 'Reknro', 'key' => 'vh_id', 'type'=>'VH', 'key_link' => site_url('virtuaalihevoset/hevonen/'));        
+                    $taulu['headers'] = json_encode($taulu['headers']);
+                            
+                    $taulu['data'] = json_encode($bis_rivit);
+                    $bis_tulokset = $this->load->view('misc/taulukko', $taulu, TRUE);
+                    $luokat = $this->load->view('kilpailutoiminta/tulos_nayttelyt', array("tulokset" => $tulos_info, "bistulokset"=>$bis_rivit, "bistaulu"=>$bis_tulokset), TRUE);
+
+                    
+
+                }else {
+                    
+                    
+                    $luokat = $this->load->view('kilpailutoiminta/tulos_luokat', array("tulos" => $tulos_info), TRUE);
+
+                }
 
                 $this->fuel->pages->render('kilpailutoiminta/tulos', array("tulos" => $tulos_info, "tulos_info"=>$info, "luokat_info"=>$luokat));
     
@@ -788,14 +824,25 @@ function tulosarkisto ($type = "perinteiset", $id = null, $id_type = null){
                 $vars['headers'][3] = array('title' => 'Järjestäjä', 'key' => 'jarj_talli', 'reknro', 'key_link' => site_url('virtuaalitallit/talli/'));
                 $vars['headers'][4] = array('title'=> 'Kutsu', 'key'=>'url', 'type'=>'url', 'static_text'=>"Kutsu");
                 $vars['headers'][5] = array('title' => 'Tulos', 'key' => 'tulos_id', 'key_link'=>site_url('kilpailutoiminta/tulosarkisto/tulos/'));
+            }else if($type == "nayttelyt"){
+                $nayttelyt = true;
+        
+                $vars['headers'][1] = array('title' => 'KP', 'key' => 'kp', 'type'=>'date');
+                $vars['headers'][2] = array('title' => 'Jaos', 'key' => 'jaoslyhenne');
+                $vars['headers'][3] = array('title' => 'Järjestäjä', 'key' => 'jarj_talli', 'reknro', 'key_link' => site_url('virtuaalitallit/talli/'));
+                $vars['headers'][4] = array('title'=> 'Kutsu', 'key'=>'url', 'type'=>'url', 'static_text'=>"Kutsu");
+                $vars['headers'][5] = array('title' => 'Tulos', 'key' => 'tulos_id', 'key_link'=>site_url('kilpailutoiminta/tulosarkisto/bis/'));
             }
         
             $vars['headers'] = json_encode($vars['headers']);
             
             $vars['id_form'] = $this->_result_id_search_form();
         
-                        
-            $vars['data'] = json_encode($this->Kisakeskus_model->get_results($porrastettu, $arvontatapa));
+            if($nayttelyt){
+                $vars['data'] = json_encode($this->Kisakeskus_model->get_showresults());
+            }else {
+                $vars['data'] = json_encode($this->Kisakeskus_model->get_results($porrastettu, $arvontatapa));
+            }
         
             $vars['kalenteri'] = $this->load->view('misc/taulukko', $vars, TRUE);
             
@@ -814,6 +861,7 @@ function tulosarkisto ($type = "perinteiset", $id = null, $id_type = null){
 
 private function _result_id_search_form($data = array()){
     $this->load->library('form_builder', array('submit_value' => 'Hae'));
+    $fields['type'] = array('label'=>"Tyyppi", 'type'=>'select', 'options'=>array("0"=>"Kilpailut", "1"=>"Näyttelyt"), 'value'=>$data['type'] ?? 0, 'class'=>'form-control');
     $fields['id_type'] = array('label'=>"Hae id:llä", 'type' => 'select', 'options' => array("kisa_id"=>"Kilpailun id", "tulos_id"=>"Tuloksen id"), 'value' => $data['id_type'] ?? 'tulos_id', 'class'=>'form-control');
     $fields['id'] = array('label' => 'ID', 'type' => 'number', 'value' =>  $data['id_type'] ?? 0, 'class'=>'form-control', 'represents' => 'int|smallint|mediumint|bigint', 'negative' => FALSE, 'decimal' => FALSE);    
 	$this->form_builder->form_attrs = array('method' => 'post', 'action' => site_url('/kilpailutoiminta/tulosarkisto'));
@@ -840,7 +888,7 @@ public function ilmoita_kilpailut($type, $jaos_id = null){
     else if ($type == "porrastetut"){
         $url_begin = "kilpailutoiminta/ilmoita_kilpailut/porrastetut/";
         if($jaos_id == null){
-            //jos jaosta ei ole annettu, valitaan se
+            //jos jaosta ei ole annettu, valitaan se*
             //luetaan se joko lomakkeelta tai näytetään lomake
             if($this->input->post('jaos')){
                 $jaos_id = $this->input->post('jaos');
