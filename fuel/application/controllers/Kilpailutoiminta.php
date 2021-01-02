@@ -195,9 +195,8 @@ class Kilpailutoiminta extends CI_Controller
         
         }
         else if($type == "menneet"){
-            $vars['headers'][6] = array('title' => 'Porrastettu', 'key' => 'porrastettu');
-            $vars['headers'][7] = array('title' => 'Info', 'key' => 'info', 'type'=>'small');
-            $vars['headers'][8] = array('title' => 'Tulos', 'key' => 'tulos_id', 'key_link'=> site_url('kilpailutoiminta/tulosarkisto/tulos/'));
+            $vars['headers'][8] = array('title' => 'Info', 'key' => 'info', 'type'=>'small');
+            $vars['headers'][9] = array('title' => 'Tulos', 'key' => 'tulos_id', 'key_link'=> site_url('kilpailutoiminta/tulosarkisto/bis/'));
             $vars['data'] = json_encode($this->Kisakeskus_model->get_users_shows($user, false, false, false, true));
 
         }

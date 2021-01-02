@@ -4,7 +4,7 @@ print	'<hr /> <h3>Tulokset</h3>';
 
 
 if(strlen($tulokset['tulokset']) > 1){
-    echo $tulokset['tulokset'];
+    echo nl2br($tulokset['tulokset']);
     
     
 } else {

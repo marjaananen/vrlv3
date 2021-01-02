@@ -573,7 +573,7 @@ class Kisakeskus_model extends CI_Model
 
         } else if ($tulokset){
             $this->db->where('k.tulokset', 1);
-            $this->db->where('t.hyvaksytty IS NOT NULL', NULL, FALSE);
+            $this->db->where('t.hyvaksytty IS NOT NULL OR t.hyvaksytty != \'0000-00-00 00:00:00\'');
             $this->db->order_by('k.kp', 'desc');
 
         }

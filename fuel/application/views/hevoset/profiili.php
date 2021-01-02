@@ -112,6 +112,7 @@ if (isset($palkinnot) && sizeof($palkinnot) > 0){
         <li role="presentation" class="<?php if ($sivu == 'suku' || empty($sivu)){echo "active";}?>"><a href="<?php echo base_url('virtuaalihevoset/hevonen/'. $hevonen['reknro'] . '/suku')?>">Suku</a></li>
         <li role="presentation" class="<?php if ($sivu == 'varsat'){echo "active";}?>"><a href="<?php echo base_url('virtuaalihevoset/hevonen/'. $hevonen['reknro'] . '/varsat')?>">Jälkeläiset</a></li>
         <li role="presentation" class="<?php if ($sivu == 'palkinnot'){echo "active";}?>"><a href="<?php echo base_url('virtuaalihevoset/hevonen/'. $hevonen['reknro'] . '/palkinnot')?>">Palkinnot</a></li>
+        <li role="presentation" class="<?php if ($sivu == 'nayttelyt'){echo "active";}?>"><a href="<?php echo base_url('virtuaalihevoset/hevonen/'. $hevonen['reknro'] . '/nayttelyt')?>">Näyttelyt</a></li>
         <li role="presentation" class="<?php if ($sivu == 'porrastetut'){echo "active";}?>"><a href="<?php echo base_url('virtuaalihevoset/hevonen/'. $hevonen['reknro'] . '/porrastetut')?>">Ominaisuudet</a></li>
         <li role="presentation" class="<?php if ($sivu == 'kilpailut'){echo "active";}?>"><a href="<?php echo base_url('virtuaalihevoset/hevonen/'. $hevonen['reknro'] . '/kilpailut')?>">Kilpailustatistiikka</a></li>
     </ul>
@@ -135,6 +136,38 @@ if (isset($palkinnot) && sizeof($palkinnot) > 0){
         
         else if($sivu == 'kilpailut'){
             echo $kilpailut;
+
+        }
+        
+        else if($sivu == 'nayttelyt'){
+            if(isset($show_palkinnot) && sizeof($show_palkinnot)> 0){
+             echo '<ul>';
+
+             $last_id = 0;
+             $shows = array();
+             $rewards = array();
+             foreach($show_palkinnot as $show){
+              $shows[$show['bis_id']] = $show;
+              if(isset($rewards[$show['bis_id']])){
+               $rewards[$show['bis_id']] = $rewards[$show['bis_id']] . ", " . $show['palkinto'];
+              }
+              else {
+               $rewards[$show['bis_id']] = $show['palkinto'];
+              }
+             }
+             
+             foreach ($shows as $id => $show){
+              $bis = '(<a href="'.site_url().'/kilpailutoiminta/tulosarkisto/bis/'.$id.'">tulosarkisto</a>)';
+
+              echo '<li>' . $vrl_helper->sql_date_to_normal($show['kp']).', <b>' . $rewards[$id] .'</b>, päätuomari: ' . $show['paatuomari_nimi'] . ' ' . $bis; 
+              echo '</li>';
+      
+             
+             }
+             echo '</ul>';
+            }else {
+             echo "<p>Ei näyttelypalkintoja</p>";
+            }
 
         }
         

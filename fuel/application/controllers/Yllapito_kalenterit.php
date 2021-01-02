@@ -138,12 +138,30 @@ class Yllapito_kalenterit extends CI_Controller
 	}
     
     function resultApplicationsMaintenance( $jaos, $leveled = false, $jaosdata = array() ) {
+        
+        $nayttelyt = false;
+        
+        if(isset($jaosdata['nayttelyjaos']) && $jaosdata['nayttelyjaos'] == 1){
+            $nayttelyt = true;
+        } else {
+            $nayttelyt = $this->kisajarjestelma->nayttelyjaos($jaos);
+        }
+        
+        if($nayttelyt){
+             $this->db->select('COUNT(t.bis_id) as kpl, MIN(t.ilmoitettu) as ilmoitettu');
+            $this->db->from('vrlv3_kisat_nayttelytulokset as t');
+            $this->db->join('vrlv3_kisat_nayttelykalenteri as k', 't.bis_id = k.kisa_id');
+
+        } 
+        else {
+        
          $this->db->select('COUNT(t.tulos_id) as kpl, MIN(t.ilmoitettu) as ilmoitettu');
         $this->db->from('vrlv3_kisat_tulokset as t');
-        $this->db->join('vrlv3_kisat_kisakalenteri as k', 't.kisa_id = k.kisa_id');
-        $this->db->where('k.jaos', $jaos);
-        $this->db->where ('k.vanha', 0);
-        $this->db->where('k.porrastettu', $leveled);
+            $this->db->join('vrlv3_kisat_kisakalenteri as k', 't.kisa_id = k.kisa_id');
+            $this->db->where ('k.vanha', 0);
+            $this->db->where('k.porrastettu', $leveled);
+        }
+        $this->db->where('k.jaos', $jaos);    
         $this->db->where('t.hyvaksytty', NULL);
 
         
@@ -605,7 +623,9 @@ private function _read_basic_input_field(&$data, $field){
             
             foreach ($data['jaokset'] as &$jaos){
                $this->_sort_panel_info_applications('tulokset_norm', $this->resultApplicationsMaintenance($jaos['id'], false), $jaos);
-               $this->_sort_panel_info_applications('tulokset_porr', $this->resultApplicationsMaintenance($jaos['id'], true), $jaos);
+               if($jaos['nayttelyt'] != 1){
+                $this->_sort_panel_info_applications('tulokset_porr', $this->resultApplicationsMaintenance($jaos['id'], true), $jaos);
+               }
 
             }
             $this->fuel->pages->render('yllapito/kisakalenteri/kisakalenteri_tuloshyvaksynta_main', $data);
@@ -661,12 +681,44 @@ private function _read_basic_input_field(&$data, $field){
                 unset($tulos_info['hyvaksyi']);
                 $tulos_info['jarjestelma']= & $this->kisajarjestelma;
                 
+                $nayttelyt =  $tulos_info['jaos_info']['nayttelyt'];                
+                
+                
+                 if($nayttelyt){
+                    $tulos_info['tulos_id'] = $tulos_info['bis_id'];
+                    $tulos_info['kisa_id'] = $tulos_info['nayttely_id'];
+                    $tulos_info['porrastettu'] = false;
+                    
+                }
                 $data['tulos'] = $tulos_info;
                 $data['tulos_info'] = $this->load->view('kilpailutoiminta/tulos_info', array("tulos" => $data['tulos']), TRUE);
-                $data['luokat_info'] = $this->load->view('kilpailutoiminta/tulos_luokat', array("tulos" => $data['tulos']), TRUE);
+                $luokat = "";
+                if($nayttelyt){
+                    
+                    $bis_rivit = $this->Kisakeskus_model->get_showresult_rewards($tulos_info['bis_id']);
+                    $taulu['headers'][1] = array('title' => 'Palkinto', 'key' => 'palkinto');
+                    $taulu['headers'][2] = array('title' => 'Hevonen', 'key' => 'vh_nimi');
+                    $taulu['headers'][3] = array('title' => 'Reknro', 'key' => 'vh_id', 'type'=>'VH', 'key_link' => site_url('virtuaalihevoset/hevonen/'));        
+                    $taulu['headers'] = json_encode($taulu['headers']);
+                            
+                    $taulu['data'] = json_encode($bis_rivit);
+                    $bis_tulokset = $this->load->view('misc/taulukko', $taulu, TRUE);
+                     $data['luokat_info'] = $this->load->view('kilpailutoiminta/tulos_nayttelyt', array("tulokset" => $tulos_info, "bistulokset"=>$bis_rivit, "bistaulu"=>$bis_tulokset), TRUE);
+
+                    
+
+                }else {
+                    
+                    
+                     $data['luokat_info'] = $this->load->view('kilpailutoiminta/tulos_luokat', array("tulos" => $tulos_info), TRUE);
+
+                }
                 
           
             }
+            
+            
+            
             
             $this->fuel->pages->render('yllapito/kisakalenteri/tuloshyvaksynta', $data);
         }
@@ -711,9 +763,20 @@ private function _read_basic_input_field(&$data, $field){
     
      private function _get_next($table, $jaos)
     {
+        $result = false;
+        $show = false;
         $letter = 'k';
+        
         if($table == "vrlv3_kisat_tulokset" || $table == 'vrlv3_kisat_nayttelytulokset'){
-            $letter = "t";
+            $result = true;
+        }
+        if($table == "vrlv3_kisat_nayttelytulokset" || $table == 'vrlv3_kisat_nayttelykalenteri'){
+            $show = true;
+        }
+        
+        if($result){
+              $letter= 't';          
+
         }
         $data = array();
         $date = new DateTime();
@@ -728,9 +791,9 @@ private function _read_basic_input_field(&$data, $field){
         $this->db->group_start();
         $this->db->where($letter.'.kasitelty IS NULL OR '.$letter.'.kasitelty < \'' . $date->format('Y-m-d H:i:s') . '\'');
         $this->db->group_end();
-
         $this->db->order_by($letter.".ilmoitettu", "asc"); 
         $query = $this->db->get();
+        
         if ($query->num_rows() > 0)
         {
             $data = $query->row_array(); 
@@ -739,9 +802,11 @@ private function _read_basic_input_field(&$data, $field){
             $user = $this->ion_auth->user()->row();
             $update_data = array('kasitelty' => $date->format('Y-m-d H:i:s'), 'kasittelija'=> $this->ion_auth->user()->row()->tunnus);
             
-            $id_key = "tulos_id";
-            if($letter == 'k'){
-                $id_key = 'kisa_id';
+            $id_key = "kisa_id";
+            if($show && $result){
+                $id_key = "bis_id";
+            }else if($result){
+                $id_key = 'tulos_id';
             }
             $this->db->where($id_key, $data[$id_key]);
             $this->db->update($table, $update_data);
@@ -825,17 +890,41 @@ private function _read_basic_input_field(&$data, $field){
     
      private function _approve_result ($jaos, $kisa_id, $approve, $disapprove_msg = false){
         $processing_ok = false;
-        $vrl = $this->ion_auth->user()->row()->tunnus;
+        $nayttelyt = false;
+        $db_comp_table = "";
+        $db_res_table = "";
+        $db_res_id = "";
+        $db_comp_ref_id ="";
+        
         $this->db->trans_start();
-        $this->db->select('vrlv3_kisat_kisakalenteri.*, vrlv3_kisat_tulokset.tunnus as ilmoittaja, vrlv3_kisat_tulokset.ilmoitettu as ilmoitettu, vrlv3_kisat_tulokset.luokat, vrlv3_kisat_tulokset.tulokset, vrlv3_kisat_tulokset.hylatyt, vrlv3_kisat_tulokset.tulos_id');
-        $this->db->from('vrlv3_kisat_kisakalenteri');
-        $this->db->join('vrlv3_kisat_tulokset', 'vrlv3_kisat_kisakalenteri.kisa_id = vrlv3_kisat_tulokset.kisa_id ');
-        $this->db->where('jaos', $jaos);
-        $this->db->where('vrlv3_kisat_kisakalenteri.kisa_id', $kisa_id);
-        $this->db->where('vrlv3_kisat_tulokset.kasittelija', $vrl);
-        $this->db->where('vrlv3_kisat_tulokset.hyvaksytty', NULL);
-                $query = $this->db->get();
 
+        $vrl = $this->ion_auth->user()->row()->tunnus;
+
+        if($this->kisajarjestelma->nayttelyjaos($jaos)){
+            $nayttelyt = true;
+            $db_comp_table = 'vrlv3_kisat_nayttelykalenteri';
+            $db_res_table = 'vrlv3_kisat_nayttelytulokset';
+            $db_res_id = "bis_id";
+            $db_comp_ref_id = "nayttely_id";
+            $this->db->select('k.*, t.tunnus as ilmoittaja, t.ilmoitettu as ilmoitettu, t.bis_id');
+
+        }else {
+            $db_comp_table = 'vrlv3_kisat_kisakalenteri';
+            $db_res_table = 'vrlv3_kisat_tulokset';
+            $db_res_id = "kisa_id";
+            $db_comp_ref_id = "kisa_id";
+            $this->db->select('k.*, t.tunnus as ilmoittaja, vrlv3_kisat_tulokset.ilmoitettu as ilmoitettu, t.luokat, t.tulokset, t.hylatyt, t.tulos_id');
+
+        }
+        
+        $this->db->from($db_comp_table . " as k");
+        $this->db->join($db_res_table . " as t", 'k.kisa_id = t.' . $db_comp_ref_id);
+        $this->db->where('jaos', $jaos);
+        $this->db->where('k.kisa_id', $kisa_id);
+        $this->db->where('t.kasittelija', $vrl);
+        $this->db->where('t.hyvaksytty', NULL);
+        $query = $this->db->get();
+        
         
         if ($query->num_rows() > 0)
         {
@@ -844,51 +933,67 @@ private function _read_basic_input_field(&$data, $field){
                 $date = new DateTime();
                 $date->setTimestamp(time());
                 $insert_data = array('hyvaksytty'=> $date->format('Y-m-d H:i:s'), 'hyvaksyi'=>$vrl);
-                $where_data = array('kisa_id' => $kisa_id, 'kasittelija' => $vrl);
+                $where_data = array($db_comp_ref_id => $kisa_id, 'kasittelija' => $vrl);
                 $this->db->where($where_data);
-                $this->db->update('vrlv3_kisat_tulokset', $insert_data);
+                $this->db->update($db_res_table, $insert_data);
                 
-                //statistiikka
-                $this->kisajarjestelma->add_stats($query->result_array()[0], $jaos, $query->result_array()[0]['porrastettu']);
-                                
-                //etuuspisteet
-                if($query->result_array()[0]['porrastettu'] == 0){
-                    $ilmo_tunnus = $query->result_array()[0]['ilmoittaja'];
-                    $takaaja_tunnus = $query->result_array()[0]['takaaja'];
-    
-                    //onko takaajan ilmoittama?
-                    $takaaja = false;
-                    if(isset($takaaja_tunnus) && $takaaja_tunnus != '00000' && $takaaja_tunnus == $ilmo_tunnus){
-                        $takaaja = true;
+                                //pikaviesti
+                $this->load->model('Tunnukset_model');
+                
+                if(!$nayttelyt){
+                    //statistiikka
+                    $this->kisajarjestelma->add_stats($query->result_array()[0], $jaos, $query->result_array()[0]['porrastettu']);
+                                    
+                    //etuuspisteet
+                    if($query->result_array()[0]['porrastettu'] == 0){
+                        $ilmo_tunnus = $query->result_array()[0]['ilmoittaja'];
+                        $takaaja_tunnus = $query->result_array()[0]['takaaja'];
+        
+                        //onko takaajan ilmoittama?
+                        $takaaja = false;
+                        if(isset($takaaja_tunnus) && $takaaja_tunnus != '00000' && $takaaja_tunnus == $ilmo_tunnus){
+                            $takaaja = true;
+                        }
+                        $this->kisajarjestelma->add_etuuspisteet($ilmo_tunnus, $jaos, $query->result_array()[0]['kp'], $query->result_array()[0]['ilmoitettu'], $takaaja);
                     }
-                    $this->kisajarjestelma->add_etuuspisteet($ilmo_tunnus, $jaos, $query->result_array()[0]['kp'], $query->result_array()[0]['ilmoitettu'], $takaaja);
-                }
-                //ominaisuuspisteet
-                else {
-                    $tulos_id = $query->result_array()[0]['tulos_id'];
-                    $this->porrastetut->approve_propertyPoints_from_queue($tulos_id);
-                }
+                    //ominaisuuspisteet
+                    else {
+                        $tulos_id = $query->result_array()[0]['tulos_id'];
+                        $this->porrastetut->approve_propertyPoints_from_queue($tulos_id);
+                    }
+                    
+                    $this->Tunnukset_model->send_message($vrl, $query->result_array()[0]['ilmoittaja'] , "Kilpailukutsun #".$query->result_array()[0]['kisa_id']." tulokset on hyväksytty!");
+
                 
-                
+                } else {
+                    $this->Tunnukset_model->send_message($vrl, $query->result_array()[0]['ilmoittaja'] , "Näyttelyn #".$query->result_array()[0]['kisa_id']." tulokset on hyväksytty!");
+
+                }
 
                     
                 
-                //pikaviesti
-                $this->load->model('Tunnukset_model');
+
                 
-                $this->Tunnukset_model->send_message($vrl, $query->result_array()[0]['ilmoittaja'] , "Kilpailukutsun #".$query->result_array()[0]['kisa_id']." tulokset on hyväksytty!");
             }
             
             else {
-                    $where_data = array('kisa_id' => $kisa_id, 'kasittelija' => $vrl);
-                    $this->db->delete('vrlv3_kisat_tulokset', $where_data);
+                    $where_data = array($db_comp_ref_id => $kisa_id, 'kasittelija' => $vrl);
+                    $this->db->delete($db_res_table, $where_data);
                     $insert_data = array('tulokset'=>0);
                     $where_data = array('jaos'=> $jaos, 'kisa_id' => $kisa_id);
                     $this->db->where($where_data);
-                    $this->db->update('vrlv3_kisat_kisakalenteri', $insert_data);
+                    $this->db->update($db_comp_table, $insert_data);
+                    
                     $this->load->model('Tunnukset_model');
-                    $this->Tunnukset_model->send_message($vrl, $query->result_array()[0]['tunnus'] ,
+                    
+                    if($nayttelyt){
+                        $this->Tunnukset_model->send_message($vrl, $query->result_array()[0]['tunnus'] ,
+                                                         "Näyttelyn #".$query->result_array()[0]['kisa_id']." tulokset on hylätty! Syy: " . $disapprove_msg);
+  
+                    }else  {
+                        $this->Tunnukset_model->send_message($vrl, $query->result_array()[0]['tunnus'] ,
                                                          "Kilpailukutsun #".$query->result_array()[0]['kisa_id']." tulokset on hylätty! Syy: " . $disapprove_msg);
+                    }
 
 
             }
