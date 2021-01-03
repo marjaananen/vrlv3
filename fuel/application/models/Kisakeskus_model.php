@@ -146,6 +146,7 @@ class Kisakeskus_model extends CI_Model
     
                 $this->db->where('k.tulokset', 1);
                 $this->db->where('t.hyvaksytty IS NOT NULL', NULL, FALSE);
+            $this->db->where('t.hyvaksytty != \'0000-00-00 00:00:00\'');
                 $this->db->order_by('k.kp', 'desc');
     
             
@@ -285,10 +286,14 @@ class Kisakeskus_model extends CI_Model
         
     }
     
-    public function search_competitions($jaos, $parameters){
+    public function search_competitions($jaos, $parameters, $nayttelyt = false){
         $where = array();
-        $this->db->select('vip, kp, j.id as jaos, j.lyhenne as jaoslyhenne, k.tunnus, k.url, k.info, jarj_talli, kisa_id, porrastettu, k.hyvaksytty, k.hyvaksyi');
-        $this->db->from('vrlv3_kisat_kisakalenteri as k');
+        $this->db->select('vip, kp, j.id as jaos, j.lyhenne as jaoslyhenne, k.tunnus, k.url, k.info, jarj_talli, kisa_id, k.hyvaksytty, k.hyvaksyi, IF(k.tulokset = 1, "ok", "ei") as tulokset');
+        if($nayttelyt){
+            $this->db->from('vrlv3_kisat_nayttelykalenteri as k');
+        }ELSE {
+            $this->db->from('vrlv3_kisat_kisakalenteri as k');
+        }
         $this->db->join('vrlv3_kisat_jaokset as j', 'j.id = k.jaos');
         $this->db->where('jaos', $jaos);
         if(isset($parameters['id'])){
@@ -296,7 +301,10 @@ class Kisakeskus_model extends CI_Model
 
         }else {
             unset($parameters['id_type']);
-            
+            if($nayttelyt){
+                unset($parameters['porrastettu']);
+                unset($parameters['arvontatapa']);
+            }
             foreach ($parameters as $key=>$parameter){
                 $where['k.'.$key] = $parameter;
             }
@@ -337,21 +345,35 @@ class Kisakeskus_model extends CI_Model
     
     
     
-     public function search_results($jaos, $parameters){
-        $this->db->select('kp, j.id as jaos, j.lyhenne as jaoslyhenne, u.hyvaksytty, u.tunnus, k.url, tulos_id, jarj_talli, k.kisa_id, porrastettu, u.hyvaksyi');
-        $this->db->from('vrlv3_kisat_kisakalenteri as k');
-        $this->db->join('vrlv3_kisat_jaokset as j', 'j.id = k.jaos');
-        $this->db->join('vrlv3_kisat_tulokset as u', 'k.kisa_id = u.kisa_id');
+     public function search_results($jaos, $parameters, $nayttelyt = false){
+        if($nayttelyt){
+            $this->db->select('kp, j.id as jaos, j.lyhenne as jaoslyhenne, u.hyvaksytty, u.tunnus, k.url, bis_id as tulos_id, jarj_talli, k.kisa_id, u.hyvaksyi');
+            $this->db->from('vrlv3_kisat_nayttelykalenteri as k');
+           $this->db->join('vrlv3_kisat_jaokset as j', 'j.id = k.jaos');
+           $this->db->join('vrlv3_kisat_nayttelytulokset as u', 'k.kisa_id = u.nayttely_id');
+        }else {
+            $this->db->select('kp, j.id as jaos, j.lyhenne as jaoslyhenne, u.hyvaksytty, u.tunnus, k.url, tulos_id, jarj_talli, k.kisa_id, u.hyvaksyi');
+            $this->db->from('vrlv3_kisat_kisakalenteri as k');
+            $this->db->join('vrlv3_kisat_jaokset as j', 'j.id = k.jaos');
+            $this->db->join('vrlv3_kisat_tulokset as u', 'k.kisa_id = u.kisa_id');
+        }
 
         if(isset($parameters['id_type']) && $parameters['id_type'] == "kisa_id" && isset($parameters['id'])){
             $this->db->where('k.kisa_id', $parameters['id']);
 
-        }  else if(isset($parameters['id_type']) && $parameters['id_type'] == "tulos_id" && isset($parameters['id'])){
-            $this->db->where('tulos_id', $parameters['id']);
+        }  else if(isset($parameters['id_type']) && $parameters['id_type'] == "tulos_id" && isset($parameters['id']) && $nayttelyt){
+            $this->db->where('bis_id', $parameters['id']);
 
-        }else {
+        } else if(isset($parameters['id_type']) && $parameters['id_type'] == "tulos_id" && isset($parameters['id'])){
+           $this->db->where('tulos_id', $parameters['id']);
+        }
+        else {
             unset($parameters['id_type']);
             unset($parameters['id']);
+            if($nayttelyt){
+                unset($parameters['porrastettu']);
+                unset($parameters['arvontatapa']);
+            }
 
             
             foreach ($parameters as $key=>$parameter){
@@ -377,6 +399,7 @@ class Kisakeskus_model extends CI_Model
                 $this->db->where($where);        }  
 
         $this->db->where('k.tulokset', 1);
+        $this->db->where('u.hyvaksytty is NOT NULL', NULL, FALSE);
         $this->db->where('u.hyvaksytty !=','0000-00-00 00:00:00');
 
         $this->db->order_by('u.hyvaksytty', 'desc');
@@ -573,7 +596,8 @@ class Kisakeskus_model extends CI_Model
 
         } else if ($tulokset){
             $this->db->where('k.tulokset', 1);
-            $this->db->where('t.hyvaksytty IS NOT NULL OR t.hyvaksytty != \'0000-00-00 00:00:00\'');
+            $this->db->where('t.hyvaksytty IS NOT NULL');
+            $this->db->where('t.hyvaksytty != \'0000-00-00 00:00:00\'');
             $this->db->order_by('k.kp', 'desc');
 
         }

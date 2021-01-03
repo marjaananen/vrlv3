@@ -182,60 +182,32 @@ class Yllapito_kalenterit extends CI_Controller
 // Käsittele hyväksyttyjä
 /////////////////////////////////////////////////////////////////////////////////////////
     
-    public function hyvaksytytkisat($tapa = null, $id = null){
+    public function hyvaksytytkisat($tapa = null, $type = null, $id = null){
         if($tapa == "delete"){
             $msg = "";
-            if($this->_delete_competition($id, $msg)){
+            if($this->_delete_competition($id, $type, $msg)){
                 $this->fuel->pages->render('misc/naytaviesti', array('msg_type' => 'success', 'msg' => 'Kilpailu #'.$id.' poistettu!'));
             }else {
                 $this->fuel->pages->render('misc/naytaviesti', array('msg_type' => 'danger', 'msg' => 'Kilpailu #'.$id.' poisto epäonnistui! ' . $msg));
             }
         }else if($tapa == "edit"){
-            $msg = "";
-            $kutsu = $this->Kisakeskus_model->hae_kutsutiedot($id, null, 0);
-            
-            if(sizeof($kutsu)>0){
-                $jaos = $kutsu['jaos'];
-                if($this->_is_jaos_owner($jaos) || $this->_is_jaos_admin()){
-                    if($this->input->server('REQUEST_METHOD') == 'POST'){
-                        $kutsu_new = $this->kisajarjestelma->parse_competition_application(false);
-                        if(!$this->kisajarjestelma->validate_competition_application($kutsu['porrastettu'], false, false)){
-                                $data['msg_type'] = 'danger';
-                                $data['msg'] = "Virhe syötetyissä tiedoissa.";
-                                
-                        }else if(!$this->kisajarjestelma->check_competition_edit_info(array_merge($kutsu, $kutsu_new), $msg)){
-                            $data['msg_type'] = 'danger';
-                            $data['msg'] = $msg;
-                        }else if (!$this->kisajarjestelma->edit_competition($id, $jaos, $kutsu_new, $msg)){
-                            $data['msg_type'] = 'danger';
-                            $data['msg'] = $msg;
-                        }else {
-                            $data['msg_type'] = 'success';
-                            $data['msg'] = "Kilpailun muokkaus onnistui";
-                        
-                        }
-                        $kutsu = array_merge($kutsu, $kutsu_new);
-                    
-                    }
+            $data = array();
+            if($this->_edit_competition($id, $type, $msg, $data)){
                 
-                    
-                    
-                    $data['form'] = $this->kisajarjestelma->get_competition_application ("edit", $this->url."hyvaksytytkisat/edit/".$kutsu['kisa_id'],  $kutsu['porrastettu'], false, $kutsu, $kutsu['jaos']);           
-                    $data['title'] = "Muokkaa kilpailukutsua (#".$kutsu['kisa_id'];
-                    if($kutsu['porrastettu']){
-                        $data['title'] .= ", porrastettu)";
-                    }else {
-                        $data['title'] .= ")";
-                    }
-                    $this->fuel->pages->render('misc/haku', $data);
-                    
-                }else {
-                    $this->fuel->pages->render('misc/naytaviesti', array('msg_type' => 'danger', 'msg' => 'Vain ylläpitäjillä, jaosvastaavalla tai jaoksen ylläpitäkällä on oikeus muokata kutsuja.'));
-    
-                }
-            }else {
-                $this->fuel->pages->render('misc/naytaviesti', array('msg_type' => 'danger', 'msg' => 'Kutsua ei löydy, tai sillä on jo hyväksytyt tai ilmoitetut tulokset!'));
 
+                $this->fuel->pages->render('misc/haku', $data);
+                
+            }else {
+                $data['msg_type'] = 'danger';
+                $data['msg'] = 'Kilpailu #'.$id.' muokkaus epäonnistui! ' . $msg;
+                if(isset($data['form'])){
+                    $this->fuel->pages->render('misc/haku', $data);
+                }
+                
+                else {
+                    $this->fuel->pages->render('misc/naytaviesti', $data);
+
+                }
             }
 
             
@@ -250,15 +222,73 @@ class Yllapito_kalenterit extends CI_Controller
 
     }
     
-    public function muokkaakisat(){
-        
+    private function _edit_competition($id, $type, &$msg = "", &$data = array()){
+        $nayttelyt = false;
+        $ok = true;
+
+        if($type == "nayttelyt"){
+               $nayttelyt = true;
+           }
+           
+        $porrastettu = false;
+
+        $kutsu = $this->Kisakeskus_model->hae_kutsutiedot($id, null, 0, $nayttelyt);
+        if(!$nayttelyt){
+            $porrastettu = $kutsu['porrastettu'];
+        }
+        if(sizeof($kutsu)>0){
+            $jaos = $kutsu['jaos'];
+             if($this->_is_jaos_owner($jaos) || $this->_is_jaos_admin()){
+                 if($this->input->server('REQUEST_METHOD') == 'POST'){
+                    
+                     $kutsu_new = $this->kisajarjestelma->parse_competition_application(false);
+                     if(!$this->kisajarjestelma->validate_competition_application($porrastettu, $nayttelyt, false)){
+                             $msg = "Virhe syötetyissä tiedoissa.";
+                             $ok = false;
+                             
+                     }else if(!$this->kisajarjestelma->check_competition_edit_info(array_merge($kutsu, $kutsu_new), $msg)){
+                         $ok = false;
+                     }else if (!$this->kisajarjestelma->edit_competition($id, $jaos, $kutsu_new, $msg)){
+                        $ok = false;
+                     } else {
+                            $data['msg_type'] = 'success';
+                            $data['msg'] = 'Kilpailu #'.$id.' muokattu!';
+                     }
+                     
+                     $kutsu = array_merge($kutsu, $kutsu_new);
+                     
+                 
+                 }
+             
+                 
+                 $data['form'] = $this->kisajarjestelma->get_competition_application ("edit", $this->url."hyvaksytytkisat/edit/".$type."/".$kutsu['kisa_id'],
+                                                                                      $porrastettu, $nayttelyt, $kutsu, $kutsu['jaos']);           
+                 $data['title'] = "Muokkaa kilpailukutsua (#".$kutsu['kisa_id'];
+                 if($porrastettu){
+                     $data['title'] .= ", porrastettu)";
+                 }else {
+                     $data['title'] .= ")";
+                 }
+                 
+             }else {
+                 $msg = 'Vain ylläpitäjillä, jaosvastaavalla tai jaoksen ylläpitäkällä on oikeus muokata kutsuja.';
+                 $ok = false;
+ 
+             }
+         }else {
+             $msg = 'Kutsua ei löydy, tai sillä on jo hyväksytyt tai ilmoitetut tulokset!';
+             $ok = false;
+
+         }
+         return $ok;
     }
+    
 
     
-    public function hyvaksytyttulokset($tapa = null, $id = null){
+    public function hyvaksytyttulokset($tapa = null, $type = null, $id = null){
         if($tapa == "delete"){
             $msg = "";
-            if($this->_delete_result($id, $msg)){
+            if($this->_delete_result($id, $type, $msg)){
                 $this->fuel->pages->render('misc/naytaviesti', array('msg_type' => 'success', 'msg' => 'Tulos #'.$id.' poistettu!'));
             }else {
                 $this->fuel->pages->render('misc/naytaviesti', array('msg_type' => 'danger', 'msg' => 'Tuloksen #'.$id.' poisto epäonnistui! ' . $msg));
@@ -275,6 +305,7 @@ class Yllapito_kalenterit extends CI_Controller
     
     private function _hyvaksytyt_selaa($result, $competition, $url){
         $data = array();
+        $nayttelyt = false;
         $data['search'] = array();
         $data['kisat'] = array();
         
@@ -288,10 +319,11 @@ class Yllapito_kalenterit extends CI_Controller
              $data['msg'] = "Sinulla ei ole oikeutta jaoksen ".$jaos_data['lyhenne']." kilpailukalenteriin. ";
              $data['msg_type'] = "danger";
             }else {
+                $nayttelyt = $this->kisajarjestelma->nayttelyjaos($data['search']['jaos']);
                 if($result){
-                    $data['kisat'] = $this->Kisakeskus_model->search_results($data['search']['jaos'], $data['search']);
+                    $data['kisat'] = $this->Kisakeskus_model->search_results($data['search']['jaos'], $data['search'], $nayttelyt);
                 }if($competition){
-                    $data['kisat'] = $this->Kisakeskus_model->search_competitions($data['search']['jaos'], $data['search']);
+                    $data['kisat'] = $this->Kisakeskus_model->search_competitions($data['search']['jaos'], $data['search'], $nayttelyt);
                 }
             }
             
@@ -299,8 +331,16 @@ class Yllapito_kalenterit extends CI_Controller
         
 
         $vars['headers'][1] = array('title' => 'Hyväksytty', 'key' => 'hyvaksytty', 'type'=>'date');
+        $handle_id = "kisa";
+        $result_url_id = "tulos";
+            if($nayttelyt){
+                $handle_id = "nayttelyt";
+                $result_url_id = "bis";
+            }
+
         if($result){
-            $vars['headers'][2] = array('title' => '#', 'key' => 'tulos_id', 'key_link'=> site_url('kilpailutoiminta/tulosarkisto/tulos/'), 'prepend_text' => '#');
+   
+            $vars['headers'][2] = array('title' => '#', 'key' => 'tulos_id', 'key_link'=> site_url('kilpailutoiminta/tulosarkisto/'.$result_url_id.'/'), 'prepend_text' => '#');
 
         }else if ($competition){
             $vars['headers'][2] = array('title' => '#', 'key' => 'kisa_id');
@@ -310,13 +350,15 @@ class Yllapito_kalenterit extends CI_Controller
         $vars['headers'][5] = array('title' => 'Jaos', 'key' => 'jaoslyhenne');
         $vars['headers'][6] = array('title' => 'Järjestäjä', 'key' => 'tunnus', 'key_link' => site_url('tunnus/'), 'prepend_text' => 'VRL-');
         $vars['headers'][7] = array('title' => 'Hyväksyjä', 'key' => 'hyvaksyi', 'key_link' => site_url('tunnus/'), 'prepend_text' => 'VRL-');
+
         
         if ($competition){
-            $vars['headers'][8] = array('title' => 'Editoi', 'key' => 'kisa_id', 'key_link' => site_url($url) . "/edit/", 'image' => site_url('assets/images/icons/edit.png'));
-            $vars['headers'][9] = array('title' => 'Poista', 'key' => 'kisa_id', 'key_link' => site_url($url) . "/delete/", 'image' => site_url('assets/images/icons/delete.png'));
+            $vars['headers'][8] = array('title' => 'Tulokset', 'key' => 'tulokset');
+            $vars['headers'][9] = array('title' => 'Editoi', 'key' => 'kisa_id', 'key_link' => site_url($url) . "/edit/".$handle_id ."/", 'image' => site_url('assets/images/icons/edit.png'));
+            $vars['headers'][10] = array('title' => 'Poista', 'key' => 'kisa_id', 'key_link' => site_url($url) . "/delete/" . $handle_id ."/", 'image' => site_url('assets/images/icons/delete.png'));
         }
         else if($result){
-            $vars['headers'][8] = array('title' => 'Poista', 'key' => 'tulos_id', 'key_link' => site_url($url) . "/delete/", 'image' => site_url('assets/images/icons/delete.png'));
+            $vars['headers'][8] = array('title' => 'Poista', 'key' => 'tulos_id', 'key_link' => site_url($url) . "/delete/" . $handle_id ."/", 'image' => site_url('assets/images/icons/delete.png'));
 
         }
         
@@ -346,7 +388,7 @@ class Yllapito_kalenterit extends CI_Controller
 
         $jaos_options = array();
         if($this->_is_jaos_admin()){
-            $jaos_options = $this->Jaos_model->get_jaos_option_list(true);
+            $jaos_options = $this->Jaos_model->get_jaos_option_list(true, false, false);
 
         }else {
             $jaoslist = $this->Jaos_model->get_users_jaos($this->ion_auth->user()->row()->tunnus);
@@ -412,12 +454,19 @@ private function _read_basic_input_field(&$data, $field){
 
 
  
-    private function _delete_competition($kisa_id, &$msg){
+    private function _delete_competition($kisa_id, $type, &$msg){
         $ok = true;
+        $db  = 'vrlv3_kisat_kisakalenteri';
+        $nayttelyt = false;
+        if($type == "nayttelyt"){
+            $db = 'vrlv3_kisat_nayttelykalenteri';
+            $nayttelyt = true;
+        }
+        
         $this->db->trans_start();
                 
         $this->db->select('*');
-        $this->db->from('vrlv3_kisat_kisakalenteri as k');
+        $this->db->from($db.' as k');
         $this->db->where('kisa_id', $kisa_id);
         $this->db->where('tulokset', 0);
         $this->db->where('k.hyvaksytty is NOT NULL', NULL, FALSE);
@@ -428,11 +477,15 @@ private function _read_basic_input_field(&$data, $field){
         {
             $id = $query->result_array()[0]['kisa_id'];
             $jaos  = $query->result_array()[0]['jaos'];
+            $item = "Kilpailukutsu";
+            if($nayttelyt){
+                $item = "Näyttelykutsu";
+            }
             if($this->_is_jaos_owner($jaos) || $this->_is_jaos_admin()){
-                $this->db->delete('vrlv3_kisat_kisakalenteri', array('jaos'=>$jaos, 'kisa_id'=>$id));
+                $this->db->delete($db, array('jaos'=>$jaos, 'kisa_id'=>$id));
                 $this->load->model('Tunnukset_model');
                 $this->Tunnukset_model->send_message($this->ion_auth->user()->row()->tunnus, $query->result_array()[0]['tunnus'] ,
-                                                         "Kilpailukutsu #".$query->result_array()[0]['kisa_id']." on poistettu kalenterista! Jos et tiedä miksi, ole yhteydessä jaoksen ylläpitoon!");
+                                                        $item. " #".$query->result_array()[0]['kisa_id']." on poistettu kalenterista! Jos et tiedä miksi, ole yhteydessä jaoksen ylläpitoon!");
 
                 $this->db->trans_complete();
                 
@@ -449,6 +502,7 @@ private function _read_basic_input_field(&$data, $field){
             }
 
         } else {
+            echo $this->db->last_query();
               $this->db->trans_complete();
               $msg = "Kilpailua ei löytynyt, tai siitä on jo ilmoitettu tulokset.";
               $ok = false;
@@ -462,14 +516,28 @@ private function _read_basic_input_field(&$data, $field){
     
     
     
-    private function _delete_result($result_id, &$msg){
+    private function _delete_result($result_id, $type, &$msg){
         $ok = true;
+        
+        $db_kisa  = 'vrlv3_kisat_kisakalenteri';
+        $db_tulos  = 'vrlv3_kisat_tulokset';
+        $db_kisa_id_ref = "kisa_id";
+        $db_res_id = "tulos_id";
+        $nayttelyt = false;
+        if($type == "nayttelyt"){
+            $db_kisa = 'vrlv3_kisat_nayttelykalenteri';
+            $db_tulos = 'vrlv3_kisat_nayttelytulokset';
+            $db_kisa_id_ref = "nayttely_id";
+            $db_res_id = "bis_id";
+
+            $nayttelyt = true;
+        }
         $this->db->trans_start();
                 
-        $this->db->select('*');
-        $this->db->from('vrlv3_kisat_tulokset as t');
-        $this->db->join('vrlv3_kisat_kisakalenteri as k', 'k.kisa_id = t.kisa_id');
-        $this->db->where('tulos_id', $result_id);
+        $this->db->select('*, t.'.$db_kisa_id_ref.' as kisa_id');
+        $this->db->from($db_tulos.' as t');
+        $this->db->join($db_kisa. ' as k', 'k.kisa_id = t.'. $db_kisa_id_ref);
+        $this->db->where('t.'. $db_res_id, $result_id);
         $this->db->where('t.hyvaksytty is NOT NULL', NULL, FALSE);
         $this->db->where('t.hyvaksytty !=','0000-00-00 00:00:00');
 
@@ -478,17 +546,21 @@ private function _read_basic_input_field(&$data, $field){
         
         if ($query->num_rows() > 0)
         {
-            $id = $query->result_array()[0]['tulos_id'];
+            $id = $query->result_array()[0][$db_res_id];
             $jaos = $query->result_array()[0]['jaos'];
             if($this->_is_jaos_owner($jaos) || $this->_is_jaos_admin()){
-                $this->db->delete('vrlv3_kisat_tulokset', array('tulos_id'=>$id));
+                $this->db->delete($db_tulos, array($db_res_id=>$id));
                 
                 $this->db->where('kisa_id', $query->result_array()[0]['kisa_id']);
-                $this->db->update('vrlv3_kisat_kisakalenteri', array('tulokset'=> 0));
+                $this->db->update($db_kisa, array('tulokset'=> 0));
                 
                 $this->load->model('Tunnukset_model');
+                $item = "Kilpailun";
+                if($nayttelyt){
+                    $item = "Näyttelyn";
+                }
                 $this->Tunnukset_model->send_message($this->ion_auth->user()->row()->tunnus, $query->result_array()[0]['tunnus'] ,
-                                                         "Kilpailutulokset #".$query->result_array()[0]['kisa_id']." on poistettu arkistosta! Jos et tiedä miksi, ole yhteydessä jaoksen ylläpitoon!");
+                                                         $item." #".$query->result_array()[0]['kisa_id']." tulokset on poistettu arkistosta! Jos et tiedä miksi, ole yhteydessä jaoksen ylläpitoon!");
 
                 $this->db->trans_complete();
                 
@@ -505,7 +577,6 @@ private function _read_basic_input_field(&$data, $field){
             }
 
         } else {
-              echo $this->db->last_query();
               $this->db->trans_complete();
               $msg = "Tulosta ei löytynyt.";
               $ok = false;

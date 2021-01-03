@@ -597,7 +597,7 @@ public function check_competition_edit_info($kisa, &$msg){
             return false;
         }
         
-        if($kisa['porrastettu']){
+        if(isset($kisa['porrastettu']) && $kisa['porrastettu']){
             $jaos = $this->CI->Jaos_model->get_jaos($kisa['jaos']);
             if($kisa['arvontatapa'] != 3){
                 $msg = "Virheellinen arvontatapa porrastetulla.";
@@ -785,9 +785,15 @@ public function check_competition_info($mode = "add", &$kisa, &$msg, $direct = f
     }
     
     public function edit_competition($id, $jaos, $kutsu_new, $msg){
-        $this->CI->db->where('kisa_id', $id);
-	    $this->CI->db->where('jaos', $jaos);
-	    $this->CI->db->update('vrlv3_kisat_kisakalenteri', $kutsu_new);
+        if($this->nayttelyjaos($jaos)){
+            $this->CI->db->where('kisa_id', $id);
+            $this->CI->db->where('jaos', $jaos);
+            $this->CI->db->update('vrlv3_kisat_nayttelykalenteri', $kutsu_new);
+        }else {        
+            $this->CI->db->where('kisa_id', $id);
+            $this->CI->db->where('jaos', $jaos);
+            $this->CI->db->update('vrlv3_kisat_kisakalenteri', $kutsu_new);
+        }
         
         return true;
         

@@ -95,9 +95,9 @@ $route['yllapito/kalenterit/tuloshyvaksynta/(:any)/(:any)'] = "yllapito_kalenter
 $route['yllapito/kalenterit/tuloshyvaksynta/(:any)/(:any)/(:any)'] = "yllapito_kalenterit/tuloshyvaksynta/$1/$2/$3";
 $route['yllapito/kalenterit/hyvaksytyttulokset'] = "yllapito_kalenterit/hyvaksytyttulokset";
 $route['yllapito/kalenterit/hyvaksytytkisat'] = "yllapito_kalenterit/hyvaksytytkisat";
-$route['yllapito/kalenterit/hyvaksytytkisat/delete/(:any)'] = "yllapito_kalenterit/hyvaksytytkisat/delete/$1";
-$route['yllapito/kalenterit/hyvaksytytkisat/edit/(:any)'] = "yllapito_kalenterit/hyvaksytytkisat/edit/$1";
-$route['yllapito/kalenterit/hyvaksytyttulokset/delete/(:any)'] = "yllapito_kalenterit/hyvaksytyttulokset/delete/$1";
+$route['yllapito/kalenterit/hyvaksytytkisat/delete/(:any)/(:any)'] = "yllapito_kalenterit/hyvaksytytkisat/delete/$1/$2";
+$route['yllapito/kalenterit/hyvaksytytkisat/edit/(:any)/(:any)'] = "yllapito_kalenterit/hyvaksytytkisat/edit/$1/$2";
+$route['yllapito/kalenterit/hyvaksytyttulokset/delete/(:any)/(:any)'] = "yllapito_kalenterit/hyvaksytyttulokset/delete/$1/$2";
 $route['yllapito/kalenterit/porrastetut_run'] = "yllapito_kalenterit/porrastetut_run";
 
 
