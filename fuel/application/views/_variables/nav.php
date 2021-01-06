@@ -27,8 +27,9 @@ $nav['profiili'] = array('label'=>'Profiili', 'hidden'=> TRUE, 'active' => 'prof
 //Liitto alamenu
 $nav['liitto/tiedotukset'] = array('label' => 'Tiedotukset', 'parent_id' => 'liitto', 'active' => 'liitto/tiedotukset');
 $nav['liitto/tiedotus'] = array('hidden'=>TRUE, 'label' => 'Tiedotus', 'parent_id' => 'liitto/tiedotukset', 'active' => 'liitto/tiedotus/:any'); 
-
 $nav['liitto/yllapito'] = array('label' => 'Ylläpito ja yhteydenotto', 'parent_id' => 'liitto', 'active' => 'liitto/yllapito'); //Koodattavaa: työntekijöiden listaus
+$nav['liitto/rajapinta'] = array('label' => 'Rajapinta', 'parent_id' => 'liitto', 'active' => 'liitto/rajapinta');
+
 $nav['liitto/wiki'] = array('label' => 'Virtuaaliwiki', 'parent_id' => 'liitto', 'active' => 'liitto/wiki');
 $nav['liitto/somessa'] = array('label' => 'VRL sosiaalisessa mediassa', 'parent_id' => 'liitto', 'active' => 'liitto/somessa');
 $nav['liitto/mainosta'] = array('label' => 'Mainosta sivuillamme!', 'parent_id' => 'liitto', 'active' => 'liitto/mainosta');
