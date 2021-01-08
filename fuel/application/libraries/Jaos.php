@@ -55,8 +55,9 @@ class Jaos
 		$vars['headers'][3] = array('title' => 'Tulos', 'key' => 'tulos');
       $vars['headers'][4] = array('title' => 'Palkinto', 'key' => 'palkinto');
       $vars['headers'][5] = array('title' => 'Kommentti', 'key' => 'kommentti', 'type'=>'small');
-      $vars['headers'][6] = array('title' => 'Poista', 'key' => 'oid', 'key_link' => site_url($url_poista), 'image' => site_url('assets/images/icons/delete.png'));
-
+      if(isset($url_poista)){
+         $vars['headers'][6] = array('title' => 'Poista', 'key' => 'oid', 'key_link' => site_url($url_poista), 'image' => site_url('assets/images/icons/delete.png'));
+      }
 		$vars['headers'] = json_encode($vars['headers']);
 					
 		$vars['data'] = json_encode($this->CI->Jaos_model->get_event_horses($id));

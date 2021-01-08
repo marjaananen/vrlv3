@@ -984,7 +984,7 @@ private function _read_basic_input_field(&$data, $field){
             $db_res_table = 'vrlv3_kisat_tulokset';
             $db_res_id = "kisa_id";
             $db_comp_ref_id = "kisa_id";
-            $this->db->select('k.*, t.tunnus as ilmoittaja, vrlv3_kisat_tulokset.ilmoitettu as ilmoitettu, t.luokat, t.tulokset, t.hylatyt, t.tulos_id');
+            $this->db->select('k.*, t.tunnus as ilmoittaja, t.ilmoitettu as ilmoitettu, t.luokat, t.tulokset, t.hylatyt, t.tulos_id');
 
         }
         

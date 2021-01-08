@@ -19,7 +19,7 @@ class Rajapinta extends CI_Controller
         $vars['virhekoodit'] = $this->virhekoodit;
         $vars['esimerkit'] = array();
         $vars['esimerkit']['error'] = json_encode($this->_virhetaulu("Virhekoodi numerona", "Virheen sanallinen kuvaus"));
-        $vars['esimerkit']['success'] = json_encode(array_merge($this->_base_array(), array("rajapinnan nimi"=>array("rajapinnan", "plauttama", "sisalto", "taulukkona"))));
+        $vars['esimerkit']['success'] = json_encode(array_merge($this->_base_array(), array("rajapinnan nimi"=>array("rajapinnan", "palauttama", "sisalto", "taulukkona"))));
         $vars['rajapinnat'] = array();
         $vars['rajapinnat']['varsat'] = array("parametrit"=>array("vh-tunnus"),
                                               "esimerkki"=>array("VH03-028-8756"),
@@ -54,7 +54,7 @@ class Rajapinta extends CI_Controller
     var $virhekoodit = array ("400" => "Antamasi parametri (esim. vh-tunnus tai kilpailun id) on virheellinen",
                               "404" => "Antamillasi parametreilla (esim. vh-tunnus tai kilpailun id) ei löydy tulosta",
                               "600" => "Porrastetut: Hevonen liian nuori tai siltä puuttuu ikä.",
-                              "601" => "Porrastetut: Hevonen liian matala tai siltä puuttuu ikä.",
+                              "601" => "Porrastetut: Hevonen liian matala tai siltä puuttuu säkäkorkeus.",
                               "800" => "Tapahtui odottamaton virhe. Ota yhteys ylläpitoon.");
     
     private function _print($array = array()){

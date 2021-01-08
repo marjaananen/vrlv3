@@ -19,7 +19,7 @@ $nav['tallit'] = array('label' => 'Virtuaalitallit', 'active' => 'tallit$|tallit
 $nav['virtuaalihevoset'] = array('label' => 'Virtuaalihevoset', 'active' => 'virtuaalihevoset$|virtuaalihevoset/:any'); //Koodattavaa: Hevoshaku
 $nav['kasvatus'] = array('label' => 'Kasvatus', 'active' => 'kasvatus$|kasvatus/:any'); //Koodattavaa: Hevoshaku
 $nav['kilpailutoiminta'] = 'Kilpailutoiminta';
-$nav['muutoiminta'] = 'Muu toiminta';
+$nav['alayhdistykset'] = 'Alayhdistykset';
 //Piilotetut
 $nav['yllapito'] = array('label'=>'Ylläpito', 'hidden'=> TRUE, 'active' => 'yllapito$|yllapito/:any');
 $nav['profiili'] = array('label'=>'Profiili', 'hidden'=> TRUE, 'active' => 'profiili');
@@ -123,20 +123,9 @@ $nav['kilpailutoiminta/ilmoita_tulokset/kisat'] = array('label' => 'Ilmoita kisa
 $nav['kilpailutoiminta/ilmoita_tulokset/nayttelyt'] = array('label' => 'Ilmoita näyttelytulokset', 'parent_id' => 'kilpailutoiminta/omat', 'active' => 'kilpailutoiminta/ilmoita_tulokset/nayttelyt');
 
 
-$nav['muutoiminta/kantakirjat'] = array('label' => 'Kantakirjat', 'parent_id' => 'muutoiminta', 'active' => 'muutoiminta/kantakirjat');
-$nav['muutoiminta/yhdistykset'] = array('label' => 'Yhdistykset', 'parent_id' => 'muutoiminta', 'active' => 'muutoiminta/yhdistykset');
-$nav['muutoiminta/laatuarvostelut'] = array('label' => 'Laatuarvostelut', 'parent_id' => 'muutoiminta', 'active' => 'muutoiminta/laatuarvostelut');
 
 
 
-//porrastettujen jutut, anomisen jutut jne jne
-//nayttelytoiminta alamenu
-/*$nav['kilpailutoiminta/saannot'] = array('label' => 'Näyttelysäännöt', 'parent_id' => 'nayttelytoiminta', 'active' => 'nayttelytoiminta/saannot');
-$nav['kilpailutoiminta/nayttelykalenteri'] = array('label' => 'Näyttelykalenteri', 'parent_id' => 'nayttelytoiminta', 'active' => 'nayttelytoiminta/nayttelykalenteri');
-$nav['kilpailutoiminta/bislista'] = array('label' => 'BIS-lista', 'parent_id' => 'nayttelytoiminta', 'active' => 'nayttelytoiminta/bislista');
-$nav['kilpailutoiminta/nayttelyiden-kermaa'] = array('label' => 'Näyttelyiden kermaa', 'parent_id' => 'nayttelytoiminta', 'active' => 'nayttelytoiminta/nayttelyiden-kermaa');
-$nav['kilpailutoiminta/jarjestaminen'] = array('label' => 'Näyttelyiden järjestäminen', 'parent_id' => 'nayttelytoiminta', 'active' => 'nayttelytoiminta/jarjestaminen');
-*/
 // ylläpito alamenu
 $nav['yllapito/tiedotukset'] = array('label' => 'Tiedotukset', 'parent_id' => 'yllapito', 'active' => 'yllapito/tiedotukset');
 $nav['yllapito/tunnukset'] = array('label' => 'Tunnukset', 'parent_id' => 'yllapito', 'active' => 'yllapito/tunnukset');
@@ -179,6 +168,12 @@ $nav['yllapito/kalenterit/hyvaksytytkisat/edit'] = array('label' => 'Muokkaa kut
 
 
 
+$nav['alayhdistykset/kilpailujaokset'] = array('label' => 'Kilpailujaokset', 'parent_id' => 'alayhdistykset', 'active' => 'alayhdistykset/kilpailujaokset');
+$nav['alayhdistykset/kantakirjat'] = array('label' => 'Kantakirjat', 'parent_id' => 'alayhdistykset', 'active' => 'alayhdistykset/kantakirjat');
+$nav['alayhdistykset/laatuarvostelut'] = array('label' => 'Muut laatuarvostelut', 'parent_id' => 'alayhdistykset', 'active' => 'alayhdistykset/laatuarvostelut');
+$nav['alayhdistykset/rotuyhdistykset'] = array('label' => 'Rotuyhdistykset', 'parent_id' => 'alayhdistykset', 'active' => 'alayhdistykset/rotuyhdistykset');
+
+$nav['alayhdistykset/tapahtumat'] = array('label' => 'Tapahtuma-arkisto', 'parent_id' => 'alayhdistykset', 'active' => 'alayhdistykset/tapahtumat');
 
 
 

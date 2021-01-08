@@ -55,13 +55,25 @@ class Jaos_model extends Base_module_model
         return array();
     }
     
-    
-        //tapahtumat
-    function get_event_list($jaos)
+    function get_event_list_by_type($jaos = false, $pulju_type = null)
     {
-        $this->db->select('*');
+        $this->db->select('vrlv3_tapahtumat.*, j.lyhenne as lyhenne');
         $this->db->from('vrlv3_tapahtumat');
-        $this->db->where('vrlv3_tapahtumat.jaos_id', $jaos);
+        if($jaos){
+        $this->db->join('vrlv3_kisat_jaokset as j', 'j.id = vrlv3_tapahtumat.jaos_id');
+        }else {
+        $this->db->join('vrlv3_puljut as j', 'j.id = vrlv3_tapahtumat.pulju_id');
+        }
+
+        if($jaos){
+            $this->db->where('vrlv3_tapahtumat.jaos_id IS NOT NULL');
+        }
+
+        else if (isset($pulju_type)){
+            $this->db->where('vrlv3_tapahtumat.jaos_id IS NULL');
+            $this->db->where('j.tyyppi', $pulju_type);
+        }
+        
         $this->db->where('vrlv3_tapahtumat.tulos', 1);
 
         $query = $this->db->get();
@@ -74,14 +86,36 @@ class Jaos_model extends Base_module_model
         return array();
     }
     
-    function get_event($id, $jaos = null)
+     function get_event_list($jaos = null, $pulju = null)
+    {
+        $this->db->select('*, ');
+        $this->db->from('vrlv3_tapahtumat');
+        if(isset($jaos)){
+            $this->db->where('vrlv3_tapahtumat.jaos_id', $jaos);
+        } else if (isset($pulju)){
+            $this->db->where('vrlv3_tapahtumat.pulju_id', $pulju);
+        }
+        $this->db->where('vrlv3_tapahtumat.tulos', 1);
+
+        $query = $this->db->get();
+        
+        if ($query->num_rows() > 0)
+        {
+            return $query->result_array(); 
+        }
+        
+        return array();
+    }
+    
+    function get_event($id, $jaos = null, $pulju = null)
     {
         $this->db->select('*');
         $this->db->from('vrlv3_tapahtumat');
         $this->db->where('vrlv3_tapahtumat.id', $id);
         if(isset($jaos)){
             $this->db->where('vrlv3_tapahtumat.jaos_id', $jaos);
-
+        } else if (isset($pulju)){
+            $this->db->where('vrlv3_tapahtumat.pulju_id', $pulju);
         }
         $query = $this->db->get();
         
@@ -92,6 +126,7 @@ class Jaos_model extends Base_module_model
         
         return array();
     }
+    
     
     function get_event_horses($event){
         $this->db->select('oid, vh, tulos, palkinto, kommentti');
@@ -108,8 +143,8 @@ class Jaos_model extends Base_module_model
 
     }
     
-    function delete_event($id, $jaos_id){
-        $data = array('id' => $id, 'jaos_id'=>$jaos_id);
+    function delete_event($id, $jaos_id, $pulju_id){
+        $data = array('id' => $id, 'jaos_id'=>$jaos_id, 'pulju_id'=>$pulju_id);
         $this->db->delete('vrlv3_tapahtumat', $data);
         return true;
     }
@@ -120,13 +155,19 @@ class Jaos_model extends Base_module_model
         return true;
     }
     
-    function add_event($pvm, $title, $user, $jaos, $participant_data = array()){
+    function add_event($pvm, $title, $user, $jaos, $participant_data = array(), $pulju = false){
         $event_data['otsikko'] = $title;
         $event_data['pv'] = $this->CI->vrl_helper->normal_date_to_sql($pvm);
         $event_data['vastuu'] = $user;
-        $event_data['jaos_id'] = $jaos;
-        
-        $jaos_info = $this->get_jaos($jaos);
+        $jaos_info = "";
+        if($pulju){
+            $event_data['pulju_id'] = $jaos;
+            $jaos_info = $this->get_pulju($jaos);
+        }else {
+            $event_data['jaos_id'] = $jaos;
+            $jaos_info = $this->get_jaos($jaos);
+
+        }
         
         $event_data['jaos'] = $jaos_info['lyhenne'];
 
@@ -141,8 +182,15 @@ class Jaos_model extends Base_module_model
         return $id;   
     }
     
-    function edit_event($id, $jaos, $title, $date){
-        $where = array('id'=> $id, 'jaos_id' => $jaos);
+    function edit_event($id, $jaos, $title, $date, $pulju = false){
+        $where = array();
+        if($pulju){
+            $where = array('id'=> $id, 'pulju_id' => $jaos);
+
+        }else {
+            $where = array('id'=> $id, 'jaos_id' => $jaos);
+
+        }
         $this->db->where($where);
         $this->db->update('vrlv3_tapahtumat', array("otsikko"=>$title, "pv" => $this->CI->vrl_helper->normal_date_to_sql($date)));
     
@@ -681,6 +729,303 @@ class Jaos_model extends Base_module_model
             return 0;
         }
     }
+    
+    
+    //////////////////////////////////////////////////////////////////7
+    // PULJUT
+    /////////////////////////////////////////////////////////////////
+    
+     function add_pulju(&$msg, $pulju){
+            $this->db->insert('vrlv3_puljut', $pulju);
+            $id = $this->db->insert_id();
+            return $id;
+        }
+    
+    function edit_pulju($id, $pulju){
+        $this->db->where('id', $id);
+        $this->db->update('vrlv3_puljut', $pulju);
+    }
+    function set_pulju_online($id, $online = true){
+        $this->db->where('id', $id);
+        $this->db->update('vrlv3_puljut', array('toiminnassa' => $online));
+    }
+    
+    function add_owner_to_pulju($id, $tunnus)
+    {
+        $data = array('jid' => $id, 'tunnus' => $tunnus);      
+        $this->db->insert('vrlv3_puljut_omistajat', $data);
+    }
+
+    function delete_pulju($id, &$msg){
+        //todo delete luokat, ominaisuudet
+        $data = array('id' => $id);
+        $this->db->delete('vrlv3_puljut', $data);
+        return true;
+    }
+    
+    //names
+    function get_users_pulju($pinnumber)
+    {
+        $this->db->select('vrlv3_puljut.id, nimi, lyhenne, toiminnassa');
+        $this->db->from('vrlv3_puljut');
+        $this->db->join('vrlv3_puljut_omistajat', 'vrlv3_puljut.id = vrlv3_puljut_omistajat.jid');
+        $this->db->where('vrlv3_puljut_omistajat.tunnus', $pinnumber);
+        $query = $this->db->get();
+        
+        if ($query->num_rows() > 0)
+        {
+            return $query->result_array(); 
+        }
+        
+        return array();
+    }
+    
+    
+    
+    
+    
+    
+    function get_pulju_list($only_active = false, $type = null)
+    {
+        $this->db->select("id, nimi, lyhenne, kuvaus, url, IF(toiminnassa='1', 'toiminnassa', 'ei toiminnassa') as toiminnassa");
+        if($only_active){
+            $this->db->where("toiminnassa", 1);
+        }if(isset($type)){
+                    $this->db->where("$tyyppi", $type);
+
+        }
+        $this->db->from('vrlv3_puljut');
+        
+        $query = $this->db->get();
+        
+        if ($query->num_rows() > 0)
+        {
+            return $query->result_array(); 
+        }
+        
+        return array();
+    }
+    
+    function get_pulju_option_list($only_active = false, $type = null){
+        $options = array();
+        
+        $pulju_list = $this->get_pulju_list($only_active, $type);
+        
+        foreach ($pulju_list as $pulju){
+            $options[$pulju['id']] = $pulju['lyhenne'];
+        }
+        
+        return $options;
+    }
+    
+    function get_puljut_all($type = null, $online = null)
+    {
+        $this->db->select("*");
+        $this->db->from('vrlv3_puljut');
+        
+        
+        if(isset($online)){
+            $this->db->where("toiminnassa", $online);
+        }
+        
+        if(isset($type)){
+            $this->db->where("tyyppi", $type);
+        }
+        $query = $this->db->get();
+        
+        if ($query->num_rows() > 0)
+        {
+            return $query->result_array(); 
+        }
+        
+        return array();
+    }
+    
+    function get_puljut_full($type = null, $online = null)
+    {
+        $jaokset = $this->get_puljut_all($type, $online);
+        foreach ($jaokset as &$pulju){
+            $pulju['yllapito'] = $this->get_pulju_handlers($pulju['id']);
+        }
+        
+        return $jaokset;
+    }
+    
+    function get_pulju_handlers($id){
+        return $this->get_pulju_owners($id, true);
+        
+    }
+    
+    function get_pulju($id)
+    {
+        $pulju = array();
+        $this->db->select('*');
+        $this->db->from('vrlv3_puljut as j');
+        //$this->db->join('vrlv3_puljut_omistajat', 'vrlv3_puljut.id = vrlv3_puljut_omistajat.jid');
+        //$this->db->join('vrlv3_lista_painotus as l', 'j.laji = l.pid', 'left');
+        $this->db->where('j.id', $id);
+        $query = $this->db->get();
+        
+        if ($query->num_rows() > 0)
+        {
+            $result = $query->result_array();
+            $pulju = $result[0];
+            
+            
+            return $pulju;
+        }
+        
+        return array();
+    }
+    
+    
+    function get_pulju_owners($id, $only_yp = false)
+    {
+        $this->db->select('vrlv3_tunnukset.tunnus as omistaja, nimimerkki, taso, CONCAT(vrlv3_puljut_omistajat.tunnus, "/", vrlv3_puljut_omistajat.jid) as id');
+        $this->db->from('vrlv3_puljut_omistajat');
+        $this->db->join('vrlv3_tunnukset', 'vrlv3_tunnukset.tunnus = vrlv3_puljut_omistajat.tunnus');
+        if($only_yp){
+          $this->db->where('vrlv3_puljut_omistajat.taso', 1);
+
+        }
+        $this->db->where('jid', $id);
+        $query = $this->db->get();
+        
+        if ($query->num_rows() > 0)
+        {
+            return $query->result_array();
+        }
+        
+        return array();
+    }
+    
+    function edit_pulju_user_rights($tunnus){
+        
+        
+        $this->db->trans_start();
+        
+        $this->db->select('vrlv3_tunnukset.tunnus as omistaja, vrlv3_tunnukset.id as id, taso, count(vrlv3_puljut_omistajat.jid)');
+        $this->db->from('vrlv3_puljut_omistajat');
+        $this->db->join('vrlv3_tunnukset', 'vrlv3_tunnukset.tunnus = vrlv3_puljut_omistajat.tunnus');
+        $this->db->where('vrlv3_tunnukset.tunnus', $tunnus);
+        $this->db->group_by('vrlv3_puljut_omistajat.jid');
+
+        $query = $this->db->get();
+        
+        
+        if ($query->num_rows() > 0)
+        {
+            $id = $query->result_array()[0]['id'];
+            //henkilöllä on jaoksiin yp tai kalenterioikeuksia (tai molempia)
+            //exclude pulju-yp (11) and puljuuduunari (12)
+            $this->db->delete('vrlv3_users_groups', array('user_id' => $id, 'group_id'=>11));
+            $this->db->delete('vrlv3_users_groups', array('user_id' => $id, 'group_id'=>12));
+            
+            $yp_done = false;
+            $cal_done = false;
+            foreach ($query->result_array() as $rivi){
+                if ($rivi['taso'] == 1 && !$yp_done){
+                    
+                    $this->db->insert('vrlv3_users_groups', array('user_id' => $id, 'group_id'=>11));
+                    $yp_done = true;
+                }
+                else if ($rivi['taso'] == 0 && !$cal_done){
+                    $this->db->insert('vrlv3_users_groups', array('user_id' => $id, 'group_id'=>12));
+                    $cal_done = true;
+                }
+                
+            }
+            
+            
+
+
+        } else {
+            
+            
+           //otetaan puljuoikat pois
+           $id = 0;
+
+           $this->db->select('id');
+           $this->db->from('vrlv3_tunnukset');
+           $this->db->where('tunnus', $tunnus);
+           $query = $this->db->get();
+           
+           if ($query->num_rows() > 0)
+           {
+               $id = $query->row_array()['id']; 
+           }
+            //exclude pulju-yp (11) and puljuduunari (12)
+            $this->db->delete('vrlv3_users_groups', array('user_id' => $id, 'group_id'=>11));
+            $this->db->delete('vrlv3_users_groups', array('user_id' => $id, 'group_id'=>12));
+
+
+        }
+        
+        $this->db->trans_complete();
+
+        return true;
+        
+        
+        
+    }
+
+    function is_pulju_name_in_use($name, $id = null)
+    {
+        $this->db->select('id');
+        $this->db->from('vrlv3_puljut');
+        $this->db->where('nimi', $name);
+        if (isset($id)){
+            $this->db->where('id !=', $id);
+        }
+        $query = $this->db->get();
+        
+        if ($query->num_rows() > 0)
+        {
+            return true;
+        }
+        
+        return false;
+    }
+    
+    function is_pulju_lyhenne_in_use($name, $id = null)
+    {
+        
+        $this->db->select('id');
+        $this->db->from('vrlv3_puljut');
+        $this->db->where('lyhenne', $name);
+        if (isset($id)){
+            $this->db->where('id !=', $id);
+        }
+        $query = $this->db->get();
+        
+        if ($query->num_rows() > 0)
+        {
+            return true;
+        }
+        
+        return false;
+    }
+    
+    function is_pulju_owner($pinnumber, $id, $taso = null)
+    {
+        $this->db->select('tunnus');
+        $this->db->from('vrlv3_puljut_omistajat');
+        $this->db->where('jid', $id);
+        $this->db->where('tunnus', $pinnumber);
+        if(isset($taso)){
+            $this->db->where('taso', $taso);
+
+        }
+        $query = $this->db->get();
+        
+        if ($query->num_rows() > 0)
+        {
+            return true;
+        }
+        
+        return false;
+    }
+    
 
 }
 
