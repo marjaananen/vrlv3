@@ -1,14 +1,22 @@
+<?php
 
+$pulju = false;
+
+if (isset($jaos['pulju']) && $jaos['pulju'] == true){
+ $pulju = true;
+}
         
+        ?>
         
-        
+    
+    
     <h2>Muokkaa jaosta <?=$jaos['nimi']?> (<?=$jaos['lyhenne']?>)</h2>
 
 
    <ul class="nav nav-tabs">
       <li role="presentation" class="<?php if ($sivu == 'tiedot'){echo "active";}?>"><a href="<?php echo base_url($url . 'tiedot')?>">Tiedot</a></li>
       <?php
-       if ($jaos['nayttelyt'] == 0){
+       if (!$pulju && $jaos['nayttelyt'] == 0 ){
         
         ?>
       
@@ -17,10 +25,14 @@
       <li role="presentation" class="<?php if ($sivu == 'ominaisuudet'){echo "active";}?>"><a href="<?php echo base_url($url . 'ominaisuudet')?>">Ominaisuudet</a></li>
       
       <?php
-       } else {
+       } else if(!$pulju){
         
         ?>
               <li role="presentation" class="<?php if ($sivu == 'palkinnot'){echo "active";}?>"><a href="<?php echo base_url($url . 'palkinnot')?>">Palkinnot</a></li>
+<?php
+       } else {
+        ?>
+              <li role="presentation" class="<?php if ($sivu == 'rodut'){echo "active";}?>"><a href="<?php echo base_url($url . 'rodut')?>">Rodut</a></li>
 <?php
        }
        
@@ -59,9 +71,15 @@
                 }
                 
       else if($sivu == 'omistajat'){
-         
-      echo '<p>Jaoksella voi olla useita ylläpitäjiä (taso 1) ja kalenteriityöntekijöitä (taso 0).
-      Ylläpitäjä pystyy muokkaamaan jaoksen sääntöjä, ylläpitäjiä ja työntekijöitä. Kalenterityöntekijällä on oikeus hyväksyä ja muokata kilpailuja ja tuloksia.</p>';
+         if($pulju){
+           echo '<p>Yhdistyksellä voi olla useita ylläpitäjiä (taso 1) ja muita työntekijöitä (taso 0).
+      Ylläpitäjä pystyy muokkaamaan ylläpitäjiä ja työntekijöitä ja hallitsemaan tapahtumia. Muilla työntekijöillä voi olla yhdistyksestä riippuen eri oikeuksia,
+      esim. rotuveriprosenttien kirjaus hevosrekisteriin.</p>';
+          }
+          else {
+           echo '<p>Jaoksella voi olla useita ylläpitäjiä (taso 1) ja kalenterityöntekijöitä (taso 0).
+           Ylläpitäjä pystyy muokkaamaan jaoksen sääntöjä, ylläpitäjiä ja työntekijöitä. Kalenterityöntekijällä on oikeus hyväksyä ja muokata kilpailuja ja tuloksia.</p>';
+           }
       }
       
       else if($sivu == 'palkinnot'){

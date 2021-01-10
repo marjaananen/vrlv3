@@ -461,10 +461,15 @@ class Jaos_model extends Base_module_model
         
     }
 
-    function is_name_in_use($name, $id = null)
+    function is_name_in_use($name, $id = null, $pulju = false)
     {
         $this->db->select('id');
-        $this->db->from('vrlv3_kisat_jaokset');
+        if($pulju){
+            $this->db->from('vrlv3_puljut');
+
+        }else {
+            $this->db->from('vrlv3_kisat_jaokset');
+        }
         $this->db->where('nimi', $name);
         if (isset($id)){
             $this->db->where('id !=', $id);
@@ -479,11 +484,16 @@ class Jaos_model extends Base_module_model
         return false;
     }
     
-    function is_lyhenne_in_use($name, $id = null)
+    function is_lyhenne_in_use($name, $id = null, $puljut = false)
     {
         
         $this->db->select('id');
-        $this->db->from('vrlv3_kisat_jaokset');
+        if($pulju){
+            $this->db->from('vrlv3_puljut');
+
+        }else {
+            $this->db->from('vrlv3_kisat_jaokset');
+        }
         $this->db->where('lyhenne', $name);
         if (isset($id)){
             $this->db->where('id !=', $id);
@@ -787,7 +797,11 @@ class Jaos_model extends Base_module_model
     
     function get_pulju_list($only_active = false, $type = null)
     {
-        $this->db->select("id, nimi, lyhenne, kuvaus, url, IF(toiminnassa='1', 'toiminnassa', 'ei toiminnassa') as toiminnassa");
+        $this->db->select("id, nimi, lyhenne, kuvaus, url, IF(toiminnassa='1', 'toiminnassa', 'ei toiminnassa') as toiminnassa,
+                          CASE WHEN  tyyppi='1' THEN 'ktk'
+                          WHEN tyyppi='2' THEN 'laatis'
+                          WHEN tyyppi='3' THEN 'rotuyhdistys'
+                          ELSE 'tuntematon' END as tyyppi");
         if($only_active){
             $this->db->where("toiminnassa", 1);
         }if(isset($type)){
@@ -969,43 +983,7 @@ class Jaos_model extends Base_module_model
         
     }
 
-    function is_pulju_name_in_use($name, $id = null)
-    {
-        $this->db->select('id');
-        $this->db->from('vrlv3_puljut');
-        $this->db->where('nimi', $name);
-        if (isset($id)){
-            $this->db->where('id !=', $id);
-        }
-        $query = $this->db->get();
-        
-        if ($query->num_rows() > 0)
-        {
-            return true;
-        }
-        
-        return false;
-    }
-    
-    function is_pulju_lyhenne_in_use($name, $id = null)
-    {
-        
-        $this->db->select('id');
-        $this->db->from('vrlv3_puljut');
-        $this->db->where('lyhenne', $name);
-        if (isset($id)){
-            $this->db->where('id !=', $id);
-        }
-        $query = $this->db->get();
-        
-        if ($query->num_rows() > 0)
-        {
-            return true;
-        }
-        
-        return false;
-    }
-    
+   
     function is_pulju_owner($pinnumber, $id, $taso = null)
     {
         $this->db->select('tunnus');

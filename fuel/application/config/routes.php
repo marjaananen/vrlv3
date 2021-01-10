@@ -84,6 +84,16 @@ $route['yllapito/jaokset/(:any)/(:any)/(:any)/(:any)/(:any)'] = "yllapito_jaokse
 $route['yllapito/jaokset/(:any)/(:any)/(:any)/(:any)/(:any)/(:any)'] = "yllapito_jaokset/$1/$2/$3/$4/$5/$6";
 
 
+$route['yllapito/alayhdistykset'] = "yllapito_puljut";
+$route['yllapito/alayhdistykset/tapahtumat'] = "yllapito_puljut/tapahtumat/";
+$route['yllapito/alayhdistykset/tapahtumat/(:any)'] = "yllapito_puljut/tapahtumat/$1";
+$route['yllapito/alayhdistykset/(:any)'] = "yllapito_puljut/$1";
+$route['yllapito/alayhdistykset/(:any)/(:any)'] = "yllapito_puljut/$1/$2";
+$route['yllapito/alayhdistykset/(:any)/(:any)/(:any)'] = "yllapito_puljut/$1/$2/$3";
+$route['yllapito/alayhdistykset/(:any)/(:any)/(:any)/(:any)'] = "yllapito_puljut/$1/$2/$3/$4";
+$route['yllapito/alayhdistykset/(:any)/(:any)/(:any)/(:any)/(:any)'] = "yllapito_puljut/$1/$2/$3/$4/$5";
+$route['yllapito/alayhdistykset/(:any)/(:any)/(:any)/(:any)/(:any)/(:any)'] = "yllapito_puljut/$1/$2/$3/$4/$5/$6";
+
 $route['yllapito/kalenterit'] = "yllapito_kalenterit";
 $route['yllapito/kalenterit/kisahyvaksynta'] = "yllapito_kalenterit/kisahyvaksynta";
 $route['yllapito/kalenterit/kisahyvaksynta/(:any)'] = "yllapito_kalenterit/kisahyvaksynta/$1";

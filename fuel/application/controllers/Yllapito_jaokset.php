@@ -18,6 +18,8 @@ class Yllapito_jaokset extends CI_Controller
         $this->load->model('Trait_model');
         $this->load->library('Jaos');
         $this->url = "yllapito/jaokset/";
+                $this->load->library('Events');
+
         
     }
     
@@ -522,7 +524,7 @@ class Yllapito_jaokset extends CI_Controller
                     $data['msg'] = "Tallennus epäonnistui!";
                     $data['msg_type'] = "danger";
             }
-            else if ($this->jaos->validate_jaos("edit", $this->_is_jaos_admin(), $jaos, $data['msg'], $id) == false){
+            else if ($this->jaos->validate_jaos("edit", $this->_is_jaos_admin(), $jaos, $data['msg'], false, $id) == false){
                 $data['msg_type'] = "danger";
             }
             else  {
@@ -851,24 +853,8 @@ class Yllapito_jaokset extends CI_Controller
     public function tapahtumat($jaos_id = null, $tapa=null, $id=null, $tapa2 = null, $os_id = null){
         $url_begin = $this->url."tapahtumat/";
         if($jaos_id == null){
-            //jos jaosta ei ole annettu, valitaan se
-            if($this->input->post('jaos')){
-                $jaos_id = $this->input->post('jaos');
-                redirect($url_begin.$jaos_id, 'refresh');
-            }else {       
-                $this->load->library('form_builder', array('submit_value' => 'Hae'));
-                $jaos_options = $this->Jaos_model->get_jaos_option_list();
-        
-                $fields = array();
-                $fields['jaos'] = array('type' => 'select', 'options' => $jaos_options, 'value' => 0, 'class'=>'form-control');
-                $this->form_builder->form_attrs = array('method' => 'post', 'action' => site_url($url_begin));
-                $data['form'] =  $this->form_builder->render_template('_layouts/basic_form_template', $fields);
-                
-                $data['title'] = "Jaosten tapahtumat";
-                $data['text_view'] = $this->load->view('jaokset/text_tapahtumat', null, TRUE);
-                $data['list'] = "";
-                $this->fuel->pages->render('jaokset/tapahtumat', $data);
-            }
+            $this->events->select_event_organizer($jaos_id, $url_begin);
+
             
         }else {
                      
@@ -885,97 +871,26 @@ class Yllapito_jaokset extends CI_Controller
 
             }
             else if($tapa == "poista"){
-                $this->_delete_event($id, $data);
-                $this->_print_event_list($data, $edit_url);
+                $this->events->delete_event($id, $data);
+                $this->events->print_event_list($data, $edit_url);
 
             }
             
             else if($tapa == "lisaa"){
-                $this->_add_event($id, $data, $edit_url);
-                $this->_print_event_list($data, $edit_url, $data['event_data']);
+                $this->events->add_event($id, $data, $edit_url);
+                $this->events->print_event_list($data, $edit_url, false, $data['event_data']);
                 
             }    
             else if($tapa == "muokkaa"){
                 $this->_edit_event($id, $data['jaos'], $tapa2, $os_id, $edit_url);
                 
             }else {
-                $this->_print_event_list($data, $edit_url);
+                $this->events->print_event_list($data, $edit_url);
             }
         }
         
     }
     
-    private function _print_event_list($data, $edit_url, $event_data = array()){
-
-                $data['form'] = $this->jaos->get_event_form($edit_url."/lisaa", $event_data);
-                $data['title'] = "Jaoksen ". $data['jaos']['lyhenne'] . " tapahtumat";
-                $data['text_view'] = $this->load->view('jaokset/text_tapahtumat', null, TRUE);
-                $data['list'] = $this->jaos->tapahtumataulukko($data['jaos']['id'], $edit_url."/poista/", $edit_url."/muokkaa/");
-                $this->fuel->pages->render('jaokset/tapahtumat', $data);
-    }
-    
-     private function _add_event($id, &$data, $edit_url){
-        $jaos = $data['jaos'];
-        $event_data = array();
-        $this->load->library("vrl_helper");
-        if($this->input->server('REQUEST_METHOD') == 'POST'){
-            $event_data['pv'] = $this->input->post('pv');
-            $event_data['otsikko'] = $this->input->post('otsikko');
-            $event_data['osallistujat'] = $this->input->post('osallistujat');
-                        
-            if(strlen($this->input->post('otsikko')) > 5
-               && $this->vrl_helper->validateDate($this->input->post('pv'))){
-                $osallistujat = array();
-                $osallistujat_ok = $this->_parse_event_horses($this->input->post('osallistujat'), $data, $osallistujat);
-                if($osallistujat_ok){
-                    $tid = $this->jaos->add_event($this->ion_auth->user()->row()->tunnus, $jaos['id'], $this->input->post('pv'), $this->input->post('otsikko'), $osallistujat);
-                    IF($tid == false){
-                        $data['msg'] = "Virhe lisäyksessä! Sisältö ei mennyt tietokantaan asti. Ole yhteydessä ylläpitoon!";
-                        $data['msg_type'] = 'danger';
-                    }else {
-                    
-                        $data['msg'] = "Tapahtuman lisäys onnistui!";
-                        $data['msg_type'] = 'success';
-                        $event_data = array();
-                    }
-                }
-                
-                //parse_event_horses funkkari lisää virheilmot $data funkkariin, ei tarvitse käsitellä erikseen
-            }
-            else {
-                
-                $data['msg'] = "Virhe lisäyksessä! Otsikko tai päivämäärä puuttuu tai on liian lyhyt/virheellinen.";
-                $data['msg_type'] = 'danger';
-            }
-                
-                                
-        }else {
-            $event_data = array();
-        }
-        $data['event_data'] = $event_data;
-    }
-    
-    private function _delete_event($id, &$data){
-        $tapahtuma = $this->Jaos_model->get_event($id, $data['jaos']['id']);
-        if (sizeof($tapahtuma)>0){
-            $osallistujat = $this->Jaos_model->get_event_horses($id);
-            if(sizeof($osallistujat)>0){
-                $data['msg_type'] = 'danger';
-                $data['msg'] = "Tapahtumassa on palkittuja hevosia. Poista ensin palkitut hevoset listalta.";
-               
-            }else {
-                $this->Jaos_model->delete_event($id, $data['jaos']['id']);
-                $data['msg_type'] = "success";
-                $data['msg'] = "Poisto onnistui!";
-            }
-            
-        }else {
-            $data['msg_type'] = 'danger';
-            $data['msg'] = "Tapahtumaa jota yrität poistaa ei ole olemassa.";
-
-        }        
-        
-    }
     
     private function _edit_event($id, $jaos, $tapa = null, $os_id = null, $edit_url){
         $this->load->library('vrl_helper');
@@ -984,42 +899,14 @@ class Yllapito_jaokset extends CI_Controller
         if (sizeof($tapahtuma)>0){
             //poistetaan palkittu 
             if (isset($tapa) && $tapa == "poista"){
-                $this->Jaos_model->delete_event_horse($os_id, $id);
+                $this->events->delete_event_horse($os_id, $id);
                 $this->tapahtumat($jaos['id'], "muokkaa", $id);
             //muokataan tapahtumaa
             } else {
-                 if($this->input->server('REQUEST_METHOD') == 'POST'){
-                    //tapahtuman tiedot
-                    if($this->input->post('otsikko') && $this->input->post('pv')
-                       && strlen($this->input->post('otsikko')) > 5
-                       && $this->vrl_helper->validateDate($this->input->post('pv'))){
-                        
-                            $this->jaos->edit_event($id, $jaos['id'], $this->input->post('otsikko'),$this->input->post('pv'));
-                            
-                            //lisätäänkö osallistujia?
-                            if($this->input->post('osallistujat')){
-                                $osallistujat = array();
-                                $osallistujat_ok = $this->_parse_event_horses($this->input->post('osallistujat'), $data, $osallistujat);
-                                if($osallistujat_ok){
-                                    $this->jaos->add_participants($id, $osallistujat);
-                                }
-                            }
-                        }
-                        
-                    else {
-                        $this->fuel->pages->render('misc/naytaviesti', array('msg_type' => 'danger', 'msg' => "Tapahtuman tiedot virheelliset."));
-
-                    }
+                 $this->events->edit_event($id, $jaos);
                 }
-                $data['delete_url'] = $edit_url."/poista/".$id;
-                $data['jaos'] = $jaos;
-                $data['palkitut'] = $this->jaos->tapahtumaosallistujat($id, $edit_url."/muokkaa/".$id."/poista/");
-                $data['tapahtuma'] = $this->Jaos_model->get_event($id);
-                $data['form'] = $this->jaos->get_event_form($edit_url."/muokkaa/".$id, $data['tapahtuma'], true);
-
-                $this->fuel->pages->render('jaokset/tapahtuma', $data);
-                
-            }
+                $this->events->tapahtuma($id, true, $edit_url);            
+            
             
 
             
@@ -1029,75 +916,7 @@ class Yllapito_jaokset extends CI_Controller
         }        
         
     }
-    
-    private function _parse_event_horses($osallistujalista_input, &$data, &$luetut_rivit){
-        $this->load->library("Vrl_helper");
-                $this->load->model("Hevonen_model");
-
-        $osallistujalista = trim($osallistujalista_input);
-		$osallistujat = explode("\n", $osallistujalista);
-		$osallistujat = array_filter($osallistujat, 'trim');
-        $kasitellyt_kopukat = array();
-        $luetut_rivit = array();
-		$virhe = array();		
-		//Jokainen rivi/luokka käydään läpi
-		foreach ($osallistujat as $rivi_input){
-            $luettu = array();
-            $rivi = explode(";", $rivi_input);
-            if(sizeof($rivi) != 4){
-                $virhe[] = "Virheellinen rivi, tarkistathan että riviltä löytyy kolme ; merkkiä! " . $rivi_input;
-
-            }
-            else {
-                if(isset($rivi[0]) && $this->vrl_helper->check_vh_syntax($rivi[0]) && $this->Hevonen_model->onko_tunnus($this->vrl_helper->vh_to_number($rivi[0]))){
-                    $luettu['vh'] = $this->vrl_helper->vh_to_number(trim($rivi[0]));
-                    if(isset($kasitellyt_kopukat[$rivi[0]])){
-                        $virhe[] = "Sama VH-tunnus toista kertaa rivillä: " . $rivi_input;
-
-                    }
-                    
-                    else if(isset($rivi[2]) && strlen($rivi[2]) > 1){
-                        $luettu['palkinto'] = $rivi[2];
-                                        
-                    
-                        if(isset($rivi[1])){
-                            $luettu['tulos'] = $rivi[1];
-                        }
-                        
-                        if(isset($rivi[3])){
-                            $luettu['kommentti'] = htmlspecialchars($rivi[3]);
-                        }
-                        
-                        $luetut_rivit[] = $luettu;
-                        $kasitellyt_kopukat[$rivi[0]] = "ok";
-                        }
-                    
-                    else {
-                        $virhe[] = "Virheellinen palkinto rivillä: " . $rivi_input;
-                    }
-  
-                }else {
-                    $virhe[] = "Virheellinen VH-tunnus rivillä: " . $rivi_input;
-                }
-            }
-            
-        }
         
-        if(sizeof($virhe)>0){
-            $data['msg'] = "Virhe lisäyksessä!";
-            $data['msg_details'] = $virhe;
-            $data['msg_type'] = 'danger';
-            return false;
-        }
-        else {
-            return true;
-        }
-    }
-    
-    
-    
-    
-    
     
     private function _is_editing_allowed($id, &$msg){
         

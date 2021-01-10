@@ -12,59 +12,39 @@ class Jaos
 
     }
     
-    function jaostaulukko($url_poista, $url_muokkaa, $url_tapahtumat){
+    function jaostaulukko($url_poista, $url_muokkaa, $url_tapahtumat, $pulju = false){
                                 //start the list		
 		$vars['headers'][1] = array('title' => 'ID', 'key' => 'id');
 		$vars['headers'][2] = array('title' => 'Nimi', 'key' => 'nimi');
 		$vars['headers'][3] = array('title' => 'Lyhenne', 'key' => 'lyhenne');
       $vars['headers'][4] = array('title' => 'Toiminnassa', 'key' => 'toiminnassa');
-      $vars['headers'][5] = array('title' => 'Tyyppi', 'key' => 'nayttelyt');
+      if($pulju){
+               $vars['headers'][5] = array('title' => 'Tyyppi', 'key' => 'tyyppi');
+
+      }else {
+         $vars['headers'][5] = array('title' => 'Tyyppi', 'key' => 'nayttelyt');
+      }
       $vars['headers'][6] = array('title' => 'Poista', 'key' => 'id', 'key_link' => site_url($url_poista), 'image' => site_url('assets/images/icons/delete.png'));
       $vars['headers'][7] = array('title' => 'Editoi', 'key' => 'id', 'key_link' => site_url($url_muokkaa), 'image' => site_url('assets/images/icons/edit.png'));
       $vars['headers'][8] = array('title' => 'Tapahtumat', 'key' => 'id', 'key_link' => site_url($url_tapahtumat), 'image' => site_url('assets/images/icons/award_star_gold_2.png'));
 
 		$vars['headers'] = json_encode($vars['headers']);
-					
-		$vars['data'] = json_encode($this->CI->Jaos_model->get_jaos_list(false, false, false));
-        
-        return  $this->CI->load->view('misc/taulukko', $vars, TRUE);
-        
-    }
-    
-    
-      function tapahtumataulukko ($jaos, $url_poista, $url_muokkaa){
-                                //start the list		
-		$vars['headers'][1] = array('title' => 'ID', 'key' => 'id');
-		$vars['headers'][2] = array('title' => 'Päivämäärä', 'key' => 'pv', 'type'=>'date');
-		$vars['headers'][3] = array('title' => 'Otsikko', 'key' => 'otsikko');
-      $vars['headers'][4] = array('title' => 'Poista', 'key' => 'id', 'key_link' => site_url($url_poista), 'image' => site_url('assets/images/icons/delete.png'));
-      $vars['headers'][5] = array('title' => 'Editoi', 'key' => 'id', 'key_link' => site_url($url_muokkaa), 'image' => site_url('assets/images/icons/edit.png'));
+		if($pulju){
+         $vars['data'] = json_encode($this->CI->Jaos_model->get_pulju_list());
 
-		$vars['headers'] = json_encode($vars['headers']);
-					
-		$vars['data'] = json_encode($this->CI->Jaos_model->get_event_list($jaos));
+      }
+      else {
+         $vars['data'] = json_encode($this->CI->Jaos_model->get_jaos_list(false, false, false));
+      }
         
         return  $this->CI->load->view('misc/taulukko', $vars, TRUE);
         
     }
     
-      function tapahtumaosallistujat ($id, $url_poista){
-                                //start the list		
-		$vars['headers'][1] = array('title' => 'ID', 'key' => 'oid');
-		$vars['headers'][2] = array('title' => 'Rekisterinumero', 'key' => 'vh', 'type'=>'VH', 'key_link'=>site_url('virtuaalihevoset/hevonen/'));
-		$vars['headers'][3] = array('title' => 'Tulos', 'key' => 'tulos');
-      $vars['headers'][4] = array('title' => 'Palkinto', 'key' => 'palkinto');
-      $vars['headers'][5] = array('title' => 'Kommentti', 'key' => 'kommentti', 'type'=>'small');
-      if(isset($url_poista)){
-         $vars['headers'][6] = array('title' => 'Poista', 'key' => 'oid', 'key_link' => site_url($url_poista), 'image' => site_url('assets/images/icons/delete.png'));
-      }
-		$vars['headers'] = json_encode($vars['headers']);
-					
-		$vars['data'] = json_encode($this->CI->Jaos_model->get_event_horses($id));
-        
-        return  $this->CI->load->view('misc/taulukko', $vars, TRUE);
-        
-    }
+    
+
+    
+      
     
    function delete_jaos($id, &$msg){
       $jaos = $this->CI->Jaos_model->get_jaos($id);
@@ -80,19 +60,38 @@ class Jaos
       }
     }
     
+      function delete_pulju($id, &$msg){
+      $jaos = $this->CI->Jaos_model->get_pulju($id);
+      if(sizeof($jaos) > 0){
+         $msg = "Yhdistystä ei ole olemassa.";
+         return false;
+      }else if($jaos['toiminnassa'] === "1"){
+          $msg = "Et voi poistaa toiminnassa olevaa yhdistystä.";
+          return false;
+      }else {
+         //todo: tsekkaa onko kisoja jne
+         return $this->CI->Jaos_model->delete_pulju($id, $msg);
+      }
+    }
     
-	public function get_jaos_form ($url, $mode = "new", $admin = false, $jaos = array()) {
-
-        $sport_options = $this->CI->Sport_model->get_sport_option_list();
-         $sport_options[-1] = "";        
+    
+	public function get_jaos_form ($url, $mode = "new", $admin = false, $jaos = array(), $pulju = false) {
+      
+      if(!$pulju){
+         $sport_options = $this->CI->Sport_model->get_sport_option_list();
+         $sport_options[-1] = "";
+      }
 
         
 		$this->CI->load->library('form_builder', array('submit_value' => 'Tallenna'));
 		if($mode == "new" || $admin){
             $fields['nimi'] = array('type' => 'text', 'class'=>'form-control', 'required' => TRUE,'value' => $jaos['nimi'] ?? "" );
             $fields['lyhenne'] = array('type' => 'text', 'class'=>'form-control','required' => TRUE, 'value' => $jaos['lyhenne'] ?? "");
-            $fields['laji'] = array('type' => 'select', 'options' => $sport_options, 'value' => $jaos['laji'] ?? -1, 'class'=>'form-control');
-            $fields['nayttelyt'] = array('label'=> 'Näyttelyjaos', 'type' => 'checkbox', 'checked' => $jaos['nayttelyt'] ?? false, 'class'=>'form-control');
+            
+            if(!$pulju){
+               $fields['laji'] = array('type' => 'select', 'options' => $sport_options, 'value' => $jaos['laji'] ?? -1, 'class'=>'form-control');
+               $fields['nayttelyt'] = array('label'=> 'Näyttelyjaos', 'type' => 'checkbox', 'checked' => $jaos['nayttelyt'] ?? false, 'class'=>'form-control');
+            }
 
 
         }
@@ -106,7 +105,7 @@ class Jaos
 	}
     
     
-   function validate_jaos_form($type = 'new', $admin = false){
+   function validate_jaos_form($type = 'new', $admin = false, $pulju = false){
 
         $this->CI->load->library('form_validation');
         
@@ -122,26 +121,27 @@ class Jaos
         return $this->CI->form_validation->run();        
     }
     
-    function validate_jaos($type = "new", $admin = false, $jaos, &$msg, $id = null){
+    function validate_jaos($type = "new", $admin = false, $jaos, &$msg, $pulju = false, $id = null){
                   $this->CI->load->model('Jaos_model');
                   $this->CI->load->model('Sport_model');
 
        
-        if(isset($jaos['lyhenne']) && $this->CI->Jaos_model->is_lyhenne_in_use($jaos['lyhenne'], $id)){
+        if(isset($jaos['lyhenne']) && $this->CI->Jaos_model->is_lyhenne_in_use($jaos['lyhenne'], $id, $pulju)){
             $msg = "Lyhenne on jo käytössä.";
             return false;
         }
-        if(isset($jaos['nimi']) && $this->CI->Jaos_model->is_name_in_use($jaos['nimi'], $id)){
+        if(isset($jaos['nimi']) && $this->CI->Jaos_model->is_name_in_use($jaos['nimi'], $id, $pulju)){
             $msg = "Nimi on jo käytössä.";
             return false;
         }
         
-        if(isset($jaos['laji']) && !$this->CI->Sport_model->sport_exists($jaos['laji'])){
+        if(!$pulju && isset($jaos['laji']) && !$this->CI->Sport_model->sport_exists($jaos['laji'])){
                 $msg = "Valittua lajia ei ole olemassa";
                 return false;
         }
         
         if($type == "edit"){
+         if(!$pulju){
             $old_jaos = $this->CI->Jaos_model->get_jaos($id);
             
             if($old_jaos['toiminnassa'] && isset($jaos['laji']) && $jaos['laji'] != $old_jaos['laji']){
@@ -153,26 +153,30 @@ class Jaos
                $msg = "Jaokselle on merkitty luokkia, joten sen lajia ei saa vaihtaa.";
                return false;
             }
+         }
 
             
         }
         return true;
     }
     
-   function read_jaos_input(&$jaos){
+   function read_jaos_input(&$jaos, $pulju = false){
       if($this->CI->input->post("nimi")){
           $jaos['nimi'] = $this->CI->input->post("nimi");
       }
-      if($this->CI->input->post("nayttelyt")){
+      if(!$pulju && $this->CI->input->post("nayttelyt")){
           $jaos['nayttelyt'] = $this->CI->input->post("nayttelyt");
-      }else {
+      }else if(!$pulju){
          $jaos['nayttelyt'] = 0;
       }
       if($this->CI->input->post("lyhenne")){
          $jaos['lyhenne'] = $this->CI->input->post("lyhenne");
       }
-      if($this->CI->input->post("laji")){
+      if(!$pulju && $this->CI->input->post("laji")){
          $jaos['laji'] = $this->CI->input->post("laji");
+      }
+      if($pulju && $this->CI->input->post("tyyppi")){
+         $jaos['tyyppi'] = $this->CI->input->post("tyyppi");
       }
       if($this->CI->input->post("toiminnassa")){
          $jaos['toiminnassa'] = $this->CI->input->post("toiminnassa");
@@ -192,16 +196,16 @@ class Jaos
     // TOIMINNASSA
     ///////////////////////////////////////////////////////
     
-    function get_toiminnassa_form($url, $jaos){
+    function get_toiminnassa_form($url, $jaos, $pulju = false){
          $this->CI->load->library('form_builder', array('submit_value' => 'Tallenna'));
 
          $fields = array();
          $fields['toiminnassa'] = array('type' => 'checkbox', 'label'=> "Toiminnassa", 'checked' => $jaos['toiminnassa'] ?? false, 'class'=>'form-control',
                                         'after_html' => '<span class="form_comment">Jos jaos ei ole toiminnassa, sen alaisia kilpailuja ei voi järjestää. Tarkasta säännöt ja sallitut luokat ennen jaoksen merkitsemistä toimivaksi.</span>');
          
-         if($jaos['nayttelyt'] == 0){
+         if($jaos['nayttelyt'] == 0 && $pulju == false){
             $fields['s_salli_porrastetut'] = array('type' => 'checkbox', 'label'=> "Salli porrastetut", 'checked' => $jaos['s_salli_porrastetut'] ?? false, 'class'=>'form-control',
-                                                'after_html' => '<span class="form_comment">Jos jaos ei salliporrastettuja, niitä ei voi järjestää. Tarkasta säännöt, sallitut luokat ja vaikuttavat ominaisuudet ennen porrastettujen sallimista.
+                                                'after_html' => '<span class="form_comment">Jos jaos ei salli porrastettuja, niitä ei voi järjestää. Tarkasta säännöt, sallitut luokat ja vaikuttavat ominaisuudet ennen porrastettujen sallimista.
                                                 <b>Vaikuttavia ominaisuuksia ei voi enää muokata kun porrastetut on asetettu sallituksi!</b></span>');
          }
           $this->CI->form_builder->form_attrs = array('method' => 'post', 'action' => site_url($url));
@@ -210,7 +214,7 @@ class Jaos
 
     }
     
-   function read_toiminnassa_input(&$jaos){
+   function read_toiminnassa_input(&$jaos, $pulju = false){
       $jaos['toiminnassa'] = 0;
       $jaos['s_salli_porrastetut'] = 0;
       
@@ -221,6 +225,10 @@ class Jaos
       if($this->CI->input->post('s_salli_porrastetut')){
             $jaos['s_salli_porrastetut'] = 1;
          }
+         
+      if($pulju){
+         unset($jaos['s_salli_porrastetut']);
+      }
       
       return $jaos;
       
@@ -520,46 +528,9 @@ class Jaos
       
     }
     
-   ////////////////////////////////////////////////////////
-    // TAPAHTUMAT
-    ///////////////////////////////////////////////////////
-    
-     function get_event_form($url, $event=array(), $osallistujat = true){
-      $this->CI->load->library('form_builder', array('submit_value' => 'Tallenna tapahtuma'));
-      $this->CI->load->library("vrl_helper");
-      
-      if(isset($event['pv'])){
-         $event['pv'] = $this->CI->vrl_helper->sql_date_to_normal($event['pv']);
-      }
-
-      $fields = array();
-      $fields['otsikko'] = array('type' => 'text', 'class'=>'form-control', 'required' => TRUE, 'value' => $event['otsikko'] ?? "");
-      $fields['pv'] = array('type' => 'text', 'label'=>'Päivämäärä', 'class'=>'form-control', 'required' => TRUE, 'value' => $event['pv'] ?? "",
-                            'after_html'=>'<span class="form_comment">Muodossa pp.kk.vvvv</span>');
-      if($osallistujat){
-      $fields['osallistujat'] = array('label'=>"Lisää osallistujia", 'type' => 'textarea', 'cols' => 80, 'rows' => 5, 'class' => 'wysiwyg',
-                                      'value' => $event['osallistujat'] ?? "VH00-000-00000;70;KERJ-III;16 + 24 + 16,5 + 5,5 = 70 p. Esimerkkikommentti.	",
-                                      'after_html'=>'<span class="form_comment">Yksi hevonen per rivi. Erottele puolipisteellä seuraavasti.  VH-numero; pisteet; palkinto; kommentti. <br>Kaikki viimeisen puolipisteen jälkeen kirjattu lasketaan kommentiksi. Jos kommenttia ei ole, jätä tyhjäksi (mutta rivin pitää silti sisältää kolme puolipistettä (;).</span>');
-      }
-
-      $this->CI->form_builder->form_attrs = array('method' => 'post', 'action' => site_url($url));
-		        
-      return $this->CI->form_builder->render_template('_layouts/basic_form_template', $fields);
-    }
-    
-    
-    function add_event($user, $jaos, $date, $title, $participant_data){
-      return $this->CI->Jaos_model->add_event($date, $title, $user, $jaos, $participant_data);
-    }
-    
-    function edit_event($id, $jaos, $title, $date){
-      return $this->CI->Jaos_model->edit_event($id, $jaos, $title, $date);
-    }
 
     
-   function add_participants($id, $participant_data){
-      return $this->CI->Jaos_model->add_event_participants($id, $participant_data);
-    }
+
 
     
    ////////////////////////////////////////////////////////
@@ -597,6 +568,48 @@ class Jaos
       foreach ($traits as $trait){
          if(!$this->CI->Trait_model->trait_exists($trait)){
             $msg = "Ominaisuutta ei ole.";
+            return false;
+            break;
+         }
+      }
+      
+      return true;
+    }
+    
+    
+    
+      ////////////////////////////////////////////////////////
+    //   RODUT
+    ///////////////////////////////////////////////////////
+    
+    function get_breed_form($url, $rodut = array(), $pulju = false){
+            $this->CI->load->library('form_builder', array('submit_value' => 'Tallenna'));
+
+      		$fields['rodut'] = array('type' => 'multi', 'mode' => 'checkbox', 'required' => TRUE,
+                                     'options' => $this->CI->Breed_model->get_breed_option_list(), 'value'=>$rodut, 'class'=>'form-control', 'wrapper_tag' => 'li');
+            $this->CI->form_builder->form_attrs = array('method' => 'post', 'action' => site_url($url));
+            return $this->CI->form_builder->render_template('_layouts/basic_form_template', $fields);
+
+
+    }
+    
+   function read_breed_input(&$breeds, $pulju = false){
+      $breeds = $this->CI->input->post('ominaisuudet');
+    }
+    
+    function validate_breed_form($id, $breeds, $jaos, &$msg, $pulju = false){
+      if(sizeof($breeds) < 1){
+         $msg = "Rotuja pitää olla vähintään 1!";
+         return false;
+      }
+      if(sizeof($breeds) > 15){
+         $msg = "Rotuja saa valita korkeintaan 15!";
+         return false;
+      }
+      
+      foreach ($breeds as $breed){
+         if(!$this->CI->Breed_model->breed_exists($breed)){
+            $msg = "Rotua ei ole.";
             return false;
             break;
          }

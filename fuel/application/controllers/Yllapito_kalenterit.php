@@ -388,7 +388,7 @@ class Yllapito_kalenterit extends CI_Controller
 
         $jaos_options = array();
         if($this->_is_jaos_admin()){
-            $jaos_options = $this->Jaos_model->get_jaos_option_list(true, false, false);
+            $jaos_options = $this->Jaos_model->get_jaos_option_list(false, false, false);
 
         }else {
             $jaoslist = $this->Jaos_model->get_users_jaos($this->ion_auth->user()->row()->tunnus);

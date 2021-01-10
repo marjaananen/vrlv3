@@ -17,6 +17,8 @@ public function __construct()
                            "kasv"=>array("t"=>"vrlv3_kasvattajanimet", "id"=>"id",
 										 "ot"=>array("om"=>"tunnus", "id"=> "kid", "t"=>"taso")),
 						    "jaos"=>array("t"=>"vrlv3_kisat_jaokset", "id"=>"id",
+										  "ot"=>array("om"=>"tunnus", "id"=> "jid", "t"=>"taso")),
+							"pulju"=>array("t"=>"vrlv3_puljut", "id"=>"id",
 										  "ot"=>array("om"=>"tunnus", "id"=> "jid", "t"=>"taso"))
 
                           );
@@ -46,6 +48,14 @@ public function __construct()
 		return $ok;
 	
     }
+	
+	public function handle_pulju_ownerships($mode, $tapa, $adder, $owner, $item, &$fields){
+        $ok = $this->_handle_owners  ($this->taulut['pulju'], $mode, $tapa, $adder, $owner, $item, $fields);
+		$this->CI->load->model("Jaos_model");
+		$this->CI->Jaos_model->edit_pulju_user_rights($owner);
+		return $ok;
+	
+    }
 
 private function _handle_owners($taulu, $mode, $tapa, $adder, &$owner, $item, &$fields){
     $msg ="";
@@ -57,6 +67,9 @@ private function _handle_owners($taulu, $mode, $tapa, $adder, &$owner, $item, &$
 	if($taulu['t'] == 'vrlv3_kisat_jaokset'){
 		$om = "ylläpitäjä";
 		$om2 = "kalenterityöntekijä";
+	} else if ($taulu['t'] == 'vrlv3_puljut'){
+		$om = "ylläpitäjä";
+		$om2 = "työntekijä";
 	}
     
     if($this->CI->input->server('REQUEST_METHOD') == 'POST'){
@@ -145,6 +158,10 @@ private function _handle_owners($taulu, $mode, $tapa, $adder, &$owner, $item, &$
 	public function jaos_ownerships($item, $edit, $url){
         return $this->_listing ('jaos', $item, $edit, $url);
     }
+	
+	public function pulju_ownerships($item, $edit, $url){
+        return $this->_listing ('pulju', $item, $edit, $url);
+    }
     
              
     private function _listing ($type, $item, $edit, $url){
@@ -183,6 +200,10 @@ private function _handle_owners($taulu, $mode, $tapa, $adder, &$owner, $item, &$
             $this->CI->load->model('jaos_model');
 			$vars['data'] = json_encode($this->CI->jaos_model->get_jaos_owners($item));
         }
+		else if ($type == 'pulju') {
+            $this->CI->load->model('jaos_model');
+			$vars['data'] = json_encode($this->CI->jaos_model->get_pulju_owners($item));
+        }
 		$vars['headers'] = json_encode($vars['headers']);
 		
 		return $this->CI->load->view('misc/taulukko', $vars, TRUE);
@@ -203,6 +224,9 @@ private function _handle_owners($taulu, $mode, $tapa, $adder, &$owner, $item, &$
     public function is_jaos_main_owner($adder, $item){
         return $this->_editor_permission($this->taulut['jaos'],$adder, $item);
     }
+	public function is_pulju_main_owner($adder, $item){
+        return $this->_editor_permission($this->taulut['pulju'],$adder, $item);
+    }
 
 
 // Add Ownership    
@@ -222,6 +246,10 @@ private function _handle_owners($taulu, $mode, $tapa, $adder, &$owner, $item, &$
 	
 	public function add_jaos_ownerships( $owner, $item, $level=1){
         return $this->_add($this->taulut['jaos'], $owner, $item, $level);             
+
+    }
+	public function add_pulju_ownerships( $owner, $item, $level=1){
+        return $this->_add($this->taulut['pulju'], $owner, $item, $level);             
 
     }
     
@@ -266,7 +294,12 @@ private function _handle_owners($taulu, $mode, $tapa, $adder, &$owner, $item, &$
     }
 	
 	public function del_jaos_ownerships( $owner, $item){
-        return $this->_del($this->jaos['kasv'],  $owner, $item);             
+        return $this->_del($this->taulut['jaos'],  $owner, $item);             
+
+    }
+	
+	public function del_pulju_ownerships( $owner, $item){
+        return $this->_del($this->taulut['pulju'],  $owner, $item);             
 
     }
     
@@ -320,6 +353,11 @@ private function _handle_owners($taulu, $mode, $tapa, $adder, &$owner, $item, &$
 	
 	public function edit_jaos_ownerships($owner, $item){
         return $this->_edit($this->taulut['jaos'], $owner, $item);             
+
+    }
+    
+	public function edit_pulju_ownerships($owner, $item){
+        return $this->_edit($this->taulut['pulju'], $owner, $item);             
 
     }
     

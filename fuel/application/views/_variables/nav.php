@@ -130,6 +130,7 @@ $nav['kilpailutoiminta/ilmoita_tulokset/nayttelyt'] = array('label' => 'Ilmoita 
 $nav['yllapito/tiedotukset'] = array('label' => 'Tiedotukset', 'parent_id' => 'yllapito', 'active' => 'yllapito/tiedotukset');
 $nav['yllapito/tunnukset'] = array('label' => 'Tunnukset', 'parent_id' => 'yllapito', 'active' => 'yllapito/tunnukset');
 $nav['yllapito/hevosrekisteri'] = array('label' => 'Hevosrekisteri', 'parent_id' => 'yllapito', 'active' => 'yllapito/hevosrekisteri');
+$nav['yllapito/alayhdistykset'] = array('label' => 'Alayhdistykset', 'parent_id' => 'yllapito', 'active' => 'yllapito/alayhdistykset');
 $nav['yllapito/jaokset'] = array('label' => 'Jaokset', 'parent_id' => 'yllapito', 'active' => 'yllapito/jaokset');
 $nav['yllapito/kalenterit'] = array('label' => 'Kisakalenterit', 'parent_id' => 'yllapito', 'active' => 'yllapito/kalenterit');
 
@@ -154,7 +155,6 @@ $nav['yllapito/hevosrekisteri/rodut'] = array('label' => 'Hallitse rotuja', 'par
 
 $nav['yllapito/jaokset/lajit'] = array('label' => 'Hallitse lajeja', 'parent_id' => 'yllapito/jaokset', 'active' => 'yllapito/jaokset/lajit');
 $nav['yllapito/jaokset/ominaisuudet'] = array('label' => 'Hallitse ominaisuuksia', 'parent_id' => 'yllapito/jaokset', 'active' => 'yllapito/jaokset/ominaisuudet');
-
 $nav['yllapito/jaokset/jaokset'] = array('label' => 'Jaokset', 'parent_id' => 'yllapito/jaokset', 'active' => 'yllapito/jaokset/jaokset');
 $nav['yllapito/jaokset/lisaa_jaos'] = array('label' => 'Lisää jaos', 'parent_id' => 'yllapito/jaokset', 'active' => 'yllapito/jaokset/lisaa_jaos');
 $nav['yllapito/jaokset/tapahtumat'] = array('label' => 'Hallitse tapahtumia', 'parent_id' => 'yllapito/jaokset', 'active' => 'yllapito/jaokset/tapahtumat');
@@ -165,7 +165,9 @@ $nav['yllapito/kalenterit/hyvaksytytkisat'] = array('label' => 'Selaa hyväksytt
 $nav['yllapito/kalenterit/hyvaksytyttulokset'] = array('label' => 'Selaa hyväksyttyjä tuloksia', 'parent_id' => 'yllapito/kalenterit', 'active' => 'yllapito/kalenterit/hyvaksytyttulokset');
 $nav['yllapito/kalenterit/hyvaksytytkisat/edit'] = array('label' => 'Muokkaa kutsua', 'hidden'=>true, 'parent_id' => 'yllapito/kalenterit/hyvaksytytkisat', 'active' => 'yllapito/kalenterit/hyvaksytytkisat/edit/:any');
 
-
+$nav['yllapito/alayhdistykset/yhdistykset'] = array('label' => 'Alayhdistykset', 'parent_id' => 'yllapito/alayhdistykset', 'active' => 'yllapito/alayhdistykset/yhdistykset');
+$nav['yllapito/alayhdistykset/lisaa_yhdistys'] = array('label' => 'Lisää yhdistys', 'parent_id' => 'yllapito/alayhdistykset', 'active' => 'yllapito/alayhdistykset/lisaa_yhdistys');
+$nav['yllapito/alayhdistykset/tapahtumat'] = array('label' => 'Hallitse tapahtumia', 'parent_id' => 'yllapito/alayhdistykset', 'active' => 'yllapito/alayhdistykset/tapahtumat');
 
 
 $nav['alayhdistykset/kilpailujaokset'] = array('label' => 'Kilpailujaokset', 'parent_id' => 'alayhdistykset', 'active' => 'alayhdistykset/kilpailujaokset');
@@ -173,7 +175,7 @@ $nav['alayhdistykset/kantakirjat'] = array('label' => 'Kantakirjat', 'parent_id'
 $nav['alayhdistykset/laatuarvostelut'] = array('label' => 'Muut laatuarvostelut', 'parent_id' => 'alayhdistykset', 'active' => 'alayhdistykset/laatuarvostelut');
 $nav['alayhdistykset/rotuyhdistykset'] = array('label' => 'Rotuyhdistykset', 'parent_id' => 'alayhdistykset', 'active' => 'alayhdistykset/rotuyhdistykset');
 
-$nav['alayhdistykset/tapahtumat'] = array('label' => 'Tapahtuma-arkisto', 'parent_id' => 'alayhdistykset', 'active' => 'alayhdistykset/tapahtumat');
+$nav['alayhdistykset/tapahtumat'] = array('label' => 'Tapahtuma-arkisto', 'parent_id' => 'alayhdistykset', 'active' => 'alayhdistykset/tapahtumat$|:any');
 
 
 

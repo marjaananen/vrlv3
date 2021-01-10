@@ -24,6 +24,55 @@ class Breed_model extends Base_module_model
                 
     }
     
+    function update_pulju_breeds($id, $breeds, &$msg){
+        
+        $insert_batch_batch = array();
+        foreach ($breeds as $breed){
+            $insert_batch = array();
+            $insert_batch['pulju'] = $id;
+            $insert_batch['rotu'] = $breed;
+            
+            $insert_batch_batch[] = $insert_batch;
+        }
+        
+        $this->db->trans_start();
+
+        $data = array('pulju' => $id);
+        $this->db->delete('vrlv3_puljut_rodut', $data);
+        $this->db->insert_batch('vrlv3_puljut_rodut', $insert_batch_batch);
+
+        
+        $this->db->trans_complete();
+        
+        if ($this->db->trans_status() === FALSE)
+        {
+            $msg = "Jokin meni vikaan. ";
+            return false;
+        }
+        else return true;
+        
+    }
+    
+    
+    
+    public function get_breed_array_by_pulju($id){
+        $data = array();
+        
+        $this->db->select('rotu');
+        $this->db->from('vrlv3_puljut_rodut');
+        $this->db->where('pulju', $id);
+        $query = $this->db->get();
+        
+        if ($query->num_rows() > 0)
+        {
+            foreach ($query->result_array() as $row)
+            {
+               $data[] = $row['rotu'];
+            }
+        }
+        
+        return $data;
+    }
     
     public function get_breed_info($rotunro){
         
