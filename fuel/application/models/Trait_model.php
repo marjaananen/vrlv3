@@ -196,12 +196,13 @@ class Trait_model extends Base_module_model
     
     public function delete_trait($id){
         $this->db->select('*');
-        $this->db->where('id', $id);
-        $this->db->from('vrlv3_lista_ominaisuudet');
+        $this->db->where('ominaisuus', $id);
+        $this->db->from('vrlv3_kisat_jaokset_ominaisuudet');
     
         $query = $this->db->get();
-        if ($query->num_rows() == 0)
+        if ($query->num_rows() > 0)
         {
+            //ominaisuus käytössä jollain jaoksella
             return false;
         
         } else {

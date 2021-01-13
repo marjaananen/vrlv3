@@ -33,7 +33,7 @@ class Yllapito_jaokset extends CI_Controller
     
 
     function index(){
-        $this->pipari();
+        $this->jaokset();
     }
    
     
@@ -328,16 +328,46 @@ class Yllapito_jaokset extends CI_Controller
     
                 }
                 
+                
                 else {
                     $this->ominaisuudet(array('msg_type' => 'success', 'msg' => "Poisto onnistui."));
                 }
             }
             
          
+        else if ($tapa == "muokkaa"){
+                 $data = array();
+                $data['title'] = "Muokkaa ominaisuutta";
+                $data['data_view'] = "<p>Huom! Muokkaukset koskevat kaikkia hevosia ja jaoksia, joille tämä ominaisuus on asetettu.
+                Käytäthän muokkausta vain virheiden korjaamiseen (kirjoitusvirheet jne).</p>";
+                $data['msg'] = "";
+                if($this->input->server('REQUEST_METHOD') == 'POST'){
+                    $tid = 0;
+                    if ($this->_validate_trait_form('edit') == FALSE)
+                        {
+                            $data['msg'] = "Ominaisuuden muokkaus epäonnistui!";
+                            $data['msg_type'] = "danger";
+                        }
+        
+                    else
+                        {
+    
+                            if($this->Trait_model->muokkaa_trait($data['msg'], $id, $this->input->post('ominaisuus'))){
+                                $data['msg'] = "Muokkaus onnistui!";
+                                $data['msg_type'] = "success";
+
+                            }else {
+                                $data['msg_type'] = "danger";
+                                
+                            }
+                        }
+                }
                 
-                $data['tulokset'] = $this->_traittaulukko();
-                $data['form'] = $this->_get_trait_form('edit',  $id);
+                $data['tulokset'] = $this->_sporttaulukko();
+                $data['form'] = $this->_get_sport_form('edit',  $id);
                 $this->fuel->pages->render('misc/haku', $data);
+    
+            }
     
             
         } else {
@@ -582,7 +612,8 @@ class Yllapito_jaokset extends CI_Controller
                     $data['msg_type'] = "danger";
             }
             else  {
-                   $tid = $this->Jaos_model->edit_jaos($id, $jaos);
+                $edit_data = array("toiminnassa"=>$jaos['toiminnassa'], "s_salli_porrastetut"=>$jaos['s_salli_porrastetut']);
+                   $tid = $this->Jaos_model->edit_jaos($id, $edit_data);
                    $data['msg_type'] = "danger";
 
                    if ($tid !== false){                 

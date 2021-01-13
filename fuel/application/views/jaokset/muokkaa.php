@@ -1,10 +1,14 @@
 <?php
 
 $pulju = false;
+$nayttelyt = false;
 
 if (isset($jaos['pulju']) && $jaos['pulju'] == true){
  $pulju = true;
+}else if(isset($jaos['nayttelyt']) && $jaos['nayttelyt'] == 1){
+ $nayttelyt = true;
 }
+
         
         ?>
         
@@ -16,7 +20,7 @@ if (isset($jaos['pulju']) && $jaos['pulju'] == true){
    <ul class="nav nav-tabs">
       <li role="presentation" class="<?php if ($sivu == 'tiedot'){echo "active";}?>"><a href="<?php echo base_url($url . 'tiedot')?>">Tiedot</a></li>
       <?php
-       if (!$pulju && $jaos['nayttelyt'] == 0 ){
+       if (!($pulju || $nayttelyt) ){
         
         ?>
       

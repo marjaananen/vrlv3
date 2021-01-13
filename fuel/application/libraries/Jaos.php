@@ -48,7 +48,7 @@ class Jaos
     
    function delete_jaos($id, &$msg){
       $jaos = $this->CI->Jaos_model->get_jaos($id);
-      if(sizeof($jaos) > 0){
+      if(sizeof($jaos) == 0){
          $msg = "Jaosta ei ole olemassa.";
          return false;
       }else if($jaos['toiminnassa'] === "1"){
@@ -62,7 +62,7 @@ class Jaos
     
       function delete_pulju($id, &$msg){
       $jaos = $this->CI->Jaos_model->get_pulju($id);
-      if(sizeof($jaos) > 0){
+      if(sizeof($jaos) == 0){
          $msg = "Yhdistystä ei ole olemassa.";
          return false;
       }else if($jaos['toiminnassa'] === "1"){
@@ -76,11 +76,6 @@ class Jaos
     
     
 	public function get_jaos_form ($url, $mode = "new", $admin = false, $jaos = array(), $pulju = false) {
-      
-      if(!$pulju){
-         $sport_options = $this->CI->Sport_model->get_sport_option_list();
-         $sport_options[-1] = "";
-      }
 
         
 		$this->CI->load->library('form_builder', array('submit_value' => 'Tallenna'));
@@ -89,8 +84,15 @@ class Jaos
             $fields['lyhenne'] = array('type' => 'text', 'class'=>'form-control','required' => TRUE, 'value' => $jaos['lyhenne'] ?? "");
             
             if(!$pulju){
+               $sport_options = $this->CI->Sport_model->get_sport_option_list();
+               $sport_options[-1] = "";
                $fields['laji'] = array('type' => 'select', 'options' => $sport_options, 'value' => $jaos['laji'] ?? -1, 'class'=>'form-control');
                $fields['nayttelyt'] = array('label'=> 'Näyttelyjaos', 'type' => 'checkbox', 'checked' => $jaos['nayttelyt'] ?? false, 'class'=>'form-control');
+            }else {
+               $tyypit_options = $this->CI->Jaos_model->get_pulju_type_option_list();
+               $tyypit_options[-1] = "";
+               $fields['tyyppi'] = array('type' => 'select', 'options' => $tyypit_options, 'value' => $jaos['tyyppi'] ?? -1, 'class'=>'form-control');
+
             }
 
 
@@ -203,7 +205,7 @@ class Jaos
          $fields['toiminnassa'] = array('type' => 'checkbox', 'label'=> "Toiminnassa", 'checked' => $jaos['toiminnassa'] ?? false, 'class'=>'form-control',
                                         'after_html' => '<span class="form_comment">Jos jaos ei ole toiminnassa, sen alaisia kilpailuja ei voi järjestää. Tarkasta säännöt ja sallitut luokat ennen jaoksen merkitsemistä toimivaksi.</span>');
          
-         if($jaos['nayttelyt'] == 0 && $pulju == false){
+         if($pulju == false && (!isset($jaos['nayttelyt']) || $jaos['nayttelyt'] == 0)){
             $fields['s_salli_porrastetut'] = array('type' => 'checkbox', 'label'=> "Salli porrastetut", 'checked' => $jaos['s_salli_porrastetut'] ?? false, 'class'=>'form-control',
                                                 'after_html' => '<span class="form_comment">Jos jaos ei salli porrastettuja, niitä ei voi järjestää. Tarkasta säännöt, sallitut luokat ja vaikuttavat ominaisuudet ennen porrastettujen sallimista.
                                                 <b>Vaikuttavia ominaisuuksia ei voi enää muokata kun porrastetut on asetettu sallituksi!</b></span>');
@@ -234,34 +236,64 @@ class Jaos
       
     }
     
-    function validate_toiminnassa_form($id, $toiminnassa, &$msg){
-      $jaos = $this->CI->Jaos_model->get_jaos($id);
+    function validate_toiminnassa_form($id, $toiminnassa, &$msg, $pulju = false){
+      $jaos = array();
       
-      if($jaos['toiminnassa'] === $toiminnassa['toiminnassa'] && $jaos['s_salli_porrastetut'] === $toiminnassa['s_salli_porrastetut']){
+      if($pulju){
+         $jaos = $this->CI->Jaos_model->get_pulju($id);
+      }else {
+         $jaos = $this->CI->Jaos_model->get_jaos($id);
+      }
+      
+      $t_muuttuu = false;
+      $p_muuttuu = false;
+      
+      if (isset($jaos['toiminnassa']) && $jaos['toiminnassa'] != $toiminnassa['toiminnassa']){
+         $t_muuttuu = true;
+      }
+      
+      if (!$pulju && $jaos['nayttelyt'] != 1 &&
+          isset($jaos['s_salli_porrastetut']) && $jaos['s_salli_porrastetut'] != $toiminnassa['s_salli_porrastetut']){
+         $p_muuttuu = true;
+      }
+      
+      
+      
+      if(!($t_muuttuu || $p_muuttuu)){
          $msg = "Et muuttanut asetuksia.";
          return false;
       }
-      
-      $ok = true;
-      //jaos offlinesta onlineen
-      if($toiminnassa['toiminnassa'] === '1'){
-         $ok = $this->jaos_ready($id, $msg);
-         //jos porrastetut on myös menossa online, tsekataan nekin
-         if ($ok && $toiminnassa['s_salli_porrastetut'] === '1'){
-            $ok = $this->jaos_porr_ready($id, $msg);
-         }
-      }else if ($toiminnassa['s_salli_porrastetut'] === '1'){
-         $ok = $this->jaos_porr_ready($id, $msg);
+      //samaksi jättäminen tai pois päältä ottaminen on aina ok
+      else if((!$t_muuttuu || ($t_muuttuu && $toiminnassa['toiminnassa'] == 0))
+              &&  ((!$p_muuttuu || ($p_muuttuu && $toiminnassa['s_salli_porrastetut'] == 0)))){
+         //pois päältä on aina ok heittää
+         return true;
+      }
+      //jos merkitään toiminnassa olevaksi, mutta jaos ei ole valmis
+      else if($t_muuttuu && $toiminnassa['toiminnassa'] == '1' && !$this->jaos_ready($id, $msg, $pulju)){
+         //jos_ready funktio päivittää msg:n
+         return false;
+      }
+      //jos merkitään porrastetut toimintaan, mutta jaos ei ole valmis
+      else if($p_muuttuu  && $toiminnassa['s_salli_porrastetut'] == '1' && !$this->jaos_porr_ready($id, $msg)){
+         return false;
+      }
+      else {
+         return true;
       }
       
-      return $ok;
     }
     
-    function jaos_ready($id, &$msg){
+    function jaos_ready($id, &$msg, $pulju = false){
       $ok = true;
-         $owners = $this->get_owners($id);       
-          if(sizeof($omistajat) < 1){
-            $msg .= " Jaokselle ei ole vielä ylläpitäjiä!";
+      $owners = array();
+      if($pulju){
+         $owners = $this->CI->Jaos_model->get_pulju_owners($id);
+      }else {
+         $owners = $this->CI->Jaos_model->get_jaos_owners($id);
+      }
+          if(sizeof($owners) < 1){
+            $msg .= " Jaoksella ei ole vielä ylläpitäjiä!";
             $ok = false;
          }
          return $ok;
@@ -270,15 +302,18 @@ class Jaos
     function jaos_porr_ready($id, &$msg){
       $ok = true;
       $jaos = $this->CI->Jaos_model->get_jaos($id);     
-         $luokat = $this->get_classes_porr($id);
-         $traits = $this->get_traits($id);       
-         if(sizeof($luokat) < 1){
+      $luokat = $this->CI->Jaos_model->get_class_list($id, true, true);
+      
+      if(sizeof($luokat) < 1){
             $msg .= " Jaokselle ei ole vielä asetettu porrastettuja luokkia!";
             $ok = false;
-         } if(sizeof($traits) < 1){
-               $msg .= " Jaokselle ei ole vielä valittu porrastettujen ominaisuuksia!";
+      } 
+            
+      $traits = $this->CI->Trait_model->get_trait_list($id);
+      if(sizeof($traits) < 1){
+            $msg .= " Jaokselle ei ole vielä valittu porrastettujen ominaisuuksia!";
             $ok = false;
-         }         
+      }         
          return $ok;
     }
     
@@ -594,7 +629,7 @@ class Jaos
     }
     
    function read_breed_input(&$breeds, $pulju = false){
-      $breeds = $this->CI->input->post('ominaisuudet');
+      $breeds = $this->CI->input->post('rodut');
     }
     
     function validate_breed_form($id, $breeds, $jaos, &$msg, $pulju = false){
@@ -605,14 +640,6 @@ class Jaos
       if(sizeof($breeds) > 15){
          $msg = "Rotuja saa valita korkeintaan 15!";
          return false;
-      }
-      
-      foreach ($breeds as $breed){
-         if(!$this->CI->Breed_model->breed_exists($breed)){
-            $msg = "Rotua ei ole.";
-            return false;
-            break;
-         }
       }
       
       return true;

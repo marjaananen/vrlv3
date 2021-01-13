@@ -146,7 +146,7 @@ public function __construct()
         //tapahtuman tiedot
         if($this->CI->input->post('otsikko') && $this->CI->input->post('pv')
            && strlen($this->CI->input->post('otsikko')) > 5
-           && $this->CI->vrl_helper->validateDate($this->input->post('pv'))){
+           && $this->CI->vrl_helper->validateDate($this->CI->input->post('pv'))){
             
                 $this->CI->Jaos_model->edit_event($id, $jaos['id'], $this->CI->input->post('otsikko'), $this->CI->input->post('pv'), $pulju);
                 
@@ -185,7 +185,7 @@ public function __construct()
 		return $this->CI->Jaos_model->get_event_list_by_type($kisajaos, $search_type);
     }
     
-          function tapahtumataulukko_admin($jaos, $url_poista, $url_muokkaa){
+          function tapahtumataulukko_admin($jaos, $url_poista, $url_muokkaa, $pulju = false){
                                 //start the list		
 		$vars['headers'][1] = array('title' => 'ID', 'key' => 'id');
 		$vars['headers'][2] = array('title' => 'Päivämäärä', 'key' => 'pv', 'type'=>'date');
@@ -194,8 +194,12 @@ public function __construct()
         $vars['headers'][5] = array('title' => 'Editoi', 'key' => 'id', 'key_link' => site_url($url_muokkaa), 'image' => site_url('assets/images/icons/edit.png'));
 
 		$vars['headers'] = json_encode($vars['headers']);
-					
-		$vars['data'] = json_encode($this->CI->Jaos_model->get_event_list($jaos));
+		if($pulju){
+            $vars['data'] = json_encode($this->CI->Jaos_model->get_event_list(null, $jaos));
+        }else  {
+            $vars['data'] = json_encode($this->CI->Jaos_model->get_event_list($jaos));
+
+        }
         
         return  $this->CI->load->view('misc/taulukko', $vars, TRUE);
         
@@ -251,13 +255,14 @@ public function __construct()
             $event_data['pv'] = $this->CI->input->post('pv');
             $event_data['otsikko'] = $this->CI->input->post('otsikko');
             $event_data['osallistujat'] = $this->CI->input->post('osallistujat');
+			
                         
-            if(strlen($this->CI->input->post('otsikko')) > 5
+            if(strlen($event_data['otsikko']) > 5
                && $this->CI->vrl_helper->validateDate($this->CI->input->post('pv'))){
                 $osallistujat = array();
                 $osallistujat_ok = $this->_parse_event_horses($this->CI->input->post('osallistujat'), $data, $osallistujat);
                 if($osallistujat_ok){
-                    $tid = $this->CI->Jaos_model->add_event($this->CI->input->post('pv'), $this->input->post('otsikko'), $this->CI->ion_auth->user()->row()->tunnus,
+                    $tid = $this->CI->Jaos_model->add_event($this->CI->input->post('pv'), $this->CI->input->post('otsikko'), $this->CI->ion_auth->user()->row()->tunnus,
                                                      $jaos['id'], $osallistujat, $pulju);
     
                     IF($tid == false){
@@ -327,8 +332,8 @@ public function __construct()
     
     function tapahtumaosallistujat ($id, $url_poista){
                                 //start the list		
-		$vars['headers'][1] = array('title' => 'ID', 'key' => 'oid');
-		$vars['headers'][2] = array('title' => 'Rekisterinumero', 'key' => 'vh', 'type'=>'VH', 'key_link'=>site_url('virtuaalihevoset/hevonen/'));
+		$vars['headers'][1] = array('title' => 'Rekisterinumero', 'key' => 'vh', 'type'=>'VH', 'key_link'=>site_url('virtuaalihevoset/hevonen/'));
+        $vars['headers'][2] = array('title'=> 'Nimi', 'key' => 'nimi');
 		$vars['headers'][3] = array('title' => 'Tulos', 'key' => 'tulos');
       $vars['headers'][4] = array('title' => 'Palkinto', 'key' => 'palkinto');
       $vars['headers'][5] = array('title' => 'Kommentti', 'key' => 'kommentti', 'type'=>'small');

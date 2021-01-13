@@ -33,7 +33,7 @@ class Yllapito_puljut extends CI_Controller
     
 
     function index(){
-        $this->pipari();
+        $this->yhdistykset();
     }
    
 
@@ -59,7 +59,7 @@ class Yllapito_puljut extends CI_Controller
 
     
     public function lisaa_yhdistys($msg = ""){
-        if($this->_is_jaos_admin()){   
+        if($this->_is_pulju_admin()){   
         
             $data['msg'] = $msg;
             $data['title'] = 'Lisää yhdistys';
@@ -128,7 +128,7 @@ class Yllapito_puljut extends CI_Controller
             
         }
         else if ($tapa == "muokkaa"){
-            
+            $data['jaos']['pulju'] = true;
             $data['sivu'] = $sivu;
             $data['url'] = $this->url . "yhdistys/muokkaa/".$id."/";
             $edit_url = $this->url . "yhdistys/muokkaa/".$id."/".$sivu;
@@ -142,7 +142,7 @@ class Yllapito_puljut extends CI_Controller
             }else if($sivu == "online"){
                 $this->_handle_toiminnassa_edit($id, $data, $edit_url);
             }else if($sivu == "rodut"){
-                $this->_handle_roduit_edit($id, $data, $edit_url);
+                $this->_handle_rodut_edit($id, $data, $edit_url);
             }else if($sivu == "omistajat"){
                 $this->_handle_pulju_owners($id, $tapa2, $sub_id, $data, $data['url']);
             }
@@ -162,11 +162,11 @@ class Yllapito_puljut extends CI_Controller
         
         if($this->input->server('REQUEST_METHOD') == 'POST'){
             $this->jaos->read_jaos_input($jaos, true);
-            if ($this->jaos->validate_jaos_form('edit', $this->_is_jaos_admin(), true) == FALSE){
+            if ($this->jaos->validate_jaos_form('edit', $this->_is_pulju_admin(), true) == FALSE){
                     $data['msg'] = "Tallennus epäonnistui!";
                     $data['msg_type'] = "danger";
             }
-            else if ($this->jaos->validate_jaos("edit", $this->_is_jaos_admin(), $jaos, $data['msg'], true, $id) == false){
+            else if ($this->jaos->validate_jaos("edit", $this->_is_pulju_admin(), $jaos, $data['msg'], true, $id) == false){
                 $data['msg_type'] = "danger";
             }
             else  {
@@ -181,8 +181,7 @@ class Yllapito_puljut extends CI_Controller
             }
             
         }
-        $data['pulju'] = true;
-        $data['form'] = $this->jaos->get_jaos_form($edit_url, "edit", $this->_is_jaos_admin(), $jaos, true);
+        $data['form'] = $this->jaos->get_jaos_form($edit_url, "edit", $this->_is_pulju_admin(), $jaos, true);
         $this->fuel->pages->render('jaokset/muokkaa', $data);
         
     }
@@ -197,7 +196,8 @@ class Yllapito_puljut extends CI_Controller
                     $data['msg_type'] = "danger";
             }
             else  {
-                   $tid = $this->Jaos_model->edit_pulju($id, $jaos);
+                   $edit_data = array("toiminnassa"=>$jaos['toiminnassa']);
+                   $tid = $this->Jaos_model->edit_pulju($id, $edit_data);
                    $data['msg_type'] = "danger";
 
                    if ($tid !== false){                 
@@ -215,8 +215,7 @@ class Yllapito_puljut extends CI_Controller
     
     private function _handle_rodut_edit($id, $data, $edit_url){
         $jaos = $data['jaos'];
-        $breeds = $this->Breed_model->get_breed_array_by_pulju($breedd);
-
+        $breeds = array();
         if($this->input->server('REQUEST_METHOD') == 'POST'){
             $this->jaos->read_breed_input($breeds);
 
@@ -235,12 +234,12 @@ class Yllapito_puljut extends CI_Controller
             }
                     
         }
-        $data['form'] = $this->jaos->get_breed_form($edit_url, $breeds, true);
+        $data['form'] = $this->jaos->get_breed_form($edit_url, $this->Breed_model->get_breed_array_by_pulju($id), true);
         $this->fuel->pages->render('jaokset/muokkaa', $data);
         
     }
     
-    private function _delete_jaos($id){
+    private function _delete_pulju($id){
                 if(!$this->_is_pulju_admin()){
                 $this->fuel->pages->render('misc/naytaviesti', array('msg_type' => 'danger', 'msg' => "Vain VRL:n ylläpidolla ja yhdistysvastaavalla on oikeus poistaa jaos."));
                 return;
@@ -286,7 +285,7 @@ class Yllapito_puljut extends CI_Controller
 public function tapahtumat($jaos_id = null, $tapa=null, $id=null, $tapa2 = null, $os_id = null){
         $url_begin = $this->url."tapahtumat/";
         if($jaos_id == null){
-            $this->events->select_event_organizer($jaos_id, $url_begin);
+            $this->events->select_event_organizer($jaos_id, $url_begin, true);
 
             
         }else {
@@ -336,7 +335,7 @@ public function tapahtumat($jaos_id = null, $tapa=null, $id=null, $tapa2 = null,
                 $this->tapahtumat($jaos['id'], "muokkaa", $id);
             //muokataan tapahtumaa
             } else {
-                 $this->events->edit_event($id, $jaos´, true);
+                 $this->events->edit_event($id, $jaos, true);
                 }
                 $this->events->tapahtuma($id, true, $edit_url);            
             

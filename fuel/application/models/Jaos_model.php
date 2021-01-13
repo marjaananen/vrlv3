@@ -129,9 +129,10 @@ class Jaos_model extends Base_module_model
     
     
     function get_event_horses($event){
-        $this->db->select('oid, vh, tulos, palkinto, kommentti');
-        $this->db->from('vrlv3_tapahtumat_osallistujat');
-        $this->db->where('vrlv3_tapahtumat_osallistujat.tapahtuma', $event);
+        $this->db->select('o.oid, o.vh, o.tulos, o.palkinto, o.kommentti, h.nimi');
+        $this->db->from('vrlv3_tapahtumat_osallistujat as o');
+        $this->db->join('vrlv3_hevosrekisteri as h', 'o.vh = h.reknro');
+        $this->db->where('o.tapahtuma', $event);
         $query = $this->db->get();
         
         if ($query->num_rows() > 0)
@@ -484,7 +485,7 @@ class Jaos_model extends Base_module_model
         return false;
     }
     
-    function is_lyhenne_in_use($name, $id = null, $puljut = false)
+    function is_lyhenne_in_use($name, $id = null, $pulju = false)
     {
         
         $this->db->select('id');
@@ -799,8 +800,8 @@ class Jaos_model extends Base_module_model
     {
         $this->db->select("id, nimi, lyhenne, kuvaus, url, IF(toiminnassa='1', 'toiminnassa', 'ei toiminnassa') as toiminnassa,
                           CASE WHEN  tyyppi='1' THEN 'ktk'
-                          WHEN tyyppi='2' THEN 'laatis'
-                          WHEN tyyppi='3' THEN 'rotuyhdistys'
+                          WHEN tyyppi='3' THEN 'laatis'
+                          WHEN tyyppi='2' THEN 'rotuyhdistys'
                           ELSE 'tuntematon' END as tyyppi");
         if($only_active){
             $this->db->where("toiminnassa", 1);
@@ -818,6 +819,23 @@ class Jaos_model extends Base_module_model
         }
         
         return array();
+    }
+    
+    
+        
+    function get_pulju_type_option_list(){
+        $options = array();
+        
+        $query = $this->db->get('vrlv3_lista_puljutyyppi');
+                
+        if ($query->num_rows() > 0)
+        {
+             foreach ($query->result_array() as $pulju){
+                $options[$pulju['pid']] = $pulju['tyyppi'];
+            } 
+        }       
+        
+        return $options;
     }
     
     function get_pulju_option_list($only_active = false, $type = null){
