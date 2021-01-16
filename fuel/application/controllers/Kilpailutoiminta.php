@@ -713,7 +713,6 @@ function tulosarkisto ($type = "perinteiset", $id = null, $id_type = null){
     
     if($this->ion_auth->logged_in())
     {
-    
         $vars['msg'] = '';
             
         $vars['text_view'] = "";
@@ -1204,6 +1203,7 @@ private function _make_result_form($luokat, $jaos_id, $porr = false){
             }
         }
         
+        echo "<br>luokkia on " . $nro;
         return $this->form_builder->render_template('_layouts/basic_form_template', $fields);
 }
 
@@ -1251,7 +1251,7 @@ private function _send_result($kisa, $user, &$msg = array()){
             $nro = 1;
             while (true) {
                 $luokka = $this->input->post('tulos_'.$nro.'_luokka');
-                if(isset($luokka) && strlen($luokka) > 5){              
+                if(isset($luokka) && strlen($luokka) > 5){
                     $kantaan_luokat = $kantaan_luokat . $this->input->post('tulos_'.$nro.'_luokka') . "\n";
                     $kantaan_tulokset = $kantaan_tulokset . $this->input->post('tulos_'.$nro.'_os') . "~";
                     $kantaan_hylsyt = $kantaan_hylsyt . $this->input->post('tulos_'.$nro.'_hyl') . "~";
@@ -1260,6 +1260,7 @@ private function _send_result($kisa, $user, &$msg = array()){
                     break;
                 }
             }
+
             
             $tulos = array();
             $tulos['tunnus'] = $user;

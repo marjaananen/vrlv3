@@ -159,8 +159,8 @@ $nav['yllapito/jaokset/jaokset'] = array('hidden'=>true, 'label' => 'Jaokset', '
 $nav['yllapito/jaokset/lisaa_jaos'] = array('label' => 'Lisää jaos', 'parent_id' => 'yllapito/jaokset', 'active' => 'yllapito/jaokset/lisaa_jaos');
 $nav['yllapito/jaokset/tapahtumat'] = array('label' => 'Hallitse tapahtumia', 'parent_id' => 'yllapito/jaokset', 'active' => 'yllapito/jaokset/tapahtumat');
 
-$nav['yllapito/kalenterit/kisahyvaksynta'] = array('label' => 'Kisahyväksyntä', 'parent_id' => 'yllapito/kalenterit', 'active' => 'yllapito/kalenterit/kisahyvaksynta|yllapito/kalenterit/kisahyvaksynta/:any');
-$nav['yllapito/kalenterit/tuloshyvaksynta'] = array('label' => 'Tuloshyväksyntä', 'parent_id' => 'yllapito/kalenterit', 'active' => 'yllapito/kalenterit/tuloshyvaksynta|yllapito/kalenterit/tuloshyvaksynta/:any');
+$nav['yllapito/kalenterit/kisahyvaksynta'] = array('hidden'=>true, 'label' => 'Kisahyväksyntä', 'parent_id' => 'yllapito/kalenterit', 'active' => 'yllapito/kalenterit/kisahyvaksynta|yllapito/kalenterit/kisahyvaksynta/:any');
+$nav['yllapito/kalenterit/tuloshyvaksynta'] = array('hidden'=>true, 'label' => 'Tuloshyväksyntä', 'parent_id' => 'yllapito/kalenterit', 'active' => 'yllapito/kalenterit/tuloshyvaksynta|yllapito/kalenterit/tuloshyvaksynta/:any');
 $nav['yllapito/kalenterit/hyvaksytytkisat'] = array('label' => 'Selaa hyväksyttyjä kutsuja', 'parent_id' => 'yllapito/kalenterit', 'active' => 'yllapito/kalenterit/hyvaksytytkisat');
 $nav['yllapito/kalenterit/hyvaksytyttulokset'] = array('label' => 'Selaa hyväksyttyjä tuloksia', 'parent_id' => 'yllapito/kalenterit', 'active' => 'yllapito/kalenterit/hyvaksytyttulokset');
 $nav['yllapito/kalenterit/hyvaksytytkisat/edit'] = array('label' => 'Muokkaa kutsua', 'hidden'=>true, 'parent_id' => 'yllapito/kalenterit/hyvaksytytkisat', 'active' => 'yllapito/kalenterit/hyvaksytytkisat/edit/:any');

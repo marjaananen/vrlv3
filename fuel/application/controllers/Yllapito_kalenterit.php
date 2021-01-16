@@ -62,12 +62,22 @@ class Yllapito_kalenterit extends CI_Controller
         $data['jaokset'] = $this->Jaos_model->get_jaos_list($only_active, $only_leveled, $skip_shows);
         $data['url'] = $this->url;
         
+        $applicationAmounts = $this->_getApplicationAmounts();
+        $resultApplicationAmounts = $this->_getResultApplicationAmounts();
+
+
         foreach ($data['jaokset'] as &$jaos){
-        
-               // $this->_sort_panel_info_applications('hakemukset_porr', $this->raceApplicationsMaintenance($jaos['id'], true), $jaos);
-               $this->_sort_panel_info_applications('hakemukset_norm', $this->raceApplicationsMaintenance($jaos['id'], false, $jaos), $jaos);
-               //$this->_sort_panel_info_applications('tulokset_porr', $this->resultApplicationsMaintenance($jaos['id'], true), $jaos);
-               $this->_sort_panel_info_applications('tulokset_norm', $this->resultApplicationsMaintenance($jaos['id'], false, $jaos), $jaos);
+            
+            $jaos['hakemukset_norm'] = $applicationAmounts[$jaos['id']]['kpl'] ?? 0;
+            if($jaos['hakemukset_norm'] > 0){
+                $jaos['hakemukset_norm' . '_latest'] = $applicationAmounts[$jaos['id']]['ilmoitettu'];
+            }
+
+            $jaos['tulokset_norm'] = $resultApplicationAmounts[$jaos['id']]['kpl'] ?? 0;
+            if($jaos['tulokset_norm'] > 0){
+                $jaos['tulokset_norm' . '_latest'] = $resultApplicationAmounts[$jaos['id']]['ilmoitettu'];
+            }
+            
            
         }
         
@@ -78,6 +88,47 @@ class Yllapito_kalenterit extends CI_Controller
 
     }
     
+    private function _getApplicationAmounts(){
+        $applicationAmounts = array();
+        $result = $this->Kisakeskus_model->get_application_amounts_per_jaos(true);
+        
+        foreach ($result as $row){
+            $applicationAmounts[$row['jaos']] = $row;
+        }
+        
+        $result = $this->Kisakeskus_model->get_application_amounts_per_jaos(false);
+
+        foreach ($result as $row){
+            $applicationAmounts[$row['jaos']] = $row;
+        }
+        
+        return $applicationAmounts;
+        
+
+    }
+    
+    private function _getResultApplicationAmounts(){
+        $applicationAmounts = array();
+        $result = $this->Kisakeskus_model->get_result_application_amounts_per_jaos(true);
+        
+        foreach ($result as $row){
+            $applicationAmounts[$row['jaos']] = $row;
+        }
+        
+        $result = $this->Kisakeskus_model->get_result_application_amounts_per_jaos(false);
+
+        foreach ($result as $row){
+            $applicationAmounts[$row['jaos']] = $row;
+        }
+        
+        return $applicationAmounts;
+        
+
+    }
+    
+    
+    
+    
     public function porrastetut_run(){
         
         $done = $this->porrastetut->generate_results_automatically($max = 10);
@@ -86,14 +137,7 @@ class Yllapito_kalenterit extends CI_Controller
         $this->fuel->pages->render('misc/naytaviesti', array('msg_type' => 'success', 'msg' => $done .' kpl porrastettuja kisoja arvottu. ' . $kpl . ' kpl jäljellä. Paina f5 jos haluat arpoa lisää.'));
 
     }
-    
-    private function _sort_panel_info_applications($key, $data, &$jaos){
-        $jaos[$key] = $data['kpl'];
-        if($jaos[$key] > 0){
-            $jaos[$key . '_latest'] = $data['ilmoitettu'];
-        }
 
-    }
     
     
     function raceApplicationsMaintenance( $jaos, $leveled = false, $jaosdata = array()) {
@@ -502,7 +546,6 @@ private function _read_basic_input_field(&$data, $field){
             }
 
         } else {
-            echo $this->db->last_query();
               $this->db->trans_complete();
               $msg = "Kilpailua ei löytynyt, tai siitä on jo ilmoitettu tulokset.";
               $ok = false;
@@ -603,17 +646,7 @@ private function _read_basic_input_field(&$data, $field){
         $msg = "";
         
         if(empty($jaos)){
-            $only_active = false;
-         $skip_shows = false;
-        $only_leveled = false;
-        $data['jaokset'] = $this->Jaos_model->get_jaos_list($only_active, $only_leveled, $skip_shows);
-            $data['url'] = $this->url;
-            
-            foreach ($data['jaokset'] as &$jaos){
-               $this->_sort_panel_info_applications('hakemukset_norm', $this->raceApplicationsMaintenance($jaos['id'], false, $jaos), $jaos);
-            }
-            
-            $this->fuel->pages->render('yllapito/kisakalenteri/kisakalenteri_kisahyvaksynta_main', $data);
+$this->index();
 
         
         } 
@@ -686,20 +719,7 @@ private function _read_basic_input_field(&$data, $field){
         $msg = "";
         
         if(empty($jaos)){
-            $only_active = false;
-            $skip_shows = false;
-            $only_leveled = false;
-            $data['jaokset'] = $this->Jaos_model->get_jaos_list($only_active, $only_leveled, $skip_shows);
-            $data['url'] = $this->url;
-            
-            foreach ($data['jaokset'] as &$jaos){
-               $this->_sort_panel_info_applications('tulokset_norm', $this->resultApplicationsMaintenance($jaos['id'], false), $jaos);
-               if($jaos['nayttelyt'] != 1){
-                $this->_sort_panel_info_applications('tulokset_porr', $this->resultApplicationsMaintenance($jaos['id'], true), $jaos);
-               }
-
-            }
-            $this->fuel->pages->render('yllapito/kisakalenteri/kisakalenteri_tuloshyvaksynta_main', $data);
+            $this->index();
         } 
         
         else if(sizeof($jaos_data) == 0){
@@ -716,7 +736,7 @@ private function _read_basic_input_field(&$data, $field){
 
             if(isset($kasittele) && $kasittele == 'hyvaksy'){
                 if($this->_approve_result($jaos, $kisa_id, true)){
-                    $data['msg'] = "Tulokset hyväksytty.";
+                    $data['msg'] = "Kisan #" . $kisa_id ." tulokset hyväksytty.";
                     $data['msg_type'] = "success";
                 }else {
                     $data['msg'] = "Tulosta jota hait ei enää löydy, tai se on jonkun toisen käsiteltävänä.";

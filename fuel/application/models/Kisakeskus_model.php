@@ -111,7 +111,7 @@ class Kisakeskus_model extends CI_Model
     }
     
     public function get_calendar_show(){ 
-        $this->db->select('vip, kp, j.id as jaos, j.lyhenne as jaoslyhenne, k.url, k.moiinfo, jarj_talli, t.nimi as tallinimi, kisa_id, k.hyvaksytty');
+        $this->db->select('vip, kp, j.id as jaos, j.lyhenne as jaoslyhenne, k.url, k.info, jarj_talli, t.nimi as tallinimi, kisa_id, k.hyvaksytty');
         $this->db->from('vrlv3_kisat_nayttelykalenteri as k');
         $this->db->join('vrlv3_tallirekisteri as t', 't.tnro = k.jarj_talli');
         $this->db->join('vrlv3_kisat_jaokset as j', 'j.id = k.jaos');
@@ -132,6 +132,66 @@ class Kisakeskus_model extends CI_Model
         }
         
     }
+    
+    public function get_application_amounts_per_jaos($show = false){
+        $this->db->select('lyhenne, jaos, COUNT(kisa_id) as kpl, MIN(ilmoitettu) as ilmoitettu');
+        $this->db->from('vrlv3_kisat_jaokset');
+        if($show){
+            $this->db->join('vrlv3_kisat_nayttelykalenteri','vrlv3_kisat_jaokset.id = vrlv3_kisat_nayttelykalenteri.jaos');
+        }else {
+             $this->db->join('vrlv3_kisat_kisakalenteri','vrlv3_kisat_jaokset.id = vrlv3_kisat_kisakalenteri.jaos');
+
+        }
+        $this->db->group_start();
+           $this->db->where('hyvaksytty IS NULL OR hyvaksytty = \'0000-00-00 00:00:00\'');
+            $this->db->group_end();
+        $this->db->group_by('jaos');
+        
+        $query = $this->db->get();
+
+        
+        if(sizeof($query->result_array())>0){
+
+            return $query->result_array();
+        }else {
+            return array();
+        }
+        
+        
+        
+    }
+    
+    
+    public function get_result_application_amounts_per_jaos($show = false){
+        $this->db->from('vrlv3_kisat_jaokset as j');
+        if($show){
+            $this->db->select('n.jaos, COUNT(bis_id) as kpl, MIN(t.ilmoitettu) as ilmoitettu');
+            $this->db->join('vrlv3_kisat_nayttelykalenteri as n','j.id = n.jaos');
+            $this->db->join('vrlv3_kisat_nayttelytulokset as t','t.nayttely_id = n.kisa_id');
+
+        }else {
+             $this->db->select('n.jaos, COUNT(kisa_id) as kpl, MIN(t.ilmoitettu) as ilmoitettu');
+            $this->db->join('vrlv3_kisat_nayttelykalenteri as n','j.id = n.jaos');
+            $this->db->join('vrlv3_kisat_nayttelytulokset as t','t.nayttely_id = n.kisa_id');
+
+        }
+                   $this->db->group_start();
+            $this->db->where('t.hyvaksytty IS NULL OR t.hyvaksytty = \'0000-00-00 00:00:00\'');
+            $this->db->group_end();
+        $this->db->group_by('n.jaos');
+        
+        $query = $this->db->get();
+
+        if(sizeof($query->result_array())>0){
+        return $query->result_array();
+        }else {
+            return array();
+        }
+        
+        
+        
+    }
+    
     
         public function get_showresults($jaos = null){ 
             $this->db->select('vip, kp, j.id as jaos, j.lyhenne as jaoslyhenne, k.url, k.info, jarj_talli, ta.nimi as tallinimi, k.ilmoitettu as kisailmoitettu, t.ilmoitettu as tulosilmoitettu,
@@ -196,7 +256,8 @@ class Kisakeskus_model extends CI_Model
         }
 
         $this->db->where('k.tulokset', 1);
-        $this->db->where('t.hyvaksytty !=','0000-00-00 00:00:00');
+        $this->db->where('u.hyvaksytty is NOT NULL', NULL, FALSE);
+        $this->db->where('u.hyvaksytty !=','0000-00-00 00:00:00');
 
         $this->db->order_by('kp', 'desc');
         $this->db->limit('1000');
@@ -223,7 +284,6 @@ class Kisakeskus_model extends CI_Model
             
         }else {
             $this->db->select('t.*, k.kp, k.vip, t.ilmoitettu, k.tunnus as tunnus, porrastettu, k.url, t.tunnus as tulosten_lah, k.jarj_talli, k.info, k.tunnus, k.jaos, k.arvontatapa');
-
             $this->db->from('vrlv3_kisat_tulokset as t');
             $this->db->join('vrlv3_kisat_kisakalenteri as k', 'k.kisa_id = t.kisa_id');
         }
@@ -255,7 +315,7 @@ class Kisakeskus_model extends CI_Model
         }
         $query = $this->db->get();
         if ($query->num_rows() > 0)
-        {        
+        {
             return $query->row_array();
         }else {
             return array();

@@ -1,4 +1,3 @@
-
 <table class="table table-striped">
  	<tr>
 		<th scope="row">Kilpailu</th> <td> #<?php echo $tulos['kisa_id']; ?></td>

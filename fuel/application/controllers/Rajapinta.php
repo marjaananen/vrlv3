@@ -226,7 +226,6 @@ class Rajapinta extends CI_Controller
                         
                 
                   $data['porrastetut'] = $return_data;
-                  var_dump($data);
                        
                         
             }            

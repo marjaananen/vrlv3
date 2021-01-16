@@ -18,7 +18,7 @@ ADD INDEX `laji` (`laji` ASC);
 UPDATE vrlv3.kisat_kisakalenteri SET jaos = 1 where laji = 1; -- uusi erj = 1
 UPDATE vrlv3.kisat_kisakalenteri SET jaos = 2 where laji = 2; -- uusi krj = 2
 UPDATE vrlv3.kisat_kisakalenteri SET jaos = 3 where laji = 3; -- uusi kerj = 3
-UPDATE vrlv3.kisat_kisakalenteri SET jaos = 3 where laji = 6; -- uusi vvj = 4
+UPDATE vrlv3.kisat_kisakalenteri SET jaos = 4 where laji = 6; -- uusi vvj = 4
 UPDATE vrlv3.kisat_kisakalenteri SET jaos = 5 where laji = 5; -- uusi wrj = 5
 UPDATE vrlv3.kisat_kisakalenteri SET jaos = 6 where laji = 7; -- uusi arj = 6
 

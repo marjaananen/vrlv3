@@ -252,12 +252,16 @@ class Kisajarjestelma
     
         # Rikotaan ensin luokat rivinvaihdon kohdalta
         $luokat = explode("\n",$tulos['luokat']);
-        $luokkien_maara = sizeof($luokat);
+        $luokat = preg_grep('/^\s*\z/', $luokat, PREG_GREP_INVERT);
+        $luokat = array_values( array_filter($luokat) );
         
-        var_dump($luokat);
+        $luokkien_maara = sizeof($luokat);
+
+
     
         # Sitten rikotaan tulokset ~- merkin kohdalta, eli mikä merkitsee luokan loppua
         $tulokset = explode("~",$tulos['tulokset']);
+        
         
         # Sitten rikotaan hylsyt ~- merkin kohdalta, eli mikä merkitsee luokan loppua
         $hylsyt = explode("~",$tulos['hylatyt']);
@@ -309,7 +313,7 @@ class Kisajarjestelma
                 
         $stats_info = $this->_get_horses_stats_info($vh_list, $jaos);
                 
-        $bulk_insert = array();
+        $bulk_add = array();
         $bulk_edit = array();
         $pre_txt = "";
         if($porr){ $pre_txt = "porr_";}
@@ -339,7 +343,7 @@ class Kisajarjestelma
                 if($stats_ok){
                     $bulk_add[] = $new_data;
                 }
-            } //jos hevosella on aiempia tuloksia
+            } //jos hevosella on aiempia *tulok*sia
             else {
                  if(isset($voi[$horse])){
                     $new_data[$pre_txt.'voi'] = $data[$pre_txt.'voi'] + $voi[$horse];
