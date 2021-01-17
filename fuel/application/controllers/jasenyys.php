@@ -119,23 +119,25 @@ class Jasenyys extends CI_Controller
             $fields['email'] = $user->email;
         else
             $fields['email'] = "Ei saatavilla";            
-	    
+	
+        
         if($fields['logged_in']){
 			$fields['muut_yhteystiedot'] = $this->tunnukset_model->get_users_public_contacts($pinnumber);        
 			$fields['nimimerkit'] = $this->tunnukset_model->get_previous_nicknames($pinnumber);
 			
-			if($sivu == 'tallit'){
-					$fields['stables'] = $this->_omat_tallit($pinnumber);
-				}
-			else if($sivu == 'hevoset'){				
-					$fields['horses'] = $this->_omat_hevoset($pinnumber);
-				}
-			else if($sivu == 'kasvatit'){				
-					$fields['foals'] = $this->_omat_kasvatit($pinnumber);
-				}
-				else if($sivu == 'kasvattajanimet'){				
-					$fields['names'] = $this->_omat_kasvattajanimet($pinnumber);
-				}	
+                if($sivu == 'tallit'){
+                        $fields['stables'] = $this->_omat_tallit($pinnumber);
+                    }
+                else if($sivu == 'hevoset'){				
+                        $fields['horses'] = $this->_omat_hevoset($pinnumber);
+                    }
+                else if($sivu == 'kasvatit'){				
+                        $fields['foals'] = $this->_omat_kasvatit($pinnumber);
+                }
+                else if($sivu == 'kasvattajanimet'){				
+                    $fields['names'] = $this->_omat_kasvattajanimet($pinnumber);
+                }
+                
 			}
 			else {
 				$fields['horses'] = "Kirjaudu sisään nähdäksesi tiedot.";
@@ -144,6 +146,10 @@ class Jasenyys extends CI_Controller
 				$fields['stables'] = "Kirjaudu sisään nähdäksesi tiedot.";
 				
 			}
+            
+            if($sivu=="vastuut"){
+                $fields['vastuut'] = $this->_omat_vastuut($pinnumber);
+            }
 			
             
 	    $this->fuel->pages->render('jasenyys/tunnus', $fields);
@@ -257,6 +263,8 @@ class Jasenyys extends CI_Controller
 			$vars['headers'][2] = array('title' => 'Nimi', 'key' => 'nimi');
 			$vars['headers'][3] = array('title' => 'Rotu', 'key' => 'rotu');
 			$vars['headers'][4] = array('title' => 'Sukupuoli', 'key' => 'sukupuoli');
+            $vars['headers'][5] = array('title' => 'Syntymäaika', 'key' => 'syntymaaika', 'type'=>'date');
+
 			
 			$vars['headers'] = json_encode($vars['headers']);
 						
@@ -316,7 +324,31 @@ class Jasenyys extends CI_Controller
 			
 	
 		return $this->load->view('misc/taulukko', $vars, TRUE);
-	}	
+    }
+    
+    
+    private function _omat_vastuut($nro){
+        $this->load->model("oikeudet_model");
+        $this->load->model("jaos_model");
+
+        $vars['stats'] = array();
+        $vars['stats']['jaokset'] = $this->jaos_model->get_users_jaos($nro);
+        $vars['stats']['puljut'] = $this->jaos_model->get_users_pulju($nro);
+        
+        
+        $id = $this->tunnukset_model->get_users_id($nro);
+        $user = $this->ion_auth->user()->row();
+        
+        $groups = $this->ion_auth->groups()->result_array();
+        $currentGroups = $this->ion_auth->get_users_groups($id)->result_array();
+        $vars['vastuut'] = $this->oikeudet_model->sort_users_privileges($groups, $currentGroups);
+        
+        $this->load->library('user_rights', array('groups' => array('admin', 'tunnukset')));
+        
+        $vars['oma'] =  $this->user_rights->is_allowed() || ($this->ion_auth->user()->row()->id == $id);
+        
+        return $this->load->view('jasenyys/vastuut', $vars, TRUE);
+    }
 	
 }
 ?>

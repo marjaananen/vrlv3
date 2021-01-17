@@ -41,7 +41,7 @@ class Jaos_model extends Base_module_model
     //names
     function get_users_jaos($pinnumber)
     {
-        $this->db->select('vrlv3_kisat_jaokset.id, nimi, lyhenne, toiminnassa');
+        $this->db->select('vrlv3_kisat_jaokset.id, nimi, lyhenne, toiminnassa, taso');
         $this->db->from('vrlv3_kisat_jaokset');
         $this->db->join('vrlv3_kisat_jaokset_omistajat', 'vrlv3_kisat_jaokset.id = vrlv3_kisat_jaokset_omistajat.jid');
         $this->db->where('vrlv3_kisat_jaokset_omistajat.tunnus', $pinnumber);
@@ -777,7 +777,7 @@ class Jaos_model extends Base_module_model
     //names
     function get_users_pulju($pinnumber)
     {
-        $this->db->select('vrlv3_puljut.id, nimi, lyhenne, toiminnassa');
+        $this->db->select('vrlv3_puljut.id, nimi, lyhenne, toiminnassa, taso');
         $this->db->from('vrlv3_puljut');
         $this->db->join('vrlv3_puljut_omistajat', 'vrlv3_puljut.id = vrlv3_puljut_omistajat.jid');
         $this->db->where('vrlv3_puljut_omistajat.tunnus', $pinnumber);

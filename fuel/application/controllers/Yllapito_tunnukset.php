@@ -13,6 +13,7 @@ class Yllapito_tunnukset extends CI_Controller
             redirect($this->user_rights->redirect());
         }
         $this->load->model("tunnukset_model");
+        $this->load->model("Oikeudet_model");
     }
 
     //ADMIN-OSUUS
@@ -205,13 +206,8 @@ class Yllapito_tunnukset extends CI_Controller
             else {
                 $groups = $this->ion_auth->groups()->result_array();
                 $currentGroups = $this->ion_auth->get_users_groups($user_id)->result();
-                $group_options = array();
-                foreach ($groups as $key=>$group){
-                    //exclude admin (1), jaos-yp (9) and kisakalenteri (10)
-                    if($group['id'] != 1 && $group['id'] != 9 && $group['id'] != 10){
-                        $group_options[$group['id']] = $group['name'];
-                    }
-                }
+                $group_options = $this->Oikeudet_model->sanitize_automatic_groups($groups);
+                
                 $users_groups=array();
                 foreach ($currentGroups as $group){
                     $users_groups[]=$group->id;

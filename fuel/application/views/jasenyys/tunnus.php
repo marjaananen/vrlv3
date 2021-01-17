@@ -45,6 +45,7 @@
     <?php }?>
     
     <ul class="nav nav-tabs">
+        <li role="presentation" class="<?php if ($sivu == 'vastuut'){echo "active";}?>"><a href="<?php echo base_url('tunnus/'. $tunnus . '/vastuut')?>">Vastuutehtävät</a></li>
         <li role="presentation" class="<?php if ($sivu == 'hevoset'){echo "active";}?>"><a href="<?php echo base_url('tunnus/'. $tunnus . '/hevoset')?>">Hevoset</a></li>
         <li role="presentation" class="<?php if ($sivu == 'tallit'){echo "active";}?>"><a href="<?php echo base_url('tunnus/'. $tunnus . '/tallit')?>">Tallit</a></li>
         <li role="presentation" class="<?php if ($sivu == 'kasvattajanimet'){echo "active";}?>"><a href="<?php echo base_url('tunnus/'. $tunnus . '/kasvattajanimet')?>">Kasvattajanimet</a></li>
@@ -68,6 +69,8 @@
             else if($sivu == 'kasvattajanimet'){
                     echo $names;
 
+        } else if($sivu == 'vastuut'){
+            echo $vastuut;
         }
     
     ?>

@@ -11,7 +11,21 @@ Toimintaan on helppo tulla mukaan. Ensikertalaisen kannattaa aloittaa Mikä on v
 
 </p>
 <h2>Ylläpito</h2>
-<p>VRL:n ylläpito on täysin harrastajien omissa käsissä. Sivuston toiminnasta ovat vastuussa <?php echo fuel_var('yllapito_nimet') ?>, ja liiton pyörittämisessä apuna toimii kymmeniä vapaaehtoistyöntekijöitä monissa eri tehtävissä! Mikäli olet kiinnostunut auttamaan liiton pyörittämisessä, älä epäröi ottaa yhteyttä! Yhteystietosivulta löydät kaikkien osa-alueiden vastuuhenkilöiden nimet ja yhteystiedot.</p>
+<p>VRL:n ylläpito on täysin harrastajien omissa käsissä. Sivuston toiminnasta ovat vastuussa <?php foreach ($admins as $key=>$admin){
+   echo '<strong>'.$admin['nimimerkki'] . "</strong> (VRL-". $admin['tunnus'] . ")";
+   
+   if(sizeof($admins) == 1){
+      echo ', ';
+   }
+   else if(sizeof($admins) - 2 == $key){
+      echo ' ja ';
+   }
+   else {
+      echo ', ';
+   }
+}
+   
+   ?> ja liiton pyörittämisessä apuna toimii kymmeniä vapaaehtoistyöntekijöitä monissa eri tehtävissä! Mikäli olet kiinnostunut auttamaan liiton pyörittämisessä, älä epäröi ottaa yhteyttä! Yhteystietosivulta löydät kaikkien osa-alueiden vastuuhenkilöiden nimet ja yhteystiedot.</p>
 
 
 <h2>Tiedotukset</h2>

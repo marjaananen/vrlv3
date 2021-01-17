@@ -92,16 +92,26 @@
 	{
 		if ($this->ion_auth->logged_in())
 		{
-			echo "<p>Tervetuloa, VRL-" . $this->session->userdata( 'tunnus' ) . "<br /> <a href=" . site_url('/auth/logout') . ">Kirjaudu ulos</a> <br /> <a href=" . site_url('/profiili') . ">Profiili</a>";
-			echo "<br />Sinulle on " . $this->tunnukset_model->unread_messages($this->session->userdata('identity')) . " uutta <a href=" . site_url('/profiili/pikaviestit') . ">pikaviestiä</a>.</p>";
+			echo "<p>Tervetuloa, VRL-" . $this->session->userdata( 'tunnus' ) . "!</p>";
 			
-			
+			echo '<a href="'.site_url().'profiili"><button type="button" class="btn btn-primary btn-block">
+			<span class="glyphicon glyphicon-user" aria-hidden="true"></span> Profiili</button></a>';
+						
+						
+			echo '<a href="'.site_url('/profiili/pikaviestit').'"><button type="button" class="btn btn-primary btn-block">
+			<span class="glyphicon glyphicon-envelope" aria-hidden="true"></span> Pikaviestit <span class="badge">'
+			. $this->tunnukset_model->unread_messages($this->session->userdata('identity')) .'</span></button></a>';
+
+					
 			$group_amount = $this->ion_auth->get_users_groups()->result_array();
           
 			if ($this->ion_auth->is_admin() || sizeof($group_amount) > 2 || (sizeof($group_amount) == 1 && $group_amount[0]['name'] !== "members")){
-				echo "<p>Ylläpitotoiminnot:</p>";
-				echo $adminmainmenu;
+				echo '<a href="'.site_url().'yllapito"><button type="button" class="btn btn-primary btn-block">
+				<span class="glyphicon glyphicon-cog" aria-hidden="true"></span> Ylläpitotoiminnot</button></a>';
 			}
+			
+			echo '<a href="'.site_url().'auth/logout"><button type="button" class="btn btn-primary btn-block">
+			<span class="glyphicon glyphicon-off" aria-hidden="true"></span> Kirjaudu ulos</button></a>';
 		}
 		else
 		{

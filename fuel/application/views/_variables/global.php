@@ -15,12 +15,12 @@ $vars['css'] = array();
 $vars['body_class'] = uri_segment(1).' '.uri_segment(2);
 $vars['sidemenu'] = fuel_nav(array('container_tag_id' => 'sidebar', 'container_tag_class' => 'nav nav-stacked', 'parent' => uri_segment(1)));
 $vars['adminmainmenu'] = fuel_nav(array('container_tag_id' => 'sidebar', 'container_tag_class' => 'nav nav-stacked', 'parent' => 'yllapito', 'depth'=>'0'));
-$vars['main_quickmenu'] = '<li><a href="http://vf.marsupieni.net/viewtopic.php?f=3&t=1308">Yhteystiedot</a></li>
-<li><a href=" ">Rekisteröidy jäseneksi</a></li>
-<li><a href=" ">Hae työntekijäksi</a></li>
+$vars['main_quickmenu'] = '<li><a href="'.site_url('liitto/yllapito').'">Yhteystiedot</a></li>
+<li><a href="'.site_url('jasenyys/liity').'">Rekisteröidy jäseneksi</a></li>
+<li><a href="'.site_url('liitto/mainosta').'">Mainosta sivuillamme!</a></li>
+
 <li><a href="http://www.virtuaalihevoset.net/wiki/index.php/Etusivu">VirtuaaliWiki</a></li>    
 ';
-$vars['yllapito_nimet'] = "<b>Marsupieni</b> (VRL-01026) ja <b>pipariina</b> (VRL-00050)";
 // page specific variables
 $pages = array();
 

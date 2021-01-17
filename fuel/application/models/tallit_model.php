@@ -30,14 +30,22 @@ class Tallit_model extends Base_module_model
     
 	function get_users_stables_amount($pinnumber, $active = 1)
     {
-        $this->db->select('vrlv3_tallirekisteri.tnro, nimi, perustettu, lopettanut');
+        
+
+        $this->db->select('COUNT(vrlv3_tallirekisteri.tnro) as kaikki,
+    COUNT(CASE WHEN lopettanut = 0 then 1 ELSE NULL END) as toiminnassa');
         $this->db->from('vrlv3_tallirekisteri');
         $this->db->join('vrlv3_tallirekisteri_omistajat', 'vrlv3_tallirekisteri.tnro = vrlv3_tallirekisteri_omistajat.tnro');
         $this->db->where('omistaja', $pinnumber);
 		$query = $this->db->get();
 
 	
-		return $query->num_rows();
+		if ($query->num_rows() > 0)
+        {
+            return $query->result_array()[0]; 
+        }
+        
+        return array();
     }
 	
     function get_stable($tnro)

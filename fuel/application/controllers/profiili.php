@@ -5,6 +5,8 @@ class Profiili extends Loggedin_Controller
     {
         parent::__construct();
         
+        $this->load->library("vrl_helper");
+        
         //Kaikki funktiot täällä vaativat kirjautuneen käyttäjän, joten:
         if(!($this->ion_auth->logged_in()))
         {
@@ -15,27 +17,58 @@ class Profiili extends Loggedin_Controller
     function index()
     {
         $this->load->model('tallit_model');
-		        $this->load->model('hevonen_model');
-				        $this->load->model('kasvattajanimi_model');
+		$this->load->model('hevonen_model');
+		$this->load->model('kasvattajanimi_model');
+        $this->load->model('jaos_model');
+        $this->load->model('oikeudet_model');
+
 
 
 		$user = $this->ion_auth->user()->row();
 	
 		$vars = array();
-	$vars['nimimerkki'] =  $user->nimimerkki;
+        $vars['nimimerkki'] =  $user->nimimerkki;
         $vars['email'] = $user->email;
-	$dateofaccept = date("d.m.Y", strtotime($user->hyvaksytty));
-
-	$vars['hyvaksytty'] = $dateofaccept;
+        $vars['tunnus'] = $user->tunnus;
+        $dateofaccept = $this->vrl_helper->sanitize_registration_date($user->hyvaksytty);
+        $vars['hyvaksytty'] = $dateofaccept;
         
-    $vars['stats'] = array();
-	$vars['stats']['tallit'] = $this->tallit_model->get_users_stables_amount($user->tunnus);
-	$vars['stats']['hevoset'] = $this->hevonen_model->get_owners_horses_amount($user->tunnus);
-	$vars['stats']['kasvattajanimet'] = $this->kasvattajanimi_model->get_users_names_amount($user->tunnus);
+        $vars['tallit_url'] = site_url() . '/tallit/omat';
+        $vars['hevoset_url'] = site_url() . '/virtuaalihevoset/omat';
+        $vars['kasvattajanimet_url'] = site_url() . '/kasvatus/kasvattajanimet/omat';
+        $vars['tunnus_url'] = site_url() . 'profiili/tunnus';
+        
+        
+        $groups = $this->ion_auth->groups()->result_array();
+        $currentGroups = $this->ion_auth->get_users_groups($user->id)->result_array();
+        $vars['vastuut'] = $this->oikeudet_model->sort_users_privileges($groups, $currentGroups);
+        
+        
+        $vars['oma'] = TRUE;
+        
+        $vars['admin'] = $this->ion_auth->is_admin($user->id);
+
+
+            
+        $vars['stats'] = array();
+        $vars['stats']['tallit'] = $this->tallit_model->get_users_stables_amount($user->tunnus);
+        $vars['stats']['hevoset'] = $this->hevonen_model->get_owners_horses_amount($user->tunnus);
+        $vars['stats']['kasvattajanimet'] = $this->kasvattajanimi_model->get_users_names_amount($user->tunnus);
+        $vars['stats']['jaokset'] = $this->jaos_model->get_users_jaos($user->tunnus);
+        $vars['stats']['puljut'] = $this->jaos_model->get_users_pulju($user->tunnus);
+        
+        $groups = $this->ion_auth->groups()->result_array();
+        $currentGroups = $this->ion_auth->get_users_groups($user->id)->result_array();
+        $vars['vastuut'] = $this->oikeudet_model->sort_users_privileges($groups, $currentGroups);        
+        $vars['oma'] = TRUE;
+        
+        $vars['vastuut'] = $this->load->view('jasenyys/vastuut', $vars, TRUE);
+        $vars['admin'] = $this->ion_auth->is_admin($user->id);
+                                                                      
 
 
 	
-	$this->fuel->pages->render('profiili/index', $vars);
+    	$this->fuel->pages->render('profiili/index', $vars);
     }
     
     //OMAT-TIEDOT
@@ -43,7 +76,7 @@ class Profiili extends Loggedin_Controller
     function tiedot()
     {
         $vars = array();
-	$this->load->library('form_validation');
+    	$this->load->library('form_validation');
         $this->load->model('tunnukset_model');
         $user = $this->ion_auth->user()->row();
         
@@ -130,7 +163,7 @@ class Profiili extends Loggedin_Controller
         
         // load form_builder
         $this->load->library('form_builder', array('submit_value' => 'Lisää'));
-        $options = array('irc' => 'IRC', 'line' => 'Line', 'skype' => 'Skype', 'www' => 'WWW');
+        $options = array('irc' => 'IRC', 'line' => 'Line', 'skype' => 'Skype', 'www' => 'WWW', 'email' => 'Email');
         
         // create fields
         $fields['tyyppi'] = array('type' => 'select', 'options' => $options, 'value' => 'www', 'class'=>'form-control');

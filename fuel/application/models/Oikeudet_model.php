@@ -23,6 +23,37 @@ class Oikeudet_model extends Base_module_model
     }
     
     
+    function sort_users_privileges($all_groups, $users_groups){
+        $users_privileges = array();
+        
+        $groups = $this->sanitize_automatic_groups($all_groups, true);
+        
+        foreach ($users_groups as $usergroup){
+            if(isset($groups[$usergroup['id']])){
+                $users_privileges[] = $groups[$usergroup['id']];
+            }
+        }
+        
+        return $users_privileges;
+    }
+    
+    function sanitize_automatic_groups($groups, $only_privileges = false){
+        
+        $group_options = array();
+                foreach ($groups as $key=>$group){
+                    //exclude admin (1), jaos-yp (9) and kisakalenteri (10), pulju yp (11) and puljuduunari (12)
+                    if($group['id'] != 1 && $group['id'] != 9 && $group['id'] != 10 && $group['id'] != 12 && $group['id'] != 11){
+                        $group_options[$group['id']] = $group;
+                    }
+                }
+        if($only_privileges){
+            //members pois
+            unset($group_options[2]);
+                
+        }
+        return $group_options;
+    }
+    
     
     function users_in_group_id($group_id){
         $this->db->select('tunnus, nimimerkki');

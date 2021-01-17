@@ -275,6 +275,8 @@ class Tunnukset_model extends Base_module_model
             
         $query = $this->db->get();
         
+        echo $this->last_query();
+        
         if ($query->num_rows() > 0)
         {
             return $query->result_array(); 
