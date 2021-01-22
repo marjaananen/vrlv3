@@ -473,6 +473,63 @@ class Hevonen_model extends Base_module_model
         return array();
     }
     
+        function get_users_foals_full($user, $admin = false){
+            
+            $stables = array();
+            
+            
+            $this->db->select('vrlv3_tallirekisteri.tnro');
+            $this->db->from('vrlv3_tallirekisteri');
+            $this->db->join('vrlv3_tallirekisteri_omistajat', 'vrlv3_tallirekisteri.tnro = vrlv3_tallirekisteri_omistajat.tnro');
+            $this->db->where('omistaja', $user);
+            if(!$admin){
+                $this->db->where('lopettanut', 0);
+
+            }
+            $query = $this->db->get();
+            foreach($query->result_array() as $talli){
+                $stables[] = $talli['tnro'];
+            }
+            
+            $names = array();
+            
+            $this->db->select('vrlv3_kasvattajanimet.id');
+            $this->db->from('vrlv3_kasvattajanimet');
+            $this->db->join('vrlv3_kasvattajanimet_omistajat', 'vrlv3_kasvattajanimet.id = vrlv3_kasvattajanimet_omistajat.kid');
+            $this->db->where('vrlv3_kasvattajanimet_omistajat.tunnus', $user);
+            $query = $this->db->get();
+            
+            foreach($query->result_array() as $nimi){
+                $names[] = $nimi['id'];
+            }
+        
+            $this->db->select("reknro, nimi, r.lyhenne as rotu, vari, IF(sukupuoli='1', 'tamma', IF(sukupuoli='2', 'ori', 'ruuna')) as sukupuoli, syntymaaika,
+                              IFNULL(kasvattaja_talli, '') as kasvattaja_talli, IFNULL(kasvattaja_tunnus, '') as kasvattaja_tunnus, IFNULL(kasvattajanimi, '') as kasvattajanimi");        
+            $this->db->from('vrlv3_hevosrekisteri as h');
+            $this->db->join("vrlv3_lista_rodut as r", "h.rotu = r.rotunro", 'left outer');
+    
+            $this->db->where('kasvattaja_tunnus', $user);
+            if(sizeof($stables)>0){
+            $this->db->or_where_in('kasvattaja_talli', $stables);
+            }
+            if(sizeof($names)>0){
+            $this->db->or_where_in('kasvattajanimi_id', $names);
+            }
+
+        
+        
+        
+        $query = $this->db->get();
+        
+        if ($query->num_rows() > 0)
+        {
+            return $query->result_array(); 
+        }
+        
+        return array();
+    }
+    
+    
     function get_users_foals($user){
         $this->db->select("reknro, nimi, r.lyhenne as rotu, vari, sukupuoli, syntymaaika");        
         $this->db->from('vrlv3_hevosrekisteri as h');
@@ -488,6 +545,8 @@ class Hevonen_model extends Base_module_model
         
         return array();
     }
+    
+    
     
     function get_names_foals_by_id($id){
         $this->db->select("reknro, nimi, rotu, vari, sukupuoli, syntymaaika");        

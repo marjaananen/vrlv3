@@ -31,18 +31,7 @@
             ?>
         </ul>
     </p>
-    <p>
-        Viimeisimmät epäonnistuneet kirjautumiset:
-        <ul>
-            <?php
-                $date = new DateTime();
-                foreach($latest_failed_logins as $lfl)
-                {
-                    echo "<li>" . $lfl['nimimerkki'] . " (" . $lfl['aika'] . ")</li>";
-                }
-            ?>
-        </ul>
-    </p>
+   
 
     <br />
     

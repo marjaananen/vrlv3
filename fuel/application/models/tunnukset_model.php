@@ -252,9 +252,13 @@ class Tunnukset_model extends Base_module_model
         return -1;
     }
     
-    function search_users($pinnumber, $nick)
+    function search_users($pinnumber, $nick, $email=null, $admin=false)
     {
-        $this->db->select('tunnus, nimimerkki');
+        if($admin){
+            $this->db->select('tunnus, nimimerkki, email');
+        }else {
+            $this->db->select('tunnus, nimimerkki, IF(nayta_email = "1", email, "Ei julkinen") as email');
+        }
         $this->db->from('vrlv3_tunnukset');
         
         if(!empty($pinnumber))
@@ -272,11 +276,19 @@ class Tunnukset_model extends Base_module_model
             else
                 $this->db->where('nimimerkki', $nick);
         }
+        if(!empty($email)){
+             if(strpos($email, '*') !== false)
+                $this->db->where('email LIKE "' . str_replace('*', '%', $email) . '"');
+            else
+                $this->db->where('email', $email);
+                
+            if(!$admin){
+                $this->db->where('nayta_email', 1);
+            }
             
+        }
         $query = $this->db->get();
-        
-        echo $this->last_query();
-        
+                
         if ($query->num_rows() > 0)
         {
             return $query->result_array(); 

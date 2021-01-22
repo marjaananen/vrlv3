@@ -69,7 +69,7 @@
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </button>
-      <a href="/" class="navbar-brand">VRL</a>
+      <a href="/" class="navbar-brand">VRL</a> <img src="<?php echo site_url();?>assets/images/logo_100.png" alt="..." height="50">
     </div>
     <nav class="collapse navbar-collapse" role="navigation">
 	  <?php echo fuel_nav(array('container_tag_id' => 'topmenu', 'container_tag_class' => 'nav navbar-nav', 'item_id_prefix' => 'topmenu_', 'depth'=>'0')); ?>
@@ -80,7 +80,10 @@
 <div class="container">
 	<div class="row">
   			<div class="col-md-3" id="leftCol">
-              	
+        
+
+				
+				
 				<div class="well"> 
 					<?php if (!empty($sidemenu)) { echo $sidemenu;} else {echo $main_quickmenu;} ?>
   				</div>

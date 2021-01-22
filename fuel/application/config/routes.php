@@ -157,6 +157,8 @@ $route['liitto/rajapinta'] = "rajapinta";
 
 $route['profiili/vaihda_salasana'] = 'auth/change_password';
 $route['profiili/tunnus'] = "jasenyys/tunnus/";
+$route['profiili/tunnus/(:any)/(:any)'] = "jasenyys/tunnus/$1/$2";
+
 
 
 

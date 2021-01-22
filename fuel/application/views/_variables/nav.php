@@ -39,6 +39,12 @@ $nav['liitto/copyright'] = array('label' => 'Tekijänoikeudet', 'parent_id' => '
 // jäsenyys alamenu
 $nav['jasenyys/liity'] = array('label' => 'Liity jäseneksi', 'parent_id' => 'jasenyys', 'active' => 'jasenyys/liity');
 $nav['jasenyys/rekisteriseloste'] = array('label' => 'Rekisteriseloste', 'parent_id' => 'jasenyys', 'active' => 'jasenyys/rekisteriseloste');
+$nav['tunnus'] = array('hidden'=>true, 'label' => 'Tunnus', 'parent_id' => 'jasenyys', 'active' => 'tunnus$|tunnus/:any');
+$nav['jasenyys/tunnus'] = array('hidden'=>true, 'label' => 'Tunnus', 'parent_id' => 'jasenyys', 'active' => 'tunnus$|tunnus/:any');
+
+
+
+
 // virtuaalitallit alamenu
 $nav['tallit/haku'] = array('label' => 'Tallihaku', 'parent_id' => 'tallit', 'active' => 'tallit');
 $nav['tallit/rekisterointi'] = array('label' => 'Tallin rekisteröinti', 'parent_id' => 'tallit', 'active' => 'tallit/rekisterointi');

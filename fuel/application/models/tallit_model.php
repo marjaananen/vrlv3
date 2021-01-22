@@ -11,12 +11,25 @@ class Tallit_model extends Base_module_model
     
     
     //Tallit
-    function get_users_stables($pinnumber)
+    function get_users_stables($pinnumber, $cats = false, $only_online = false)
     {
-        $this->db->select('vrlv3_tallirekisteri.tnro, nimi, perustettu, lopettanut');
         $this->db->from('vrlv3_tallirekisteri');
+
+        
+        if($cats){
+            $this->db->select('vrlv3_tallirekisteri.tnro, nimi, perustettu, lopettanut, katelyh, kuvaus');
+            $this->db->join('vrlv3_tallirekisteri_kategoriat', 'vrlv3_tallirekisteri.tnro = vrlv3_tallirekisteri_kategoriat.tnro', 'left');
+            $this->db->join('vrlv3_lista_tallikategoriat', 'vrlv3_lista_tallikategoriat.kat = vrlv3_tallirekisteri_kategoriat.kategoria');
+        }else {
+            $this->db->select('vrlv3_tallirekisteri.tnro, nimi, perustettu, lopettanut, kuvaus');
+
+        }
         $this->db->join('vrlv3_tallirekisteri_omistajat', 'vrlv3_tallirekisteri.tnro = vrlv3_tallirekisteri_omistajat.tnro');
         $this->db->where('omistaja', $pinnumber);
+        if($only_online){
+            $this->db->where('lopettanut', 0);
+
+        }
 	
         $query = $this->db->get();
         

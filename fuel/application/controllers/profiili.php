@@ -106,6 +106,9 @@ class Profiili extends Loggedin_Controller
                     
                 if(!empty($this->input->post('email')))
                     $update_data['email'] = $this->input->post('email');
+                    
+                if(!empty($this->input->post('kuvaus')))
+                    $update_data['kuvaus'] = $this->input->post('kuvaus');
                 
                     
                 $update_data['nayta_email'] = $this->input->post('nayta_email');    
@@ -141,8 +144,12 @@ class Profiili extends Loggedin_Controller
         
         // create fields
         $fields['nimimerkki'] = array('type' => 'text', 'value' => $user->nimimerkki, 'class'=>'form-control');
-        $fields['email'] = array('type' => 'text', 'value' => $user->email, 'label' => 'Sähköpostiosoite', 'after_html' => '<span class="form_comment">Anna toimiva osoite tai saatat menettää tunnuksesi!</span>', 'class'=>'form-control');
+        $fields['email'] = array('type' => 'text', 'value' => $user->email, 'label' => 'Sähköpostiosoite', 'after_html' => '<span class="form_comment">Anna toimiva osoite jotta voit tarvittaessa palauttaa salasanasi!</span>', 'class'=>'form-control');
         $fields['nayta_email'] = array('type' => 'checkbox', 'checked' => $user->nayta_email, 'label' => 'Näytetäänkö sähköposti julkisesti?', 'after_html' => '<span class="form_comment">Näytetäänkö sähköposti julkisesti profiilissasi.</span>', 'class'=>'form-control');
+        $fields['kuvaus'] = array('type' => 'textarea', 'value' => $user->kuvaus ?? "", 'cols' => 40, 'rows' => 3, 'class'=>'form-control',
+                                  'after_html' => '<span class="form_comment">Voit kirjoittaa tähän esim. millainen harrastaja olet tai vaikka listata roolihahmosi, jos pidät eri talleja eri nimillä!</span>');
+
+        
         $fields['muut_yhteystiedot'] = array('type' => 'section', 'tag' => 'label', 'value' => 'Muut yhteystiedot', 'display_label' => false, 'after_html' => $contacts_html . '<span class="form_comment"><a href="' . site_url('/profiili/muokkaa_yhteystietoja') . '">Muokkaa yhteystietoja</a></span>');
                 
         $this->form_builder->form_attrs = array('method' => 'post', 'action' => site_url('profiili/tiedot'));

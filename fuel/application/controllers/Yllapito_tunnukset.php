@@ -59,7 +59,6 @@ class Yllapito_tunnukset extends CI_Controller
         $vars['queue_unlocked_num'] = $this->tunnukset_model->get_application_queue_unlocked_num();
         $vars['latest_approvals'] = $this->tunnukset_model->get_latest_approvals();
         $vars['latest_logins'] = $this->tunnukset_model->get_latest_logins();
-        $vars['latest_failed_logins'] = $this->tunnukset_model->get_latest_failed_logins();
             
         $this->fuel->pages->render('yllapito/hakemusjono', $vars);
     }
@@ -169,7 +168,7 @@ class Yllapito_tunnukset extends CI_Controller
     
     public function muokkaa($tunnus = null)
 	{
-        $data['title'] = "Muokkaa käyttäjän oikeuksia";
+        $data['title'] = "Muokkaa käyttäjän tietoja";
         $this->load->library("vrl_helper");
         //jos haettiin tunnusta, avataan ko. tunnuksen editori
         if($this->input->server('REQUEST_METHOD') == 'POST' && $this->input->post('tunnushaku')){
@@ -185,15 +184,14 @@ class Yllapito_tunnukset extends CI_Controller
             }
          
         }
-        //jos haluttiin tallentaa oikeuksia
-        else if ($this->input->server('REQUEST_METHOD') == 'POST' && $this->input->post('oikeus')){
-            $tunnus = $this->vrl_helper->vrl_to_number($this->input->post('tunnus'));
-            $this->sort_users_groups($this->input->post('oikeudet'), $this->ion_auth->get_user_id_from_identity($tunnus));
-            redirect('/yllapito/tunnukset/oikeudet', 'refresh');
+        //jos haluttiin tallentaa muokkausta
+        else if ($this->input->server('REQUEST_METHOD') == 'POST' && $this->input->post('nimimerkki')){
+            
+            $this->_edit_user($tunnus);
  
         }
         
-        else if ($tunnus != null){
+        if ($tunnus != null){
             $user_id = $this->ion_auth->get_user_id_from_identity($this->vrl_helper->vrl_to_number($tunnus));
             
             if ($user_id == false){
@@ -204,9 +202,15 @@ class Yllapito_tunnukset extends CI_Controller
 
             }
             else {
+                $user = $this->ion_auth->user($user_id)->row();
                 $groups = $this->ion_auth->groups()->result_array();
                 $currentGroups = $this->ion_auth->get_users_groups($user_id)->result();
-                $group_options = $this->Oikeudet_model->sanitize_automatic_groups($groups);
+                $groups = $this->Oikeudet_model->sanitize_automatic_groups($groups);
+                $group_options = array();
+                
+                foreach ($groups as $group){
+                    $group_options[$group['id']] = $group['name'] . ' (' . $group['description'] . ')';
+                }
                 
                 $users_groups=array();
                 foreach ($currentGroups as $group){
@@ -217,9 +221,17 @@ class Yllapito_tunnukset extends CI_Controller
                 $data['msg'] = "Valitse käyttäjälle sopivat oikeudet";
                 $this->load->library('form_builder', array('submit_value' => "Muokkaa oikeuksia", 'submit_name' => 'oikeus', 'required_text' => '*Pakollinen kenttä'));
                 $fields['tunnus'] = array('type' => 'hidden', 'value' => $tunnus);
+                
+                 $fields['nimimerkki'] = array('type' => 'text', 'value' => $user->nimimerkki, 'class'=>'form-control');
+                $fields['email'] = array('type' => 'text', 'value' => $user->email, 'label' => 'Sähköpostiosoite', 'after_html' => '<span class="form_comment">Anna toimiva osoite jotta voit tarvittaessa palauttaa salasanasi!</span>', 'class'=>'form-control');
+                $fields['nayta_email'] = array('type' => 'checkbox', 'checked' => $user->nayta_email, 'label' => 'Näytetäänkö sähköposti julkisesti?', 'after_html' => '<span class="form_comment">Näytetäänkö sähköposti julkisesti profiilissasi.</span>', 'class'=>'form-control');
+                $fields['kuvaus'] = array('type' => 'textarea', 'value' => $user->kuvaus ?? "", 'cols' => 40, 'rows' => 3, 'class'=>'form-control',
+                                  'after_html' => '<span class="form_comment">Voit kirjoittaa tähän esim. millainen harrastaja olet tai vaikka listata roolihahmosi, jos pidät eri talleja eri nimillä!</span>');
+
                 $fields['oikeudet'] = array('type' => 'multi', 'mode' => 'checkbox', 'required' => TRUE, 'options' => $group_options, 'value'=>$users_groups, 'class'=>'form-control', 'wrapper_tag' => 'li');
+
                 $this->form_builder->form_attrs = array('method' => 'post', 'action' => '/yllapito/tunnukset/muokkaa/'.$this->vrl_helper->vrl_to_number($tunnus));
-    
+                
                 
                 $data['form'] = $this->form_builder->render_template('_layouts/basic_form_template', $fields);
                 // set the flash data error message if there is one
@@ -243,6 +255,55 @@ class Yllapito_tunnukset extends CI_Controller
         }
                     
             
+    }
+    
+    
+    private function _edit_user(&$msg){
+        
+            $tunnus = $this->vrl_helper->vrl_to_number($this->input->post('tunnus'));
+            $user_id = $this->ion_auth->get_user_id_from_identity($tunnus);
+            $user = $this->ion_auth->user($user_id)->row();
+            
+            //sortataan käyttöoikeudet
+            $this->sort_users_groups($this->input->post('oikeudet'), $this->ion_auth->get_user_id_from_identity($tunnus));
+            
+            $valid = true;
+            $previous_nick = $user->nimimerkki;
+            
+            $this->load->helper(array('form', 'url'));
+            
+            if($this->input->post('email') != $user->email) //validointi katsoo tietokannasta duplikaatit joten tee se vain jos vaihdetaan email
+                $this->form_validation->set_rules('email', 'Sähköpostiosoite', 'valid_email|is_unique[vrlv3_tunnukset.email]|is_unique[vrlv3_tunnukset_jonossa.email]');
+            
+            $this->form_validation->set_rules('nimimerkki', 'Nimimerkki', "min_length[1]|max_length[20]|regex_match[/^[A-Za-z0-9_\-.:,; *~#&'@()]*$/]");
+            $this->form_validation->set_rules('nayta_email', 'Sähköpostin näkyvyys', 'min_length[1]|max_length[1]|numeric|regex_match[/^[01]*$/]');
+         
+            
+            if ($this->form_validation->run() == true && $valid == true)
+            {
+                $vars['success'] = true;
+                $update_data = array();
+                
+                if(!empty($this->input->post('nimimerkki')))
+                    $update_data['nimimerkki'] = $this->input->post('nimimerkki');
+                    
+                if(!empty($this->input->post('email')))
+                    $update_data['email'] = $this->input->post('email');
+                    
+                if(!empty($this->input->post('kuvaus')))
+                    $update_data['kuvaus'] = $this->input->post('kuvaus');
+                
+                    
+                $update_data['nayta_email'] = $this->input->post('nayta_email');    
+
+                if(!empty($update_data))
+                {
+                    $vars['success'] = $this->ion_auth->update($user->id, $update_data);
+                    
+                    if($vars['success'] == true && !empty($this->input->post('nimimerkki')) && $this->input->post('nimimerkki') != $user->nimimerkki)
+                        $this->tunnukset_model->add_previous_nickname($previous_nick, $user->tunnus);
+                }
+            }
     }
         
     public function oikeudet($oikeus = null){
@@ -347,13 +408,24 @@ class Yllapito_tunnukset extends CI_Controller
     
         
     private function sort_users_groups($groupData, $id){
-                            // Only allow updating groups if user is admin
+            // Only allow updating groups if user is admin
             // Update the groups user belongs to
+            
+            $groups = $this->Oikeudet_model->get_groups();
+            $groups = $this->Oikeudet_model->sanitize_automatic_groups($groups);
+            
+            $removable_group_list = array();
+            foreach($groups as $group){
+                
+                $removable_group_list[] = $group['id'];                
+
+            }
+            
+            
 
             if (isset($groupData) && !empty($groupData))
             {
-
-                $this->ion_auth->remove_from_group('', $id);
+                $this->ion_auth->remove_from_group($removable_group_list, $id);
 
                 foreach ($groupData as $grp)
                 {

@@ -27,6 +27,14 @@
                 if (type === 'small'){
                     return '<small>'+value+'</small>';
                 }
+                
+                if (type === 'bool'){
+                    if(value == '1'){
+                        return "kyllä";
+                    }else {
+                        return "ei";
+                    }
+                }
                 return value;
             }
         

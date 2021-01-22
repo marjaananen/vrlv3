@@ -106,7 +106,9 @@ CREATE TABLE `vrlv3_tunnukset` (
   `nayta_vuosi` smallint(1) NOT NULL DEFAULT '0',
   `nayta_laani` smallint(1) NOT NULL DEFAULT '0',
   `suositus` varchar(20) NOT NULL,
-  `rekisteroitynyt` datetime NOT NULL
+  `rekisteroitynyt` datetime NOT NULL,
+  `kuvaus` TEXT NULL
+
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
