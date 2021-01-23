@@ -25,12 +25,14 @@ class Tallit extends CI_Controller
 		$vars['title'] = 'Uusimmat tallit';
 				
 		$vars['text_view'] = $this->load->view('tallit/teksti_uusimmat', NULL, TRUE);
-		
 		$vars['headers'][1] = array('title' => 'Perustettu', 'key' => 'perustettu', 'type' => 'date');
-		$vars['headers'][2] = array('title' => 'Tallinumero', 'key' => 'tnro', 'key_link' => site_url('tallit/talli/'));
+        $vars['headers'][2] = array('title' => 'Tallinumero', 'key' => 'tnro', 'key_link' => site_url('tallit/talli/'));
 		$vars['headers'][3] = array('title' => 'Nimi', 'key' => 'nimi');
+		$vars['headers'][4] = array('title' => 'Kategoria', 'key' => 'katelyh', 'aggregated_by' => 'tnro');
+        $vars['headers'][5] = array('title' => 'Lopettanut', 'key' => 'lopettanut', 'type' => 'bool');
+
 		if($this->user_rights->is_allowed()){
-			$vars['headers'][4] = array('title' => 'Editoi', 'key' => 'tnro', 'key_link' => site_url('tallit/muokkaa/'), 'image' => site_url('assets/images/icons/edit.png'));
+			$vars['headers'][6] = array('title' => 'Editoi', 'key' => 'tnro', 'key_link' => site_url('tallit/muokkaa/'), 'image' => site_url('assets/images/icons/edit.png'));
 		}
 		
 		$vars['headers'] = json_encode($vars['headers']);
@@ -69,45 +71,53 @@ class Tallit extends CI_Controller
 	
 	public function talliprofiili($tnro="", $sivu ="")
     {
+        $fields = array();
 		$tnro = str_replace('%C3%96', 'Ö', $tnro);
         $tnro = str_replace('%C3%84', 'Ä', $tnro);
         $tnro = str_replace('%C3%85', 'Å', $tnro);
         
-		if(empty($tnro))
+		if(empty($tnro)){
 			$this->fuel->pages->render('misc/naytaviesti', array('msg_type' => 'danger', 'msg' => 'Tallitunnus puuttuu'));
+		} else {
 
-		
-		if(!$this->tallit_model->is_tnro_in_use($tnro))
-			$this->fuel->pages->render('misc/naytaviesti', array('msg_type' => 'danger', 'msg' => 'Tallitunnusta ei ole olemassa'));
+            $this->load->library('Vrl_helper');
+            $fields['sivu'] = $sivu;			
+            $fields['stable'] = $this->tallit_model->get_stable($tnro);
+            
+            if(sizeof($fields['stable']) == 0){
+                $this->fuel->pages->render('misc/naytaviesti', array('msg_type' => 'danger', 'msg' => 'Tallitunnusta ei ole olemassa'));
+            } else {
+            
+            
+            
+                $fields['stable']['perustettu'] = $this->vrl_helper->sanitize_registration_date($fields['stable']['perustettu']);
+                $fields['categories'] = $this->tallit_model->get_stables_categories($tnro);
+                $fields['owners'] = $this->tallit_model->get_stables_owners($tnro);
+            
+            
+    
+                if($sivu == 'hevoset'){				
+                        $fields['horses'] = $this->_tallin_hevoset($tnro);
+                    }
+                else if($sivu == 'kasvatit'){				
+                        $fields['foals'] = $this->_tallin_kasvatit($tnro);
+                }
+                else if($sivu == 'kasvattajanimet'){				
+                    $fields['names'] = $this->_tallin_kasvattajanimet($tnro);
+                }
+                else if($sivu == 'kilpailut'){				
+                    $fields['competitions'] = $this->_tallin_kisat($tnro);
+                }
+                else if($sivu == 'nayttelyt'){				
+                    $fields['shows'] = $this->_tallin_kisat($tnro, true);
+                }
+                
+                $this->fuel->pages->render('tallit/profiili', $fields);
 
-			$this->load->library('Vrl_helper');
-		$fields['sivu'] = $sivu;			
-		$fields['stable'] = $this->tallit_model->get_stable($tnro);
-		$fields['stable']['perustettu'] = $this->vrl_helper->sanitize_registration_date($fields['stable']['perustettu']);
-		$fields['categories'] = $this->tallit_model->get_stables_categories($tnro);
-		$fields['owners'] = $this->tallit_model->get_stables_owners($tnro);
+            }
+            
+        }
 		
-		if($this->ion_auth->logged_in()){		
-
-			if($sivu == 'hevoset'){				
-					$fields['horses'] = $this->_tallin_hevoset($tnro);
-				}
-			else if($sivu == 'kasvatit'){				
-					$fields['foals'] = $this->_tallin_kasvatit($tnro);
-				}
-				else if($sivu == 'kasvattajanimet'){				
-					$fields['names'] = $this->_tallin_kasvattajanimet($tnro);
-				}	
-			}
-			else {
-				$fields['horses'] = "Kirjaudu sisään nähdäksesi tiedot.";
-				$fields['foals'] = "Kirjaudu sisään nähdäksesi tiedot.";
-				$fields['names'] = "Kirjaudu sisään nähdäksesi tiedot.";
-				$fields['stables'] = "Kirjaudu sisään nähdäksesi tiedot.";
-				
-			}
-		
-		$this->fuel->pages->render('tallit/profiili', $fields);
     }
 	
 	
@@ -127,10 +137,15 @@ class Tallit extends CI_Controller
 			$vars['headers'][2] = array('title' => 'Nimi', 'key' => 'nimi');
 			$vars['headers'][3] = array('title' => 'Rotu', 'key' => 'rotu');
 			$vars['headers'][4] = array('title' => 'Sukupuoli', 'key' => 'sukupuoli');
-			
+            $vars['headers'][5] = array('title' => 'Syntymäaika', 'key' => 'syntymaaika', 'type' => 'date');
+
+
+
+
+		
 			$vars['headers'] = json_encode($vars['headers']);
 						
-			$vars['data'] = json_encode($this->hevonen_model->get_stables_horses($nro));
+			$vars['data'] = json_encode($this->hevonen_model->get_stables_horses($nro, true));
 		
 		
 		return $this->load->view('misc/taulukko', $vars, TRUE);
@@ -153,10 +168,52 @@ class Tallit extends CI_Controller
 			$vars['headers'][2] = array('title' => 'Nimi', 'key' => 'nimi');
 			$vars['headers'][3] = array('title' => 'Rotu', 'key' => 'rotu');
 			$vars['headers'][4] = array('title' => 'Sukupuoli', 'key' => 'sukupuoli');
+            $vars['headers'][5] = array('title' => 'Syntymäaika', 'key' => 'syntymaaika', 'type'=>'date');
+            $vars['headers'][6] = array('title' => 'Kuollut', 'key' => 'kuollut', 'type' => 'bool');
+            $vars['headers'][7] = array('title' => 'Omistaja(t)', 'key' => 'omistaja', 'aggregated_by' => 'reknro', 'key_link' => site_url('tunnus/'));
+
+
 			
 			$vars['headers'] = json_encode($vars['headers']);
 						
 			$vars['data'] = json_encode($this->hevonen_model->get_stables_foals($nro));
+		
+		
+		return $this->load->view('misc/taulukko', $vars, TRUE);
+    }
+    
+    
+    	private function _tallin_kisat($nro, $show = false)
+    {
+				$this->load->model('kisakeskus_model');
+
+		$vars['title'] = "";
+		
+		$vars['msg'] = '';
+		
+		$vars['text_view'] = "";		
+	
+	
+		
+			$vars['headers'][1] = array('title' => 'Id', 'key' => 'kisa_id', 'prepend_text'=>'#');
+			$vars['headers'][2] = array('title' => 'Kisapäivä', 'key' => 'kp', 'type'=>'date');
+			$vars['headers'][3] = array('title' => 'Jaos', 'key' => 'jaoslyhenne');
+			$vars['headers'][4] = array('title' => 'Info', 'key' => 'info', 'type'=>'small');
+            
+            IF($show){
+                $vars['headers'][5] = array('title' => 'Tulos', 'key' => 'bis_id', 'key_link'=> site_url('kilpailutoiminta/tulosarkisto/bis/'));
+            } else {
+                $vars['headers'][5] = array('title' => 'Porrastettu', 'key' => 'porrastettu', 'type'=>'bool');
+                $vars['headers'][6] = array('title' => 'Tulos', 'key' => 'tulos_id', 'key_link'=> site_url('kilpailutoiminta/tulosarkisto/tulos/'));
+
+
+            }
+
+
+			
+			$vars['headers'] = json_encode($vars['headers']);
+						
+			$vars['data'] = json_encode($this->kisakeskus_model->get_stables_competitions($nro, $show));
 		
 		
 		return $this->load->view('misc/taulukko', $vars, TRUE);
@@ -211,8 +268,10 @@ class Tallit extends CI_Controller
 				$vars['headers'][2] = array('title' => 'Nimi', 'key' => 'nimi');
 				$vars['headers'][3] = array('title' => 'Kategoria', 'key' => 'katelyh', 'aggregated_by' => 'tnro');
 				$vars['headers'][4] = array('title' => 'Perustettu', 'key' => 'perustettu', 'type' => 'date');
+                $vars['headers'][5] = array('title' => 'Lopettanut', 'key' => 'lopettanut', 'type' => 'bool');
+
 				if($this->user_rights->is_allowed()){
-					$vars['headers'][5] = array('title' => 'Editoi', 'key' => 'tnro', 'key_link' => site_url('tallit/muokkaa/'), 'image' => site_url('assets/images/icons/edit.png'));
+					$vars['headers'][6] = array('title' => 'Editoi', 'key' => 'tnro', 'key_link' => site_url('tallit/muokkaa/'), 'image' => site_url('assets/images/icons/edit.png'));
 				}
 				
 				$vars['headers'] = json_encode($vars['headers']);
@@ -244,9 +303,11 @@ class Tallit extends CI_Controller
 			$vars['headers'][1] = array('title' => 'Perustettu', 'key' => 'perustettu', 'type' => 'date');
 			$vars['headers'][2] = array('title' => 'Tallinumero', 'key' => 'tnro', 'key_link' => site_url('tallit/talli/'));
 			$vars['headers'][3] = array('title' => 'Nimi', 'key' => 'nimi');
-			$vars['headers'][4] = array('title' => 'Editoi', 'key' => 'tnro', 'key_link' => site_url('tallit/muokkaa/'), 'image' => site_url('assets/images/icons/edit.png'));
+            $vars['headers'][4] = array('title' => 'Lopettanut', 'key' => 'lopettanut', 'type'=>'bool');
+
+			$vars['headers'][5] = array('title' => 'Editoi', 'key' => 'tnro', 'key_link' => site_url('tallit/muokkaa/'), 'image' => site_url('assets/images/icons/edit.png'));
 			
-			$vars['headers'][5] = array('title' => 'Lopeta', 'key' => 'tnro', 'key_link' => site_url('tallit/lopeta/'), 'image' => site_url('assets/images/icons/delete.png'));
+			$vars['headers'][6] = array('title' => 'Lopeta', 'key' => 'tnro', 'key_link' => site_url('tallit/lopeta/'), 'image' => site_url('assets/images/icons/delete.png'));
 			
 			$vars['headers'] = json_encode($vars['headers']);
 			
@@ -283,15 +344,19 @@ class Tallit extends CI_Controller
 			else if($this->input->server('REQUEST_METHOD') == 'POST')
 			{
 			
-				if ($this->_validate_stable_form('application') == FALSE)
+				if ($this->_validate_stable_form('application') == FALSE || !$this->input->post('luin_saannot'))
 				{
-					$vars['msg'] = "Rekisteröinti epäonnistui!";
+					$vars['msg'] = "Rekisteröinti epäonnistui! Syötteessä on virhe, tai sääntöjä ei ole merkitty luetuksi.";
 					$vars['msg_type'] = "danger";
 				}
 				else if($this->tallit_model->is_name_in_use($this->input->post('nimi'))){
 					$vars['msg'] = "Talli nimeltä " .$this->input->post('nimi')." on jo olemassa.";
 					$vars['msg_type'] = "danger";
 				}
+                else if($this->input->post('kategoria') == false || sizeof($this->input->post('kategoria'))== 0 ){
+                    $vars['msg'] = "Tallille tulee valita edes yksi kategoria.";
+					$vars['msg_type'] = "danger";
+                }
 				else
 				{
 					$vars['msg'] = "Rekisteröinti onnistui!";
@@ -362,9 +427,9 @@ class Tallit extends CI_Controller
 		
 		else if ($sivu == 'lopeta'){
 			if($this->tallit_model->is_stable_active($tnro))
-				$data['editor'] = "<p><a href='" . site_url('tallit/lopeta') . "/" . $tnro . "'>Lopeta talli</a></p>";
+				$data['editor'] = '<a href="' . site_url('tallit/lopeta') . '/' . $tnro . '"><button type="button" class="btn btn-danger">Lopeta talli</button></a>';
 			else
-				$data['editor'] = "Talli on lopetettu.";
+				$data['editor'] = "<p>Talli on jo lopetettu.</p>";
 		}
 		
 		else if($sivu == 'tiedot'){
@@ -475,7 +540,7 @@ class Tallit extends CI_Controller
 	
 	
 	
-	private function _get_stable_form($mode, $tnro=-1)
+	private function _get_stable_form($mode, $tnro=-1, $stable = array())
     {
         if($mode != 'application' && $mode != 'edit' && $mode != 'admin')
             return "";
@@ -521,13 +586,18 @@ class Tallit extends CI_Controller
         //make edits depending on the mode
         if($mode == 'application')
         {
-            $fields['lyhehd'] = array('type' => 'text', 'label' => 'Lyhenne ehdotus', 'after_html' => '<span class="form_comment">2-4 merkin lyhenne tallillesi. Tästä muodostuu tallitunnus.</span>', 'class'=>'form-control');          
+            $fields['lyhehd'] = array('type' => 'text', 'required' => TRUE, 'label' => 'Lyhenne', 'after_html' => '<span class="form_comment">2-4 merkin lyhenne tallillesi. Tästä muodostuu tallitunnus.</span>', 'class'=>'form-control');          
         }
            
 		if($mode == 'admin')
 		{
 			$fields['tallinumero'] = array('type' => 'text', 'required' => TRUE, 'value' => $stable['tnro'], 'class'=>'form-control');
-		}
+		}else {
+            $fields['luin_saannot'] = array('label'=>"Virtuaalitallini sivuilla lukee selvästi että kyseessä on virtuaalitalli!", 'type' => 'checkbox',
+                                            'after_html' => '<span class="form_comment">Uusia talleja valvotaan, ja sääntöjä noudattamattomat voidaan poistaa rekisteristä!
+                                        </span>', 'class'=>'form-control');
+
+        }
 
 		$this->form_builder->form_attrs = array('method' => 'post', 'action' => $submit[$mode]["url"]);
 
@@ -545,10 +615,11 @@ class Tallit extends CI_Controller
         $this->form_validation->set_rules('nimi', 'Nimi', "required|min_length[1]|max_length[128]");
         $this->form_validation->set_rules('kuvaus', 'Kuvaus', "max_length[1024]");
         $this->form_validation->set_rules('osoite', 'Osoite', "required|min_length[4]|max_length[1024]|regex_match[/^[A-Za-z0-9_\-.:,; \/*~#&'@()]*$/]");
+        
 
         if($mode == 'application')
         {
-            $this->form_validation->set_rules('lyhehd', 'Lyhenne ehdotus', "min_length[2]|max_length[4]");
+            $this->form_validation->set_rules('lyhehd', 'Lyhenne', "min_length[2]|max_length[4]");
         }
         
         if($mode == 'admin')

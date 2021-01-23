@@ -119,7 +119,7 @@ class Kisajarjestelma
                                2 => "Suhteutettu arvonta",
                                4 => "Tuotos/kysymys",
                                3=> "Porrastettu arvonta",
-                               5=> "Tuomarointi (NJ)"); 
+                               5=> "Tuomarointi"); 
          return $arvontatavat;                                                                                                                        //
                                                                                                                                  
     

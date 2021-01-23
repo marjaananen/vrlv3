@@ -210,7 +210,7 @@ class Tallit_model extends Base_module_model
     
     function search_stables($name, $category, $tnro)
     {
-        $this->db->select('vrlv3_tallirekisteri.tnro, nimi, perustettu, katelyh');
+        $this->db->select('vrlv3_tallirekisteri.tnro, nimi, perustettu, katelyh, lopettanut');
         $this->db->from('vrlv3_tallirekisteri');
         $this->db->join('vrlv3_tallirekisteri_kategoriat', 'vrlv3_tallirekisteri.tnro = vrlv3_tallirekisteri_kategoriat.tnro', 'left');
         $this->db->join('vrlv3_lista_tallikategoriat', 'vrlv3_lista_tallikategoriat.kat = vrlv3_tallirekisteri_kategoriat.kategoria');
@@ -248,8 +248,10 @@ class Tallit_model extends Base_module_model
     
     function search_stables_updated()
     {
-        $this->db->select('MAX(vrlv3_tallirekisteri_paivitetty.aika) as aika, vrlv3_tallirekisteri_paivitetty.tnro, nimi, perustettu');
+        $this->db->select('MAX(vrlv3_tallirekisteri_paivitetty.aika) as aika, vrlv3_tallirekisteri_paivitetty.tnro, nimi, perustettu, katelyh, lopettanut');
         $this->db->from('vrlv3_tallirekisteri');
+        $this->db->join('vrlv3_tallirekisteri_kategoriat', 'vrlv3_tallirekisteri.tnro = vrlv3_tallirekisteri_kategoriat.tnro', 'left');
+        $this->db->join('vrlv3_lista_tallikategoriat', 'vrlv3_lista_tallikategoriat.kat = vrlv3_tallirekisteri_kategoriat.kategoria');
         $this->db->join('vrlv3_tallirekisteri_paivitetty', 'vrlv3_tallirekisteri_paivitetty.tnro = vrlv3_tallirekisteri.tnro');
         $this->db->group_by('tnro');
         $this->db->order_by('aika', 'DESC');
@@ -271,8 +273,10 @@ class Tallit_model extends Base_module_model
     
     function search_stables_newest()
     {
-        $this->db->select('tnro, nimi, perustettu');
+        $this->db->select('vrlv3_tallirekisteri.tnro, nimi, perustettu, katelyh, lopettanut');
         $this->db->from('vrlv3_tallirekisteri');
+        $this->db->join('vrlv3_tallirekisteri_kategoriat', 'vrlv3_tallirekisteri.tnro = vrlv3_tallirekisteri_kategoriat.tnro', 'left');
+        $this->db->join('vrlv3_lista_tallikategoriat', 'vrlv3_lista_tallikategoriat.kat = vrlv3_tallirekisteri_kategoriat.kategoria');
         $this->db->order_by('perustettu', 'DESC');
         
         $this->db->limit(100);
@@ -381,7 +385,7 @@ class Tallit_model extends Base_module_model
     
     function get_stables_categories($tnro)
     {
-        $this->db->select('katelyh, vrlv3_tallirekisteri_kategoriat.id, vrlv3_tallirekisteri_kategoriat.kategoria');
+        $this->db->select('katelyh, vrlv3_tallirekisteri_kategoriat.id, vrlv3_lista_tallikategoriat.kategoria as nimi, vrlv3_tallirekisteri_kategoriat.kategoria');
         $this->db->from('vrlv3_tallirekisteri_kategoriat');
         $this->db->join('vrlv3_lista_tallikategoriat', 'vrlv3_lista_tallikategoriat.kat = vrlv3_tallirekisteri_kategoriat.kategoria');
         $this->db->where('tnro', $tnro);

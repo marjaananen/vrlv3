@@ -32,7 +32,8 @@
                 
                 echo "</ul>";
             ?>
-    </td></tr><tr>
+    </td>
+	</tr><tr>
     
         <th scope="row">Vanhat nimimerkit:</th><td>
             <?php
@@ -48,13 +49,13 @@
                 
                 echo "</ul>";
             ?>
-        </td></tr></table>
+        </td></tr>
     <?php } else {?>
         <div class="alert alert-success" role="alert">
             Näet enemmän profiilitietoja sisäänkirjautuneena!
         </div>
     <?php }?>
-    
+    </table>
     <ul class="nav nav-tabs">
         <li role="presentation" class="<?php if ($sivu == 'vastuut'){echo "active";}?>"><a href="<?php echo base_url($url. $tunnus . '/vastuut')?>">Vastuutehtävät</a></li>
         <li role="presentation" class="<?php if ($sivu == 'hevoset'){echo "active";}?>"><a href="<?php echo base_url($url. $tunnus . '/hevoset')?>">Hevoset</a></li>

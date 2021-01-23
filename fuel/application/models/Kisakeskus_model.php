@@ -274,6 +274,47 @@ class Kisakeskus_model extends CI_Model
     }
     
     
+    
+    public function get_stables_competitions($stable, $show = false){
+        if($show) {
+            $this->db->select('kp, j.id as jaos, j.lyhenne as jaoslyhenne, IFNULL(bis_id, "") as bis_id, jarj_talli, kisa_id, info');
+            $this->db->from('vrlv3_kisat_nayttelykalenteri as k');
+            $this->db->join('vrlv3_kisat_jaokset as j', 'j.id = k.jaos');
+            $this->db->join('vrlv3_kisat_nayttelytulokset as u', 'k.kisa_id = u.nayttely_id', 'left');
+        }else {
+            $this->db->select('kp, j.id as jaos, j.lyhenne as jaoslyhenne, IFNULL(tulos_id, "") as tulos_id, jarj_talli, k.kisa_id, porrastettu, info');
+            $this->db->from('vrlv3_kisat_kisakalenteri as k');
+            $this->db->join('vrlv3_kisat_jaokset as j', 'j.id = k.jaos');
+            $this->db->join('vrlv3_kisat_tulokset as u', 'k.kisa_id = u.kisa_id', 'left');
+        }
+        $this->db->where('jarj_talli', $stable);
+        
+        $this->db->group_start();
+        $this->db->where('k.tulokset', 0);
+        
+        $this->db->or_group_start();
+        $this->db->where('k.tulokset', 1);
+        $this->db->where('u.hyvaksytty is NOT NULL', NULL, FALSE);
+        $this->db->where('u.hyvaksytty !=','0000-00-00 00:00:00');
+        $this->db->group_end();
+        $this->db->group_end();
+
+
+        $this->db->order_by('kp', 'desc');
+        $this->db->limit('1000');
+                
+        $query = $this->db->get();
+        
+        if ($query->num_rows() > 0)
+        {
+            return $query->result_array();
+        }else {
+            return array();
+        }
+        
+    }
+    
+    
     //hae_yksittäinen_tulos
     public function get_result($result_id = null, $kisa_id = null, $hyvaksytty = true, $nayttelyt = false){
         

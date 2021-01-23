@@ -163,9 +163,7 @@ class Jasenyys extends CI_Controller
                  if($sivu == 'kasvatit'){				
                         $fields['foals'] = $this->_omat_kasvatit($pinnumber, $fields['oma'], $fields['admin'] );
                     }
-                else if($sivu == 'kasvattajanimet'){				
-                    $fields['names'] = $this->_omat_kasvattajanimet($pinnumber);
-                    }
+                
                     
                 }
                 else {
@@ -181,7 +179,9 @@ class Jasenyys extends CI_Controller
                 }
                 else if($sivu=="vastuut"){
                     $fields['vastuut'] = $this->_omat_vastuut($user, $fields['oma'] || $fields['admin']);
-                }
+                } else if($sivu == 'kasvattajanimet'){				
+                    $fields['names'] = $this->_omat_kasvattajanimet($pinnumber);
+                    }
                 
                 
             $this->fuel->pages->render('jasenyys/tunnus', $fields);

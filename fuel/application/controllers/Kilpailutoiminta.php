@@ -769,6 +769,7 @@ function tulosarkisto ($type = "perinteiset", $id = null, $id_type = null){
                     $tulos_info['tulos_id'] = $tulos_info['bis_id'];
                     $tulos_info['kisa_id'] = $tulos_info['nayttely_id'];
                     $tulos_info['porrastettu'] = false;
+                    $tulos_info['arvontatapa'] = 5;
                     
                 }
                 $info = $this->load->view('kilpailutoiminta/tulos_info', array("tulos" => $tulos_info), TRUE);
