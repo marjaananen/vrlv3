@@ -25,12 +25,13 @@ class Kisajarjestelma
 
     
     public function nayttelyjaos($jaos_id, $jaos = array()){
-        
         if(!isset($jaos['nayttelyt'])){
             $jaos = $this->CI->Jaos_model->get_jaos($jaos_id);
+
         }
         
-         if ( $jaos['nayttelyt'] == 1 ) { return true;}
+        
+         if ( $jaos['nayttelyjaos'] == 1 ) { return true;}
          else { return false;}
     }
     
@@ -57,7 +58,7 @@ class Kisajarjestelma
     
     public function sallitutKisamaarat($etuuspisteet, $jaos_id){
         //nj:ssä ei sijoituta samalla tavalla
-         if ( $this->nayttelyjaos($jaos_id) ) { $jarjestettavia = 1; }
+         if ( isset($jaos_id)&& $this->nayttelyjaos($jaos_id) ) { $jarjestettavia = 1; }
         
         #### KUINKA MONTA KISAA MAHDOLLISUUS JÄRJESTÄÄ ####
 		/*

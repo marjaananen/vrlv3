@@ -66,6 +66,15 @@ tammoja <b><?php echo $tammat;?></b> kpl (<?php echo $tammatp; ?>%),
 oreja <b><?php echo $orit;?></b> kpl (<?php echo $oritp; ?>%) ja
 ruunia <b><?php echo $ruunat;?></b> kpl (<?php echo $ruunatp; ?>%).</p>
 
+<?php
+if(isset($puljut) && sizeof($puljut) > 0){
+  echo '<h3>Yhdistykset</h3><ul>';
+  foreach ($puljut as $pulju){
+    echo '<li><a href="'.$pulju['url'].'">'.$pulju['nimi'].'</a> ('.$pulju['lyhenne'].')</li>';
+  }
+  echo '</ul>';
+}
+  ?>
 
 
 <?php
@@ -78,3 +87,7 @@ if (isset ($other_data)){
 }
 
 ?>
+
+<?php
+
+if(isset($year_stats)){echo '<h3>Rekisteröintimäärät vuosittain</h3>'; echo $year_stats;}?>

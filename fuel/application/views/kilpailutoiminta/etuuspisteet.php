@@ -61,7 +61,7 @@ while ($pisteet < 110){
     if($avoimet_uusi>$avoimet){
         $tulosta = $pisteet-1;
         $cal = '<img src="'.site_url('assets/images/icons/cancel.png').'" alt="Ei"/>';
-        if($kisajarjestelma->directlyCalender($tulosta, 0)){
+        if($kisajarjestelma->directlyCalender($tulosta, null)){
             $cal = '<img src="'.site_url('assets/images/icons/accept.png').'" alt="Kyllä"/>';
         }
         echo "<tr><td>". $alkup . "-" .$tulosta." </td><td> " . $avoimet . "kpl" . "</td><td>".$cal."</td></tr>";

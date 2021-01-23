@@ -63,7 +63,12 @@ class Color_model extends Base_module_model
         $this->db->from('vrlv3_lista_varit');
         $this->db->where('vid', $id);
         $query = $this->db->get();
-        return $query->row_array();
+        if ($query->num_rows() > 0)
+        {
+            return $query->row_array();
+        }else {
+            return array();
+        }
                 
     }
     

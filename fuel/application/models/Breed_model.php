@@ -90,7 +90,27 @@ class Breed_model extends Base_module_model
                 
     }
     
-    
+    public function get_breed_pulju($breed, $only_online = false){
+        $this->db->select('p.*');
+        $this->db->from('vrlv3_puljut as p');
+        $this->db->join('vrlv3_puljut_rodut as r', 'p.id = r.pulju');
+        $this->db->where('r.rotu', $breed);
+        
+        if($only_online){
+             $this->db->where('p.toiminnassa', 1);
+
+        }
+        
+         $query = $this->db->get();
+        
+        if ($query->num_rows() > 0)
+        {
+            return $query->result_array();
+        }
+        
+        return array();
+        
+    }
     ////functions for form option lists
     
     

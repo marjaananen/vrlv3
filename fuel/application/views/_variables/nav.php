@@ -55,10 +55,17 @@ $nav['tallit/paivitetyt'] = array('label' => 'Viimeksi päivitetyt tallit', 'par
 $nav['virtuaalihevoset/haku'] = array('label' => 'Hevosrekisteri', 'parent_id' => 'virtuaalihevoset', 'active' => 'virtuaalihevoset/haku'); //Koodattavaa: Rekisteröintilomake
 $nav['virtuaalihevoset/rekisterointi'] = array('label' => 'Hevosten rekisteröinti', 'parent_id' => 'virtuaalihevoset', 'active' => 'virtuaalihevoset/rekisterointi'); //Koodattavaa: Rekisteröintilomake
 $nav['virtuaalihevoset/omat'] = array('label' => 'Omat hevoset', 'parent_id' => 'virtuaalihevoset', 'active' => 'virtuaalihevoset/omat'); //Koodattavaa: Syntymämaat
-$nav['virtuaalihevoset/statistiikka'] = array('label' => 'Statistiikka', 'parent_id' => 'virtuaalihevoset', 'active' => 'virtuaalihevoset/statistiikka'); //Koodattavaa: Statistiikat
-$nav['virtuaalihevoset/rodut'] = array('label' => 'Rotulista', 'parent_id' => 'virtuaalihevoset', 'active' => 'virtuaalihevoset/rotulista'); //Koodattavaa: Rotulistat
-$nav['virtuaalihevoset/varit'] = array('label' => 'Värilista', 'parent_id' => 'virtuaalihevoset', 'active' => 'virtuaalihevoset/varilista'); //Koodattavaa: Värit
+$nav['virtuaalihevoset/statistiikka'] = array('label' => 'Statistiikka', 'parent_id' => 'virtuaalihevoset', 'active' => 'virtuaalihevoset/statistiikka$|virtuaalihevoset/statistiikka/:any'); //Koodattavaa: Statistiikat
+$nav['virtuaalihevoset/rodut'] = array('label' => 'Rotulista', 'parent_id' => 'virtuaalihevoset', 'active' => 'virtuaalihevoset/rodut'); //Koodattavaa: Rotulistat
+$nav['virtuaalihevoset/rotu'] = array('hidden'=>true, 'label' => 'Rotu', 'parent_id' => 'virtuaalihevoset/rodut', 'active' => 'virtuaalihevoset/rotu$|virtuaalihevoset/rotu/:any'); //Koodattavaa: Rotulistat
+
+$nav['virtuaalihevoset/varit'] = array('label' => 'Värilista', 'parent_id' => 'virtuaalihevoset', 'active' => 'virtuaalihevoset/varit'); //Koodattavaa: Värit
+$nav['virtuaalihevoset/vari'] = array('hidden'=>true, 'label' => 'Väri', 'parent_id' => 'virtuaalihevoset/varit', 'active' => 'virtuaalihevoset/vari$|virtuaalihevoset/vari/:any'); //Koodattavaa: Rotulistat
+
+
 $nav['virtuaalihevoset/syntymamaat'] = array('label' => 'Syntymämaalista', 'parent_id' => 'virtuaalihevoset', 'active' => 'virtuaalihevoset/syntymamaat'); //Koodattavaa: Syntymämaat
+$nav['virtuaalihevoset/maa'] = array('hidden'=>true, 'label' => 'Maa', 'parent_id' => 'virtuaalihevoset/syntymamaat', 'active' => 'virtuaalihevoset/maa$|virtuaalihevoset/maa/:any'); //Koodattavaa: Rotulistat
+
 //jalostus ja kasvatus alamenu
 $nav['kasvatus/kasvattajanimet'] = array('label' => 'Kasvattajanimirekisteri', 'parent_id' => 'kasvatus', 'active' => 'kasvatus/kasvattajanimet'); 
 $nav['kasvatus/kasvattajanimet/rekisteroi'] = array('label' => 'Rekisteröi kasvattajanimi', 'parent_id' => 'kasvatus/kasvattajanimet', 'active' => 'kasvatus/kasvattajanimet/omat');

@@ -5,6 +5,8 @@ class Virtuaalihevoset extends CI_Controller
     {
         parent::__construct();
 		$this->load->model("hevonen_model");
+        		$this->load->model("breed_model");
+
         $this->load->library('user_rights', array('groups' => $this->allowed_user_groups));
 
     }
@@ -432,10 +434,22 @@ class Virtuaalihevoset extends CI_Controller
 	}
 	
 	public function maa($id){
-		$vars = array();
-		$vars['title'] = "Syntymämaan statistiikka";
-		$vars['genders'] =  $this->hevonen_model->get_stats_country($id);
-		$this->fuel->pages->render('hevoset/stats', $vars);
+        $country = $this->hevonen_model->get_country($id);
+        
+        if(sizeof($country) < 1){
+            $this->fuel->pages->render('misc/naytaviesti', array('msg_type' => 'danger', 'msg' => 'Maakoodi on virheellinen.'));
+
+        }
+        else {   
+            $vars = array();
+            $img = site_url() . "/assets/images/flags/48x48/";
+            $img = '<img src="'.$img.$country['lyh'].'.png">';
+            $vars['title'] = "Syntymämaastatistiikka: " . $country['maa'] . " " . $img;
+            $vars['genders'] =  $this->hevonen_model->get_stats_country($id);
+            $vars['year_stats'] = $this->_year_stats_table($this->hevonen_model->get_stats_country_year_list($id));
+
+            $this->fuel->pages->render('hevoset/stats', $vars);
+        }
 		
 		
 	}
@@ -461,17 +475,41 @@ class Virtuaalihevoset extends CI_Controller
 		
 	}
 	
-	public function rotu($id){
+	public function rotu($id = null){
 		$vars = array();
-		$vars['title'] = "Rodun statsit";
-		$vars['genders'] =  $this->hevonen_model->get_stats_breed($id);
-		$this->fuel->pages->render('hevoset/stats', $vars);
+        
+        if(!isset($id)){
+            $this->fuel->pages->render('misc/naytaviesti', array('msg_type' => 'danger', 'msg' => 'Rotukoodi puuttuu.'));
+
+        }else {
+            $breed = $this->breed_model->get_breed_info($id);
+            
+            if(sizeof($breed) < 1){
+                $this->fuel->pages->render('misc/naytaviesti', array('msg_type' => 'danger', 'msg' => 'Rotukoodi on virheellinen.'));
+
+            }else {
+                $vars['title'] = "Rotu: " . $breed['rotu'];
+        
+                $vars['genders'] =  $this->hevonen_model->get_stats_breed($id);
+                $vars['puljut'] = $this->breed_model->get_breed_pulju($id, true);
+                $vars['year_stats'] = $this->_year_stats_table($this->hevonen_model->get_stats_breed_year_list($id));
+                $this->fuel->pages->render('hevoset/stats', $vars);
+            }
+        }
 		
 		
 	}
 	
-
-	
+    private function _year_stats_table($data, $title=null, $text = null){
+            $vars['title'] = $title;
+	        $vars['text_view'] = $text;
+            $vars['headers'][1] = array('title' => 'Vuosi', 'key' => 'year', 'key_link' => site_url('virtuaalihevoset/statistiikka/'));
+            $vars['headers'][2] = array('title' => 'Rekisteröityjä hevosia', 'key' => 'amount');
+            $vars['headers'] = json_encode($vars['headers']);
+                        
+            $vars['data'] = json_encode($data);
+            return $this->load->view('misc/taulukko', $vars, TRUE);
+    }
 	
 	
 	public function varit(){
@@ -493,21 +531,29 @@ class Virtuaalihevoset extends CI_Controller
 		
 	}
 	
-	public function vari($id){
+	public function vari($id = null){
 		$this->load->model("color_model");
 
-		$vars['genders'] =  $this->hevonen_model->get_stats_colour($id);
-		$vars['colour'] = $this->color_model->get_colour_info($id);		
+		$vars['colour'] = $this->color_model->get_colour_info($id);
+        
+        if(!isset($id) || sizeof($vars['colour']) < 1){
+            $this->fuel->pages->render('misc/naytaviesti', array('msg_type' => 'danger', 'msg' => 'Värikoodi on virheellinen.'));
+
+        }else {
+        $vars['genders'] =  $this->hevonen_model->get_stats_colour($id);
+
 		$vars['title'] = "Väri: " . $vars['colour']['vari'] . " (". $vars['colour']['lyhenne'] . ")";
 		
 		$vars['gene_lists'] = $this->color_model->get_genes_list($id);	
 		
+        $vars['year_stats'] = $this->_year_stats_table($this->hevonen_model->get_stats_color_year_list($id));
+
 		
 		$vars['other_data'] = array();
 		$vars['other_data'][] = $vars['text_view'] = $this->load->view('hevoset/geenit', $vars, TRUE);
 		
 		$this->fuel->pages->render('hevoset/stats', $vars);
-
+        }
 
 
 	}

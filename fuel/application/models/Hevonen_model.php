@@ -906,6 +906,52 @@ class Hevonen_model extends Base_module_model
         
     }
     
+    function get_stats_breed_year_list($breed){
+        
+        $this->db->select("COUNT(reknro) as amount, YEAR(rekisteroity) as year");
+        $this->db->group_by("YEAR(rekisteroity)");     
+        $this->db->from('vrlv3_hevosrekisteri');
+        $this->db->where('rotu', $breed);
+        
+        $query = $this->db->get();
+        
+        
+        return $query->result_array();
+
+        
+    }
+    
+    function get_stats_country_year_list($country){
+        
+        $this->db->select("COUNT(reknro) as amount, YEAR(rekisteroity) as year");
+        $this->db->group_by("YEAR(rekisteroity)");     
+        $this->db->from('vrlv3_hevosrekisteri');
+        $this->db->where('syntymamaa', $country);
+        
+        $query = $this->db->get();
+        
+        
+        return $query->result_array();
+
+        
+    }
+    
+    function get_stats_color_year_list($color){
+        
+        $this->db->select("COUNT(reknro) as amount, YEAR(rekisteroity) as year");
+        $this->db->group_by("YEAR(rekisteroity)");     
+        $this->db->from('vrlv3_hevosrekisteri');
+        $this->db->where('vari', $color);
+        
+        $query = $this->db->get();
+        
+        
+        return $query->result_array();
+
+        
+    }
+    
+    
     
 
     private function _get_suku_info($reknro){
@@ -932,6 +978,22 @@ class Hevonen_model extends Base_module_model
         if ($query->num_rows() > 0)
         {
             return $query->result_array();
+        }
+        
+        return array();
+                
+    }
+    
+    public function get_country($id){
+        
+        $this->db->select('id, maa, lyh');
+        $this->db->from('vrlv3_lista_maat');
+        $this->db->where('id', $id);
+        $query = $this->db->get();
+        
+        if ($query->num_rows() > 0)
+        {
+            return $query->result_array()[0];
         }
         
         return array();
