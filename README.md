@@ -10,12 +10,19 @@ Sitten voit halutessasi muokata sen vastaamaan omaa konfiguraatiotasi, mutta ÄL
 
 Kuvat, javascripta yms. sijoitetaan assets kansioon
 
-Alkuunsa luo tietokanta, ja aja sinne database kansion _schema.sql tiedostot seuraavassa järjestyksessä:
+Alkuunsa luo tietokanta, ja aja sinne database kansion .sql tiedostot seuraavassa järjestyksessä (älä aja muita tiedostoja):
 fuel_schema.sql
+
 listat_data_schema.sql 
+
 tunnukset_schema.sql
-tiedotukset_schema.sql
-tallirekisteri_schema.sql
+
+from_scratch_schema.sql
+
+from_scratch_insert.sql
+
+
+
 
 # FUEL CMS
 FUEL CMS is a [CodeIgniter](https://codeigniter.com) based content management system. To learn more about its features visit: http://www.getfuelcms.com
