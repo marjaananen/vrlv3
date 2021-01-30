@@ -382,10 +382,16 @@ class Hevonen_model extends Base_module_model
     
     function get_owners_horses($nro, $only_alive = false, $rotu = null)
     {
-        $this->db->select("h.reknro, h.nimi, r.lyhenne as rotu, IF(sukupuoli='1', 'tamma', IF(sukupuoli='2', 'ori', 'ruuna')) as sukupuoli, r.rotunro, syntymaaika, kuollut, h.porr_kilpailee, h.sakakorkeus, h.kotitalli, h.painotus");
+        $this->db->select("h.reknro, h.nimi, r.lyhenne as rotu, IF(sukupuoli='1', 'tamma', IF(sukupuoli='2', 'ori', 'ruuna')) as sukupuoli,
+                          IFNULL(kotitalli,'') as kotitalli, r.rotunro, syntymaaika, kuollut, h.porr_kilpailee, h.sakakorkeus, h.painotus as painotusid,
+                          t.nimi as tallinimi, p.painotus, r.rotunro");
         $this->db->from('vrlv3_hevosrekisteri as h');
         $this->db->join('vrlv3_hevosrekisteri_omistajat as o', 'h.reknro = o.reknro');
         $this->db->join("vrlv3_lista_rodut as r", "h.rotu = r.rotunro", 'left outer');
+        $this->db->join("vrlv3_lista_painotus as p", "h.painotus = p.pid", 'left outer');
+        $this->db->join("vrlv3_tallirekisteri as t", "t.tnro = h.kotitalli", 'left outer');
+
+
         if(isset($rotu)){
             $this->db->where('h.rotu', $rotu);
         }

@@ -580,7 +580,9 @@ class Tallit extends CI_Controller
 		$fields['nimi'] = array('type' => 'text', 'required' => TRUE, 'value' => $stable['nimi'], 'class'=>'form-control');
         $fields['kuvaus'] = array('type' => 'textarea', 'value' => $stable['kuvaus'], 'cols' => 40, 'rows' => 3, 'class'=>'form-control');
         $fields['osoite'] = array('type' => 'text', 'required' => TRUE, 'value' => $stable['url'], 'class'=>'form-control');
-		$fields['kategoria'] = array('type' => 'multi', 'mode' => 'checkbox', 'required' => TRUE, 'options' => $this->tallit_model->get_category_option_list(), 'value'=>$stable['kategoria'], 'class'=>'form-control', 'wrapper_tag' => 'li');
+		$fields['kategoria'] = array('type' => 'multi', 'mode' => 'checkbox', 'required' => TRUE,
+                                     'options' => $this->tallit_model->get_category_option_list(), 'value'=>$stable['kategoria'],
+                                     'class'=>'form-control', 'wrapper_tag' => 'li');
 
 
         //make edits depending on the mode

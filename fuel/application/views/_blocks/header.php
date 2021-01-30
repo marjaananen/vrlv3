@@ -58,9 +58,35 @@
 		<?php echo js('jqcloud.min.js'); ?>
 		<?php echo css('jqcloud.min.css'); ?>
 		<?php echo css('vrl.css'); ?>
+		<link rel="stylesheet" href="http://tiritomba.net/virtuaali/vrl/style.css" />
+
+		
 	</head>
 	<body>
 <header class="navbar navbar-default navbar-static-top" role="banner">
+	<div class="container-fluid login-area">
+    <div class="row">
+
+<?php
+
+if(!empty($this->ion_auth))
+	{
+		if ($this->ion_auth->logged_in())
+		{
+			//mitä tähän tulee?
+		}else {
+			print_login();
+		}
+	} else {
+		print_login();
+	}
+
+
+?></div>
+  </div>
+	
+	
+	
   <div class="container">
     <div class="navbar-header">
       <button class="navbar-toggle" type="button" data-toggle="collapse" data-target=".navbar-collapse">
@@ -156,10 +182,6 @@
 			  <p><?php echo form_submit('submit', "Kirjaudu");?></p>
 
 			<?php echo form_close();?>
-
-    			
-			
-			
 			
 			<?php
 			
@@ -170,3 +192,54 @@
       		</div>  
       		<div class="col-md-9">
 	<?php echo fuel_nav(array('render_type' => 'breadcrumb', 'container_tag_class' => 'breadcrumb', 'delimiter' => '&nbsp;', 'order' => 'desc', 'home_link' => 'Etusivu','depth'=>'3'));?>
+	
+	
+	<?php
+	
+	function print_login(){
+		$identity = [
+				'name' => 'identity',
+				'id' => 'identity',
+				'type' => 'text',
+				'value' => "",
+				'class' => 'form-control',
+			];
+
+			$password = [
+				'name' => 'password',
+				'id' => 'password',
+				'type' => 'password',
+				'class' => 'form-control',
+			];
+			
+			$hidden = array('url'=>current_url());
+			
+			
+				
+			echo form_open("auth/login", '', $hidden);?>
+
+			<div class="form-inline">
+          <div class="form-group">
+						<label for="identity" id="label_identity">Tunnus</label><?php echo form_input($identity);?>
+					</div>
+          <div class="form-group">
+						<label for="password" id="label_password">Salasana</label><?php echo form_input($password);?>
+					</div>
+					<div class="form-group">
+						<label for="remember" id="label_remember">Muista minut</label> <?php echo form_checkbox('remember', '1', FALSE, 'id="remember"');?> 
+					</div>
+			  <div class="form-group"><?php echo form_submit('submit', "Kirjaudu");?></div>
+
+			<?php echo form_close();?>
+			</div>
+
+    				
+			
+			<?php
+			
+			echo "<a href='" . site_url('/auth/forgot_password') . "'>Unohtuiko salasana?</a>";
+		}
+		
+		
+		
+	?>

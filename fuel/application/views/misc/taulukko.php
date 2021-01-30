@@ -91,13 +91,23 @@
                         } else if (headers[i].static_text != undefined) {
                             output = headers[i].static_text;
                         }else if (headers[i].checkbox_id != undefined){
-                            output = "<input type=\"checkbox\" name=\"" + headers[i].checkbox_id +"\" value=\"" + data[d][headers[i].key] +"\" >";
+                            output = "<input type=\"checkbox\" name=\"" + headers[i].checkbox_id +"[]\" value=\"" + data[d][headers[i].key] +"\" >";
                         } else {
                             output = prepend_text + formatValue(data[d][headers[i].key], headers[i].type);
                         }
                         
                         if (headers[i].key_link != undefined) {
-                            table += "<td><a href='" + headers[i].key_link + formatValue(data[d][headers[i].key], headers[i].type) + "'>" + output + "</a></td>"; //profiili linkatun arvon tulostus soluunsa
+                            if (headers[i].aggregated_by != undefined) {
+                                // kyseessä on aggregaatti kenttä joten tehdään erilliset linkit jokaiselle aggregoidulle arvolle
+                                const splitUrls = output.split(', ');
+                                table += "<td>";
+                                for (const split of splitUrls) {
+                                    table += "<a href='" + headers[i].key_link + split + "'>" + split + "</a><br/>"; //profiili linkatun arvon tulostus soluunsa
+                                }
+                                table += "</td>";
+                            } else {
+                                table += "<td><a href='" + headers[i].key_link + formatValue(data[d][headers[i].key], headers[i].type) + "'>" + output + "</a></td>"; //profiili linkatun arvon tulostus soluunsa
+                            }
                         } else if (headers[i].type === 'url') {
                             table += "<td><a href='" + formatValue(data[d][headers[i].key], headers[i].type) + "' target='_blank'>" + output + "</a></td>"; //profiili linkatun arvon tulostus soluunsa
                         }

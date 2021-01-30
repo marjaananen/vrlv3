@@ -161,35 +161,434 @@ class Virtuaalihevoset extends CI_Controller
 		return $this->load->view('misc/taulukko', $vars, TRUE);
     }
     
+    var $jaokset;
+    
     function omat(){
-        
         if(!($this->ion_auth->logged_in()))
         {
-            	$this->fuel->pages->render('misc/naytaviesti', array('msg_type' => 'danger', 'msg' => 'Kirjaudu sisään nähdäksesi hevosesi!'));
-        }else {
+            	$this->fuel->pages->render('misc/naytaviesti', array('msg_type' => 'danger', 'msg' => 'Kirjaudu sisään tarkastellaksesi omia hevosiasi!'));
+        } else {
+            $haku = array();
+            $settings = array();
+            $data = array();
+            $tunnus = $this->ion_auth->user()->row()->tunnus;
+            
+            //luetaan hakukentät
+            $this->_massatuho_read_search_input($haku, $settings);
+       
+       //     var_dump($this->input->post());
+            
+            //suorita operaatiot
+            $data['msg'] = "";
+            $data['msg_type'] = 'danger';
+            if($this->_massatuho_suorita($tunnus, $data['msg'])){
+               $data['msg_type'] = 'success';
+            }
 
-            $vars['title'] = "Omat hevoset";
             
-            $vars['msg'] = '';
+            //haetaan hevoset            
+            $horses =  $this->hevonen_model->get_owners_horses($tunnus, true);
+            $results =  $this->_massatuho_search($tunnus, $haku, $settings['sarakkeet'], $settings['massatuho']);
             
+            
+            //luodaan formi
+            $this->load->library('form_builder', array('submit_value'=>'Hae'));    
+            
+            $fields = array();
+            $this->_massatuho_setup_hakulomake($horses, $fields, array_merge($haku, $settings));
+            
+            if($settings['massatuho']){
+                $this-> _massatuho_setup_operations_form($tunnus, $fields);
+                $fields['hakutulokset_tulokset'] = array('type' => 'section', 'tag' => 'h3', 'label' => 'Hakutulokset',
+                                                         'before_html'=>'</div></div></div>', 'after_html'=>$results);
+            }else {
+                
+                
+                //kasataan hakutulokset
+                $fields['hakutulokset_tulokset'] = array('type' => 'section', 'tag' => 'h3', 'label' => 'Hakutulokset',
+                                                              'after_html'=>$results);
+            }
+            
+            $this->form_builder->form_attrs = array('method' => 'post', 'action' => site_url('/virtuaalihevoset/omat'));
+            $this->form_builder->css_class = 'form-inline';
+              
+                    
+            $data['form'] =  $this->form_builder->render_template('_layouts/basic_form_template', $fields);
+            
+            $data['title'] = "Omat hevoset";
+                        
             $vars['text_view'] = "";		
-        
-            
-                $vars['headers'][1] = array('title' => 'Rekisterinumero', 'key' => 'reknro', 'key_link' => site_url('virtuaalihevoset/hevonen/'), 'type'=>'VH');
-                $vars['headers'][2] = array('title' => 'Nimi', 'key' => 'nimi');
-                $vars['headers'][3] = array('title' => 'Rotu', 'key' => 'rotu');
-                $vars['headers'][4] = array('title' => 'Sukupuoli', 'key' => 'sukupuoli');
-                $vars['headers'][5] = array('title' => 'Editoi', 'key' => 'reknro', 'key_link' => site_url('virtuaalihevoset/muokkaa/'), 'image' => site_url('assets/images/icons/edit.png'));
-                
-                
-                $vars['headers'] = json_encode($vars['headers']);
-                            
-                $vars['data'] = json_encode($this->hevonen_model->get_owners_horses($this->ion_auth->user()->row()->tunnus));
-            
-            
-                $this->fuel->pages->render('misc/taulukko', $vars);
+            $this->fuel->pages->render('misc/haku', $data);
+
         }
+        
+    }
     
+    private function _massatuho_setup_hakulomake($horses, &$fields, $haku = array()){
+                $kotitalli_options = array();
+                $painotus_options = array();
+                $rotu_options = array();
+                $kuollut_options = array();
+                $leveled_options = array();
+                $this->_massatuho_options($horses, $kotitalli_options, $rotu_options, $painotus_options, $kuollut_options, $leveled_options);
+                $skp_options = $this->hevonen_model->get_gender_option_list();
+                $skp_options[-1] = "Ei väliä";
+                $kotitalli_options[-1] = "Ei väliä";
+                $painotus_options[-1] = "Ei väliä";
+                $rotu_options[-1] = "Ei väliä";
+                $kuollut_options[-1] = "Ei väliä";
+                $leveled_options[-1] = "Ei väliä";
+                
+                $fields['Hakukriteerit'] = array('type' => 'section', 'tag' => 'h3', 'label' => 'Hae hevosia');
+                $fields['rotu'] = array('type' => 'select', 'options' => $rotu_options, 'value' => $haku['rotu'] ?? '-1', 'class'=>'form-control');
+                $fields['painotus'] = array('type' => 'select', 'options' => $painotus_options, 'value' => $haku['painotus'] ?? '-1', 'class'=>'form-control');
+                $fields['kotitalli'] = array('type' => 'select', 'options' => $kotitalli_options, 'value' => $haku['kotitalli'] ?? '-1', 'class'=>'form-control');
+                $fields['sukupuoli'] = array('type' => 'select', 'options' => $skp_options, 'value' => $haku['sukupuoli'] ?? '-1', 'class'=>'form-control');
+                $fields['porr_kilpailee'] = array('label'=>"Kilpailee porrastetuissa", 'type' => 'select', 'options'=>$leveled_options, 'value'=>$haku['porr_kilpailee'] ?? -1, 'class'=>'form-control');
+                $fields['kuollut'] = array('type' => 'select', 'options'=>$kuollut_options, 'value'=>$haku['kuollut'] ?? 0, 'class'=>'form-control');
+                $fields['sarakkeet'] = array('label'=>'Hakutuloksissa näytettävät sarakkeet', 'type' => 'enum', 'mode' => 'radios', 'required' => TRUE,
+                                             'options' => array(1=>"perustiedot", 2=>"porrastettujen maksimit") , 'value'=>$haku['sarakkeet'] ?? 1, 'class'=>"form-check-input");
+                $fields['massatuho'] = array('label'=>'Näytä massakäsittelytoiminnot', 'type' => 'checkbox', 'checked' => $haku['massatuho'] ?? false, 'class'=>'form-control');
+                                $fields['hae'] = array('type' => 'submit', 'value' => 'Hae');
+
+
+    }
+    private function _massatuho_setup_operations_form($tunnus, &$fields){
+        $fields['operaatiot'] = array('type' => 'section', 'tag' => 'h3', 'label' => 'Massaoperaatiot valituille hevosille',
+                                              'before_html' => '</div></div><div class="panel panel-default">
+                                              <div class="panel-heading">Massatuhoase</div> <div class="panel-body"><div class="form-inline">');
+        $fields['lopeta'] = array('type' => 'submit', 'value' => 'Lopeta valitut');
+        $fields['porr_kylla'] = array('type' => 'submit', 'value' => 'Kilpailevat porrastetuissa');
+        $fields['porr_ei'] = array('type' => 'submit', 'value' => 'Eivät kilpaile porrastetuissa');
+        if(!isset($this->jaokset)){
+            $this->load->model('Jaos_model');
+            $this->jaokset = $this->Jaos_model->get_jaos_porr_list();
+        }
+        $fields['operaatiot2'] = array('type' => 'section', 'tag' => 'h3', 'label' => 'Maksimitasot', 'after_html'=>'<span class="form_comment">Nämä vaikuttavat hevosen näkymiseen kilpailulistalla. -1 estää hevosta näkymästä ko. lajin listalla. Kun hevonen ylittää tässä esitetyn maksimitasonsa,
+                                                       se ei näy enää kyseisen lajin listalla. Sillä voi silti kilpailla normaalien sääntöjen puitteissa. Jätä tyhjäksi jos et halua muokata kyseistä arvoa.</span>'
+);
+
+        foreach($this->jaokset as $jaos){
+            $fields[$jaos['id']] = array('label'=> 'Maksimitaso: ' . $jaos['lyhenne'], 'type' => 'select', 'options'=>array(-1=>'-1', 99=> "", 0=>0, 1=>1, 2=>2, 3=>3, 4=>4, 5=>5, 6=>6, 7=>7, 8=>8, 9=>9, 10=>10), 'value'=>99, 'class'=>'form-control');
+        }
+        $fields['tasot'] = array('type' => 'submit', 'value' => 'Muokkaa maksimitasoja');
+        
+        $fields['operaatiot3'] = array('type' => 'section', 'tag' => 'h3', 'label' => 'Muokkaa', 'before_html'=>'</div><div class="form">');
+        
+        
+        $this->load->model("Tallit_model");
+        $this->load->library("vrl_helper");
+        
+        $skill_options = $this->hevonen_model->get_skill_option_list();
+        $skill_options[-1] = "";
+        $fields['aseta_painotus'] = array('label'=>'Painotus', 'type' => 'select', 'options' => $skill_options, 'value' =>  -1, 'class'=>'form-control',
+                                          'after_html'=>'<span class="form_comment">Jätä tyhjäksi jos et halua muokata painotusta.</span>');
+        
+        
+        $tallilista  = $this->Tallit_model->get_users_stables($tunnus, false, true);
+        
+        $tallit = array();
+        foreach ($tallilista as $talli){
+           $tallit[$talli['tnro']] = $talli['tnro'];
+        }
+
+        $option_script = $this->vrl_helper->get_option_script('aseta_kotitalli', $tallit);
+        
+
+        $fields['aseta_kotitalli'] = array('label'=>'Kotitalli', 'type' => 'text', 'class'=>'form-control', 
+                                     'after_html'=> '<span class="form_comment">Jätä tyhjäksi jos et halua muokata kotitallia. Laita tunnus muodossa XXXX0000. Omat tallisi (klikkaa lisätäksesi): ' .
+                                    $option_script['list'] . '</span>' . $option_script['script']);
+        
+
+        $fields['aseta'] = array('type' => 'submit', 'value' => 'Muokkaa tietoja');
+
+
+
+        
+    }
+    private function _massatuho_read_search_input(&$haku = array(), &$settings = array()){
+        $haku = array();
+        $settings = array();
+        $this->_massatuho_clean_input('rotu', $haku, -1);
+        $this->_massatuho_clean_input('painotus', $haku, -1);
+        $this->_massatuho_clean_input('kotitalli', $haku, -1);
+        $this->_massatuho_clean_input('sukupuoli', $haku, -1);
+        $this->_massatuho_clean_input('porr_kilpailee', $haku, -1);
+        
+        if($this->input->post('kuollut')){
+            $haku['kuollut'] = 1;
+        }else {
+            $haku['kuollut'] = 0;
+        }
+        
+        if(!isset($haku['kuollut'])){
+            $haku['kuollut'] = 0;
+        }
+        
+        $settings['massatuho']=0;
+        $settings['sarakkeet'] = 1;
+            $this->_massatuho_clean_input('sarakkeet', $settings, -1);
+            if($this->input->post()){
+                if($this->input->post('massatuho')){
+                $settings['massatuho'] = $this->input->post('massatuho');
+                }
+                $settings['sarakkeet'] = $this->input->post('sarakkeet');
+            }
+
+    }
+    
+    private function _massatuho_search($user, $haku, $sarakkeet, $massatuho = false){
+        $where = array();
+        $leveled_list = false;
+        $basic_list = false;
+        
+        foreach ($haku as $key=>$value){
+            $where['h.'.$key] = $value;
+        }
+        
+        if($sarakkeet == 2){
+            $leveled_list = true;
+        }else {
+            $basic_list = true;
+        }
+        
+        $this->db->from('vrlv3_hevosrekisteri as h');
+
+        
+        if($basic_list){
+            $this->db->select("h.reknro, h.nimi, r.lyhenne as rotu, IF(sukupuoli='1', 'tamma', IF(sukupuoli='2', 'ori', 'ruuna')) as sukupuoli,
+                          IFNULL(kotitalli,'') as kotitalli, r.rotunro, syntymaaika, kuollut, h.porr_kilpailee, h.sakakorkeus, h.painotus as painotusid,
+                          t.nimi as tallinimi, IFNULL(p.painotus, '') AS painotus, r.rotunro");
+            $this->db->join("vrlv3_tallirekisteri as t", "t.tnro = h.kotitalli", 'left outer');
+
+        }else if($leveled_list){
+            $this->db->select("h.reknro, h.nimi, r.lyhenne as rotu, IF(sukupuoli='1', 't', IF(sukupuoli='2', 'o', 'r')) as sukupuoli, h.sakakorkeus,
+                              IFNULL(p.lyhenne, '') as painotus, k.jaos, k.taso_max, h.porr_kilpailee");
+            $this->db->join("vrlv3_hevosrekisteri_kisatiedot as k", "k.reknro = h.reknro", "left");
+
+        }
+        $this->db->join('vrlv3_hevosrekisteri_omistajat as o', 'h.reknro = o.reknro');
+        $this->db->join("vrlv3_lista_rodut as r", "h.rotu = r.rotunro", 'left outer');
+        $this->db->join("vrlv3_lista_painotus as p", "h.painotus = p.pid", 'left outer');
+
+        $this->db->where($where);
+        $this->db->where('o.omistaja', $user);
+        $query = $this->db->get();
+        
+        
+        $horses = array();
+        if ($query->num_rows() > 0)
+        {
+            $horses = $query->result_array();
+        
+        }
+        
+        $nro = 0;
+        if($massatuho){
+            $vars['headers'][1] = array('title' => '', 'key' => 'reknro', 'checkbox_id'=>'hevo');
+            $nro = 1;
+        }
+        
+		$vars['headers'][$nro + 1] = array('title' => 'VH', 'key' => 'reknro', 'key_link' => site_url('virtuaalihevoset/hevonen/'), 'type'=>'VH');
+        $vars['headers'][$nro + 2] = array('title' => 'Nimi', 'key' => 'nimi');
+        $vars['headers'][$nro + 3] = array('title' => 'Rotu', 'key' => 'rotu');
+        
+        $nro = $nro + 3;
+        
+        if($basic_list){
+            $vars['headers'][$nro + 1] = array('title' => 'Painotus', 'key' => 'painotus');
+            $vars['headers'][$nro + 2] = array('title' => 'Skp', 'key' => 'sukupuoli');
+            $vars['headers'][$nro + 3] = array('title' => 'Kotitalli', 'key' => 'kotitalli', 'key_link' => site_url('virtuaalitallit/talli/'));
+            $vars['headers'][$nro + 4] = array('title' => 'Kuollut', 'key' => 'kuollut', 'type'=>'bool');
+
+        }else if($leveled_list){
+            $vars['headers'][$nro + 1] = array('title' => 'Pai- notus', 'key' => 'painotus');
+            $vars['headers'][$nro + 2] = array('title' => 'Kisaa porr.', 'key' => 'porr_kilpailee', 'type'=>'bool');
+            $nro = $nro + 2;
+            
+            if(!isset($this->jaokset)){
+                $this->load->model('Jaos_model');
+                $this->jaokset = $this->Jaos_model->get_jaos_porr_list();
+                
+            }
+            $counter = 1;
+            foreach($this->jaokset as $jaos){
+                $vars['headers'][$nro + $counter] = array('title' => $jaos['lyhenne'], 'key' => $jaos['lyhenne']);
+                $counter = $counter + 1;
+            }
+            $nro = $nro + $counter -1;
+            $horses = $this->_massatuho_sort_leveled_list($horses, $this->jaokset);
+            
+        }
+        
+        if(!$massatuho){
+            $vars['headers'][$nro + 1] = array('title' => 'Edit', 'key' => 'reknro', 'key_link' => site_url('virtuaalihevoset/muokkaa/'), 'image' => site_url('assets/images/icons/edit.png'));
+        }
+                
+                
+        $vars['headers'] = json_encode($vars['headers']);                    
+        $vars['data'] = json_encode($horses);
+        
+        return $this->load->view('misc/taulukko', $vars, TRUE);
+            
+    }
+    
+    private function _massatuho_clean_input($input, &$data, $novalue = -1){
+        if($this->input->post($input) && $this->input->post($input) != $novalue){
+            $data[$input] = $this->input->post($input);
+        }
+    }
+    
+    private function _massatuho_options($horses, &$stables, &$breeds, &$sports, &$dead, &$leveled){
+        $stables = array();
+        $breeds = array();
+        $sports = array();
+        
+        $yesno = array (0=> "Ei", 1=> "Kyllä");
+        $dead = $yesno;
+        $leveled = $yesno;
+        
+        foreach ($horses as $horse){
+            if (isset($horse['kotitalli']) && !empty($horse['kotitalli'])){
+                $stables[$horse['kotitalli']] = $horse['tallinimi'] . " (".$horse['kotitalli'].")";
+            }
+            
+            if (isset($horse['painotusid']) && !empty($horse['painotusid'])){
+                $sports[$horse['painotusid']] = $horse['painotus'];
+            }
+            
+            if (isset($horse['rotunro']) && !empty($horse['rotunro'])){
+                $breeds[$horse['rotunro']] = $horse['rotu'];
+            }
+        }
+        
+    }
+    
+    private function _massatuho_sort_leveled_list($horses, $jaokset){
+        $jaos_list = array();
+        foreach ($jaokset as $jaos){
+            $jaos_list[$jaos['id']] = $jaos;
+        }
+        
+        $horses_list = array();
+        
+        foreach($horses as $horse){
+            if(!isset($horses_list[$horse['reknro']])){
+                $horses_list[$horse['reknro']] = $horse;
+            }
+            if(isset($jaos_list[$horse['jaos']])){
+                $horses_list[$horse['reknro']][$jaos_list[$horse['jaos']]['lyhenne']] = $horse['taso_max'] ?? 10;
+            }
+        }
+        
+        $horses_temp = array();
+        
+        foreach ($horses_list as $horse){
+            foreach ($jaokset as $jaos){
+                if(!isset($horse[$jaos['lyhenne']])){
+                    $horse[$jaos['lyhenne']] = 10;
+                }
+            }
+            $horses_temp[] = $horse;
+        }
+        
+        return $horses_temp;
+        
+        
+    }
+    
+    private function _massatuho_suorita($user, &$msg){
+        if($this->input->post() && ($this->input->post('lopeta') !== null
+                                    || $this->input->post('porr_kylla') !== null
+                                    || $this->input->post('porr_ei') !== null
+                                    || $this->input->post('aseta') !== null
+                                    || $this->input->post('tasot') !== null)){
+            if($this->input->post('hevo') && sizeof($this->input->post('hevo')) > 0){
+                $this->db->from('vrlv3_hevosrekisteri_omistajat as o');
+                $this->db->join('vrlv3_tunnukset', 'vrlv3_tunnukset.tunnus = o.omistaja');
+    
+                $this->db->where('o.omistaja', $user);
+                $this->db->where_in('o.reknro', $this->input->post('hevo'));
+                
+                $query = $this->db->get();
+                
+                $edited_list = array();
+                if ($query->num_rows() > 0)
+                {
+                    $this->load->library("vrl_helper");
+                    $horses = array();
+                    
+                    foreach($query->result_array() as $horse){
+                        $horses[] = $horse['reknro'];
+                        $edited_list[] = $this->vrl_helper->get_vh($horse['reknro']);
+                    }
+    
+                    $edit_data = array();
+                    if($this->input->post('lopeta') !== null){
+                        $edit_data['kuollut'] = 1;
+                        $edit_data['kuol_merkkasi'] = $user;
+                        $edit_data['kuol_pvm'] = date("Y-m-d");
+                    } else if($this->input->post('porr_kylla')){
+                        $edit_data['porr_kilpailee'] = 1;
+                    }else if($this->input->post('porr_ei')){
+                        $edit_data['porr_kilpailee'] = 0;
+                    }else if($this->input->post('aseta')){
+                        $painotus = $this->input->post('aseta_painotus');
+                        $kotitalli = $this->input->post('aseta_kotitalli');
+                        $this->load->model('Tallit_model');
+                        if(isset($kotitalli) && strlen($kotitalli) > 4 && $this->Tallit_model->is_tnro_in_use($kotitalli)){
+                        
+                            $edit_data['kotitalli'] = $kotitalli;
+                        }else {
+                                $msg = "Antamasi kotitallin tunnus on virheellinen.";
+                                return false;
+                        }
+                        
+                        
+                        if(isset($painotus) && strlen($painotus) > 0 && $painotus != -1){
+                            $this->load->model('Listat_model');
+                            if($this->Listat_model->skill_exists($painotus)){
+                                $edit_data['painotus'] = $painotus;
+                            }
+                        }
+                        
+                    }
+                    
+                    if(sizeof($edit_data) > 0){
+                        $this->db->where_in('reknro', $horses);
+                        if(isset($edit_data['kuollut']) && $edit_data['kuollut'] == 1){
+                            $this->db->where('kuollut', 0);
+                        }
+                        $this->db->update('vrlv3_hevosrekisteri', $edit_data);
+                        $msg = "Muokkaus onnistui! Seuraavia hevosia muokattiin: " . implode(', ', $edited_list);
+                        return true;
+                    }
+                    
+                    if($this->input->post('tasot') !== null){
+                        if(!isset($this->jaokset)){
+                            $this->load->model('Jaos_model');
+                            $this->jaokset = $this->Jaos_model->get_jaos_porr_list();
+                        }
+                        
+                        
+                        $msg = "Tasojen säädön koodaus on vielä kesken";
+                        return false;
+                    }
+                    
+                    return true;
+                } else {
+                    $msg = "Et valinnut yhtään hevosta.";
+                    return false;
+                }
+                
+            
+            }else {
+             $msg = "Et valinnut yhtään hevosta.";
+                    return false;
+            }
+        }
+        return true;
+        
     }
 
     function rekisterointi(){
@@ -650,7 +1049,7 @@ class Virtuaalihevoset extends CI_Controller
 
 		$fields['syntymamaa'] = array('type' => 'select', 'options' => $country_options, 'value' => $poni['syntymamaa'] ?? -1, 'class'=>'form-control');
         $this->load->model("Tallit_model");
-        $tallilista  = $this->Tallit_model->get_users_stables($this->ion_auth->user()->row()->tunnus);
+        $tallilista  = $this->Tallit_model->get_users_stables($this->ion_auth->user()->row()->tunnus, false, true);
         
         $tallit = array();
         foreach ($tallilista as $talli){
