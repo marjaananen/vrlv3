@@ -400,6 +400,7 @@ class Virtuaalihevoset extends CI_Controller
             $vars['headers'][$nro + 2] = array('title' => 'Skp', 'key' => 'sukupuoli');
             $vars['headers'][$nro + 3] = array('title' => 'Kotitalli', 'key' => 'kotitalli', 'key_link' => site_url('virtuaalitallit/talli/'));
             $vars['headers'][$nro + 4] = array('title' => 'Kuollut', 'key' => 'kuollut', 'type'=>'bool');
+            $nro = $nro+4;
 
         }else if($leveled_list){
             $vars['headers'][$nro + 1] = array('title' => 'Pai- notus', 'key' => 'painotus');
@@ -570,9 +571,65 @@ class Virtuaalihevoset extends CI_Controller
                             $this->jaokset = $this->Jaos_model->get_jaos_porr_list();
                         }
                         
+                        //luetaan arvot
+                        $values = array();
+                        foreach ($this->jaokset as $jaokset){
+                            $this->_massatuho_clean_input($jaokset['id'], $values, 99);
+                        }
                         
-                        $msg = "Tasojen säädön koodaus on vielä kesken";
-                        return false;
+                        if(sizeof($values) == 0){
+                            $msg = "Et asettanut yhtäkään kilpailutasoa muokattavaksi.";
+                            return false;
+                        }else {
+                        
+                            $this->db->select('*');
+                            $this->db->from('vrlv3_hevosrekisteri_kisatiedot');
+                            $this->db->where_in('reknro', $horses);
+                            $query = $this->db->get();
+                            
+                            $old_values = array();
+                            foreach($query->result_array() as $result){
+                                if(isset($oldvalues[$result['reknro']])){
+                                    $oldvalues[$result['reknro']][$result['jaos']] = $result['taso_max'];
+                                }else {
+                                    $oldvalues[$result['reknro']] = array($result['jaos'] => $result['taso_max']);
+                                }
+                                
+                            }
+                            
+                            $insert_values = array();
+                            $update_values = array();
+                            foreach ($horses as $horse){
+                                foreach ($values as $jaos=>$value){
+                                    if(isset($oldvalues[$horse][$jaos])){
+                                        if($oldvalues[$horse][$jaos] != $value){
+                                            if(!isset($update_values[$jaos])){
+                                                $update_values[$jaos] = array();
+                                            }
+                                            $update_values[$jaos][] = $horse;
+                                        } 
+                                    }else {
+                                        $insert_values[] =  array("reknro" => $horse, "jaos"=>$jaos, "taso_max"=>$value);
+                                    }
+                                }
+                                
+                            }
+                            
+                            if(sizeof($insert_values) > 0){
+                                $this->db->insert_batch('vrlv3_hevosrekisteri_kisatiedot', $insert_values);
+                            }
+                            if(sizeof($update_values) > 0){
+                                foreach ($update_values as $jaos => $horses_list){
+                                    if(sizeof($horses_list) > 0){
+                                        $this->db->where('jaos', $jaos);
+                                        $this->db->where_in('reknro', $horses_list);
+                                        $this->db->update('vrlv3_hevosrekisteri_kisatiedot', array("taso_max"=>$values[$jaos]));
+                                    }
+                                }
+                            }
+                        $msg = "Muokkaus onnistui! Seuraavia hevosia muokattiin: " . implode(', ', $edited_list);
+                        return true;
+                        }
                     }
                     
                     return true;
