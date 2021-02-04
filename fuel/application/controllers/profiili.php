@@ -37,6 +37,7 @@ class Profiili extends Loggedin_Controller
         $vars['hevoset_url'] = site_url() . '/virtuaalihevoset/omat';
         $vars['kasvattajanimet_url'] = site_url() . '/kasvatus/kasvattajanimet/omat';
         $vars['tunnus_url'] = site_url() . 'profiili/tunnus';
+        $vars['kasvatit_url'] = site_url(). 'kasvatus/kasvatit';
         
         
         $groups = $this->ion_auth->groups()->result_array();
@@ -56,6 +57,7 @@ class Profiili extends Loggedin_Controller
         $vars['stats']['kasvattajanimet'] = $this->kasvattajanimi_model->get_users_names_amount($user->tunnus);
         $vars['stats']['jaokset'] = $this->jaos_model->get_users_jaos($user->tunnus);
         $vars['stats']['puljut'] = $this->jaos_model->get_users_pulju($user->tunnus);
+        $vars['stats']['kasvatit'] = $this->hevonen_model->get_users_foals_full_amount($user->tunnus);
         
         $groups = $this->ion_auth->groups()->result_array();
         $currentGroups = $this->ion_auth->get_users_groups($user->id)->result_array();

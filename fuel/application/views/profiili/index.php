@@ -32,7 +32,13 @@
       <td><a href="<?php echo $kasvattajanimet_url;?>">Kasvattajanimet</a></td>
       <td><?php echo $stats['kasvattajanimet'];?> kpl</td>
    </tr>
+      <tr>
+      <td><a href="<?php echo $kasvatit_url;?>">Kasvatit</a></td>
+      <td><?php echo $stats['kasvatit'];?> kpl*</td>
+   </tr>
+   
 </table>
+<small><b>*</b> Yhteenlaskettu VRL-tunnukselle, omille talleille ja omille kasvattajanimille rekisteröidyistä hevosista. </small>
 
 <?php echo $vastuut;?>
 

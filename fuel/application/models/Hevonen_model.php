@@ -597,6 +597,57 @@ class Hevonen_model extends Base_module_model
     }
     
     
+     function get_users_foals_full_amount($user){
+            
+            $stables = array();
+            
+            
+            $this->db->select('vrlv3_tallirekisteri.tnro');
+            $this->db->from('vrlv3_tallirekisteri');
+            $this->db->join('vrlv3_tallirekisteri_omistajat', 'vrlv3_tallirekisteri.tnro = vrlv3_tallirekisteri_omistajat.tnro');
+            $this->db->where('omistaja', $user);
+            
+            $query = $this->db->get();
+            foreach($query->result_array() as $talli){
+                $stables[] = $talli['tnro'];
+            }
+            
+            $names = array();
+            
+            $this->db->select('vrlv3_kasvattajanimet.id');
+            $this->db->from('vrlv3_kasvattajanimet');
+            $this->db->join('vrlv3_kasvattajanimet_omistajat', 'vrlv3_kasvattajanimet.id = vrlv3_kasvattajanimet_omistajat.kid');
+            $this->db->where('vrlv3_kasvattajanimet_omistajat.tunnus', $user);
+            $query = $this->db->get();
+            
+            foreach($query->result_array() as $nimi){
+                $names[] = $nimi['id'];
+            }
+        
+            $this->db->select("Count(*) as kpl");        
+            $this->db->from('vrlv3_hevosrekisteri as h');    
+            $this->db->where('kasvattaja_tunnus', $user);
+            if(sizeof($stables)>0){
+            $this->db->or_where_in('kasvattaja_talli', $stables);
+            }
+            if(sizeof($names)>0){
+            $this->db->or_where_in('kasvattajanimi_id', $names);
+            }
+
+        
+        
+        
+        $query = $this->db->get();
+        
+        if ($query->num_rows() > 0)
+        {
+            return $query->result_array()[0]['kpl']; 
+        }
+        
+        return 0;
+    }
+    
+    
     function get_users_foals($user){
         $this->db->select("reknro, nimi, r.lyhenne as rotu, vari, sukupuoli, syntymaaika");        
         $this->db->from('vrlv3_hevosrekisteri as h');

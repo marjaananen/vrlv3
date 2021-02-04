@@ -24,8 +24,37 @@ class Kasvatus extends CI_Controller
       
         }
         else {
-            $this->pipari();
+
+            $this->load->model('hevonen_model');
+    
+            $vars['title'] = "Omat kasvatit";
+            
+            $vars['msg'] = '';
+            
+            
+            
+            $vars['text_view'] = "";		
+        
+        
+            
+                $vars['headers'][1] = array('title' => 'Rekisterinumero', 'key' => 'reknro', 'key_link' => site_url('virtuaalihevoset/hevonen/'), 'type'=>'VH');
+                $vars['headers'][2] = array('title' => 'Nimi', 'key' => 'nimi');
+                $vars['headers'][3] = array('title' => 'Syntymäaika', 'key' => 'syntymaaika', 'type'=>'date');
+                $vars['headers'][4] = array('title' => 'Rotu', 'key' => 'rotu');
+                $vars['headers'][5] = array('title' => 'Sukupuoli', 'key' => 'sukupuoli');
+                $vars['headers'][6] = array('title' => 'Kasvattajanimi', 'key' => 'kasvattajanimi');
+                $vars['headers'][7] = array('title' => 'Kasvattajan tunnus', 'key' => 'kasvattaja_tunnus', 'key_link' => site_url('tunnus/'));
+                $vars['headers'][8] = array('title' => 'Kasvattajatalli', 'key' => 'kasvattaja_talli', 'key_link' => site_url('virtuaalitallit/talli/'));
+                
+                $vars['headers'] = json_encode($vars['headers']);
+                            
+                $vars['data'] = json_encode($this->hevonen_model->get_users_foals_full($this->ion_auth->user()->row()->tunnus), true);
+            
+            
+                $this->fuel->pages->render('misc/taulukko', $vars);
         }
+	
+        
     }
     
     public function varijalostus(){
