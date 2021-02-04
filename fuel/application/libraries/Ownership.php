@@ -26,6 +26,25 @@ public function __construct()
                                        
     
     private $CI = NULL;
+	
+	private function _owner_names($taulu, $level){
+			$om = "pääomistaja";
+			$om2 = "haltija";
+		
+		if($taulu['t'] == 'vrlv3_kisat_jaokset'){
+			$om = "ylläpitäjä";
+			$om2 = "kalenterityöntekijä";
+		} else if ($taulu['t'] == 'vrlv3_puljut'){
+			$om = "ylläpitäjä";
+			$om2 = "työntekijä";
+		}
+		
+		if($level == 1){
+			return $om;
+		}else {
+			return $om2;
+		}
+	}
     
 //handling the owners
 
@@ -61,16 +80,9 @@ private function _handle_owners($taulu, $mode, $tapa, $adder, &$owner, $item, &$
     $msg ="";
     $type="";
 	
-	$om = "pääomistaja";
-	$om2 = "haltija";
+	$om = $this->_owner_names($taulu, 1);
+	$om2 = $this->_owner_names($taulu, 2);
 	
-	if($taulu['t'] == 'vrlv3_kisat_jaokset'){
-		$om = "ylläpitäjä";
-		$om2 = "kalenterityöntekijä";
-	} else if ($taulu['t'] == 'vrlv3_puljut'){
-		$om = "ylläpitäjä";
-		$om2 = "työntekijä";
-	}
     
     if($this->CI->input->server('REQUEST_METHOD') == 'POST'){
 
@@ -122,7 +134,13 @@ private function _handle_owners($taulu, $mode, $tapa, $adder, &$owner, $item, &$
     }
     
     else if ($tapa == "poista"){
-        if (!($mode == 'admin' || $this->_editor_permission($taulu, $adder, $item))){
+
+		if($this->CI->vrl_helper->vrl_to_number($owner) == $this->CI->ion_auth->user()->row()->tunnus){
+			$ok = $this->remove_me_from_horse($item, $msg);
+			if ($ok){ $type = "success"; $msg = "Poisto onnistui!";}
+            else {$type = "danger"; $msg = "Poisto epäonnistui. Ainutta ".$om."a ei saa poistaa.";}
+		}
+        else if (!($mode == 'admin' || $this->_editor_permission($taulu, $adder, $item))){
             $msg = "Sinulla ei ole oikeuksia muuttaa omistussuhteita.";
             $ok = false;
         }else {
@@ -139,6 +157,47 @@ private function _handle_owners($taulu, $mode, $tapa, $adder, &$owner, $item, &$
     
     }
     
+}
+
+	public function remove_me_from_horse($item, &$fields){
+        return $this->_remove_me ($item, $this->taulut['hev'], $fields);
+    }
+	
+	public function remove_me_from_stable($item, &$fields){
+        return $this->_remove_me ($item, $this->taulut['tal'], $fields);
+    }
+	
+	public function remove_me_from_name($item, &$fields){
+        return $this->_remove_me ($item, $this->taulut['kasv'], $fields);
+    }
+	
+	public function remove_me_from_jaos($item, &$fields){
+        $ok = $this->_remove_me ($item, $this->taulut['jaos'], $fields);	
+		$this->CI->load->model("Jaos_model");
+		$this->CI->Jaos_model->edit_jaos_user_rights($this->CI->ion_auth->user()->row()->tunnus);
+		return $ok;
+    }
+	
+	public function remove_me_from_pulju($item, &$fields){
+        $ok = $this->_remove_me ($item, $this->taulut['pulju'], $fields);	
+		$this->CI->load->model("Jaos_model");
+		$this->CI->Jaos_model->edit_pulju_user_rights($this->CI->ion_auth->user()->row()->tunnus);
+		return $ok;
+    }
+    
+private function _remove_me($item, $taulu, &$msg){
+	
+	$om = $this->_owner_names($taulu, 1);
+	$om2 = $this->_owner_names($taulu, 2);
+	
+	$owner = $this->CI->ion_auth->user()->row()->tunnus;
+	$this->CI->load->library("vrl_helper");
+    if(!$this->_del($taulu, $this->CI->vrl_helper->vrl_to_number($owner), $item)){
+		 $msg = "Poisto epäonnistui. Ainutta ".$om."a ei saa poistaa.";
+		return false;
+	}
+	
+	return true;
 }
  
 //Owners listing    

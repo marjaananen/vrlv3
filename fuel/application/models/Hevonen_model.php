@@ -54,10 +54,12 @@ class Hevonen_model extends Base_module_model
     {
         
         $hevonen = array();
-        $this->db->select("h.*, s.i_nro, s.e_nro");
+        $this->db->select("h.*, s.i_nro, s.e_nro, i.*, h.reknro as reknro");
         $this->db->where("h.reknro", $this->CI->vrl_helper->vh_to_number($reknro));
         $this->db->from('vrlv3_hevosrekisteri as h');
-        $this->db->join("vrlv3_hevosrekisteri_sukutaulut as s", "s.reknro = h.reknro", 'left outer');                
+        $this->db->join("vrlv3_hevosrekisteri_sukutaulut as s", "s.reknro = h.reknro", 'left outer');
+        $this->db->join("vrlv3_hevosrekisteri_ikaantyminen as i", "i.reknro = h.reknro", 'left outer');                
+
 
 
         $query = $this->db->get();
@@ -101,7 +103,8 @@ class Hevonen_model extends Base_module_model
     
     
     public function add_hevonen($hevonen, $tunnus, &$msg){
-              
+        unset ($hevonen['luin_saannot']);
+        
         $suku = array();
         if(isset($hevonen['i_nro'])){
             $suku['i_nro'] = $this->CI->vrl_helper->vh_to_number($hevonen['i_nro']);
@@ -112,12 +115,15 @@ class Hevonen_model extends Base_module_model
             unset($hevonen['e_nro']);
 
         }
+        
 
         
         $hevonen['syntymaaika'] = $this->CI->vrl_helper->normal_date_to_sql($hevonen['syntymaaika']);
         if (isset($hevonen['kuol_pvm'])){
             $hevonen['kuol_pvm'] = $this->CI->vrl_helper->normal_date_to_sql($hevonen['kuol_pvm']);
         }
+        
+        $ikaantymistiedot = $this->_birthday_dates($hevonen);
         
         $vh_nro = $this->db->where(array("YEAR(rekisteroity)"=> date("Y"), "rotu"=>$hevonen['rotu'] ))->count_all_results("vrlv3_hevosrekisteri");
         if($vh_nro >= 9999){
@@ -149,6 +155,7 @@ class Hevonen_model extends Base_module_model
 
         $hevonen['reknro'] = $this->CI->vrl_helper->vh_to_number($vh);
         $suku['reknro'] = $this->CI->vrl_helper->vh_to_number($vh);
+        
         
         //porrastettujen ominaisuudet
         $ominaisuudet = array();
@@ -196,6 +203,11 @@ class Hevonen_model extends Base_module_model
         $this->db->trans_start();
         $this->db->insert('vrlv3_hevosrekisteri', $hevonen);
         $this->add_owner_to_horse($hevonen['reknro'], $tunnus);
+        
+        if(sizeof($ikaantymistiedot)>0){
+            $ikaantymistiedot['reknro'] = $hevonen['reknro'];
+            $this->db->insert('vrlv3_hevosrekisteri_ikaantyminen', $ikaantymistiedot);
+        }
 
         if(sizeof($suku)>0){
             $this->db->insert('vrlv3_hevosrekisteri_sukutaulut', $suku);
@@ -226,7 +238,37 @@ class Hevonen_model extends Base_module_model
         
     }
     
+    private function _birthday_dates(&$hevonen){
+        $vuodet = array(3, 4, 5, 6, 7, 8);
+        $ikaantymistiedot = array();
+        if(isset($hevonen['ikaantyminen_d'])){
+            $ikaantymistiedot['ikaantyminen_d'] = $hevonen['ikaantyminen_d'];
+            unset($hevonen['ikaantyminen_d']);
+        }
+        if(isset($ikaantymistiedot['ikaantyminen_d']) && $ikaantymistiedot['ikaantyminen_d'] != 0){
+            foreach($vuodet as $vuosi){
+                $ikaantymistiedot[$vuosi.'vuotta'] = date('Y-m-d', strtotime($hevonen['syntymaaika']. ' + '.$vuosi*$ikaantymistiedot['ikaantyminen_d'].' days'));
+                unset($hevonen[$vuosi.'vuotta']);
+                                                           
+            }
+            
+            
+        }else {
+
+            foreach($vuodet as $vuosi){
+                if(isset($hevonen[$vuosi.'vuotta'])){
+                    $ikaantymistiedot[$vuosi.'vuotta'] = $this->CI->vrl_helper->normal_date_to_sql($hevonen[$vuosi.'vuotta']);    
+                    unset($hevonen[$vuosi.'vuotta']);
+                }
+                   
+            }
+        }
+        return $ikaantymistiedot;
+    }
+    
       public function edit_hevonen($hevonen, $vh, &$msg){
+        unset ($hevonen['luin_saannot']);
+
                   
         $hevonen['syntymaaika'] = $this->CI->vrl_helper->normal_date_to_sql($hevonen['syntymaaika']);
         if (isset($hevonen['kuol_pvm'])){
@@ -262,6 +304,13 @@ class Hevonen_model extends Base_module_model
             }
         
         }
+        
+        $ikaantymistiedot = $this->_birthday_dates($hevonen);
+        if(sizeof($ikaantymistiedot) > 0) {
+            $this->db->where('reknro', $reknro);
+            $this->db->update('vrlv3_hevosrekisteri_ikaantyminen', $ikaantymistiedot);
+        }
+
     
         $this->db->where('reknro', $reknro);
         $this->db->update('vrlv3_hevosrekisteri', $hevonen);
@@ -411,7 +460,7 @@ class Hevonen_model extends Base_module_model
     }
     
     
-    function get_owners_porrastettu_horses($nro, $rotu = null, $kotitalli = null, $minheight=null)
+    function get_owners_porrastettu_horses($nro, $rotu = null, $kotitalli = null, $minheight=null, $min_ika = null)
     {
         $this->db->select("h.reknro, h.nimi, rotu as rotunro, h.porr_kilpailee, h.sakakorkeus, h.kotitalli, h.painotus, i.*");
         $this->db->from('vrlv3_hevosrekisteri as h');
@@ -426,6 +475,18 @@ class Hevonen_model extends Base_module_model
         
         if(isset($kotitalli)){
             $this->db->where('h.kotitalli', $kotitalli);
+        }
+        
+        if(isset($min_ika)){
+            $vuodet = array(3,4,5,6,7,8);
+            
+            foreach($vuodet as $vuosi){
+                if($vuosi == $min_ika || $vuosi > $min_ika){
+                    
+                    $this->db->where('i.'.$vuosi.'vuotta <=', date("Y-m-d"));
+                    break;
+                }
+            }
         }
         
         if(isset($minheight)){
@@ -609,7 +670,7 @@ class Hevonen_model extends Base_module_model
     function get_horses_foals($nro)
     {
         $nro = $this->CI->vrl_helper->vh_to_number($nro);
-        $this->db->select("h.reknro, h.nimi, r.lyhenne as rotu, v.lyhenne as vari, sukupuoli, syntymaaika");
+        $this->db->select("h.reknro, h.nimi, r.lyhenne as rotu, v.lyhenne as vari, IF(sukupuoli='1', 'tamma', IF(sukupuoli='2', 'ori', 'ruuna')) as sukupuoli, syntymaaika");
         $this->db->from('vrlv3_hevosrekisteri as h');
         $this->db->join("vrlv3_lista_rodut as r", "h.rotu = r.rotunro", 'left outer');
         $this->db->join("vrlv3_lista_varit as v", "h.vari = v.vid", 'left outer');

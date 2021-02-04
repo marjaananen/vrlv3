@@ -722,14 +722,15 @@ class Virtuaalihevoset extends CI_Controller
         }      
 
 		if($sivu == 'omistajat'){
-
-			$this->load->library('ownership');
+            $this->load->library('ownership');
+            $this->ownership->handle_horse_ownerships($mode, $tapa, $this->ion_auth->user()->row()->tunnus, $id, $this->vrl_helper->vh_to_number($reknro), $data);
 			if($mode == 'admin' || $this->ownership->is_horses_main_owner($this->ion_auth->user()->row()->tunnus, $this->vrl_helper->vh_to_number($reknro))){				
-				$this->ownership->handle_horse_ownerships($mode, $tapa, $this->ion_auth->user()->row()->tunnus, $id, $this->vrl_helper->vh_to_number($reknro), $data);				
+								
 				$data['form'] = $this->ownership->get_owner_adding_form('virtuaalihevoset/muokkaa/'.$reknro.'/');
 				$data['ownership'] = $this->ownership->horse_ownerships($reknro, true, 'virtuaalihevoset/muokkaa/'.$reknro.'/');
 			} else {
 				$data['ownership'] = $this->ownership->horse_ownerships($reknro, false, 'virtuaalihevoset/muokkaa/'.$reknro.'/');
+                $data['delete_owner_url'] = 'virtuaalihevoset/muokkaa/'.$reknro.'/'.$sivu.'/poista/'.$this->ion_auth->user()->row()->tunnus;
 			}
             $this->fuel->pages->render('hevoset/hevonen_muokkaa', $data);
 
@@ -774,9 +775,13 @@ class Virtuaalihevoset extends CI_Controller
                         $data['editor'] = $this->_get_horse_edit_form($mode, $poni, $data['hevonen']['reknro']);
                         $this->fuel->pages->render('hevoset/hevonen_muokkaa', $data);
                     }
-                    else {                        
-                        $this->hevosprofiili($data['hevonen']['reknro']);
-                        return;
+                    else {
+                        if(is_horse_owner($this->ion_auth->user()->row()->tunnus, $this->vrl_helper->vh_to_number($data['hevonen']['reknro']))){
+                            $this->omat();
+                        }else {
+                            $this->hevosprofiili($data['hevonen']['reknro']);
+                            return;
+                        }
                     }
                 }
 
@@ -811,17 +816,20 @@ class Virtuaalihevoset extends CI_Controller
             $msg = "Virheellinen VH-tunnus";
             return false;
         }
+        
+        $reknro = $this->vrl_helper->vh_to_number($reknro);
 		
 		//are you admin or editor?
 		$this->load->library('user_rights', array('groups' => $this->allowed_user_groups));
 		
 		//only admin, editor and owner can edit
-		if(!($this->ion_auth->is_admin()) && !$this->user_rights->is_allowed() && !($this->hevonen_model->is_horse_owner($this->ion_auth->user()->row()->tunnus, $reknro))){
+		if(!($this->ion_auth->is_admin()) && !$this->user_rights->is_allowed()
+           && !($this->hevonen_model->is_horse_owner($this->ion_auth->user()->row()->tunnus, $reknro))){
 			$msg = "Jos et ole ylläpitäjä, voit muokata vain omia hevosiasi.";
 			return false;
 		}
 		
-		//does the stable exist?
+		//does the horse exist?
 		$this->load->library("vrl_helper");
 		if(!$this->hevonen_model->onko_tunnus($this->vrl_helper->vh_to_number($reknro))){
 			$msg = "Hevosta ei ole olemassa.";
@@ -1099,12 +1107,12 @@ class Virtuaalihevoset extends CI_Controller
         
         $fields['lisatiedot'] = array('type'=>'hidden', 'before_html' => '</div></div></div><div class="panel panel-default"><div class="panel-heading">Lisätiedot (ei pakollisia)</div> <div class="panel-body"><div class="form-group">');
         
-        $fields['sakakorkeus'] = array('type' => 'text', 'class'=>'form-control', 'value'=> $poni['sakakorkeus'] ?? '', 'after_html' => '<span class="form_comment">Säkäkorkeus numeroina (senttimetreinä)</span>');
-        $fields['vari'] = array('type' => 'select', 'options' => $color_options,  'value'=> $poni['vari'] ?? '-1', 'class'=>'form-control','after_html' => '<span class="form_comment">Jos toivomasi väri ei löydy listalta, ole yhteydessä ylläpitoon.</span>');
+        $fields['sakakorkeus'] = array('label'=>'Säkäkorkeus', 'type' => 'text', 'class'=>'form-control', 'value'=> $poni['sakakorkeus'] ?? '', 'after_html' => '<span class="form_comment">Säkäkorkeus numeroina (senttimetreinä)</span>');
+        $fields['vari'] = array('label'=>'Väri', 'type' => 'select', 'options' => $color_options,  'value'=> $poni['vari'] ?? '-1', 'class'=>'form-control','after_html' => '<span class="form_comment">Jos toivomasi väri ei löydy listalta, ole yhteydessä ylläpitoon.</span>');
 		$fields['painotus'] = array('type' => 'select', 'options' => $skill_options, 'value' =>  $poni['painotus'] ?? -1, 'class'=>'form-control');
         $fields['porr_kilpailee'] = array('label'=>'Kilpailee porrastetuissa', 'type' => 'checkbox', 'checked' => $poni['porr_kilpailee'] ?? false, 'class'=>'form-control');
 
-		$fields['syntymamaa'] = array('type' => 'select', 'options' => $country_options, 'value' => $poni['syntymamaa'] ?? -1, 'class'=>'form-control');
+		$fields['syntymamaa'] = array('label'=>'Syntymämaa', 'type' => 'select', 'options' => $country_options, 'value' => $poni['syntymamaa'] ?? -1, 'class'=>'form-control');
         $this->load->model("Tallit_model");
         $tallilista  = $this->Tallit_model->get_users_stables($this->ion_auth->user()->row()->tunnus, false, true);
         
@@ -1132,8 +1140,21 @@ class Virtuaalihevoset extends CI_Controller
         $fields['i_nro'] = array('type' => 'text', 'label'=> 'Isän rekisterinumero','class'=>'form-control', 'value'=> $poni['i_nro'] ?? '', 'class'=>'form-control', 'after_html' => '<span class="form_comment">Isän rekisterinumero.</span>');
         $fields['e_nro'] = array('type' => 'text', 'label'=> 'Emän rekisterinumero', 'class'=>'form-control', 'value'=> $poni['e_nro'] ?? '', 'class'=>'form-control', 'after_html' => '<span class="form_comment">Emän rekisterinumero. </span>');
         
-        $fields['end'] = array('type'=>'hidden', 'after_html' => '</div>');
+        
+        
+        $fields['syntymajat'] = array('type'=>'hidden', 'before_html' => '</div></div></div><div class="panel panel-default">
+                                      <div class="panel-heading">Syntymäpäivät (tarpeellisia porrastetuissa kilpaileville)</div> <div class="panel-body"><div class="form-group">');
 
+        
+        $this->_horse_birthdays_form_fields($fields, $poni);
+        
+        
+        $fields['end'] = array('type'=>'hidden', 'after_html' => '</div>');
+        if($type == 'new' || $type == 'edit'){
+            $fields['luin_saannot'] = array('label'=>"Olen lukenut säännöt, ja hevoseni sivuilla lukee selvästi että kyseessä on virtuaalihevonen!", 'type' => 'checkbox',
+                                            'after_html' => '<span class="form_comment">Uusia hevosia valvotaan, ja sääntöjä noudattamattomat voidaan poistaa rekisteristä!
+                                        </span>', 'class'=>'form-control');
+        }
         
         //uusi tai admin
         $submit = array();
@@ -1149,6 +1170,25 @@ class Virtuaalihevoset extends CI_Controller
 
 	}
     
+    private function _horse_birthdays_form_fields(&$fields, $poni = array()){
+   
+        $vuodet = array("3", "4", "5", "6", "7", "8");
+        foreach($vuodet as $vuosi){
+            $value = null;
+            if(isset($poni[$vuosi.'vuotta'])){
+                $value = $this->vrl_helper->sql_date_to_normal($poni[$vuosi.'vuotta']);
+            }
+            $fields[$vuosi.'vuotta'] = array('type' => 'text', 'label'=>$vuosi. ' vuotta', 'class'=>'form-control',
+                                           'required' => FALSE, 'value'=> $value ?? '',
+                                           'after_html' => '<span class="form_comment">Muodossa pp.kk.vvvv</span>');
+        }
+        
+        $fields['ikaantyminen_d'] = array('label' => 'Ikääntyminen (päivissä)', 'type' => 'number', 'value' => $poni['ikaantyminen_d'] ?? 0,
+                                          'class'=>'form-control', 'represents' => 'int|smallint|mediumint|bigint', 'negative' => FALSE, 'decimal' => FALSE,
+                                           'after_html' => '<span class="form_comment">Montako päivää hevosen yksi vuosi kestää. Mikäli tämä on asetettu, syntymäpäivät lasketaan tämän perusteella. </span>');    
+
+    }
+    
     private function _validate_horse_form($type = 'new'){
         $this->load->library('form_validation');
         
@@ -1156,12 +1196,10 @@ class Virtuaalihevoset extends CI_Controller
             $this->form_validation->set_rules('skp', 'Sukupuoli', 'min_length[1]|max_length[2]|numeric|required');
             $this->form_validation->set_rules('rotu', 'Rotu', 'min_length[1]|max_length[4]|numeric|required');
             $this->form_validation->set_rules('nimi', 'Nimi', "min_length[4]|max_length[80]|required");
-            $this->form_validation->set_rules('syntymaaika', 'Syntymäaika', 'min_length[10]|max_length[10]|required');
         }
       
 		$this->form_validation->set_rules('url', 'Url', 'min_length[1]|max_length[360]');
         $this->form_validation->set_rules('kuollut', 'Kuolintieto', 'min_length[1]|max_length[1]|numeric');
-        $this->form_validation->set_rules('kuol_pvm', 'Kuolinpäivä', 'min_length[10]|max_length[10]');
         $this->form_validation->set_rules('sakakorkeus', 'Säkäkorkeus', 'min_length[2]|max_length[3]|numeric');
         $this->form_validation->set_rules('painotus', 'Painotus', 'min_length[1]|max_length[3]|numeric');
 		$this->form_validation->set_rules('vari', 'Väri', 'min_length[1]|max_length[4]|numeric');
@@ -1181,6 +1219,7 @@ class Virtuaalihevoset extends CI_Controller
             $poni['sukupuoli'] = $this->input->post('skp');
             $poni['syntymaaika'] = $this->input->post('syntymaaika');
         }
+        $poni['luin_saannot'] = $this->input->post('luin_saannot');
         $poni['url'] = $this->input->post('url');
         $poni['kuollut'] = $this->input->post('kuollut');
         if ($poni['kuollut'] == null){
@@ -1227,6 +1266,18 @@ class Virtuaalihevoset extends CI_Controller
         if($this->input->post('e_nro')){
             $poni['e_nro'] = $this->input->post('e_nro');
         }
+        
+        $vuodet = array("3", "4", "5", "6", "7", "8");
+        foreach($vuodet as $vuosi){
+            if($this->input->post($vuosi."vuotta")){
+            $poni[$vuosi."vuotta"] = $this->input->post($vuosi."vuotta");
+            }
+        }
+        
+        if($this->input->post('ikaantyminen_d')){
+            $poni['ikaantyminen_d'] = $this->input->post('ikaantyminen_d');
+        }
+        
         return $poni;
     }
     private function _validate_horse($type, $poni, &$msg){
@@ -1234,6 +1285,10 @@ class Virtuaalihevoset extends CI_Controller
         $this->load->model('Listat_model');
         $this->load->model('tallit_model');
         $genders = $this->hevonen_model->get_gender_option_list();
+        if(($type == 'new' || $type == 'edit') && (!isset($poni['luin_saannot']) || $poni['luin_saannot'] == 0)){
+            $msg = "Muistathan lukea säännöt ennen hevosen rekisteröintiä!.";
+                return false;
+        }
         if($type == 'new' || $type == 'admin'){ 
             
             if (!isset($poni['rotu']) || !$this->Listat_model->breed_exists($poni['rotu'])){
@@ -1292,8 +1347,18 @@ class Virtuaalihevoset extends CI_Controller
                  && $this->tunnukset_model->onko_tunnus($this->vrl_helper->vrl_to_number($poni['kasvattaja_tunnus'])))){
             $msg = "Kasvattajan VRL-tunnus on virheellinen.";
             return false;
-        }
+        }else if(!isset($poni['ikaantyminen_d']) || $poni['ikaantyminen_d'] == 0){
+            $vuodet = array("3", "4", "5", "6", "7", "8");
+            foreach($vuodet as $vuosi){
+                if(isset($poni[$vuosi."vuotta"]) && !$this->vrl_helper->validateDate($poni[$vuosi."vuotta"])){
+                        $msg = "Porrastettuja varten kirjatuissa syntymäpäivissä on virhe.";
+                        return false;
+                    
+                }
+            }
+        
                         
+        }
         return true;
     }
     
@@ -1360,7 +1425,7 @@ class Virtuaalihevoset extends CI_Controller
         }
         
         if(isset($new['kuollut']) && $new['kuollut'] && !$old['kuollut'] ){
-            $hevonen['kuol_merkkasi'] = $this->ion_auth->user()->row()->tunnus();
+            $hevonen['kuol_merkkasi'] = $this->ion_auth->user()->row()->tunnus;
         }
         
         return true;

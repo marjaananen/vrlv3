@@ -359,15 +359,18 @@ class Kilpailutoiminta extends CI_Controller
             $rotu = null;
             $talli = null;
             $minheight = null;
+            $min_ika = null;
             if($sort['rotu'] > 0){
                 $rotu = $sort['rotu'];
             }if($sort['talli'] != "-1"){
                 $talli = $sort['talli'];
             }if($sort['minheight'] > 10){
                 $minheight = $sort['minheight'];
+            }if($sort['min_ika'] > -1){
+                $min_ika = $sort['min_ika'];
             }
             
-            $vars['hevoset'] = $this->Hevonen_model->get_owners_porrastettu_horses($this->ion_auth->user()->row()->tunnus, $rotu, $talli,$minheight);
+            $vars['hevoset'] = $this->Hevonen_model->get_owners_porrastettu_horses($this->ion_auth->user()->row()->tunnus, $rotu, $talli,$minheight, $min_ika);
             
             
             
@@ -431,7 +434,7 @@ class Kilpailutoiminta extends CI_Controller
         $this->load->library('form_builder', array('submit_value' => 'Suodata'));
       
         $rodut_options = array(-1 =>"Kaikki rodut");
-    
+        $vuodet_options = array(-1 =>"Kaikki", 3=>"3v", 4=>"4v", 5=>"5v", 6=>"6v", 7=>"7v", 8=>"8v");    
         foreach ($rodut as $rotu){
             $rodut_options[$rotu['rotunro']] = $rotu['lyhenne'];
         }
@@ -449,6 +452,8 @@ class Kilpailutoiminta extends CI_Controller
                                     'options' => array("0"=>"Ei jaottelua painotuksen mukaan", "1"=> "Jaottele painotuksen mukaan"),
                                     'value' => $result['painotus'] ?? 0);
         $fields['talli'] = array('type' => 'select', 'options' => $tallit_options, 'value' => $result['talli'] ?? -1, 'class'=>'form-control');
+        $fields['min_ika'] = array('label'=>'Minimi ikä', 'type' => 'select', 'options' => $vuodet_options, 'value' => $result['min_ika'] ?? -1, 'class'=>'form-control');
+
         $fields['minheight'] = array('label' => 'Minimisäkäkorkeus', 'type' => 'number', 'value' => $result['minheight'] ?? 0, 'class'=>'form-control', 'represents' => 'int|smallint|mediumint|bigint', 'negative' => FALSE, 'decimal' => FALSE);    
 
   
@@ -464,6 +469,7 @@ class Kilpailutoiminta extends CI_Controller
         $sort_values['painotus'] = 0;
         $sort_values['talli'] = -1;
         $sort_values['minheight'] = 10;
+        $sort_values['min_ika'] = -1;
         
         if($this->input->post('rotu')){
             $sort_values['rotu'] =  $this->input->post('rotu');
@@ -477,7 +483,9 @@ class Kilpailutoiminta extends CI_Controller
         if($this->input->post('minheight')){
             $sort_values['minheight'] =  $this->input->post('minheight');
         }
-        
+        if($this->input->post('min_ika')){
+            $sort_values['min_ika'] =  $this->input->post('min_ika');
+        }
         return $sort_values;
 
     }

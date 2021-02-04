@@ -106,8 +106,12 @@ class Vrl_helper {
   }
   
   public function sql_date_to_normal($date){
-    $oDate = new DateTime($date);
-    return $oDate->format("d.m.Y");
+    if($date == '0000-00-00'){
+      return "";
+    }else {
+      $oDate = new DateTime($date);
+      return $oDate->format("d.m.Y");
+    }
   }
   
   public function normal_date_to_sql($date){
