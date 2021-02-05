@@ -18,7 +18,7 @@ class Hevonen_model extends Base_module_model
         
         $hevonen = array();
         $this->db->select("reknro, h.nimi as h_nimi, r.rotu as h_rotunimi, sukupuoli, sakakorkeus, syntymaaika, v.vari as h_varinimi, p.painotus as h_painotusnimi, syntymamaa, h.url as h_url, rekisteroity,
-                          kotitalli, t.url as t_url, t.nimi as t_nimi, kuollut, kuol_pvm, rotunro, maa, vid, pid, kasvattajanimi, kasvattajanimi_id, kasvattaja_tunnus, kasvattaja_talli");
+                          kotitalli, t.url as t_url, t.nimi as t_nimi, kuollut, kuol_pvm, rotunro, maa, vrlv3_lista_maat.id as maaid, vid, pid, kasvattajanimi, kasvattajanimi_id, kasvattaja_tunnus, kasvattaja_talli");
         $this->db->where("reknro", $this->CI->vrl_helper->vh_to_number($reknro));
 
         $this->db->from('vrlv3_hevosrekisteri as h');

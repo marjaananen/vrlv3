@@ -41,6 +41,18 @@ if(isset($hevonen['kasvattaja_tunnus'])){
     
 }
 
+$kotitallitieto = "-";
+
+if(isset($hevonen['kotitalli'])){
+ $kotitallitieto = '<a href="'. site_url('tallit/talli/'.$hevonen['kotitalli']).'">'.$hevonen['t_nimi'].'</a> ('.$hevonen['kotitalli'].')';
+}
+
+$maatieto = "";
+if(isset($hevonen['maa'])) {
+ $maatieto = ', <a href="'. site_url('virtuaalihevoset/maa/'.$hevonen['maaid']).'">'.$hevonen['maa'].'</a>';
+
+ }
+
 
     
 ?>
@@ -51,7 +63,9 @@ if(isset($hevonen['kasvattaja_tunnus'])){
 <h2><?=$hevonen['h_nimi']?> (<?=$hevonen['reknro']?>)</h2>
 
 <?php if($hevonen['kuollut']) : ?>
-    <h3>Tämä hevonen on kuollut <?=$hevonen['kuol_pvm']?>.</h3>
+
+    <div class="alert alert-warning">
+      <span class="glyphicon glyphicon-info-sign"></span> Tämä hevonen on kuollut <?=$hevonen['kuol_pvm']?>.</span></div>
 <?php endif; ?>
 
 <?php if (isset($palkinnot) && sizeof($palkinnot) > 0){
@@ -59,29 +73,28 @@ if(isset($hevonen['kasvattaja_tunnus'])){
  echo '<div class="col-xs-12 col-md-8">';
 }
 
-else {
- echo '<div class="container">';
-}
 
 ?>
-  
-    <p><b>Rotu:</b> <?=$hevonen['h_rotunimi']?></p>
-    <p><b>Sukupuoli:</b> <?=$hevonen['sukupuoli']?></p>
-    <p><b>Säkäkorkeus:</b> <?=$hevonen['sakakorkeus']?>cm</p>
-    <p><b>Syntymäaika:</b> <?=$hevonen['syntymaaika']?>, <?=$hevonen['maa']?></p>
-    <p><b>Väri:</b> <?=$hevonen['h_varinimi']?></p>
-    <p><b>Painotus:</b> <?=$hevonen['h_painotusnimi']?></p>
-    <p><b>Url:</b> <a href="<?=$hevonen['h_url']?>"><?=$hevonen['h_url']?></a></p>
-    <p><b>Rekisteröity:</b> <?=$hevonen['rekisteroity']?></p>
-    <p><b>Kotitalli:</b> <a href="<?php echo site_url('tallit/talli/'.$hevonen['kotitalli'])?>"><?=$hevonen['kotitalli']?></a></p>
-    <p><b>Kasvattajanimi:</b> <?php echo $kasvattajanimitieto; ?></p>
-    <p><b>Kasvattaja:</b> <?php echo $kasvattajatieto; ?></p>
-    <p><b>Omistajat:</b> <?php echo $omistajatieto; ?></p>
-</div>
+
+<table class="table table-striped">
+   <tr><th scope="row">Rotu</th><td> <a href="<?php echo site_url().'/virtuaalihevoset/rotu/'.$hevonen['rotunro'];?>"><?=$hevonen['h_rotunimi']?></a></td></tr>
+   <tr><th scope="row">Sukupuoli</th><td> <?=$hevonen['sukupuoli']?></td></tr>
+   <tr><th scope="row">Säkäkorkeus</th><td> <?=$hevonen['sakakorkeus']?> cm</td></tr>
+   <tr><th scope="row">Syntynyt</th><td> <?=$hevonen['syntymaaika']?><?=$maatieto;?></td></tr>
+   <tr><th scope="row">Väri</th><td> <a href="<?php echo site_url().'/virtuaalihevoset/vari/'.$hevonen['vid'];?>"><?=$hevonen['h_varinimi']?></a></td></tr>
+   <tr><th scope="row">Painotus</th><td> <?php if (isset($hevonen['painotusnimi'])) { echo $hevonen['painotusnimi']; } else {echo "-";}?></td></tr>
+   <tr><th scope="row">Sivut</th><td> <a href="<?=$hevonen['h_url']?>"><?=$hevonen['h_url']?></a></td></tr>
+   <tr><th scope="row">Rekisteröity</th><td> <?=$hevonen['rekisteroity']?></td></tr>
+   <tr><th scope="row">Kotitalli</th><td> <?php echo $kotitallitieto; ?></td></tr>
+   <tr><th scope="row">Kasvattajanimi</th><td> <?php echo $kasvattajanimitieto; ?></td></tr>
+   <tr><th scope="row">Kasvattaja</th><td> <?php echo $kasvattajatieto; ?></td></tr>
+   <tr><th scope="row">Omistajat</th><td> <?php echo $omistajatieto; ?></td></tr>
+</table>
+ 
 
 <?php
 if (isset($palkinnot) && sizeof($palkinnot) > 0){
- echo '<div class="col-xs-6 col-md-4">';
+ echo '</div><div class="col-xs-6 col-md-4">';
  
  
  foreach ($palkinnot as $palkinto){
