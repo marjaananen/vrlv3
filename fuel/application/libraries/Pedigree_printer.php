@@ -8,7 +8,7 @@ class Pedigree_printer {
   var $multiples = array();
 
  public function createPedigree($pedigree, $max = 4) {
-  $this->_handle_multiples($pedigree);
+  $this->_handle_multiples($pedigree, $max);
 		
 		$rowspan = (pow(2, $max)); 
 
@@ -25,16 +25,18 @@ class Pedigree_printer {
 		print	'</table>'."\n";
 	}
  
- private function _handle_multiples($pedigree){
+ private function _handle_multiples($pedigree, $max){
   $horses = array();
   $multiples = array();
-  foreach($pedigree as $horse){
-   if(isset($horse['reknro'])){
-    if(array_search($horse['reknro'], $horses) && !isset($multiples[$horse['reknro']])){
-     $multiples[$horse['reknro']] = $this->colours[sizeof($multiples)];
-    }else {
-      $horses[] = $horse['reknro'];
-
+  foreach($pedigree as $id=>$horse){
+   if(strlen($id) <= $max){
+    if(isset($horse['reknro'])){
+     if(array_search($horse['reknro'], $horses) && !isset($multiples[$horse['reknro']])){
+      $multiples[$horse['reknro']] = $this->colours[sizeof($multiples)];
+     }else {
+       $horses[] = $horse['reknro'];
+ 
+     }
     }
    }
   }
