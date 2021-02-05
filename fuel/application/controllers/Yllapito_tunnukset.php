@@ -374,7 +374,7 @@ class Yllapito_tunnukset extends CI_Controller
             $vars['headers'] = json_encode($vars['headers']);
             if($tapa == 'tunnus' && $this->input->post('tunnushaku')){
                 if($this->vrl_helper->check_vrl_syntax($this->input->post('tunnus'))){
-                    $latest_logins = $this->tunnukset_model->get_latest_logins($this->vrl_helper->vrl_to_number($this->input->post('tunnus')), 20);
+                    $latest_logins = $this->tunnukset_model->get_latest_logins($this->vrl_helper->vrl_to_number($this->input->post('tunnus')), 1000);
                 
                     $vars['data'] = json_encode($latest_logins);            
                     $data['tulokset'] = $this->load->view('misc/taulukko', $vars, TRUE);
@@ -386,7 +386,7 @@ class Yllapito_tunnukset extends CI_Controller
             }
             
             else if($tapa == 'ip' && $this->input->post('iphaku')){
-                $latest_logins = $this->tunnukset_model->get_logins_by_ip($this->input->post('ip'), 20);
+                $latest_logins = $this->tunnukset_model->get_logins_by_ip($this->input->post('ip'), 1000);
                 
                 $vars['data'] = json_encode($latest_logins);            
                 $data['tulokset'] = $this->load->view('misc/taulukko', $vars, TRUE);

@@ -347,7 +347,6 @@ class Tunnukset_model extends Base_module_model
         $this->db->order_by("aika", "desc");
         $this->db->limit($limit);
         $query = $this->db->get();
-        echo $this->db->last_query();
 
         
         if ($query->num_rows() > 0)

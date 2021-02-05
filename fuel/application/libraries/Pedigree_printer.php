@@ -4,9 +4,11 @@ class Pedigree_printer {
   
   var $table_id = "sukutaulu";
   var $td_class = "sukutk";
-
+  var $colours = array('#FFDFD3', '#E2F0CB', '#C7CEEA', '#ECE4D0', ' #BCE0F0', '#DAE795', '#FBFBCC', '#F8E3EB', '#A8C1C6', '#D2C3C3', '#E7E3E0', '#F8C8A5', '#F6FFE5', '#BFEADC', '#E4FFFF');
+  var $multiples = array();
 
  public function createPedigree($pedigree, $max = 4) {
+  $this->_handle_multiples($pedigree);
 		
 		$rowspan = (pow(2, $max)); 
 
@@ -22,6 +24,23 @@ class Pedigree_printer {
 			
 		print	'</table>'."\n";
 	}
+ 
+ private function _handle_multiples($pedigree){
+  $horses = array();
+  $multiples = array();
+  foreach($pedigree as $horse){
+   if(isset($horse['reknro'])){
+    if(array_search($horse['reknro'], $horses) && !isset($multiples[$horse['reknro']])){
+     $multiples[$horse['reknro']] = $this->colours[sizeof($multiples)];
+    }else {
+      $horses[] = $horse['reknro'];
+
+    }
+   }
+  }
+  
+  $this->multiples = $multiples;
+ }
 
 	private function sire($maxgeneration, $generation, $rs, $pedigree, $hevonen = '') {
 		
@@ -55,14 +74,27 @@ class Pedigree_printer {
 
 		
 	}
+ 
+ private function _set_td_colour($hevonen){
+    if (isset($hevonen['reknro']) && isset($this->multiples[$hevonen['reknro']])){
+    return  ' bgcolor="'. $this->multiples[$hevonen['reknro']] .'" ';
+				
+  	}else {
+    return "";
+   }
+ }
   
   
   private function print_parent($maxgeneration, $generation, $rs, $pedigree, $tuntematon = "", $hevonen = '') {
 		
 
-		$rowspan = $rs / 2; 
+		$rowspan = $rs / 2;
+  $colourcode = "";
+  	if (isset($pedigree[$hevonen])){
+    $colourcode = $this->_set_td_colour($pedigree[$hevonen]);
 				
-		print "\t\t".'<td  class="'.$this->td_class.'" rowspan="'.$rowspan.'">'.$hevonen.'. ';
+  	}
+		print "\t\t".'<td  class="'.$this->td_class.'" rowspan="'.$rowspan.'"'.$colourcode.'>'.$hevonen.'. ';
 		if (isset($pedigree[$hevonen])) { $this->_print_hevonen($pedigree[$hevonen], true); } else { echo $tuntematon;}
 		print "</td>\n";
 		

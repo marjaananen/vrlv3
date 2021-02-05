@@ -36,9 +36,13 @@
       <td><a href="<?php echo $kasvatit_url;?>">Kasvatit</a></td>
       <td><?php echo $stats['kasvatit'];?> kpl*</td>
    </tr>
+      <tr>
+      <td>Kilpailut</td>
+      <td><a href="<?php echo $kisat_url;?>">Järjestetyt kilpailut</a> <br /><a href="<?php echo $etuus_url;?>">Etuuspisteet</a></td>
+   </tr>
    
 </table>
-<small><b>*</b> Yhteenlaskettu VRL-tunnukselle, omille talleille ja omille kasvattajanimille rekisteröidyistä hevosista. </small>
+<small><b>*</b> Yhteenlaskettu VRL-tunnukselle, omille talleille ja omille kasvattajanimille rekisteröidyistä kasvateista. </small>
 
 <?php echo $vastuut;?>
 

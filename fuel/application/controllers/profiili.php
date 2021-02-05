@@ -38,6 +38,9 @@ class Profiili extends Loggedin_Controller
         $vars['kasvattajanimet_url'] = site_url() . '/kasvatus/kasvattajanimet/omat';
         $vars['tunnus_url'] = site_url() . 'profiili/tunnus';
         $vars['kasvatit_url'] = site_url(). 'kasvatus/kasvatit';
+        $vars['kisat_url'] = site_url(). 'kilpailutoiminta/omat';
+        $vars['etuus_url'] = site_url(). 'kilpailutoiminta/omat/etuuspisteet';
+
         
         
         $groups = $this->ion_auth->groups()->result_array();

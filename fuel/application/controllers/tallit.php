@@ -311,9 +311,7 @@ class Tallit extends CI_Controller
 			
 			$vars['headers'] = json_encode($vars['headers']);
 			
-			
-			$stables = $this->tallit_model->get_users_stables($this->ion_auth->user()->row()->tunnus, 1);	
-			
+					
 			$stables = $this->tallit_model->get_users_stables($this->ion_auth->user()->row()->tunnus);	
 			$vars['data'] = json_encode($stables);
 	

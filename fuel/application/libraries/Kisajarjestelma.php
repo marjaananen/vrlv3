@@ -27,12 +27,14 @@ class Kisajarjestelma
     public function nayttelyjaos($jaos_id, $jaos = array()){
         if(!isset($jaos['nayttelyt'])){
             $jaos = $this->CI->Jaos_model->get_jaos($jaos_id);
+            if ( $jaos['nayttelyt'] == 1 ) { return true;}
+            else { return false;}
 
-        }
-        
+        }else {        
         
          if ( $jaos['nayttelyjaos'] == 1 ) { return true;}
          else { return false;}
+        }
     }
     
     public function sijoittuu($osallistujia, $jaos_id){
@@ -56,9 +58,9 @@ class Kisajarjestelma
                 
     }
     
-    public function sallitutKisamaarat($etuuspisteet, $jaos_id){
+    public function sallitutKisamaarat($etuuspisteet, $jaos_id, $jaos = array()){
         //nj:ssä ei sijoituta samalla tavalla
-         if ( isset($jaos_id)&& $this->nayttelyjaos($jaos_id) ) { $jarjestettavia = 1; }
+         if ( isset($jaos_id)&& $this->nayttelyjaos($jaos_id, $jaos) ) { $jarjestettavia = 1; }
         
         #### KUINKA MONTA KISAA MAHDOLLISUUS JÄRJESTÄÄ ####
 		/*
@@ -437,7 +439,7 @@ class Kisajarjestelma
       }else {
          $tunnus = $event['tunnus'];
       }
-      $tallilista = $this->CI->Tallit_model->get_users_stables($tunnus);
+      $tallilista = $this->CI->Tallit_model->get_users_stables($tunnus, false, true);
       $tallit = array();
       foreach ($tallilista as $talli){
          $tallit[$talli['tnro']] = $talli['tnro'];
