@@ -13,8 +13,10 @@ class Yllapito_hevosrekisteri extends CI_Controller
         if (!$this->user_rights->is_allowed()){       
             redirect($this->user_rights->redirect());
         }
+        $this->load->model('Hevonen_model');
         $this->load->model('Color_model');
         $this->load->model('Breed_model');
+        $this->load->library("vrl_helper");
 
         $this->url = "yllapito/hevosrekisteri/";
         
@@ -28,6 +30,110 @@ class Yllapito_hevosrekisteri extends CI_Controller
 
     function index(){
 $this->pipari();
+    }
+    
+    function polveutumistarkastus($reknro = null){
+        $allowed = array("admin", "alayhdistys-yp", "alayhdistys-w");
+        $data = array();
+        if(!$this->user_rights->is_allowed($allowed)){
+            $this->fuel->pages->render('misc/naytaviesti', array('msg_type' => 'danger', 'msg' => "Vain rotuyhdistysten ylläpitäjillä ja työntekijöillä on oikeus käsitellä polveutumistietoja."));
+
+        }else {
+            if(isset($reknro)){
+                $horse = $this->Hevonen_model->get_hevonen($this->vrl_helper->vh_to_number($reknro));
+                if(isset($horse) && isset($horse['rotunro'])){
+                    if($this->Breed_model->is_breed_handling_allowed($horse['rotunro'], $this->ion_auth->user()->row()->tunnus)){
+                        IF($this->input->server('REQUEST_METHOD') == 'POST' && $this->input->post('reknro') == null){
+                            $edit_data = array();
+                            if($horse['polv_tark'] == 1 && $this->input->post('polv_tark') == 0){
+                                $edit_data['polv_tark'] = 0;
+                            }else if($this->input->post('polv_tark') == 1
+                                     && $this->input->post('polv_pros') != null
+                                     && strlen($this->input->post('polv_pros')) > 0
+                                     && strlen(trim($this->input->post('polv_pros'))) < 12
+                                   && is_numeric($this->input->post('polv_pros'))
+                                   && $this->input->post('polv_pros') > 0
+                                   && $this->input->post('polv_pros') <= 100){
+                                $edit_data['polv_tark'] = 1;
+                                $edit_data['polv_tark_vrl'] = $this->ion_auth->user()->row()->tunnus;
+                                $edit_data['polv_tark_date'] = date("Y-m-d");
+                                $edit_data['polv_pros'] = $this->input->post('polv_pros');
+                                
+                            }else {
+                                $data = array('msg_type' => 'danger', 'msg' => "Virheellinen syöte!");
+
+                            }
+                            
+                            if(sizeof($edit_data)> 0){
+                                $data = array('msg_type' => 'success', 'msg' => "Muokkaus onnistui!");
+                                $this->db->where('reknro', $this->vrl_helper->vh_to_number($reknro));
+                                $this->db->update('vrlv3_hevosrekisteri', $edit_data);
+                                
+                                $horse = $this->Hevonen_model->get_hevonen($this->vrl_helper->vh_to_number($reknro));
+
+                            }
+                            
+
+                        }
+                        
+                        
+                        
+                        $this->load->library('form_builder', array('submit_value' => "Tallenna", 'required_text' => '*Pakollinen kenttä'));
+                        $fields['polv_tark'] = array('label'=>'Polveutuminen hyväksytty', 'type' => 'checkbox', 'checked' => $horse['polv_tark'] ?? false, 'class'=>'form-control');
+                        
+                        if(isset($horse['polv_tark']) && $horse['polv_tark'] == 1){
+                            $fields['section_example'] = array('type' => 'section', 'tag' => 'h3',
+                                                               'value' => 'Polveutuminen tarkastettu ' . $this->vrl_helper->sql_date_to_normal($horse['polv_tark_date']) .'.
+                                                               <br />Prosentti: '.floatval($horse['polv_pros']) . '%, Tarkastaja: VRL-'.$horse['polv_tark_vrl'].'.',
+                                                               'after_html'=>'<span class="form_comment">Jos haluat jostain syystä muokata polveutumishyväksyntää,
+                                                               nollaa polveutumistiedot poistamalla yo. ruksi ja lähettämällä lomake. Hyväksyttyä polveutumista
+                                                               ei pitäisi jälkikäteen muokata muusta syystä kuin virheen vuoksi. Mikäli polveutumissäännöt muuttuvat,
+                                                               aiemmin hyväksytyt hevoset ja niiden jälkeläiset ovat silti kelpuutettuja rodun jalostukseen!</span>');
+
+                        }else {             
+                            $fields['polv_pros'] = array('label' => 'Polveutumisprosentti', 'type' => 'text',
+                                                         'after_html' => '<span class="form_comment">Korkeintaan kahdeksan desimaalin tarkkuudella. Käytä desimaalierotimena pistettä (.)</span>',
+                                                         'value' => $horse['polv_pros'] ?? "", 'class'=>'form-control');
+                        }
+                        $this->form_builder->form_attrs = array('method' => 'post', 'action' => site_url($this->url.'polveutumistarkastus/'.$reknro));
+                        $data['form'] = $this->form_builder->render_template('_layouts/basic_form_template', $fields);
+                        $data['title'] = 'Tarkasta hevosen ' . $horse['h_nimi'] .
+                        ' (<a href="'.site_url().'virtuaalihevoset/hevonen/'. $reknro .'">'.$reknro.'</a>) polveutuminen';
+                        
+                        $this->fuel->pages->render('misc/haku', $data);
+                                                
+                        
+                    }else {
+                        $this->fuel->pages->render('misc/naytaviesti', array('msg_type' => 'danger', 'msg' => "Sinulla ei ole oikeutta rodun ".$horse['h_rotunimi']." polveutumistarkastukseen. Ota yhteyttä rodun rotuyhdistykseen!"));
+
+                    }
+                    
+                }else {
+                    $this->fuel->pages->render('misc/naytaviesti', array('msg_type' => 'danger', 'msg' => "Etsimääsi hevosta ".$reknro." ei löytynyt."));
+
+                }
+          
+            } else IF ($this->input->server('REQUEST_METHOD') == 'POST'){
+                if($this->vrl_helper->check_vh_syntax($this->input->post('reknro'))){
+                    $this->polveutumistarkastus($this->input->post('reknro'));
+                }else {
+                    $this->fuel->pages->render('misc/naytaviesti', array('msg_type' => 'danger', 'msg' => "Virheellinen VH-tunnus."));
+
+                }
+            }else {
+                    $this->load->library('form_builder', array('submit_value' => "Hae", 'required_text' => '*Pakollinen kenttä'));
+                    $this->form_builder->form_attrs = array('method' => 'post', 'action' => site_url($this->url.'polveutumistarkastus'));           
+                    $fields['reknro'] = array('type' => 'text', 'label' => "Rekisterumero", 'required' => TRUE, 'class'=>'form-control');
+               
+                    
+                    $data['form'] =  $this->form_builder->render_template('_layouts/basic_form_template', $fields);
+                    $data['title'] = "Hae hevonen polveutumistarkastusta varten";
+                     $this->fuel->pages->render('misc/haku', $data);
+                    
+            }
+            
+        }       
+
     }
    
     
@@ -257,7 +363,7 @@ $this->pipari();
                    
                    if ($tid !== false){
                    
-                    $data['msg'] = "Julkaisu onnistui! Katso uusi väri <a href=\"".site_url('virtuaalihevoset/rotu/'.$tid) ."\">täältä</a>.";
+                    $data['msg'] = "Julkaisu onnistui! Katso uusi rotu <a href=\"".site_url('virtuaalihevoset/rotu/'.$tid) ."\">täältä</a>.";
                     $data['msg_type'] = "success";
                     }
                     else {

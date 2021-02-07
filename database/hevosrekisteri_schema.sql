@@ -28,28 +28,39 @@ SET time_zone = "+00:00";
 -- Rakenne taululle `vrlv3_hevosrekisteri`
 --
 
+DROP TABLE IF EXISTS `vrlv3_hevosrekisteri`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `vrlv3_hevosrekisteri` (
-  `reknro` int(9) UNSIGNED ZEROFILL NOT NULL,
+  `reknro` int(9) unsigned zerofill NOT NULL,
   `nimi` varchar(80) NOT NULL,
   `rotu` smallint(3) NOT NULL,
   `sukupuoli` enum('1','2','3','') NOT NULL,
-  `sakakorkeus` `sakakorkeus` SMALLINT(3) NULL DEFAULT NULL,
+  `sakakorkeus` smallint(3) DEFAULT NULL,
   `syntymaaika` datetime NOT NULL,
   `vari` smallint(4) DEFAULT NULL,
   `painotus` smallint(2) DEFAULT NULL,
   `syntymamaa` smallint(4) DEFAULT NULL,
   `url` text NOT NULL,
-  `rekisteroity` DATETIME NOT NULL DEFAULT current_timestamp,
-  `hyvaksyi` int(5) UNSIGNED ZEROFILL NOT NULL,
+  `rekisteroity` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `hyvaksyi` int(5) unsigned zerofill NOT NULL,
   `kotitalli` varchar(8) DEFAULT NULL,
   `kuollut` int(1) NOT NULL DEFAULT '0',
-  `kuol_merkkasi` `kuol_merkkasi` INT(5) UNSIGNED ZEROFILL NULL DEFAULT NULL,
-  `kuol_pvm` `kuol_pvm` DATETIME NULL DEFAULT NULL,
+  `kuol_merkkasi` int(5) unsigned zerofill DEFAULT NULL,
+  `kuol_pvm` datetime DEFAULT NULL,
   `kasvattajanimi` varchar(25) CHARACTER SET latin1 DEFAULT NULL,
   `kasvattajanimi_id` int(8) DEFAULT NULL,
   `kasvattaja_talli` varchar(8) DEFAULT NULL,
-  `kasvattaja_tunnus` int(5) UNSIGNED  ZEROFILL DEFAULT NULL,
-  `porr_kilpailee` INT(1) NOT NULL DEFAULT '1'
+  `kasvattaja_tunnus` int(5) unsigned zerofill DEFAULT NULL,
+  `porr_kilpailee` int(1) NOT NULL DEFAULT '1',
+  `polv_tark` INT(1) UNSIGNED NULL DEFAULT 0,
+  `polv_tark_vrl` INT(5) UNSIGNED ZEROFILL NULL DEFAULT NULL,
+  `polv_tark_date` DATETIME NULL DEFAULT NULL,
+  `polv_pros` DECIMAL(11,8) NULL DEFAULT NULL;
+
+  PRIMARY KEY (`reknro`);
+
+
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
@@ -96,7 +107,9 @@ ALTER TABLE `vrlv3_hevosrekisteri`
   ADD KEY `syntymamaa` (`syntymamaa`),
   ADD KEY `vrlv3_hevosrekisteri_ibfk_8_idx` (`kasvattaja_tunnus`),
   ADD KEY `vrlv3_hevosrekisteri_ibfk_9_idx` (`kasvattaja_talli`),
-  ADD KEY `vrlv3_hevosrekisteri_ibfk_10_idx` (`kasvattajanimi_id`);
+  ADD KEY `vrlv3_hevosrekisteri_ibfk_10_idx` (`kasvattajanimi_id`),
+  ADD  KEY `vrlv3_hevosrekisteri_ibfk_6_idx` (`polv_tark_vrl`);
+
 
 --
 -- Indexes for table `vrlv3_hevosrekisteri_omistajat`
@@ -132,7 +145,8 @@ ALTER TABLE `vrlv3_hevosrekisteri`
   ADD CONSTRAINT `vrlv3_hevosrekisteri_ibfk_6` FOREIGN KEY (`painotus`) REFERENCES `vrlv3_lista_painotus` (`pid`),
   ADD CONSTRAINT `vrlv3_hevosrekisteri_ibfk_7` FOREIGN KEY (`syntymamaa`) REFERENCES `vrlv3_lista_maat` (`id`),
   ADD CONSTRAINT `vrlv3_hevosrekisteri_ibfk_8` FOREIGN KEY (`kasvattaja_tunnus`) REFERENCES `vrlv3_tunnukset` (`tunnus`) ON DELETE SET NULL ON UPDATE SET NULL,
-  ADD CONSTRAINT `vrlv3_hevosrekisteri_ibfk_9` FOREIGN KEY (`kasvattaja_talli`) REFERENCES `vrlv3_tallirekisteri` (`tnro`) ON DELETE SET NULL ON UPDATE CASCADE;
+  ADD CONSTRAINT `vrlv3_hevosrekisteri_ibfk_9` FOREIGN KEY (`kasvattaja_talli`) REFERENCES `vrlv3_tallirekisteri` (`tnro`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD  CONSTRAINT `vrlv3_hevosrekisteri_ibfk_13` FOREIGN KEY (`polv_tark_vrl`) REFERENCES `vrlv3_tunnukset` (`tunnus`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 --
 -- Rajoitteet taululle `vrlv3_hevosrekisteri_omistajat`

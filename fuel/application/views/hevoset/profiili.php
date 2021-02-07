@@ -53,8 +53,12 @@ if(isset($hevonen['maa'])) {
 
  }
 
-
+$rotutieto = "";
+if(isset($hevonen['polv_tark']) && $hevonen['polv_tark'] == 1){
+ $rotutieto = '<br /><small>Polveutuminen tarkastettu ' . $hevonen['polv_tark_date'] .'.
+                                                             Veriprosentti: '.floatval($hevonen['polv_pros']) . '%, tarkastaja: VRL-'.$hevonen['polv_tark_vrl'].'.</small>';
     
+}
 ?>
 
 
@@ -77,7 +81,7 @@ if(isset($hevonen['maa'])) {
 ?>
 
 <table class="table table-striped">
-   <tr><th scope="row">Rotu</th><td> <a href="<?php echo site_url().'/virtuaalihevoset/rotu/'.$hevonen['rotunro'];?>"><?=$hevonen['h_rotunimi']?></a></td></tr>
+   <tr><th scope="row">Rotu</th><td> <a href="<?php echo site_url().'/virtuaalihevoset/rotu/'.$hevonen['rotunro'];?>"><?=$hevonen['h_rotunimi']?></a><?=$rotutieto;?></td></tr>
    <tr><th scope="row">Sukupuoli</th><td> <?=$hevonen['sukupuoli']?></td></tr>
    <tr><th scope="row">Säkäkorkeus</th><td> <?=$hevonen['sakakorkeus']?> cm</td></tr>
    <tr><th scope="row">Syntynyt</th><td> <?=$hevonen['syntymaaika']?><?=$maatieto;?></td></tr>

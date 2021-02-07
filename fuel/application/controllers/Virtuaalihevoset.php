@@ -1136,7 +1136,7 @@ class Virtuaalihevoset extends CI_Controller
         $option_script = $this->vrl_helper->get_option_script('kasvattaja_talli', $tallit);
         $fields['kasvattaja_talli'] = array('type' => 'text', 'class'=>'form-control', 'value'=> $poni['kasvattaja_talli'] ?? '', 'class'=>'form-control',
                                     'after_html'=> '<span class="form_comment">Laita tunnus muodossa XXXX0000. Jätä tyhjäksi jos kyseessä on evm-hevonen. Omat tallisi (klikkaa lisätäksesi): ' .
-                                    $option_script['list'] . '</span>' . $option_script['script']);        $fields['kasvattaja_tunnus'] = array('type' => 'text', 'class'=>'form-control', 'value'=> $poni['kasvattaja_tunnus'] ?? '', 'class'=>'form-control', 'after_html' => '<span class="form_comment">Kasvattajan VRL-tunnus. Jätä tyhjäksi, jos kyseessä evm-hevonen.</span>');
+                                    $option_script['list'] . '</span>' . $option_script['script']);        $fields['kasvattaja_tunnus'] = array('type' => 'text', 'class'=>'form-control', 'value'=> $poni['kasvattaja_tunnus'] ?? '', 'class'=>'form-control', 'after_html' => '<span class="form_comment">Muodossa VRL-00000. Kasvattajan VRL-tunnus. Jätä tyhjäksi, jos kyseessä evm-hevonen.</span>');
         $fields['i_nro'] = array('type' => 'text', 'label'=> 'Isän rekisterinumero','class'=>'form-control', 'value'=> $poni['i_nro'] ?? '', 'class'=>'form-control', 'after_html' => '<span class="form_comment">Isän rekisterinumero.</span>');
         $fields['e_nro'] = array('type' => 'text', 'label'=> 'Emän rekisterinumero', 'class'=>'form-control', 'value'=> $poni['e_nro'] ?? '', 'class'=>'form-control', 'after_html' => '<span class="form_comment">Emän rekisterinumero. </span>');
         

@@ -285,6 +285,13 @@ k.voi = s.arj_voi,
 k.sij = s.arj_sij 
 WHERE k.reknro = s.reknro AND k.jaos = 6;
 
+UPDATE vrlv3_hevosrekisteri as h
+INNER JOIN hevosrekisteri_lisatiedot as l on l.reknro = h.reknro
+SET h.polv_tark_vrl = l.polv_tark_vrl,
+h.polv_pros = l.polv_pros,
+h.polv_tark_date = l.polv_tark_date,
+h.polv_tark = l.polv_tark
+WHERE l.polv_tark = 1;
 
 
 

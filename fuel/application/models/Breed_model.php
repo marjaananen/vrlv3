@@ -90,6 +90,27 @@ class Breed_model extends Base_module_model
                 
     }
     
+    public function is_breed_handling_allowed($breed, $user){
+        $this->db->select('p.*');
+        $this->db->from('vrlv3_puljut as p');
+        $this->db->join('vrlv3_puljut_rodut as r', 'p.id = r.pulju');
+        $this->db->join('vrlv3_puljut_omistajat as o', 'p.id = o.jid');
+        $this->db->where('r.rotu', $breed);
+        $this->db->where('o.tunnus', $user);
+        $this->db->where('p.toiminnassa', 1);
+        
+         $query = $this->db->get();
+        
+        if ($query->num_rows() > 0)
+        {
+            return true;
+        }
+        
+        return false;
+        
+    
+    }
+    
     public function get_breed_pulju($breed, $only_online = false){
         $this->db->select('p.*');
         $this->db->from('vrlv3_puljut as p');

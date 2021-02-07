@@ -163,6 +163,7 @@ $nav['profiili/tiedot'] = array('label' => 'Muokkaa tietoja', 'parent_id' => 'pr
 $nav['profiili/vaihda_salasana'] = array('label' => 'Vaihda salasana', 'parent_id' => 'profiili', 'active' => 'profiili/vaihda_salasana');
 $nav['profiili/pikaviestit'] = array('label' => 'Omat pikaviestit', 'parent_id' => 'profiili', 'active' => 'profiili/pikaviestit');
 
+$nav['yllapito/hevosrekisteri/polveutumistarkastus'] = array('label' => 'Polveutumistarkastus', 'parent_id' => 'yllapito/hevosrekisteri', 'active' => 'yllapito/hevosrekisteri/polveutumistarkastus$|yllapito/hevosrekisteri/polveutumistarkastus/:any');
 $nav['yllapito/hevosrekisteri/varit'] = array('label' => 'Hallitse värejä', 'parent_id' => 'yllapito/hevosrekisteri', 'active' => 'yllapito/hevosrekisteri/varit');
 $nav['yllapito/hevosrekisteri/rodut'] = array('label' => 'Hallitse rotuja', 'parent_id' => 'yllapito/hevosrekisteri', 'active' => 'yllapito/hevosrekisteri/rodut');
 
