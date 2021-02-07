@@ -878,9 +878,26 @@ class Jaos_model extends Base_module_model
         $jaokset = $this->get_puljut_all($type, $online);
         foreach ($jaokset as &$pulju){
             $pulju['yllapito'] = $this->get_pulju_handlers($pulju['id']);
+            $pulju['rodut'] = $this->get_pulju_breeds($pulju['id']);
         }
         
         return $jaokset;
+    }
+    
+    function get_pulju_breeds($id){
+        $this->db->select('r.*');
+        $this->db->from('vrlv3_lista_rodut as r');
+        $this->db->join('vrlv3_puljut_rodut as p', 'p.rotu = r.rotunro');
+        $this->db->where('p.pulju', $id);
+        
+         $query = $this->db->get();
+        
+        if ($query->num_rows() > 0)
+        {
+            return $query->result_array();
+        }
+        
+        return array();
     }
     
     function get_pulju_handlers($id){

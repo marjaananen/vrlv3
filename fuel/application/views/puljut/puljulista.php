@@ -2,13 +2,24 @@
 
 
 <?php
+    
     foreach ($puljut as $jaos){
+        $rodut = "";
+        if(isset($jaos['rodut']) && sizeof($jaos['rodut'])> 0){
+            $rotulista = array();
+            foreach ($jaos['rodut'] as $rotu){
+                $rotulista[] = '<a href="'.site_url('virtuaalihevoset/rotu/'.$rotu['rotunro']). '">'. $rotu['rotu'].'</a>';
+            }
+            
+            $rodut = "<p>". implode(", ", $rotulista) . '</p>';
+        }
 ?>
         <div class="panel panel-default">
           <div class="panel-heading">
-            <h3 class="panel-title"><a href="<?php echo $jaos['url']; ?>"><?php echo $jaos['nimi']; ?></a> (<?php echo $jaos['lyhenne']; ?>)</h3>
+            <h3 class="panel-title"><a href="<?php echo $jaos['url']; ?>"><?php echo $jaos['nimi']; ?></a> (<?php echo $jaos['lyhenne']; ?>) </h3>
           </div>
           <div class="panel-body">
+            <?php echo $rodut;?>
             <?php echo $jaos['kuvaus']; ?>
           </div>
           <div class="panel-footer">
