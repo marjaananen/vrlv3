@@ -178,6 +178,7 @@ $nav['yllapito/kalenterit/tuloshyvaksynta'] = array('hidden'=>true, 'label' => '
 $nav['yllapito/kalenterit/hyvaksytytkisat'] = array('label' => 'Selaa hyväksyttyjä kutsuja', 'parent_id' => 'yllapito/kalenterit', 'active' => 'yllapito/kalenterit/hyvaksytytkisat');
 $nav['yllapito/kalenterit/hyvaksytyttulokset'] = array('label' => 'Selaa hyväksyttyjä tuloksia', 'parent_id' => 'yllapito/kalenterit', 'active' => 'yllapito/kalenterit/hyvaksytyttulokset');
 $nav['yllapito/kalenterit/hyvaksytytkisat/edit'] = array('label' => 'Muokkaa kutsua', 'hidden'=>true, 'parent_id' => 'yllapito/kalenterit/hyvaksytytkisat', 'active' => 'yllapito/kalenterit/hyvaksytytkisat/edit/:any');
+$nav['yllapito/kalenterit/etuuspisteet'] = array('label' => 'Etuuspisteet', 'parent_id' => 'yllapito/kalenterit', 'active' => 'yllapito/kalenterit/etuuspisteet$|yllapito/kalenterit/etuuspisteet/:any/:any');
 
 $nav['yllapito/alayhdistykset/yhdistykset'] = array('hidden'=> true, 'label' => 'Alayhdistykset', 'parent_id' => 'yllapito/alayhdistykset', 'active' => 'yllapito/alayhdistykset/yhdistykset');
 $nav['yllapito/alayhdistykset/lisaa_yhdistys'] = array('label' => 'Lisää yhdistys', 'parent_id' => 'yllapito/alayhdistykset', 'active' => 'yllapito/alayhdistykset/lisaa_yhdistys');

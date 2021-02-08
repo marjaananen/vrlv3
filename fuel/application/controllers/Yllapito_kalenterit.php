@@ -45,6 +45,20 @@ class Yllapito_kalenterit extends CI_Controller
         return $this->Jaos_model->is_jaos_owner($this->ion_auth->user()->row()->tunnus, $jaos, 1);
     }
     
+    private function _jaos_options(){
+        $jaos_options = array();
+        if($this->_is_jaos_admin()){
+            $jaos_options = $this->Jaos_model->get_jaos_option_list(false, false, false);
+    
+        }else {
+            $jaoslist = $this->Jaos_model->get_users_jaos($this->ion_auth->user()->row()->tunnus);
+            foreach ($jaoslist as $jaos){
+                $jaos_options[$jaos['id']]=$jaos['lyhenne'];
+            }
+        }
+        
+        return $jaos_options;
+    }
     public function pipari(){
 		$this->fuel->pages->render('misc/pipari');
 	}
@@ -219,6 +233,116 @@ class Yllapito_kalenterit extends CI_Controller
         }
     			
 	}
+    
+    
+//////////////////////////////////////////////////////////////////////////////////////////
+// Käsittele etuuspisteet
+/////////////////////////////////////////////////////////////////////////////////////////
+
+public function etuuspisteet($jaos = null, $tunnus = null){
+        $data = array();
+        $msg = "";
+              
+        if(isset($jaos) && isset($tunnus)){
+            if($this->_is_allowed_to_process_calendar($jaos, $msg)){
+                $jaos_data = $this->Jaos_model->get_jaos($jaos);
+                $user_data = $this->Jaos_model->getEtuuspisteet($jaos, $tunnus);
+                IF($this->input->server('REQUEST_METHOD') == 'POST' && $this->input->post('tunnus') == null){
+                    $edit_data = array();
+                    
+                    if($this->input->post('nollaa') == 1){
+                        $edit_data['pisteet'] = 0;
+                        $edit_data['nollattu'] = 1;
+                       
+                    }else if( $this->input->post('pisteet') != null
+                             && strlen($this->input->post('pisteet')) > 0
+                           && is_numeric($this->input->post('pisteet'))
+                           && $this->input->post('pisteet') > 0){
+                        $edit_data['nollattu'] = 0;
+                        $edit_data['pisteet'] = $this->input->post('pisteet');
+                        
+                    }else {
+                        $data = array('msg_type' => 'danger', 'msg' => "Virheellinen syöte!");
+
+                    }
+                        
+                    if(sizeof($edit_data)> 0){
+                        $edit_data['muokattu'] = date("Y-m-d");
+                        $edit_data['muokkaaja'] = $this->ion_auth->user()->row()->tunnus;
+
+                        $data = array('msg_type' => 'success', 'msg' => "Muokkaus onnistui!");
+                        $this->db->where('tunnus', $this->vrl_helper->vrl_to_number($tunnus));
+                        $this->db->where('jaos', $jaos);
+                        $this->db->update('vrlv3_kisat_etuuspisteet', $edit_data);
+                        
+                        $this->load->model('Tunnukset_model');
+                        $this->Tunnukset_model->send_message($this->ion_auth->user()->row()->tunnus, $this->vrl_helper->vrl_to_number($tunnus),
+                                                        "Etuuspisteitäsi on muokattu (Jaos: " . $jaos_data['nimi'] . ", vanha arvo: ".floatval($user_data['pisteet']).",
+                                                        uusi arvo: ".$edit_data['pisteet']."). Jos et tiedä miksi, ole yhteydessä jaoksen ylläpitoon!");
+
+                        
+                        $user_data =  $this->Jaos_model->getEtuuspisteet($jaos, $tunnus);
+         
+
+                    }
+                }
+                    
+                    
+                    
+                $this->load->library('form_builder', array('submit_value' => "Tallenna", 'required_text' => '*Pakollinen kenttä'));
+                $fields['nollaa'] = array('label'=>'Nollaa etuuspisteet', 'type' => 'checkbox', 'checked' => false, 'class'=>'form-control');
+                $fields['pisteet'] = array('label' => 'Etuuspisteet', 'type' => 'text',
+                                                 'value' => $user_data['pisteet'] ?? 0, 'class'=>'form-control');
+                if(sizeof($user_data) > 0 && $user_data['muokattu'] != null && $user_data['muokattu'] != '0000-00-00 00:00:00'){
+                    $nollaus = "";
+                    if($user_data['nollattu'] == 1){
+                        $nollaus = "Etuuspisteet nollattiin.";
+                    }
+                    $fields['section_example'] = array('type' => 'section', 'tag' => 'h3',
+                                                       'value' => 'Viimeisin muutos ' . $this->vrl_helper->sql_date_to_normal($user_data['muokattu']) .
+                                                       ', muokkaaja: VRL-'.$user_data['muokkaaja'].'. ' . $nollaus,
+                                                       'after_html'=>'<span class="form_comment">Tässä näkyy tieto viimeisestä manuaalisesta muokkauksesta!</span>');
+ 
+                }
+                   
+                
+                $this->form_builder->form_attrs = array('method' => 'post', 'action' => site_url($this->url.'etuuspisteet/'.$jaos."/".$tunnus));
+                $data['form'] = $this->form_builder->render_template('_layouts/basic_form_template', $fields);
+                $data['title'] = 'Etuuspisteet (Käyttäjä: <a href="'.site_url().'tunnus/'. $tunnus .'">VRL-'.$tunnus.'</a>, jaos: '.$jaos_data['lyhenne'].')';
+                
+                $this->fuel->pages->render('misc/haku', $data);
+                                            
+                    
+
+                
+            }else {
+                $this->fuel->pages->render('misc/naytaviesti', array('msg_type' => 'danger', 'msg' => "Sinulla ei ole oikeuksia käsitellä valitsemaasi jaosta."));
+
+            }
+      
+        } else IF ($this->input->server('REQUEST_METHOD') == 'POST'){
+            if($this->vrl_helper->check_vrl_syntax($this->input->post('tunnus'))){
+                $this->etuuspisteet($this->input->post('jaos'), $this->input->post('tunnus'));
+            }else {
+                $this->fuel->pages->render('misc/naytaviesti', array('msg_type' => 'danger', 'msg' => "Virheellinen VRL-tunnus."));
+
+            }
+        }else {
+                $this->load->library('form_builder', array('submit_value' => "Hae", 'required_text' => '*Pakollinen kenttä'));
+                $this->form_builder->form_attrs = array('method' => 'post', 'action' => site_url($this->url.'etuuspisteet'));
+                $jaos_options = $this->_jaos_options();
+                $fields['jaos'] = array('type' => 'select', 'required'=> TRUE, 'options' => $jaos_options, 'value' => $data['jaos'] ?? "", 'class'=>'form-control');
+                $fields['tunnus'] = array('type' => 'text', 'label' => "VRL-tunnus", 'required' => TRUE, 'class'=>'form-control');                  
+                $data['form'] =  $this->form_builder->render_template('_layouts/basic_form_template', $fields);
+                $data['title'] = "Hae käyttäjän etuuspisteeet";
+                 $this->fuel->pages->render('misc/haku', $data);
+                
+        }
+            
+              
+
+    }
+   
     
    
     
@@ -430,16 +554,7 @@ class Yllapito_kalenterit extends CI_Controller
         }
         $fields['id'] = array('label' => 'ID', 'type' => 'number', 'value' =>  $data['id'] ?? "", 'class'=>'form-control', 'represents' => 'int|smallint|mediumint|bigint', 'negative' => FALSE, 'decimal' => FALSE);    
 
-        $jaos_options = array();
-        if($this->_is_jaos_admin()){
-            $jaos_options = $this->Jaos_model->get_jaos_option_list(false, false, false);
-
-        }else {
-            $jaoslist = $this->Jaos_model->get_users_jaos($this->ion_auth->user()->row()->tunnus);
-            foreach ($jaoslist as $jaos){
-                $jaos_options[$jaos['id']]=$jaos['lyhenne'];
-            }
-        }
+        $jaos_options = $this->_jaos_options();
         
         $fields['jaos'] = array('type' => 'select', 'required'=> TRUE, 'options' => $jaos_options, 'value' => $data['jaos'] ?? "", 'class'=>'form-control');
         

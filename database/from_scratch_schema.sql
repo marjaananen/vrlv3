@@ -311,14 +311,20 @@ CREATE TABLE `vrlv3_kisat_etuuspisteet` (
   `pisteet` double(6,2) DEFAULT '0.00',
   `nollattu` tinyint(1) DEFAULT NULL,
   `muokattu` datetime DEFAULT NULL,
+  `muokkaaja` INT(5) ZEROFILL UNSIGNED NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `tunnusjaosunique` (`tunnus`,`jaos`),
   KEY `tunnusdidx` (`tunnus`),
   KEY `jaosidx` (`jaos`),
+  KEY  `muokkaajaindex` (`muokkaaja` ASC),
   CONSTRAINT `jaosetuusforein` FOREIGN KEY (`jaos`) REFERENCES `vrlv3_kisat_jaokset` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `tunnusetuusforein` FOREIGN KEY (`tunnus`) REFERENCES `vrlv3_tunnukset` (`tunnus`) ON DELETE CASCADE ON UPDATE CASCADE
+  CONSTRAINT `tunnusetuusforein` FOREIGN KEY (`tunnus`) REFERENCES `vrlv3_tunnukset` (`tunnus`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `muokkaajaforein`  FOREIGN KEY (`muokkaaja`)  REFERENCES `vrlv3`.`vrlv3_tunnukset` (`tunnus`)  ON DELETE RESTRICT ON UPDATE RESTRICT
 ) ENGINE=InnoDB AUTO_INCREMENT=5683 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
+
+
+
 
 --
 -- Table structure for table `vrlv3_kisat_jaokset`

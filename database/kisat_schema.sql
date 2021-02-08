@@ -242,6 +242,18 @@ CREATE TABLE `vrlv3`.`vrlv3_kisat_etuuspisteet` (
     ON DELETE CASCADE
     ON UPDATE CASCADE);
 
+ALTER TABLE `vrlv3`.`vrlv3_kisat_etuuspisteet` 
+ADD COLUMN `muokkaaja` INT(5) ZEROFILL UNSIGNED NULL DEFAULT NULL AFTER `muokattu`,
+ADD INDEX `muokkaajaindex` (`muokkaaja` ASC);
+;
+ALTER TABLE `vrlv3`.`vrlv3_kisat_etuuspisteet` 
+ADD CONSTRAINT `muokkaajaforein`
+  FOREIGN KEY (`muokkaaja`)
+  REFERENCES `vrlv3`.`vrlv3_tunnukset` (`tunnus`)
+  ON DELETE RESTRICT
+  ON UPDATE RESTRICT;
+
+
 
 CREATE TABLE `vrlv3`.`vrlv3_kisat_kisaluokat` (
   `id` INT NOT NULL AUTO_INCREMENT,

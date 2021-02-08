@@ -109,6 +109,11 @@ $route['yllapito/kalenterit/hyvaksytytkisat/delete/(:any)/(:any)'] = "yllapito_k
 $route['yllapito/kalenterit/hyvaksytytkisat/edit/(:any)/(:any)'] = "yllapito_kalenterit/hyvaksytytkisat/edit/$1/$2";
 $route['yllapito/kalenterit/hyvaksytyttulokset/delete/(:any)/(:any)'] = "yllapito_kalenterit/hyvaksytyttulokset/delete/$1/$2";
 $route['yllapito/kalenterit/porrastetut_run'] = "yllapito_kalenterit/porrastetut_run";
+$route['yllapito/kalenterit/etuuspisteet'] = "yllapito_kalenterit/etuuspisteet";
+$route['yllapito/kalenterit/etuuspisteet/(:any)'] = "yllapito_kalenterit/etuuspisteet/$1";
+$route['yllapito/kalenterit/etuuspisteet/(:any)/(:any)'] = "yllapito_kalenterit/etuuspisteet/$1/$2";
+
+
 
 
 
