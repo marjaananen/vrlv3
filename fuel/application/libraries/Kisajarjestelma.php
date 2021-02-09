@@ -37,6 +37,10 @@ class Kisajarjestelma
         }
     }
     
+    private function _takaaja_min_ep(){
+        return 3;
+    }
+    
     public function sijoittuu($osallistujia, $jaos_id){
     
         $sijoittuu = 0;
@@ -211,7 +215,7 @@ class Kisajarjestelma
         
             $result = $query->result_array();
          
-            if (empty($result)){
+            if (sizeof($result)>0){
                 $rivi = array();
                 $rivi['tunnus'] = $tunnus;
                 $rivi['jaos'] = $jaos;
@@ -472,6 +476,13 @@ class Kisajarjestelma
                               'value' => $event['kp'] ?? "", 'after_html'=> '<span class="form_comment">'.$comptext.'</span>');
         $fields['vip'] = array('type' => 'date', 'first-day' => 1, 'date_format'=>'d.m.Y', 'label'=>'Viimeinen ilmoittautumispäivä', 'class'=>'form-control',
                                'required' => TRUE, 'value' => $event['vip'] ?? "", 'after_html'=> '<span class="form_comment">'.$viptext.'</span>');
+        
+        if(!$porrastettu && ((isset($event['nollattu']) && $event['nollattu'] == true) || isset($event['takaaja']))){
+            $fields['takaaja'] = array('type' => 'text', 'label'=>'Takaaja', 'class'=>'form-control', 'required' => TRUE, 'value' => $event['takaaja'] ?? "",
+                                    'after_html'=> '<span class="form_comment text-danger">Muodossa VRL-00000. Etuuspisteesi on nollattu ja tarvitset takaajan järjestääksesi seuraavat kilpailut.
+                                    Takaajalla tulee olla vähintään '.$this->_takaaja_min_ep().' etuuspistettä, ja hän hoitaa kilpailut puolestasi loppuun jos et siihen pysty itse.
+                                    Kysythän takaajalta luvan ennen merkitsemistä!</span>');
+        }
       }
       if(!$porrastettu){
         $fields['url'] = array('type' => 'text', 'label'=>'Kutsu','class'=>'form-control', 'required' => TRUE, 'value' => $event['url'] ?? "http://");
@@ -598,9 +609,7 @@ class Kisajarjestelma
 public function check_competition_edit_info($kisa, &$msg){
     
      //jos takaaja on jostain syystä annettu vaikkei olisi pakko, tarkastetaan silti 
-        if(isset($kisa['takaaja']) && $kisa['takaaja'] != 00000 && !($kisa['takaaja'] != $kisa['tunnus'] && $this->CI->vrl_helper->check_vrl_syntax($kisa['takaaja'])
-                     && $this->CI->Tunnukset_model->onko_tunnus($this->CI->vrl_helper->vrl_to_number($kisa['takaaja'])))){
-            $msg  = "Annoit virheellisen takaajan tunnuksen.";
+        if(isset($kisa['takaaja']) && $kisa['takaaja'] != 00000 && !$this->_takaaja_ok($kisa['tunnus'], $kisa['takaaja'], $kisa['jaos'], $msg)){
             return false;
         }
         
@@ -644,20 +653,23 @@ public function check_competition_info($mode = "add", &$kisa, &$msg, $direct = f
             $nayttelyt = true;
         }
     
-
+        $this->CI->load->model("Tunnukset_model");
         //jos kisa ei ole porrastettu tai näyttely, ja lisäävän käyttäjän pisteet on nollattu, pitää olla oikea takaaja.
-        if (!$kisa['porrastettu'] && !$nayttelyt && $mode == "add" && $nollattu
-                 && !(isset($kisa['takaaja']) && $kisa['takaaja'] != $kisa['tunnus'] && $this->CI->vrl_helper->check_vrl_syntax($kisa['takaaja'])
-                     && $this->CI->Tunnukset_model->onko_tunnus($this->CI->vrl_helper->vrl_to_number($kisa['takaaja'])))){
+        if (!$kisa['porrastettu'] && !$nayttelyt && $mode == "add" && $nollattu){
+            if(!(isset($kisa['takaaja']))){
             $msg = "Tarvitset kilpailullesi takaajan. Sen tulee olla olemassaoleva VRL-tunnus";
             return false;
+            }else if(!$this->_takaaja_ok($kisa['tunnus'], $kisa['takaaja'], $kisa['jaos'], $msg)){
+                return false;
                     
-    
-        }  //jos takaaja on jostain syystä annettu vaikkei olisi pakko, tarkastetaan silti 
-        if(isset($kisa['takaaja']) && !($kisa['takaaja'] != $kisa['tunnus'] && $this->CI->vrl_helper->check_vrl_syntax($kisa['takaaja'])
-                     && $this->CI->Tunnukset_model->onko_tunnus($this->CI->vrl_helper->vrl_to_number($kisa['takaaja'])))){
-            $msg  = "Annoit virheellisen takaajan tunnuksen.";
+            }
+
+        }//jos takaaja on jostain syystä annettu vaikkei olisi pakko, tarkastetaan silti 
+        else if(isset($kisa['takaaja']) && !$this->_takaaja_ok($kisa['tunnus'], $kisa['takaaja'], $kisa['jaos'], $msg)){
             return false;
+        }
+        else {
+            unset($kisa['nollattu']);
         }
     }
     
@@ -775,12 +787,43 @@ public function check_competition_info($mode = "add", &$kisa, &$msg, $direct = f
     return true;    
     }
     
+    private function _takaaja_ok($tunnus, $takaaja, $jaos, &$msg){
+        if(isset($takaaja) &&  $this->CI->vrl_helper->check_vrl_syntax($takaaja)){
+            $takaaja = $this->CI->vrl_helper->vrl_to_number($takaaja);
+            $tunnus =   $this->CI->vrl_helper->vrl_to_number($tunnus);
+            
+            if($tunnus ==  $takaaja){
+                $msg = "Et voi olla oma takaajasi!";
+                return false;
+            }else {
+                $this->CI->load->model("Jaos_model");
+                $ep = $this->CI->Jaos_model->getEtuuspisteet($jaos, $takaaja);
+                
+                if(!(isset($ep) && isset($ep['pisteet']) && $ep['pisteet'] >= $this->_takaaja_min_ep())){
+                    $msg = "Takaajan tunnusta ei ole olemassa tai hänellä ei ole tarpeeksi etuuspisteitä.";
+                    return false;
+                }
+            }
+            
+            
+        } else {
+            $msg = "Virheellinen takajan tunnus";
+            return false;
+        }
+        
+        return true;
+    }
+    
     public function add_new_competition($kutsu, &$msg, $direct){
         $this->CI->load->model('Kisakeskus_model');
         $luokat = array();
         if(isset($kutsu['luokat'])){
             $luokat = $kutsu['luokat'];
             unset($kutsu['luokat']);
+        }
+        if(isset($kutsu['takaaja'])){
+            unset($kutsu['nollattu']);
+            $kutsu['takaaja'] = $this->CI->vrl_helper->vrl_to_number($kutsu['takaaja']);
         }
         return $this->CI->Kisakeskus_model->insertNewCompetition($kutsu, $luokat, $direct, $msg);
     }

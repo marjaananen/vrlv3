@@ -271,13 +271,20 @@ public function etuuspisteet($jaos = null, $tunnus = null){
                         $edit_data['muokkaaja'] = $this->ion_auth->user()->row()->tunnus;
 
                         $data = array('msg_type' => 'success', 'msg' => "Muokkaus onnistui!");
+                        if(sizeof($user_data) > 0){
                         $this->db->where('tunnus', $this->vrl_helper->vrl_to_number($tunnus));
                         $this->db->where('jaos', $jaos);
                         $this->db->update('vrlv3_kisat_etuuspisteet', $edit_data);
+                        }else {
+                            $edit_data['tunnus'] = $this->vrl_helper->vrl_to_number($tunnus);
+                            $edit_data['jaos'] = $jaos;
+                            $this->db->insert('vrlv3_kisat_etuuspisteet', $edit_data);
+                        }
                         
                         $this->load->model('Tunnukset_model');
+                        $pisteet = $user_data['pisteet'] ?? 0;
                         $this->Tunnukset_model->send_message($this->ion_auth->user()->row()->tunnus, $this->vrl_helper->vrl_to_number($tunnus),
-                                                        "Etuuspisteitäsi on muokattu (Jaos: " . $jaos_data['nimi'] . ", vanha arvo: ".floatval($user_data['pisteet']).",
+                                                        "Etuuspisteitäsi on muokattu (Jaos: " . $jaos_data['nimi'] . ", vanha arvo: ".floatval($pisteet).",
                                                         uusi arvo: ".$edit_data['pisteet']."). Jos et tiedä miksi, ole yhteydessä jaoksen ylläpitoon!");
 
                         

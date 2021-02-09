@@ -463,7 +463,7 @@ class Tunnukset_model extends Base_module_model
     {
         //seitsemän päivää vanhat poistetaan
         $date = new DateTime();
-        $date->setTimestamp(time() - 7*24*60*60);
+        $date->setTimestamp(time() - 30*24*60*60);
         $oldest_possible = $date->format('Y-m-d H:i:s');
         $this->db->delete('vrlv3_tunnukset_pikaviestit', array("vastaanottaja"=> $pinnumber, "tarkea" => 0, "luettu" => 1, "aika <" => $oldest_possible)); 
     }

@@ -1006,7 +1006,7 @@ private function _handle_competition_application($porrastettu, $nayttelyt, &$kis
             $jarjestettavia = $this->kisajarjestelma->sallitutKisamaarat($ep, $kisa['jaos']);
             if (isset($etuuspisteet['pisteet'])){
                 $direct = $this->kisajarjestelma->directlyCalender($ep, $kisa['jaos']);
-                if( $etuuspisteet['pisteet'] < 1 AND !empty($etuuspisteet['nollattu']) ) { $onnollattu = true; }
+                if( $etuuspisteet['pisteet'] < 1 AND !empty($etuuspisteet['nollattu']) ) { $onnollattu = true; $kisa['nollattu'] = true;}
 
             }
    
@@ -1032,6 +1032,11 @@ private function _handle_competition_application($porrastettu, $nayttelyt, &$kis
         }else {
             $data['msg_type'] = 'success';
             $data['msg'] = "Kilpailun lisääminen onnistui";
+            if(isset($kisa['takaaja'])){
+                $jaos_data = $this->Jaos_model->get_jaos($kisa['jaos']);
+                $this->Tunnukset_model->send_message($kisa['tunnus'], $kisa['takaaja'], "Hei! Lisäsin sinut takaajaksi ".$jaos_data['lyhenne']." kilpailulleni! (Tämä on automaattinen viesti. Jos et ole suostunut takaajaksi, ole yhteydessä jaoksen ylläpitoon!)");
+                unset($kisa['takaaja']);
+            }
         }
     }
 }

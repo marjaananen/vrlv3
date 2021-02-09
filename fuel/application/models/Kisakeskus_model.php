@@ -28,6 +28,8 @@ class Kisakeskus_model extends CI_Model
             $kutsu['kasitelty'] = date("Y-m-d H:i:s");
             $kutsu['hyvaksyi'] = "00000";
         }
+        
+
 	    
 	    
 	    $this->db->trans_start();
