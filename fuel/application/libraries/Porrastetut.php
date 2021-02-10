@@ -87,7 +87,7 @@ class Porrastetut
 				// Jos hevosen taso on 2 ja luokan taso 0
 				// Jos hevosen taso on sama kuin luokan taso
 				// Jos hevosen taso on yhtä isompi kuin luokan taso | hevonen lv 2 voi osallistua lk lv3
-        return ( ($horselevel == 1 && $classlevel = 0) OR
+        return ( ($horselevel == 1 && $classlevel == 0) OR
 					( $horselevel == 2 && $classlevel == 1 ) OR
 					$horselevel == $classlevel OR 
 					($horselevel+1) == $classlevel);
@@ -401,6 +401,7 @@ public function get_resultless_leveled_competitions($max = 100){
     
     private function _get_leveled_info($vhs){
         if(sizeof($vhs) > 0){
+            $this->CI->db->select('*, h.reknro as reknro');
             $this->CI->db->from('vrlv3_hevosrekisteri as h');
             $this->CI->db->join('vrlv3_hevosrekisteri_ikaantyminen as i', 'h.reknro = i.reknro', 'LEFT');
             $this->CI->db->join('vrlv3_hevosrekisteri_ominaisuudet as o', 'h.reknro = o.reknro', 'LEFT');
@@ -408,7 +409,6 @@ public function get_resultless_leveled_competitions($max = 100){
             $this->CI->db->where_in('h.reknro', $vhs);
             
             $query = $this->CI->db->get();
-            
             if ($query->num_rows() > 0)
             {
                 return $query->result_array(); 
@@ -424,11 +424,11 @@ public function get_resultless_leveled_competitions($max = 100){
     }
     
     private function _parse_leveled_info_horses($list){
+        
         $horses = array();
         foreach ($list as $row){
             $horses[$row['reknro']] = $row;
         }
-        
         return $horses;
         
     }
@@ -436,8 +436,11 @@ public function get_resultless_leveled_competitions($max = 100){
     private function _parse_leveled_info_skills($list, $needed_skills){
         $horses = array();
         foreach ($list as $row){
+            
+            if(!isset($horses[$row['reknro']])){
+                    $horses[$row['reknro']] = 0;
+                }
             if(in_array($row['ominaisuus'], $needed_skills)){
-                
                 if(isset($horses[$row['reknro']])){
                     $horses[$row['reknro']] = $horses[$row['reknro']] + $row['arvo'];
                 }else {
@@ -494,7 +497,6 @@ public function handle_porrastettu_class_results($jaos, $kisa, $classinfo, $part
         foreach ($participants as $rivi){
             //VH-tunnus-tarkistelu
 					$tunnuksia = preg_match_all('/\VH[0-9]{2}\-[0-9]{3}\-[0-9]{4}/', $rivi , $osumat);
-					
 					if ($tunnuksia == 1){
             
                         array_push($vh_list, $this->CI->vrl_helper->vh_to_number($osumat[0][0]));
@@ -517,6 +519,8 @@ public function handle_porrastettu_class_results($jaos, $kisa, $classinfo, $part
         for ($i = 0; $i < count($participants); $i++) {
             $horse = $participants[$i];
             $tunnuksia = preg_match_all('/\VH[0-9]{2}\-[0-9]{3}\-[0-9]{4}/', $horse , $osumat);
+           
+
             // 1. Tarkistetaan, onko rivillä VH-tunnusta ja löytyykö se infotaulukosta
             if( $tunnuksia == 1 && isset($leveled_info_horses[$this->CI->vrl_helper->vh_to_number($osumat[0][0])])) {
                 $osuma = $this->CI->vrl_helper->vh_to_number($osumat[0][0]);
