@@ -665,16 +665,7 @@ class Virtuaalihevoset extends CI_Controller
             else if($this->input->server('REQUEST_METHOD') == 'POST'){
                 $poni = $this->_fill_horse_info();
                 $msg = "";
-                if ($this->_validate_horse_form() == FALSE)
-				{
-					$vars['msg'] = "Rekisteröinti epäonnistui!";
-					$vars['msg_type'] = "danger";
-                    $vars['form'] = $this->_get_horse_edit_form('new', $poni);
-
-                    $this->fuel->pages->render('misc/jonorekisterointi', $vars);
-
-				}
-                else if (!$this->_validate_horse('new', $poni, $msg)){
+                if (!$this->_validate_horse('new', $poni, $msg)){
                     $vars['msg'] = "Rekisteröinti epäonnistui! " . $msg;
 					$vars['msg_type'] = "danger";
                     $vars['form'] = $this->_get_horse_edit_form('new', $poni);
@@ -745,16 +736,7 @@ class Virtuaalihevoset extends CI_Controller
            if($this->input->server('REQUEST_METHOD') == 'POST'){
                 $poni = $this->_fill_horse_info($mode);
                 $msg = "";
-                if ($this->_validate_horse_form($mode) == FALSE)
-                {
-                    $data['msg'] = "Muokkaus epäonnistui!";
-                    $data['msg_type'] = "danger";
-                    $data['editor'] = $this->_get_horse_edit_form($mode, $poni, $data['hevonen']['reknro']);
-                    $this->fuel->pages->render('hevoset/hevonen_muokkaa', $data);
-
-    
-                }
-                else if (!$this->_validate_horse($mode, $poni, $msg)){
+                if (!$this->_validate_horse($mode, $poni, $msg)){
                     $data['msg'] = "Rekisteröinti epäonnistui! " . $msg;
                     $data['msg_type'] = "danger";
                     $data['editor'] = $this->_get_horse_edit_form($mode, $poni, $data['hevonen']['reknro']);
@@ -1191,25 +1173,7 @@ class Virtuaalihevoset extends CI_Controller
 
     }
     
-    private function _validate_horse_form($type = 'new'){
-        $this->load->library('form_validation');
-        
-        if($type == 'new' || $type == 'admin'){
-            $this->form_validation->set_rules('skp', 'Sukupuoli', 'min_length[1]|max_length[2]|numeric|required');
-            $this->form_validation->set_rules('rotu', 'Rotu', 'min_length[1]|max_length[4]|numeric|required');
-            $this->form_validation->set_rules('nimi', 'Nimi', "min_length[4]|max_length[80]|required");
-        }
-      
-        $this->form_validation->set_rules('kuollut', 'Kuolintieto', 'min_length[1]|max_length[1]|numeric');
-        $this->form_validation->set_rules('painotus', 'Painotus', 'min_length[1]|max_length[3]|numeric');
-		$this->form_validation->set_rules('vari', 'Väri', 'min_length[1]|max_length[4]|numeric');
-        $this->form_validation->set_rules('syntymamaa', 'Syntymämaa', 'min_length[1]|max_length[4]|numeric');
 
-		$this->form_validation->set_rules('kasvattajanimi', 'Kasvattajanimi', 'min_length[1]|max_length[25]');
-        $this->form_validation->set_rules('kasvattaja_talli', 'Kasvattajatalli', 'min_length[4]|max_length[8]');
-
-        return $this->form_validation->run();        
-    }
     private function _fill_horse_info($type = 'new'){
         $poni = array();
         
@@ -1291,20 +1255,24 @@ class Virtuaalihevoset extends CI_Controller
         $ok = true;
         if($type == 'new' || $type == 'admin'){ 
             
-            if (!isset($poni['rotu']) || !$this->Listat_model->breed_exists($poni['rotu'])){
+            if (!isset($poni['rotu']) || !is_numeric($poni['rotu']) || $poni['rotu'] < 1 || $poni['rotu'] > 999 || !$this->Listat_model->breed_exists($poni['rotu'])){
                 $msg .= "<li>Rotu on virheellinen.</li>";
                 $ok = false;
             }
             
-            if (!isset($genders[$poni['sukupuoli']])){
+            if (!isset($poni['sukupuoli']) || !isset($genders[$poni['sukupuoli']])){
                     $msg .= "<li>Sukupuoli on virheellinen.</li>";
                     $ok = false;
             }
-            if (!$this->vrl_helper->validateDate($poni['syntymaaika'])){     
+            if (!isset($poni['syntymaaika']) || !$this->vrl_helper->validateDate($poni['syntymaaika'])){     
                  $msg .= "<li>Syntymäaika on virheellinen.</li>";
                 $ok = false;
             }
-            if($this->hevonen_model->onko_nimi($poni['nimi'], $poni['rotu']) && $type == 'new'){
+            if(!(isset($poni['nimi'])) || strlen($poni['nimi']) > 80 || strlen($poni['nimi']) < 2){
+                $msg .= "<li>Nimi on pakollinen tieto, ja sen tulee olla min. 2, max. 80 merkkiä pitkä.</li>";
+                $ok = false;
+            }
+            else if($this->hevonen_model->onko_nimi($poni['nimi'], $poni['rotu']) && $type == 'new'){
                $msg .= "<li>Saman niminen ja rotuinen hevonen on jo rekisterissä.</li>";
                 $ok = false;
             }
@@ -1316,23 +1284,31 @@ class Virtuaalihevoset extends CI_Controller
         }
 
         
-        if (isset($poni['painotus']) && !($this->Listat_model->skill_exists($poni['painotus']))){
+        if (isset($poni['painotus']) && (!is_numeric($poni['painotus']) || $poni['painotus'] < 1 || $poni['painotus'] > 99 || !$this->Listat_model->skill_exists($poni['painotus']))){
                 $msg .= "<li>Painotusta ei ole olemassa.</li>";
                 $ok = false;
         }
-        if (isset($poni['vari']) && !($this->Listat_model->colour_exists($poni['vari']))){
+        if (isset($poni['vari']) && (!is_numeric($poni['vari']) || $poni['vari'] < 1 || $poni['vari'] > 999 || !$this->Listat_model->colour_exists($poni['vari']))){
                 $msg .= "<li>Väri on virheellinen.</li>";
                 $ok = false;
         }
-        if (isset($poni['sakakorkeus']) && !(is_numeric($poni['sakakorkeus']) && $poni['sakakorkeus'] > 40 && $poni['sakakorkeus'] < 300)){
+        if (isset($poni['sakakorkeus']) && (!is_numeric($poni['sakakorkeus']) || $poni['sakakorkeus'] < 40 || $poni['sakakorkeus'] > 300)){
                 $msg .= "<li>Säkäkorkeus on virheellinen.</li>";
                 $ok = false;
         }
-        if (isset($poni['syntymamaa']) && !($this->Listat_model->country_exists($poni['syntymamaa']))){
+        if (isset($poni['syntymamaa']) && (!is_numeric($poni['syntymamaa']) || $poni['syntymamaa'] < 1 || $poni['syntymamaa'] > 300 || !$this->Listat_model->country_exists($poni['syntymamaa']))){
             $msg .= "<li>Maakoodia ei ole olemassa.</li>";
             $ok = false;
         }
-        if (isset($poni['kuollut']) && $poni['kuollut'] && $this->vrl_helper->validateDate($poni['kuol_pvm'])){     
+        if(isset($poni['porr_kilpailee']) && !($poni['porr_kilpailee'] == 1 ||$poni['porr_kilpailee'] == 0) ){
+            $msg .= "<li>Virheellinen porrastettujen kilpailutieto.</li>";
+            $ok = false;
+        }
+        if(isset($poni['kuollut']) && !($poni['kuollut'] == 1 ||$poni['kuollut'] == 0) ){
+            $msg .= "<li>Virheellinen kuolintieto.</li>";
+            $ok = false;
+        }
+        else if (isset($poni['kuollut']) && $poni['kuollut'] && !$this->vrl_helper->validateDate($poni['kuol_pvm'])){     
             $msg .= "<li>Kuolinaika on virheellinen.</li>";
             $ok = false;
         }
@@ -1341,21 +1317,22 @@ class Virtuaalihevoset extends CI_Controller
            $msg .= "<li>".$parent_msg."</li>";
             $ok = false;
         }
-        if (isset($poni['kasvattajanimi']) && !empty($poni['kasvattajanimi']) && !(strpos($poni['nimi'], $poni['kasvattajanimi']) !== false)){
-            $msg .= "<li>Ilmoittamasi kasvattajanimi ei ole hevosen nimessä.</li>";
+        if (isset($poni['kasvattajanimi']) && !empty($poni['kasvattajanimi']) && (strlen($poni['kasvattajanimi']) > 25 ||strpos($poni['nimi'], $poni['kasvattajanimi']) === false)){
+
+            $msg .= "<li>Ilmoittamasi kasvattajanimi on liian pitkä tai se ei ole hevosen nimessä.</li>";
                 $ok = false;
         }
-        if (isset($poni['kotitalli']) && !empty($poni['kotitalli']) && (strlen($poni['kotitalli']) < 4 || strlen($poni['kotitalli']) > 10 || !$this->tallit_model->is_tnro_in_use($poni['kotitalli']))){
+        if (isset($poni['kotitalli']) && !empty($poni['kotitalli']) && (strlen($poni['kotitalli']) < 4 || strlen($poni['kotitalli']) > 8 || !$this->tallit_model->is_tnro_in_use($poni['kotitalli']))){
             $msg .= "<li>Kotitallin tunnus on virheellinen</li>";
                 $ok = false;
         }
-        if (isset($poni['kasvattaja_talli']) && !empty($poni['kasvattaja_talli']) && !$this->tallit_model->is_tnro_in_use($poni['kasvattaja_talli'])){
+        if (isset($poni['kasvattaja_talli']) && !empty($poni['kasvattaja_talli']) && (strlen($poni['kasvattaja_talli']) < 4 || strlen($poni['kasvattaja_talli']) > 8 ||!$this->tallit_model->is_tnro_in_use($poni['kasvattaja_talli']))){
             $msg .= "<li>Kasvattajan tallitunnus on virheellinen.</li>";
                 $ok = false;
         }
-        if (isset($poni['kasvattaja_tunnus']) && !empty($poni['kasvattaja_tunnus']) && !(
-                 $this->vrl_helper->check_vrl_syntax($poni['kasvattaja_tunnus'])
-                 && $this->tunnukset_model->onko_tunnus($this->vrl_helper->vrl_to_number($poni['kasvattaja_tunnus'])))){
+        if (isset($poni['kasvattaja_tunnus']) && !empty($poni['kasvattaja_tunnus']) && (
+                 !$this->vrl_helper->check_vrl_syntax($poni['kasvattaja_tunnus'])
+                 || !$this->tunnukset_model->onko_tunnus($this->vrl_helper->vrl_to_number($poni['kasvattaja_tunnus'])))){
            $msg .= "<li>Kasvattajan VRL-tunnus on virheellinen.</li>";
                 $ok = false;
         }
@@ -1368,8 +1345,10 @@ class Virtuaalihevoset extends CI_Controller
                     
                 }
             }
-        
                         
+        }else  if(isset($poni['ikaantyminen_d']) && !is_numeric($poni['ikaantyminen_d'])){
+                $msg .= "<li>Ikääntymisen tulee olla numero.</li>";
+                $ok = false;
         }
         
         if($ok){
