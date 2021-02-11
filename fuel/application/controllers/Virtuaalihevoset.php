@@ -899,6 +899,42 @@ class Virtuaalihevoset extends CI_Controller
 		
 		
 	}
+    
+    public function lajit() {
+        $this->load->model('sport_model');
+
+        $vars['title'] = 'Painotuslajit';			
+		$vars['text_view'] = "";
+		
+		$vars['headers'][1] = array('title' => 'ID', 'key' => 'pid', 'key_link' => site_url('virtuaalihevoset/laji/'));
+		$vars['headers'][2] = array('title' => 'Painotus', 'key' => 'painotus');
+		$vars['headers'][3] = array('title' => 'Lyhenne', 'key' => 'lyhenne');
+		$vars['headers'] = json_encode($vars['headers']);
+					
+		$vars['data'] = json_encode($this->sport_model->get_sport_list());
+
+		$this->fuel->pages->render('misc/taulukko', $vars);
+    }
+    
+    public function laji($id){
+        $this->load->model('sport_model');
+        $laji = $this->sport_model->get_sport_info($id);
+        
+        if(sizeof($laji) < 1){
+            $this->fuel->pages->render('misc/naytaviesti', array('msg_type' => 'danger', 'msg' => 'Lajikoodi on virheellinen.'));
+
+        }
+        else {   
+            $vars = array();
+            $vars['title'] = "Painotuslaji: " . $laji['painotus'];
+            $vars['genders'] =  $this->hevonen_model->get_stats_sport($id);
+            $vars['year_stats'] = $this->_year_stats_table($this->hevonen_model->get_stats_sport_year_list($id));
+
+            $this->fuel->pages->render('hevoset/stats', $vars);
+        }
+		
+		
+	}
 	
 	public function rodut(){
 		
@@ -1424,9 +1460,7 @@ class Virtuaalihevoset extends CI_Controller
         }
         
         return true;
-        
-        
-            
+           
             
     }
 	

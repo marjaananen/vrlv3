@@ -949,6 +949,21 @@ class Hevonen_model extends Base_module_model
         
     }
     
+    function get_stats_sport($sport){
+        
+        $this->db->select("COUNT(reknro) as amount, sukupuoli");
+        $this->db->where("painotus", $sport);
+        $this->db->group_by("sukupuoli");
+        
+        $this->db->from('vrlv3_hevosrekisteri');
+        $query = $this->db->get();
+        
+        $genders = $this->sort_gender_stats($query->result_array());
+
+        return $genders;
+        
+    }
+    
      
     function count_breedingname_amount($id){
         
@@ -1050,6 +1065,21 @@ class Hevonen_model extends Base_module_model
         $this->db->group_by("YEAR(rekisteroity)");     
         $this->db->from('vrlv3_hevosrekisteri');
         $this->db->where('syntymamaa', $country);
+        
+        $query = $this->db->get();
+        
+        
+        return $query->result_array();
+
+        
+    }
+    
+    function get_stats_sport_year_list($country){
+        
+        $this->db->select("COUNT(reknro) as amount, YEAR(rekisteroity) as year");
+        $this->db->group_by("YEAR(rekisteroity)");     
+        $this->db->from('vrlv3_hevosrekisteri');
+        $this->db->where('painotus', $country);
         
         $query = $this->db->get();
         

@@ -66,6 +66,10 @@ $nav['virtuaalihevoset/vari'] = array('hidden'=>true, 'label' => 'Väri', 'paren
 $nav['virtuaalihevoset/syntymamaat'] = array('label' => 'Syntymämaalista', 'parent_id' => 'virtuaalihevoset', 'active' => 'virtuaalihevoset/syntymamaat'); //Koodattavaa: Syntymämaat
 $nav['virtuaalihevoset/maa'] = array('hidden'=>true, 'label' => 'Maa', 'parent_id' => 'virtuaalihevoset/syntymamaat', 'active' => 'virtuaalihevoset/maa$|virtuaalihevoset/maa/:any'); //Koodattavaa: Rotulistat
 
+$nav['virtuaalihevoset/lajit'] = array('label' => 'Lajilista', 'parent_id' => 'virtuaalihevoset', 'active' => 'virtuaalihevoset/lajit'); //Koodattavaa: Rotulistat
+$nav['virtuaalihevoset/laji'] = array('hidden'=>true, 'label' => 'Laji', 'parent_id' => 'virtuaalihevoset/lajit', 'active' => 'virtuaalihevoset/laji$|virtuaalihevoset/laji/:any'); //Koodattavaa: Rotulistat
+
+
 //jalostus ja kasvatus alamenu
 $nav['kasvatus/kasvattajanimet'] = array('label' => 'Kasvattajanimirekisteri', 'parent_id' => 'kasvatus', 'active' => 'kasvatus/kasvattajanimet'); 
 $nav['kasvatus/kasvattajanimet/rekisteroi'] = array('label' => 'Rekisteröi kasvattajanimi', 'parent_id' => 'kasvatus/kasvattajanimet', 'active' => 'kasvatus/kasvattajanimet/omat');

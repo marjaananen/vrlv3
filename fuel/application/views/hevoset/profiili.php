@@ -52,6 +52,12 @@ if(isset($hevonen['maa'])) {
  $maatieto = ', <a href="'. site_url('virtuaalihevoset/maa/'.$hevonen['maaid']).'">'.$hevonen['maa'].'</a>';
 
  }
+ 
+$painotustieto = "";
+if(isset($hevonen['h_painotusnimi'])) {
+ $painotustieto = '<a href="'. site_url('virtuaalihevoset/maa/'.$hevonen['pid']).'">'.$hevonen['h_painotusnimi'].'</a>';
+
+ }
 
 $rotutieto = "";
 if(isset($hevonen['polv_tark']) && $hevonen['polv_tark'] == 1){
@@ -59,8 +65,8 @@ if(isset($hevonen['polv_tark']) && $hevonen['polv_tark'] == 1){
                                                              Veriprosentti: '.floatval($hevonen['polv_pros']) . '%, tarkastaja: VRL-'.$hevonen['polv_tark_vrl'].'.</small>';
     
 }
-?>
 
+?>
 
 
 
@@ -86,7 +92,7 @@ if(isset($hevonen['polv_tark']) && $hevonen['polv_tark'] == 1){
    <tr><th scope="row">Säkäkorkeus</th><td> <?=$hevonen['sakakorkeus']?> cm</td></tr>
    <tr><th scope="row">Syntynyt</th><td> <?=$hevonen['syntymaaika']?><?=$maatieto;?></td></tr>
    <tr><th scope="row">Väri</th><td> <a href="<?php echo site_url().'/virtuaalihevoset/vari/'.$hevonen['vid'];?>"><?=$hevonen['h_varinimi']?></a></td></tr>
-   <tr><th scope="row">Painotus</th><td> <?php if (isset($hevonen['painotusnimi'])) { echo $hevonen['painotusnimi']; } else {echo "-";}?></td></tr>
+   <tr><th scope="row">Painotus</th><td> <?php echo $painotustieto; ?></td></tr>
    <tr><th scope="row">Sivut</th><td> <a href="<?=$hevonen['h_url']?>"><?=$hevonen['h_url']?></a></td></tr>
    <tr><th scope="row">Rekisteröity</th><td> <?=$hevonen['rekisteroity']?></td></tr>
    <tr><th scope="row">Kotitalli</th><td> <?php echo $kotitallitieto; ?></td></tr>
