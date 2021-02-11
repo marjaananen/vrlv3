@@ -1175,8 +1175,10 @@ class Virtuaalihevoset extends CI_Controller
         $vuodet = array("3", "4", "5", "6", "7", "8");
         foreach($vuodet as $vuosi){
             $value = null;
-            if(isset($poni[$vuosi.'vuotta'])){
+            if(isset($poni[$vuosi.'vuotta']) && $this->vrl_helper->validateDate($poni[$vuosi.'vuotta'], 'Y-m-d')){
                 $value = $this->vrl_helper->sql_date_to_normal($poni[$vuosi.'vuotta']);
+            }else if (isset($poni[$vuosi.'vuotta'])){
+                $value = $poni[$vuosi.'vuotta'];
             }
             $fields[$vuosi.'vuotta'] = array('type' => 'text', 'label'=>$vuosi. ' vuotta', 'class'=>'form-control',
                                            'required' => FALSE, 'value'=> $value ?? '',
@@ -1198,16 +1200,13 @@ class Virtuaalihevoset extends CI_Controller
             $this->form_validation->set_rules('nimi', 'Nimi', "min_length[4]|max_length[80]|required");
         }
       
-		$this->form_validation->set_rules('url', 'Url', 'min_length[1]|max_length[360]');
         $this->form_validation->set_rules('kuollut', 'Kuolintieto', 'min_length[1]|max_length[1]|numeric');
-        $this->form_validation->set_rules('sakakorkeus', 'Säkäkorkeus', 'min_length[2]|max_length[3]|numeric');
         $this->form_validation->set_rules('painotus', 'Painotus', 'min_length[1]|max_length[3]|numeric');
 		$this->form_validation->set_rules('vari', 'Väri', 'min_length[1]|max_length[4]|numeric');
         $this->form_validation->set_rules('syntymamaa', 'Syntymämaa', 'min_length[1]|max_length[4]|numeric');
 
 		$this->form_validation->set_rules('kasvattajanimi', 'Kasvattajanimi', 'min_length[1]|max_length[25]');
         $this->form_validation->set_rules('kasvattaja_talli', 'Kasvattajatalli', 'min_length[4]|max_length[8]');
-        $this->form_validation->set_rules('kasvattaja_tunnus', 'Kasvattajan VRL-tunnus', 'min_length[5]|max_length[10]');
 
         return $this->form_validation->run();        
     }
@@ -1289,77 +1288,94 @@ class Virtuaalihevoset extends CI_Controller
             $msg = "Muistathan lukea säännöt ennen hevosen rekisteröintiä!.";
                 return false;
         }
+        $ok = true;
         if($type == 'new' || $type == 'admin'){ 
             
             if (!isset($poni['rotu']) || !$this->Listat_model->breed_exists($poni['rotu'])){
-                $msg = "Rotu on virheellinen.";
-                return false;
+                $msg .= "<li>Rotu on virheellinen.</li>";
+                $ok = false;
             }
             
-            else if (!isset($genders[$poni['sukupuoli']])){
-                    $msg = "Sukupuoli on virheellinen";
-                    return false;
+            if (!isset($genders[$poni['sukupuoli']])){
+                    $msg .= "<li>Sukupuoli on virheellinen.</li>";
+                    $ok = false;
             }
-            else if (!$this->vrl_helper->validateDate($poni['syntymaaika'])){     
-                 $msg = "Syntymäaika on virheellinen";
-                    return false;
+            if (!$this->vrl_helper->validateDate($poni['syntymaaika'])){     
+                 $msg .= "<li>Syntymäaika on virheellinen.</li>";
+                $ok = false;
             }
-            else if($this->hevonen_model->onko_nimi($poni['nimi'], $poni['rotu']) && $type == 'new'){
-                $msg = "Saman niminen ja rotuinen hevonen on jo rekisterissä.";
-                return false;
+            if($this->hevonen_model->onko_nimi($poni['nimi'], $poni['rotu']) && $type == 'new'){
+               $msg .= "<li>Saman niminen ja rotuinen hevonen on jo rekisterissä.</li>";
+                $ok = false;
             }
+        }
+        
+         if (!isset($poni['url']) || strlen($poni['url']) < 12 || !substr( trim($poni['url']), 0, 4 ) === "http") {
+                    $msg .= "<li>Osoite on virheellinen (muista http alku!).</li>";
+                    $ok = false;
         }
 
         
         if (isset($poni['painotus']) && !($this->Listat_model->skill_exists($poni['painotus']))){
-            $msg = "Painotusta ei ole olemassa.";
-            return false;
+                $msg .= "<li>Painotusta ei ole olemassa.</li>";
+                $ok = false;
         }
-        else if (isset($poni['vari']) && !($this->Listat_model->colour_exists($poni['vari']))){
-            $msg = "Väriä ei ole olemassa.";
-            return false;
+        if (isset($poni['vari']) && !($this->Listat_model->colour_exists($poni['vari']))){
+                $msg .= "<li>Väri on virheellinen.</li>";
+                $ok = false;
         }
-        else if (isset($poni['syntymamaa']) && !($this->Listat_model->country_exists($poni['syntymamaa']))){
-            $msg = "Maakoodia ei ole olemassa.";
-            return false;
+        if (isset($poni['sakakorkeus']) && !(is_numeric($poni['sakakorkeus']) && $poni['sakakorkeus'] > 40 && $poni['sakakorkeus'] < 300)){
+                $msg .= "<li>Säkäkorkeus on virheellinen.</li>";
+                $ok = false;
         }
-        else if (isset($poni['kuollut']) && $poni['kuollut'] && $this->vrl_helper->validateDate($poni['kuol_pvm'])){     
-            $msg = "Kuolinaika on virheellinen";
-            return false;
+        if (isset($poni['syntymamaa']) && !($this->Listat_model->country_exists($poni['syntymamaa']))){
+            $msg .= "<li>Maakoodia ei ole olemassa.</li>";
+            $ok = false;
         }
-        else if ($type == 'new' && !$this->_check_parents($poni, $msg)){
-            return false;
+        if (isset($poni['kuollut']) && $poni['kuollut'] && $this->vrl_helper->validateDate($poni['kuol_pvm'])){     
+            $msg .= "<li>Kuolinaika on virheellinen.</li>";
+            $ok = false;
         }
-        else if (isset($poni['kasvattajanimi']) && !empty($poni['kasvattajanimi']) && !(strpos($poni['nimi'], $poni['kasvattajanimi']) !== false)){
-            $msg = "Ilmoittamasi kasvattajanimi ei ole hevosen nimessä. ";
-            return false;
+        $parent_msg = "";
+        if (!$this->_check_parents($poni, $parent_msg)){
+           $msg .= "<li>".$parent_msg."</li>";
+            $ok = false;
         }
-        else if (isset($poni['kotitalli']) && !empty($poni['kotitalli']) && !$this->tallit_model->is_tnro_in_use($poni['kotitalli'])){
-            $msg = "Kotitallin tunnus on virheellinen.";
-            return false;
+        if (isset($poni['kasvattajanimi']) && !empty($poni['kasvattajanimi']) && !(strpos($poni['nimi'], $poni['kasvattajanimi']) !== false)){
+            $msg .= "<li>Ilmoittamasi kasvattajanimi ei ole hevosen nimessä.</li>";
+                $ok = false;
         }
-        else if (isset($poni['kasvattaja_talli']) && !empty($poni['kasvattaja_talli']) && !$this->tallit_model->is_tnro_in_use($poni['kasvattaja_talli'])){
-            $msg = "Kasvattajan tallitunnus on virheellinen.";
-            return false;
+        if (isset($poni['kotitalli']) && !empty($poni['kotitalli']) && (strlen($poni['kotitalli']) < 4 || strlen($poni['kotitalli']) > 10 || !$this->tallit_model->is_tnro_in_use($poni['kotitalli']))){
+            $msg .= "<li>Kotitallin tunnus on virheellinen</li>";
+                $ok = false;
         }
-        else if (isset($poni['kasvattaja_tunnus']) && !empty($poni['kasvattaja_tunnus']) && !(
+        if (isset($poni['kasvattaja_talli']) && !empty($poni['kasvattaja_talli']) && !$this->tallit_model->is_tnro_in_use($poni['kasvattaja_talli'])){
+            $msg .= "<li>Kasvattajan tallitunnus on virheellinen.</li>";
+                $ok = false;
+        }
+        if (isset($poni['kasvattaja_tunnus']) && !empty($poni['kasvattaja_tunnus']) && !(
                  $this->vrl_helper->check_vrl_syntax($poni['kasvattaja_tunnus'])
                  && $this->tunnukset_model->onko_tunnus($this->vrl_helper->vrl_to_number($poni['kasvattaja_tunnus'])))){
-            $msg = "Kasvattajan VRL-tunnus on virheellinen.";
-            return false;
-        }else if(!isset($poni['ikaantyminen_d']) || $poni['ikaantyminen_d'] == 0){
+           $msg .= "<li>Kasvattajan VRL-tunnus on virheellinen.</li>";
+                $ok = false;
+        }
+        if(!isset($poni['ikaantyminen_d']) || $poni['ikaantyminen_d'] == 0){
             $vuodet = array("3", "4", "5", "6", "7", "8");
             foreach($vuodet as $vuosi){
                 if(isset($poni[$vuosi."vuotta"]) && !$this->vrl_helper->validateDate($poni[$vuosi."vuotta"])){
-                        $msg = "Porrastettuja varten kirjatuissa syntymäpäivissä on virhe.";
-                        return false;
+                        $msg .= "<li>Porrastettuihin liittyvissä syntymäpäivissä (".$vuosi." vuotta) on virhe.</li>";
+                $ok = false;
                     
                 }
             }
         
                         
         }
-        return true;
+        
+        if($ok){
+            $msg = "<ul>".$msg."</ul>";
+        }
+        return $ok;
     }
     
     private function _check_parents($poni, &$msg){
@@ -1367,13 +1383,13 @@ class Virtuaalihevoset extends CI_Controller
                  && !($this->vrl_helper->check_vh_syntax($poni['i_nro'])
                                             && ($this->hevonen_model->onko_tunnus_sukupuoli($this->vrl_helper->vh_to_number($poni['i_nro']), 2)
                                                                                             || $this->hevonen_model->onko_tunnus_sukupuoli($this->vrl_helper->vh_to_number($poni['i_nro']), 3)))){
-            $msg = "Isän tunnus on virheellinen tai se on väärää sukupuolta.";
+            $msg .= "Isän tunnus on virheellinen tai se on väärää sukupuolta. ";
             return false;
         }
-        else if (isset($poni['e_nro']) && !empty($poni['e_nro'])
+        if (isset($poni['e_nro']) && !empty($poni['e_nro'])
                  &&!($this->vrl_helper->check_vh_syntax($poni['e_nro'])
                                                                      && $this->hevonen_model->onko_tunnus_sukupuoli($this->vrl_helper->vh_to_number($poni['e_nro']), 1))){
-            $msg = "Emän tunnus on virheellinen tai se on väärää sukupuolta.";
+            $msg .= "Emän tunnus on virheellinen tai se on väärää sukupuolta. ";
             return false;
 
         }

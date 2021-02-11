@@ -121,15 +121,26 @@ class Vrl_helper {
   
   public function validateDate($date, $format = 'd.m.Y')
   {
-    try {
-    $d = DateTime::createFromFormat($format, $date);
-    // The Y ( 4 digits year ) returns TRUE for any integer with any number of digits so changing the comparison from == to === fixes the issue.
-        return $d && $d->format($format) === $date;
-
+    $date = trim($date);
+    $dates_amount = preg_match_all('/^([0]?[1-9]|[1|2][0-9]|[3][0|1])[.]([0]?[1-9]|[1][0-2])[.]([0-9]{4}|[0-9]{2})/', $date , $found_date);
+    
+    if ($dates_amount == 1 && strlen($date)<11){
+    
+    
+      try {
+      $d = DateTime::createFromFormat($format, $date);
+      // The Y ( 4 digits year ) returns TRUE for any integer with any number of digits so changing the comparison from == to === fixes the issue.
+          return $d && $d->format($format) === $date;
+  
+      }
+      catch (Exception $e){
+        return false;
+      }
+    } else {
+    
+    return false;
     }
-    catch (Exception $e){
-      return false;
-    }
+  
     
   }
   
