@@ -15,7 +15,7 @@ class Jasenyys extends CI_Controller
 	
 	function index()
     {
-        var_dump(date("Y-m-d H:i:s", NOW()));
+       // var_dump(date("Y-m-d H:i:s", NOW()));
         $this->haku();
     }
 	

@@ -699,7 +699,29 @@ class Hevonen_model extends Base_module_model
         return array();
     }
     
-    
+     function get_horses_newest()
+    {
+        
+        $date = new DateTime();
+        $date->setTimestamp(time() - 30*24*60*60);
+        $oldest_possible = $date->format('Y-m-d H:i:s');
+        
+        
+        $this->db->select("vrlv3_hevosrekisteri.reknro, nimi, syntymaaika, rekisteroity, hyvaksyi, r.lyhenne as rotu, kuollut, IF(sukupuoli='1', 'tamma', IF(sukupuoli='2', 'ori', 'ruuna')) as sukupuoli");
+        $this->db->join("vrlv3_lista_rodut as r", "vrlv3_hevosrekisteri.rotu = r.rotunro", 'left');
+        $this->db->from('vrlv3_hevosrekisteri');
+        $this->db->where('rekisteroity >', $oldest_possible);
+        $this->db->order_by('rekisteroity', 'desc');
+
+        $query = $this->db->get();
+        
+        if ($query->num_rows() > 0)
+        {
+            return $query->result_array();
+        }
+        
+        return array();
+    }
     
       function get_stables_horses($nro, $only_alive = false)
     {

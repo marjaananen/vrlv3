@@ -1400,18 +1400,20 @@ private function _sort_rewarded_horses($palkinto, &$all_rewarded, &$all_vhs){
 
 private function _check_horses_exists($all_vhs, &$tested_vhs, &$vh_names){
                     //haetaan vh:t hepparekasta ja tarkastetaan
-                
-    $this->db->select('reknro, nimi');
-    $this->db->where_in('h.reknro', $all_vhs);
-    $query = $this->db->get('vrlv3_hevosrekisteri as h');
-
-    $vh_haku = $query->result_array();
     $tested_vhs = array();
     $vh_names = array();
-    foreach($vh_haku as $vh){
-        $tested_vhs [] = $vh['reknro'];
-        $vh_names[$vh['reknro']] = $vh['nimi'];
-    }   
+    if(sizeof($all_vhs) > 0){          
+        $this->db->select('reknro, nimi');
+        $this->db->where_in('h.reknro', $all_vhs);
+        $query = $this->db->get('vrlv3_hevosrekisteri as h');
+    
+        $vh_haku = $query->result_array();
+    
+        foreach($vh_haku as $vh){
+            $tested_vhs [] = $vh['reknro'];
+            $vh_names[$vh['reknro']] = $vh['nimi'];
+        }
+    }
 }
 
     

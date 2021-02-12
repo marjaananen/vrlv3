@@ -16,7 +16,7 @@ class Yllapito_hevosrekisteri extends CI_Controller
         $this->load->model('Hevonen_model');
         $this->load->model('Color_model');
         $this->load->model('Breed_model');
-        $this->load->library("vrl_helper");
+            $this->load->library("vrl_helper");
 
         $this->url = "yllapito/hevosrekisteri/";
         
@@ -28,8 +28,31 @@ class Yllapito_hevosrekisteri extends CI_Controller
 	}
     
 
-    function index(){
-$this->pipari();
+    function index()
+    {
+		$vars['title'] = "Hevosrekisteri";
+		
+		$vars['msg'] = '';
+		
+		$vars['text_view'] = "<p>Viimeisimmät rekisteröidyt hevoset max. kuukauden ajalta.</p>";		
+	
+            $vars['headers'][1] = array('title' => 'Rekisteröity', 'key' => 'rekisteroity', 'type'=>'date');
+			$vars['headers'][2] = array('title' => 'Rekisterinumero', 'key' => 'reknro', 'key_link' => site_url('virtuaalihevoset/hevonen/'), 'type'=>'VH');
+			$vars['headers'][3] = array('title' => 'Nimi', 'key' => 'nimi');
+			$vars['headers'][4] = array('title' => 'Rotu', 'key' => 'rotu');
+			$vars['headers'][5] = array('title' => 'Skp', 'key' => 'sukupuoli');
+			$vars['headers'][6] = array('title' => 'Rekisteröi', 'key' => 'hyvaksyi', 'prepend_text'=>'VRL-', 'key_link' => site_url('/tunnus/'));
+            $vars['headers'][4] = array('title' => 'Poista', 'key' => 'reknro', 'key_link' => site_url($this->url.'/poista/'), 'image' => site_url('assets/images/icons/delete.png'));
+            $vars['headers'][5] = array('title' => 'Editoi', 'key' => 'reknro', 'key_link' => site_url($this->url.'/muokkaa/'), 'image' => site_url('assets/images/icons/edit.png'));
+  
+			
+			$vars['headers'] = json_encode($vars['headers']);
+						
+			$vars['data'] = json_encode($this->Hevonen_model->get_horses_newest());
+		
+		
+		$this->fuel->pages->render('misc/taulukko', $vars);
+    
     }
     
     function polveutumistarkastus($reknro = null){
