@@ -69,13 +69,14 @@ $route['yllapito/tiedotukset/(:any)'] = "yllapito_tiedotukset/$1";
 $route['yllapito/tiedotukset/(:any)/(:any)'] = "yllapito_tiedotukset/$1/$2";
 
 $route['yllapito/hevosrekisteri'] = "yllapito_hevosrekisteri";
-$route['yllapito/hevosrekisteri/(:any)'] = "yllapito_hevosrekisteri/$1";
-$route['yllapito/hevosrekisteri/(:any)/(:any)'] = "yllapito_hevosrekisteri/$1/$2";
-$route['yllapito/hevosrekisteri/(:any)/(:any)/(:any)'] = "yllapito_hevosrekisteri/$1/$2/$3";
+$route['yllapito/hevosrekisteri/poista/(:any)'] = "virtuaalihevoset/poista/$1";
 $route['yllapito/hevosrekisteri/muokkaa/(:any)'] = "virtuaalihevoset/muokkaa/$1";
 $route['yllapito/hevosrekisteri/muokkaa/(:any)/(:any)'] = "virtuaalihevoset/muokkaa/$1/$2";
 $route['yllapito/hevosrekisteri/muokkaa/(:any)/(:any)/(:any)'] = "virtuaalihevoset/muokkaa/$1/$2/$3";
 $route['yllapito/hevosrekisteri/muokkaa/(:any)/(:any)/(:any)/(:any)'] = "virtuaalihevoset/muokkaa/$1/$2/$3/$4";
+$route['yllapito/hevosrekisteri/(:any)'] = "yllapito_hevosrekisteri/$1";
+$route['yllapito/hevosrekisteri/(:any)/(:any)'] = "yllapito_hevosrekisteri/$1/$2";
+$route['yllapito/hevosrekisteri/(:any)/(:any)/(:any)'] = "yllapito_hevosrekisteri/$1/$2/$3";
 
 
 $route['yllapito/jaokset'] = "yllapito_jaokset";

@@ -170,6 +170,7 @@ $nav['profiili/pikaviestit'] = array('label' => 'Omat pikaviestit', 'parent_id' 
 $nav['yllapito/hevosrekisteri/polveutumistarkastus'] = array('label' => 'Polveutumistarkastus', 'parent_id' => 'yllapito/hevosrekisteri', 'active' => 'yllapito/hevosrekisteri/polveutumistarkastus$|yllapito/hevosrekisteri/polveutumistarkastus/:any');
 $nav['yllapito/hevosrekisteri/varit'] = array('label' => 'Hallitse värejä', 'parent_id' => 'yllapito/hevosrekisteri', 'active' => 'yllapito/hevosrekisteri/varit');
 $nav['yllapito/hevosrekisteri/rodut'] = array('label' => 'Hallitse rotuja', 'parent_id' => 'yllapito/hevosrekisteri', 'active' => 'yllapito/hevosrekisteri/rodut');
+$nav['yllapito/hevosrekisteri/poista/'] =array('hidden'=>true, 'label' => 'Poista', 'parent_id' => 'yllapito/hevosrekisteri', 'active' => 'yllapito/hevosrekisteri/poista$|yllapito/hevosrekisteri/poista/:any');
 
 $nav['yllapito/jaokset/lajit'] = array('label' => 'Hallitse lajeja', 'parent_id' => 'yllapito/jaokset', 'active' => 'yllapito/jaokset/lajit');
 $nav['yllapito/jaokset/ominaisuudet'] = array('label' => 'Hallitse ominaisuuksia', 'parent_id' => 'yllapito/jaokset', 'active' => 'yllapito/jaokset/ominaisuudet');

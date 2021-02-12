@@ -55,7 +55,7 @@ if(isset($hevonen['maa'])) {
  
 $painotustieto = "";
 if(isset($hevonen['h_painotusnimi'])) {
- $painotustieto = '<a href="'. site_url('virtuaalihevoset/maa/'.$hevonen['pid']).'">'.$hevonen['h_painotusnimi'].'</a>';
+ $painotustieto = '<a href="'. site_url('virtuaalihevoset/laji/'.$hevonen['pid']).'">'.$hevonen['h_painotusnimi'].'</a>';
 
  }
 
@@ -66,11 +66,19 @@ if(isset($hevonen['polv_tark']) && $hevonen['polv_tark'] == 1){
     
 }
 
+$edit = "";
+
+if(isset($edit_tools) && $edit_tools == true){
+ $button = '<button type="button" class="btn btn-default">
+  <img src="'.base_url().'assets/images/icons/edit.png" /></button>';
+ $edit = '<a href="'.site_url('/virtuaalihevoset/muokkaa/'. $hevonen['reknro']).'">'.$button.'</a>';
+}
+
 ?>
 
 
 
-<h2><?=$hevonen['h_nimi']?> (<?=$hevonen['reknro']?>)</h2>
+<h2><?=$hevonen['h_nimi']?> (<?=$hevonen['reknro']?>) <?=$edit?></h2>
 
 <?php if($hevonen['kuollut']) : ?>
 
@@ -89,7 +97,7 @@ if(isset($hevonen['polv_tark']) && $hevonen['polv_tark'] == 1){
 <table class="table table-striped">
    <tr><th scope="row">Rotu</th><td> <a href="<?php echo site_url().'/virtuaalihevoset/rotu/'.$hevonen['rotunro'];?>"><?=$hevonen['h_rotunimi']?></a><?=$rotutieto;?></td></tr>
    <tr><th scope="row">Sukupuoli</th><td> <?=$hevonen['sukupuoli']?></td></tr>
-   <tr><th scope="row">Säkäkorkeus</th><td> <?=$hevonen['sakakorkeus']?> cm</td></tr>
+   <tr><th scope="row">Säkäkorkeus</th><td> <?php if(isset($hevonen['sakakorkeus']) && $hevonen['sakakorkeus'] > 0){ echo $hevonen['sakakorkeus'] . " cm"; } ?></td></tr>
    <tr><th scope="row">Syntynyt</th><td> <?=$hevonen['syntymaaika']?><?=$maatieto;?></td></tr>
    <tr><th scope="row">Väri</th><td> <a href="<?php echo site_url().'/virtuaalihevoset/vari/'.$hevonen['vid'];?>"><?=$hevonen['h_varinimi']?></a></td></tr>
    <tr><th scope="row">Painotus</th><td> <?php echo $painotustieto; ?></td></tr>

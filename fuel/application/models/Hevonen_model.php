@@ -10,6 +10,55 @@ class Hevonen_model extends Base_module_model
     }
     
     var $genders = array(1=>'tamma', 2=>'ori', 3=>'ruuna');
+    var $allowed_time_for_delete = 60*60*24; //24h
+    var $allowed_time_for_delete_admin = 60*60*24*30; //30 pv
+    
+    function delete_hevonen($reknro, &$msg, $admin = false){
+        $date = new DateTime();
+        $allowed_time = $this->allowed_time_for_delete;
+        if($admin){
+            $allowed_time = $this->allowed_time_for_delete_admin;
+        }
+        $date->setTimestamp(time() - $allowed_time);
+        $oldest_possible = $date->format('Y-m-d H:i:s');
+
+        
+        $this->db->select("*");
+        $this->db->where("reknro", $this->CI->vrl_helper->vh_to_number($reknro));
+        $this->db->where("rekisteroity >", $oldest_possible);
+        $this->db->from('vrlv3_hevosrekisteri');
+        
+        if(!$admin){
+            $this->db->where('hyvaksyi', $this->CI->ion_auth->user->row()->tunnus);
+        }
+        
+        $query = $this->db->get();
+        $hevonen = array();
+        
+        if ($query->num_rows() > 0)
+        {
+            $this->db->where('reknro', $this->CI->vrl_helper->vh_to_number($reknro));
+            $this->db->delete('vrlv3_hevosrekisteri');
+            
+            if($this->db->affected_rows() >0){
+                return true;
+             
+            }else {
+                $msg = "Mikäli hevosella on jälkeläisiä, sitä ei voi poistaa.";
+;
+                return false;
+            }
+        }else {
+            if($admin){
+                $msg = "Hevosta ei ole olemassa tai poistoajan takaraja on mennyt umpeen.";
+            }else {
+                $msg = "Jos et ole ylläpitäjä, voit poistaa ainoastaan itse rekisteröimiäsi hevosia 24h sisällä rekisteröinnistä.";
+            }
+            return false;
+        }
+        return true;
+        
+    }
 
 
     
@@ -19,7 +68,7 @@ class Hevonen_model extends Base_module_model
         $hevonen = array();
         $this->db->select("reknro, h.nimi as h_nimi, r.rotu as h_rotunimi, sukupuoli, sakakorkeus, syntymaaika, v.vari as h_varinimi, p.painotus as h_painotusnimi, syntymamaa, h.url as h_url, rekisteroity,
                           kotitalli, t.url as t_url, t.nimi as t_nimi, kuollut, kuol_pvm, rotunro, maa, vrlv3_lista_maat.id as maaid, vid, pid, kasvattajanimi, kasvattajanimi_id, kasvattaja_tunnus, kasvattaja_talli,
-                          polv_tark, polv_tark_vrl, polv_pros, polv_tark_date
+                          polv_tark, polv_tark_vrl, polv_pros, polv_tark_date, rekisteroity
                           ");
         $this->db->where("reknro", $this->CI->vrl_helper->vh_to_number($reknro));
 
@@ -400,18 +449,19 @@ class Hevonen_model extends Base_module_model
         }
     }
         
-    public function onko_tunnus_sukupuoli($tunnus, $sukupuoli){
-        $this->db->where('reknro', $tunnus);
-        $this->db->where('sukupuoli', $sukupuoli);
+    public function get_hevonen_basic($reknro){
+        $this->db->
+        $this->db->where('reknro', $this->CI->vrl_helper->vh_to_number($reknro));
         $this->db->from('vrlv3_hevosrekisteri');
-        $amount = $this->db->count_all_results();
+        $query = $this->db->get();
         
-        if ($amount != 1){
-            return false;
+       if ($query->num_rows() > 0)
+        {
+            return $query->result_array()[0];
         }
         
         else {
-            return true;
+            return array();
         }
         
     }    

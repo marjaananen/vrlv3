@@ -1,4 +1,18 @@
-<h2>Talliprofiili: <?=$stable['nimi']?></h2>
+<?php
+
+$edit = "";
+
+if(isset($edit_tools) && $edit_tools == true){
+ $button = '<button type="button" class="btn btn-default">
+  <img src="'.base_url().'assets/images/icons/edit.png" /></button>';
+ $edit = '<a href="'.site_url('/virtuaalihevoset/muokkaa/'. $hevonen['reknro']).'">'.$button.'</a>';
+}
+
+?>
+
+
+
+<h2>Talliprofiili: <?=$stable['nimi']?> <?=$edit;?></h2>
 
 <?php if($stable['lopettanut']) : ?>
     <div class="alert alert-warning">

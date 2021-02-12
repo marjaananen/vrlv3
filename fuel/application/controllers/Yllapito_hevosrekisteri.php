@@ -42,8 +42,8 @@ class Yllapito_hevosrekisteri extends CI_Controller
 			$vars['headers'][4] = array('title' => 'Rotu', 'key' => 'rotu');
 			$vars['headers'][5] = array('title' => 'Skp', 'key' => 'sukupuoli');
 			$vars['headers'][6] = array('title' => 'Rekisteröi', 'key' => 'hyvaksyi', 'prepend_text'=>'VRL-', 'key_link' => site_url('/tunnus/'));
-            $vars['headers'][4] = array('title' => 'Poista', 'key' => 'reknro', 'key_link' => site_url($this->url.'/poista/'), 'image' => site_url('assets/images/icons/delete.png'));
-            $vars['headers'][5] = array('title' => 'Editoi', 'key' => 'reknro', 'key_link' => site_url($this->url.'/muokkaa/'), 'image' => site_url('assets/images/icons/edit.png'));
+            $vars['headers'][4] = array('title' => 'Poista', 'key' => 'reknro', 'key_link' => site_url($this->url.'poista/'), 'image' => site_url('assets/images/icons/delete.png'));
+            $vars['headers'][5] = array('title' => 'Editoi', 'key' => 'reknro', 'key_link' => site_url($this->url.'muokkaa/'), 'image' => site_url('assets/images/icons/edit.png'));
   
 			
 			$vars['headers'] = json_encode($vars['headers']);

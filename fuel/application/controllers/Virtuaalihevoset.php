@@ -6,12 +6,14 @@ class Virtuaalihevoset extends CI_Controller
         parent::__construct();
 		$this->load->model("hevonen_model");
         		$this->load->model("breed_model");
+                $this->load->library("vrl_helper");
 
         $this->load->library('user_rights', array('groups' => $this->allowed_user_groups));
 
     }
     
     private $allowed_user_groups = array('admin', 'hevosrekisteri');
+    private $vuodet = array("3", "4", "5", "6", "7", "8");
 
 	
 	//pages
@@ -71,6 +73,10 @@ class Virtuaalihevoset extends CI_Controller
 		
 		$this->fuel->pages->render('misc/haku', $data);
     }
+    
+    //////////////////////////////////////////////////////////////////////////////////
+    // Profiili
+    ///////////////////////////////////////////////////////////////////////////////////
 	
 	
 	public function hevosprofiili ($reknro, $sivu = ""){
@@ -86,6 +92,7 @@ class Virtuaalihevoset extends CI_Controller
 		$vars = array();
         $vars['sivu'] = $sivu;
 		$vars['hevonen'] = $this->hevonen_model->get_hevonen($reknro);
+        $vars['edit_tools'] = $this->_is_editing_allowed($reknro, $msg);
         
         if(sizeof($vars['hevonen']) == 0){
             $this->fuel->pages->render('misc/naytaviesti', array('msg_type' => 'danger', 'msg' => 'Etsimääsi hevosta ei löydy.'));
@@ -160,6 +167,11 @@ class Virtuaalihevoset extends CI_Controller
 		
 		return $this->load->view('misc/taulukko', $vars, TRUE);
     }
+    
+    
+    /////////////////////////////////////////////////////////////////////////////////////7
+    // Omat + massatuho
+    //////////////////////////////////////////////////////////////////////////////////////
     
     var $jaokset;
     
@@ -398,7 +410,7 @@ class Virtuaalihevoset extends CI_Controller
         if($basic_list){
             $vars['headers'][$nro + 1] = array('title' => 'Painotus', 'key' => 'painotus');
             $vars['headers'][$nro + 2] = array('title' => 'Skp', 'key' => 'sukupuoli');
-            $vars['headers'][$nro + 3] = array('title' => 'Kotitalli', 'key' => 'kotitalli', 'key_link' => site_url('virtuaalitallit/talli/'));
+            $vars['headers'][$nro + 3] = array('title' => 'Kotitalli', 'key' => 'kotitalli', 'key_link' => site_url('tallit/talli/'));
             $vars['headers'][$nro + 4] = array('title' => 'Kuollut', 'key' => 'kuollut', 'type'=>'bool');
             $nro = $nro+4;
 
@@ -647,6 +659,11 @@ class Virtuaalihevoset extends CI_Controller
         return true;
         
     }
+    
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // Rekisterointi
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////7//////
+    
 
     function rekisterointi(){
         if(!($this->ion_auth->logged_in()))
@@ -686,21 +703,26 @@ class Virtuaalihevoset extends CI_Controller
         }
 			
     }
+    
+    //////////////////////////////////////////////////////////////////////////////////////////7
+    // Muokkaus
+    ////////////////////////////////////////////////////////////////////////////////////////
 	
 	 function muokkaa($reknro, $sivu='tiedot', $tapa = null, $id = null)
     {
         $this->load->library("vrl_helper");
+        $this->load->library('user_rights', array('groups' => $this->allowed_user_groups));
+
         $mode = "edit";
         
         if(!$this->_is_editing_allowed($reknro, $msg)){
             $this->fuel->pages->render('misc/naytaviesti', array('msg_type' => 'danger', 'msg' => $msg));
 			return;
 		}
-        $this->load->library('user_rights', array('groups' => $this->allowed_user_groups));
-        if($this->user_rights->is_allowed()){
+        else if($this->user_rights->is_allowed()){
 			$mode = 'admin';
         }
-
+        
 		
 		$data = array();
 		$data['sivu'] = $sivu;
@@ -734,6 +756,7 @@ class Virtuaalihevoset extends CI_Controller
         }
         else if($sivu == 'tiedot'){
            if($this->input->server('REQUEST_METHOD') == 'POST'){
+            echo "mo3oo";
                 $poni = $this->_fill_horse_info($mode);
                 $msg = "";
                 if (!$this->_validate_horse($mode, $poni, $msg)){
@@ -758,12 +781,11 @@ class Virtuaalihevoset extends CI_Controller
                         $this->fuel->pages->render('hevoset/hevonen_muokkaa', $data);
                     }
                     else {
-                        if(is_horse_owner($this->ion_auth->user()->row()->tunnus, $this->vrl_helper->vh_to_number($data['hevonen']['reknro']))){
-                            $this->omat();
-                        }else {
-                            $this->hevosprofiili($data['hevonen']['reknro']);
-                            return;
-                        }
+                        $data['msg'] = "Muokkaus onnistui! " . $msg;
+                        $data['msg_type'] = "success";
+                        $data['hevonen'] = $this->hevonen_model->get_hevonen_edit($reknro);
+                        $data['editor'] = $this->_get_horse_edit_form($mode, $data['hevonen'], $data['hevonen']['reknro']);
+                        $this->fuel->pages->render('hevoset/hevonen_muokkaa', $data);
                     }
                 }
 
@@ -821,6 +843,62 @@ class Virtuaalihevoset extends CI_Controller
 		return true;		
 		
 	}
+    
+     function poista($reknro)
+    {
+        $reknro = $this->vrl_helper->get_vh($this->vrl_helper->vh_to_number($reknro));
+        $this->load->library("vrl_helper");
+        $admin = false;
+        $msg ="";
+        $msg = array('msg_type' => 'danger', 'msg' => "Poisto epäonnistui!");
+        $owners = array();
+        
+        $this->load->library('user_rights', array('groups' => $this->allowed_user_groups));
+
+        if(!$this->vrl_helper->check_vh_syntax($reknro)){
+            $msg['msg'] = "Virheellinen VH-tunnus";
+        }
+        else if($this->_is_editing_allowed($reknro, $msg['msg'])){
+	        if($this->user_rights->is_allowed()){
+                $admin = true;       
+            }
+            //adminin annettava poistolle syy
+            if($admin && ($this->input->server('REQUEST_METHOD') != 'POST' || strlen($this->input->post('syy')) == 0)){
+                    $this->load->library('form_builder', array('submit_value' => 'Hae'));
+                    $fields['syy'] = array('label'=>'Poiston syy', 'type' => 'text', 'class'=>'form-control');                 
+                    $this->form_builder->form_attrs = array('method' => 'post');                            
+                    $form =  $this->form_builder->render_template('_layouts/basic_form_template', $fields);
+
+                    $this->fuel->pages->render('misc/haku', array("title"=>"Poista hevonen ".$reknro, "form"=>$form));
+       
+            }        
+    
+            else if($this->hevonen_model->delete_hevonen($reknro, $msg['msg'], $admin)){
+                $msg['msg_type'] = "success";
+                $msg['msg'] = "Poisto onnistui!";
+                $user = $this->ion_auth->user()->row()->tunnus;
+                if($admin){
+                    $syy = $this->input->post('syy');
+                    foreach($owners as $owner){
+                     $this->tunnukset_model->send_message($user, $owner['omistaja'], "Hevosesi " . $reknro . " poistettiin rekisteristä. Syy:  " .$syy);
+                    }
+                }
+                $this->fuel->pages->render('misc/naytaviesti', $msg);
+
+            }else {
+            
+                $this->fuel->pages->render('misc/naytaviesti', $msg);
+            }
+
+        
+
+        } else{
+                    $this->fuel->pages->render('misc/naytaviesti', $msg);
+
+        }
+        
+
+    }
 	
 	
 	
@@ -1190,7 +1268,7 @@ class Virtuaalihevoset extends CI_Controller
     
     private function _horse_birthdays_form_fields(&$fields, $poni = array()){
    
-        $vuodet = array("3", "4", "5", "6", "7", "8");
+        $vuodet = $this->vuodet;
         foreach($vuodet as $vuosi){
             $value = null;
             if(isset($poni[$vuosi.'vuotta']) && $this->vrl_helper->validateDate($poni[$vuosi.'vuotta'], 'Y-m-d')){
@@ -1266,7 +1344,7 @@ class Virtuaalihevoset extends CI_Controller
             $poni['e_nro'] = $this->input->post('e_nro');
         }
         
-        $vuodet = array("3", "4", "5", "6", "7", "8");
+        $vuodet = $this->vuodet;
         foreach($vuodet as $vuosi){
             if($this->input->post($vuosi."vuotta")){
             $poni[$vuosi."vuotta"] = $this->input->post($vuosi."vuotta");
@@ -1308,7 +1386,7 @@ class Virtuaalihevoset extends CI_Controller
                 $msg .= "<li>Nimi on pakollinen tieto, ja sen tulee olla min. 2, max. 80 merkkiä pitkä.</li>";
                 $ok = false;
             }
-            else if($this->hevonen_model->onko_nimi($poni['nimi'], $poni['rotu']) && $type == 'new'){
+            else if(isset($poni['rotu']) && isset($poni['nimi']) && $this->hevonen_model->onko_nimi($poni['nimi'], $poni['rotu']) && $type == 'new'){
                $msg .= "<li>Saman niminen ja rotuinen hevonen on jo rekisterissä.</li>";
                 $ok = false;
             }
@@ -1348,9 +1426,7 @@ class Virtuaalihevoset extends CI_Controller
             $msg .= "<li>Kuolinaika on virheellinen.</li>";
             $ok = false;
         }
-        $parent_msg = "";
-        if (!$this->_check_parents($poni, $parent_msg)){
-           $msg .= "<li>".$parent_msg."</li>";
+        if (!$this->_check_parents($poni, $msg)){
             $ok = false;
         }
         if (isset($poni['kasvattajanimi']) && !empty($poni['kasvattajanimi']) && (strlen($poni['kasvattajanimi']) > 25 ||strpos($poni['nimi'], $poni['kasvattajanimi']) === false)){
@@ -1373,7 +1449,7 @@ class Virtuaalihevoset extends CI_Controller
                 $ok = false;
         }
         if(!isset($poni['ikaantyminen_d']) || $poni['ikaantyminen_d'] == 0){
-            $vuodet = array("3", "4", "5", "6", "7", "8");
+            $vuodet = $this->vuodet;
             foreach($vuodet as $vuosi){
                 if(isset($poni[$vuosi."vuotta"]) && !$this->vrl_helper->validateDate($poni[$vuosi."vuotta"])){
                         $msg .= "<li>Porrastettuihin liittyvissä syntymäpäivissä (".$vuosi." vuotta) on virhe.</li>";
@@ -1386,29 +1462,78 @@ class Virtuaalihevoset extends CI_Controller
                 $msg .= "<li>Ikääntymisen tulee olla numero.</li>";
                 $ok = false;
         }
+        if(!$this->_check_ages($poni, $msg)){
+            $ok = false;
+        }
         
-        if($ok){
+        if(!$ok){
             $msg = "<ul>".$msg."</ul>";
         }
         return $ok;
     }
     
-    private function _check_parents($poni, &$msg){
-        if (isset($poni['i_nro'])
-                 && !($this->vrl_helper->check_vh_syntax($poni['i_nro'])
-                                            && ($this->hevonen_model->onko_tunnus_sukupuoli($this->vrl_helper->vh_to_number($poni['i_nro']), 2)
-                                                                                            || $this->hevonen_model->onko_tunnus_sukupuoli($this->vrl_helper->vh_to_number($poni['i_nro']), 3)))){
-            $msg .= "Isän tunnus on virheellinen tai se on väärää sukupuolta. ";
-            return false;
+    private function _check_ages($poni, &$msg){
+        $birth_date = new DateTime($poni['syntymaaika']);
+        $current_date = new DateTime();
+        
+        if ($birth_date > $current_date)
+        {
+          $msg .= "<LI>Hevosen syntymäpäivä on tulevaisuudessa!</LI>";
+          return false;
+        }else {
+            $previous_date = $birth_date;
+            
+            foreach ($this->vuodet as $vuosi){
+                if(isset($poni[$vuosi.'vuotta'])){
+                    $vertailtava = new DateTime($poni[$vuosi.'vuotta']);
+                    
+                    if($previous_date > $vertailtava){
+                        $msg .= "<li>".$vuosi."-vuotissyntymäpäivä on ennen edellistä syntymäpäivää</LI>";
+                    }
+                    $previous_date = $vertailtava;
+                }
+            }
+            
         }
-        if (isset($poni['e_nro']) && !empty($poni['e_nro'])
-                 &&!($this->vrl_helper->check_vh_syntax($poni['e_nro'])
-                                                                     && $this->hevonen_model->onko_tunnus_sukupuoli($this->vrl_helper->vh_to_number($poni['e_nro']), 1))){
-            $msg .= "Emän tunnus on virheellinen tai se on väärää sukupuolta. ";
-            return false;
+    }
+    
+    private function _check_parents($poni, &$msg){
+        $ok = true;
+        if (isset($poni['i_nro'])){
+            $ok = $this->_check_parent($poni, $poni['i_nro'], "isä", $msg);
+        }
+        if (isset($poni['e_nro'])) {
+            $ok = $this->_check_parent($poni, $poni['e_nro'], "emä", $msg);
+        }
+        return $ok;
+    }
+    
+    private function _check_parent($poni, $reknro, $vanhempi, &$msg){
+                $ok = true;
+
+        
+        if($this->vrl_helper->check_vh_syntax($reknro)){
+        
+            $parent = $this->hevonen_model->get_hevonen_basic($reknro);
+            $poni_date = new DateTime($poni['syntymapaiva']);
+            $parent_date = $birth_date = new DateTime($parent['syntymapaiva']);
+            
+            
+            if($parent_date > $poni_date){
+                $msg .= "<li>Hevonen on vanhempi kuin sen " . $vanhempi . "</li>";
+                $ok = false;
+            }
+            if(($vanhempi == "isä" && $parent['sukupuoli'] == 1)|| ($vanhempi == "ema" && $parent['sukupuoli'] != 1 )){
+                $msg .= "<li>Hevosen " . $vanhempi . " on väärää sukupuolta!</li>";
+                $ok = false;
+            }
+        }else {
+            $msg .= "<li>Hevosen " . $vanhempi . "n rekisterinumero on virheellinen!</li>";
+            $ok = false;
 
         }
-        return true;
+        
+        return $ok;
     }
     
     private function _validate_edits ($type, &$new, $tunnus, &$msg) {

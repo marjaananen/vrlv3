@@ -83,6 +83,7 @@ class Tallit extends CI_Controller
             $this->load->library('Vrl_helper');
             $fields['sivu'] = $sivu;			
             $fields['stable'] = $this->tallit_model->get_stable($tnro);
+            $fielda['edit_tools'] = $this->_is_editing_allowed($tnro, $msg);
             
             if(sizeof($fields['stable']) == 0){
                 $this->fuel->pages->render('misc/naytaviesti', array('msg_type' => 'danger', 'msg' => 'Tallitunnusta ei ole olemassa'));

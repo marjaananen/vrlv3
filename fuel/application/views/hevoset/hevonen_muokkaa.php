@@ -1,5 +1,13 @@
 <h2>Muokkaa hevosta <?=$hevonen['nimi']?> (<?=$hevonen['reknro']?>)</h2>
 
+<?php if(strlen(fuel_var('msg', '')) > 0){ ?>
+    <div class="alert alert-<?php echo fuel_var('msg_type', 'info')?>" role="alert">   
+        <?php echo fuel_var('msg', '')?>
+        <?php echo validation_errors(); ?>
+    </div>
+    
+    <?php } ?>
+
 
    <ul class="nav nav-tabs">
         <li role="presentation" class="<?php if ($sivu == 'tiedot'){echo "active";}?>"><a href="<?php echo base_url('virtuaalihevoset/muokkaa/'. $hevonen['reknro'] . '/tiedot')?>">Tiedot</a></li>

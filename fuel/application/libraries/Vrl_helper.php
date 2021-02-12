@@ -108,9 +108,11 @@ class Vrl_helper {
   public function sql_date_to_normal($date){
     if($date == '0000-00-00'){
       return "";
-    }else {
+    }else if($this->validateDate($date, 'Y-m-d') || $this->validateDate($date, 'Y-m-d H:i:s')){
       $oDate = new DateTime($date);
       return $oDate->format("d.m.Y");
+    }else {
+      return $date;
     }
   }
   
@@ -124,7 +126,7 @@ class Vrl_helper {
     $date = trim($date);
     $dates_amount = preg_match_all('/^([0]?[1-9]|[1|2][0-9]|[3][0|1])[.]([0]?[1-9]|[1][0-2])[.]([0-9]{4}|[0-9]{2})/', $date , $found_date);
     
-    if ($dates_amount == 1 && strlen($date)<11){
+    if ($format != 'd.m.Y' || ($format == 'd.m.Y' && $dates_amount == 1 && strlen($date)<11)){
     
     
       try {

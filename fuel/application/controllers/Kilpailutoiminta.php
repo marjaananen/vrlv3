@@ -1361,7 +1361,9 @@ private function _send_show_result($kisa, $user, &$msg = array()){
                         }
                     }
                 }
-                $this->db->insert_batch('vrlv3_kisat_bis_tulosrivit',$tulosrivit);
+                if(sizeof($tulosrivit) > 0){
+                    $this->db->insert_batch('vrlv3_kisat_bis_tulosrivit',$tulosrivit);
+                }
                 
             }
             

@@ -152,8 +152,8 @@ ALTER TABLE `vrlv3_hevosrekisteri`
 -- Rajoitteet taululle `vrlv3_hevosrekisteri_omistajat`
 --
 ALTER TABLE `vrlv3_hevosrekisteri_omistajat`
-  ADD CONSTRAINT `vrlv3_hevosrekisteri_omistajat_ibfk_1` FOREIGN KEY (`reknro`) REFERENCES `vrlv3_hevosrekisteri` (`reknro`),
-  ADD CONSTRAINT `vrlv3_hevosrekisteri_omistajat_ibfk_2` FOREIGN KEY (`omistaja`) REFERENCES `vrlv3_tunnukset` (`tunnus`);
+  ADD CONSTRAINT `vrlv3_hevosrekisteri_omistajat_ibfk_1` FOREIGN KEY (`reknro`) REFERENCES `vrlv3_hevosrekisteri` (`reknro`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `vrlv3_hevosrekisteri_omistajat_ibfk_2` FOREIGN KEY (`omistaja`) REFERENCES `vrlv3_tunnukset` (`tunnus`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 --
 -- Rajoitteet taululle `vrlv3_hevosrekisteri_sukutaulut`
