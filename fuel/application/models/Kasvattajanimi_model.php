@@ -112,18 +112,42 @@ class Kasvattajanimi_model extends Base_module_model
         $this->db->from('vrlv3_kasvattajanimet');
         $this->db->join('vrlv3_hevosrekisteri', 'vrlv3_kasvattajanimet.id = vrlv3_hevosrekisteri.kasvattajanimi_id', 'left');
         $this->db->group_by('vrlv3_kasvattajanimet.id');
-        $this->db->limit(500);
 
         
         if ($type == "ASC"){
              $this->db->order_by('amount', "ASC");
+             $this->db->having('amount', 0);
 
         }
         
         else   {      
              $this->db->order_by('amount', "DESC");
+             $this->db->limit(500);
+
 
         }
+        $query = $this->db->get();
+
+        if ($query->num_rows() > 0)
+        {
+            return $query->result_array(); 
+        }
+        
+        return array();
+
+        
+    }
+    
+    function get_names_newest(){
+        $this->db->select('vrlv3_kasvattajanimet.id, vrlv3_kasvattajanimet.kasvattajanimi, vrlv3_kasvattajanimet.rekisteroity, count(reknro) as amount');
+        $this->db->from('vrlv3_kasvattajanimet');
+        $this->db->join('vrlv3_hevosrekisteri', 'vrlv3_kasvattajanimet.id = vrlv3_hevosrekisteri.kasvattajanimi_id', 'left');
+        $this->db->group_by('vrlv3_kasvattajanimet.id');
+        $this->db->order_by('rekisteroity', "DESC");
+        $this->db->limit(100);
+
+
+        
         $query = $this->db->get();
 
         if ($query->num_rows() > 0)

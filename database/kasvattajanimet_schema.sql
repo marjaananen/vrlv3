@@ -105,7 +105,7 @@ ALTER TABLE `vrlv3_kasvattajanimet`
 -- Rajoitteet taululle `vrlv3_kasvattajanimet`
 --
 ALTER TABLE `vrlv3_kasvattajanimet`
-  ADD CONSTRAINT `vrlv3_kasvattajanimet_talli` FOREIGN KEY (`tnro`) REFERENCES `vrlv3_tallirekisteri` (`tnro`) ON DELETE SET NULL ON UPDATE CASCADE;
+  ADD CONSTRAINT `vrlv3_kasvattajanimet_talli` FOREIGN KEY (`tnro`) REFERENCES `vrlv3_tallirekisteri` (`tnro`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 --
 -- Rajoitteet taululle `vrlv3_kasvattajanimet_omistajat`

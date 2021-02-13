@@ -76,7 +76,15 @@ $route['yllapito/hevosrekisteri/muokkaa/(:any)/(:any)/(:any)'] = "virtuaalihevos
 $route['yllapito/hevosrekisteri/muokkaa/(:any)/(:any)/(:any)/(:any)'] = "virtuaalihevoset/muokkaa/$1/$2/$3/$4";
 $route['yllapito/hevosrekisteri/(:any)'] = "yllapito_hevosrekisteri/$1";
 $route['yllapito/hevosrekisteri/(:any)/(:any)'] = "yllapito_hevosrekisteri/$1/$2";
-$route['yllapito/hevosrekisteri/(:any)/(:any)/(:any)'] = "yllapito_hevosrekisteri/$1/$2/$3";
+$route['yllapito/hevosrekisteri/(:any)/(:any)/(:any)'] = "yllapito_hevosrekisteri/$1/$2/$3";$route['yllapito/hevosrekisteri'] = "yllapito_hevosrekisteri";
+
+
+$route['yllapito/tallirekisteri'] = "tallit/uusimmat/";
+$route['yllapito/tallirekisteri/poista/(:any)'] = "tallit/poista/$1";
+
+$route['yllapito/kasvattajanimet'] = "kasvatus/kasvattajanimet/uusimmat/";
+$route['yllapito/kasvattajanimet/kasvatittomat'] = "kasvatus/kasvattajanimet/kasvatittomat/";
+$route['yllapito/kasvattajanimet/poista/(:any)'] = "kasvatus/kasvattajanimet/poista/$1";
 
 
 $route['yllapito/jaokset'] = "yllapito_jaokset";

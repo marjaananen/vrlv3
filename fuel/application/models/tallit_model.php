@@ -9,6 +9,56 @@ class Tallit_model extends Base_module_model
         parent::__construct();
     }
     
+    /*
+    
+    function delete_stable($nro, &$msg, $admin = false){
+        $date = new DateTime();
+        $allowed_time = $this->allowed_time_for_delete;
+        if($admin){
+            $allowed_time = $this->allowed_time_for_delete_admin;
+        }
+        $date->setTimestamp(time() - $allowed_time);
+        $oldest_possible = $date->format('Y-m-d H:i:s');
+
+        
+        $this->db->select("*");
+        $this->db->where("reknro", $this->CI->vrl_helper->vh_to_number($reknro));
+        $this->db->where("rekisteroity >", $oldest_possible);
+        $this->db->from('vrlv3_hevosrekisteri');
+        
+        if(!$admin){
+            $this->db->where('hyvaksyi', $this->CI->ion_auth->user->row()->tunnus);
+        }
+        
+        $query = $this->db->get();
+        $hevonen = array();
+        
+        if ($query->num_rows() > 0)
+        {
+            $this->db->where('reknro', $this->CI->vrl_helper->vh_to_number($reknro));
+            $this->db->delete('vrlv3_hevosrekisteri');
+            
+            if($this->db->affected_rows() >0){
+                return true;
+             
+            }else {
+                $msg = "Mikäli hevosella on jälkeläisiä, sitä ei voi poistaa.";
+;
+                return false;
+            }
+        }else {
+            if($admin){
+                $msg = "Hevosta ei ole olemassa tai poistoajan takaraja on mennyt umpeen.";
+            }else {
+                $msg = "Jos et ole ylläpitäjä, voit poistaa ainoastaan itse rekisteröimiäsi hevosia 24h sisällä rekisteröinnistä.";
+            }
+            return false;
+        }
+        return true;
+        
+    }
+
+    */
     
     //Tallit
     function get_users_stables($pinnumber, $cats = false, $only_online = false)
@@ -270,10 +320,9 @@ class Tallit_model extends Base_module_model
         return array();
     }
     
-    
     function search_stables_newest()
     {
-        $this->db->select('vrlv3_tallirekisteri.tnro, nimi, perustettu, katelyh, lopettanut');
+        $this->db->select('vrlv3_tallirekisteri.tnro, nimi, perustettu, katelyh, lopettanut, vrlv3_tallirekisteri.hyvaksyi');
         $this->db->from('vrlv3_tallirekisteri');
         $this->db->join('vrlv3_tallirekisteri_kategoriat', 'vrlv3_tallirekisteri.tnro = vrlv3_tallirekisteri_kategoriat.tnro', 'left');
         $this->db->join('vrlv3_lista_tallikategoriat', 'vrlv3_lista_tallikategoriat.kat = vrlv3_tallirekisteri_kategoriat.kategoria');

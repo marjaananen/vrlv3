@@ -72,7 +72,8 @@ $nav['virtuaalihevoset/laji'] = array('hidden'=>true, 'label' => 'Laji', 'parent
 
 //jalostus ja kasvatus alamenu
 $nav['kasvatus/kasvattajanimet'] = array('label' => 'Kasvattajanimirekisteri', 'parent_id' => 'kasvatus', 'active' => 'kasvatus/kasvattajanimet'); 
-$nav['kasvatus/kasvattajanimet/rekisteroi'] = array('label' => 'Rekisteröi kasvattajanimi', 'parent_id' => 'kasvatus/kasvattajanimet', 'active' => 'kasvatus/kasvattajanimet/omat');
+$nav['kasvatus/kasvattajanimet/rekisteroi'] = array('label' => 'Rekisteröi kasvattajanimi', 'parent_id' => 'kasvatus/kasvattajanimet', 'active' => 'kasvatus/kasvattajanimet/rekisteroi');
+$nav['kasvatus/kasvattajanimet/aktiiviset'] = array('label' => 'Aktiivisimmat kasvattajanimet', 'parent_id' => 'kasvatus/kasvattajanimet', 'active' => 'kasvatus/kasvattajanimet/aktiiviset');
 $nav['kasvatus/kasvattajanimet/omat'] = array('label' => 'Omat kasvattajanimet', 'parent_id' => 'kasvatus/kasvattajanimet', 'active' => 'kasvatus/kasvattajanimet/omat');
 $nav['kasvatus/kasvatit'] = array('label' => 'Omat kasvatit', 'parent_id' => 'kasvatus', 'active' => 'kasvatus/kasvatit');
 $nav['kasvatus/unelmasuku'] = array('label' => 'Unelmasuku', 'parent_id' => 'kasvatus', 'active' => 'kasvatus/unelmasuku');
@@ -147,6 +148,9 @@ $nav['kilpailutoiminta/ilmoita_tulokset/nayttelyt'] = array('label' => 'Ilmoita 
 $nav['yllapito/tiedotukset'] = array('label' => 'Tiedotukset', 'parent_id' => 'yllapito', 'active' => 'yllapito/tiedotukset');
 $nav['yllapito/tunnukset'] = array('label' => 'Tunnukset', 'parent_id' => 'yllapito', 'active' => 'yllapito/tunnukset');
 $nav['yllapito/hevosrekisteri'] = array('label' => 'Hevosrekisteri', 'parent_id' => 'yllapito', 'active' => 'yllapito/hevosrekisteri');
+$nav['yllapito/tallirekisteri'] = array('label' => 'Tallirekisteri', 'parent_id' => 'yllapito', 'active' => 'yllapito/tallirekisteri');
+$nav['yllapito/kasvattajanimet'] = array('label' => 'Kasvattajanimirekisteri', 'parent_id' => 'yllapito', 'active' => 'yllapito/kasvattajanimet');
+
 $nav['yllapito/alayhdistykset'] = array('label' => 'Alayhdistykset', 'parent_id' => 'yllapito', 'active' => 'yllapito/alayhdistykset');
 $nav['yllapito/jaokset'] = array('label' => 'Jaokset', 'parent_id' => 'yllapito', 'active' => 'yllapito/jaokset');
 $nav['yllapito/kalenterit'] = array('label' => 'Kisakalenterit', 'parent_id' => 'yllapito', 'active' => 'yllapito/kalenterit');
@@ -171,6 +175,14 @@ $nav['yllapito/hevosrekisteri/polveutumistarkastus'] = array('label' => 'Polveut
 $nav['yllapito/hevosrekisteri/varit'] = array('label' => 'Hallitse värejä', 'parent_id' => 'yllapito/hevosrekisteri', 'active' => 'yllapito/hevosrekisteri/varit');
 $nav['yllapito/hevosrekisteri/rodut'] = array('label' => 'Hallitse rotuja', 'parent_id' => 'yllapito/hevosrekisteri', 'active' => 'yllapito/hevosrekisteri/rodut');
 $nav['yllapito/hevosrekisteri/poista/'] =array('hidden'=>true, 'label' => 'Poista', 'parent_id' => 'yllapito/hevosrekisteri', 'active' => 'yllapito/hevosrekisteri/poista$|yllapito/hevosrekisteri/poista/:any');
+
+
+$nav['yllapito/tallirekisteri/poista'] = array('hidden'=> TRUE, 'label' => 'Poista', 'parent_id' => 'yllapito/tallirekisteri', 'active' => 'yllapito/tallirekisteri/poista$|yllapito/tallirekisteri/poista/:any');
+
+$nav['yllapito/kasvattajanimet/poista'] = array('hidden'=> TRUE, 'label' => 'Poista', 'parent_id' => 'yllapito/kasvattajanimet', 'active' => 'yllapito/kasvattajanimet/poista$|yllapito/kasvattajanimet/poista/:any');
+$nav['yllapito/kasvattajanimet/kasvatittomat'] = array('label' => 'Kasvatittomat', 'parent_id' => 'yllapito/kasvattajanimet', 'active' => 'yllapito/kasvattajanimet/kasvatittomat');
+
+
 
 $nav['yllapito/jaokset/lajit'] = array('label' => 'Hallitse lajeja', 'parent_id' => 'yllapito/jaokset', 'active' => 'yllapito/jaokset/lajit');
 $nav['yllapito/jaokset/ominaisuudet'] = array('label' => 'Hallitse ominaisuuksia', 'parent_id' => 'yllapito/jaokset', 'active' => 'yllapito/jaokset/ominaisuudet');

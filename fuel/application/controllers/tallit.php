@@ -30,10 +30,14 @@ class Tallit extends CI_Controller
 		$vars['headers'][3] = array('title' => 'Nimi', 'key' => 'nimi');
 		$vars['headers'][4] = array('title' => 'Kategoria', 'key' => 'katelyh', 'aggregated_by' => 'tnro');
         $vars['headers'][5] = array('title' => 'Lopettanut', 'key' => 'lopettanut', 'type' => 'bool');
+        $vars['headers'][6] = array('title' => 'Rekisteröi', 'key' => 'hyvaksyi', 'prepend_text'=>'VRL-', 'key_link' => site_url('/tunnus/'));
+
 
 		if($this->user_rights->is_allowed()){
-			$vars['headers'][6] = array('title' => 'Editoi', 'key' => 'tnro', 'key_link' => site_url('tallit/muokkaa/'), 'image' => site_url('assets/images/icons/edit.png'));
-		}
+			$vars['headers'][7] = array('title' => 'Editoi', 'key' => 'tnro', 'key_link' => site_url('yllapito/tallirekisteri/muokkaa/'), 'image' => site_url('assets/images/icons/edit.png'));
+            $vars['headers'][8] = array('title' => 'Poista', 'key' => 'tnro', 'key_link' => site_url('yllapito/tallirekisteri/poista/'), 'image' => site_url('assets/images/icons/delete.png'));
+
+        }
 		
 		$vars['headers'] = json_encode($vars['headers']);
 		
@@ -493,6 +497,61 @@ class Tallit extends CI_Controller
         $this->tallit_model->mark_stable_inactive($tnro);
             
         $this->fuel->pages->render('misc/naytaviesti', array('msg' => 'Tallisi on merkattu lopettaneeksi.'));
+    }
+    
+    function poista($tnro)
+    {
+        $admin = false;
+        $msg ="";
+        $msg = array('msg_type' => 'danger', 'msg' => "Poisto epäonnistui!");
+        $owners = array();
+        
+        $this->load->library('user_rights', array('groups' => $this->allowed_user_groups));
+
+        if(!isset($tnro)){
+            $msg['msg'] = "Virheellinen tallitunnus";
+        }
+        else if($this->_is_editing_allowed($tnro, $msg['msg'])){
+	        if($this->user_rights->is_allowed()){
+                $admin = true;
+                $owners = $this->tallit_model->get_stable_owners($tnro);
+            }
+            //adminin annettava poistolle syy
+            if($admin && ($this->input->server('REQUEST_METHOD') != 'POST' || strlen($this->input->post('syy')) == 0)){
+                    $this->load->library('form_builder', array('submit_value' => 'Poista'));
+                    $fields['syy'] = array('label'=>'Poiston syy', 'type' => 'text', 'class'=>'form-control');                 
+                    $this->form_builder->form_attrs = array('method' => 'post');                            
+                    $form =  $this->form_builder->render_template('_layouts/basic_form_template', $fields);
+
+                    $this->fuel->pages->render('misc/haku', array("title"=>"Poista talli ".$tnro, "form"=>$form));
+       
+            }        
+    
+            else if($this->tallit_model->delete_stable($tnro, $msg['msg'], $admin)){
+                $msg['msg_type'] = "success";
+                $msg['msg'] = "Poisto onnistui!";
+                $user = $this->ion_auth->user()->row()->tunnus;
+                if($admin){
+                    $syy = $this->input->post('syy');
+                    foreach($owners as $owner){
+                     $this->tunnukset_model->send_message($user, $owner['omistaja'], "Tallisi " . $tnro . " poistettiin rekisteristä. Syy:  " .$syy);
+                    }
+                }
+                $this->fuel->pages->render('misc/naytaviesti', $msg);
+
+            }else {
+            
+                $this->fuel->pages->render('misc/naytaviesti', $msg);
+            }
+
+        
+
+        } else{
+                    $this->fuel->pages->render('misc/naytaviesti', $msg);
+
+        }
+        
+
     }
     
    

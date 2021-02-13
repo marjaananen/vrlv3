@@ -232,13 +232,18 @@ class Kasvatus extends CI_Controller
 			$this->_kasvattajanimet_muokkaa($id, $sivu, $tapa, $kohde);
 		}
 		
-		else if ($type == "suuret"){
+		else if ($type == "aktiiviset"){
 			$this->_kasvattajanimet_by_activity("DESC");
 			
 		}
 		
-		else if ($type == "pienet"){
+		else if ($type == "kasvatittomat"){
 			$this->_kasvattajanimet_by_activity("ASC");
+			
+		}
+        
+        else if ($type == "uusimmat"){
+			$this->_kasvattajanimet_newest();
 			
 		}
 		
@@ -397,8 +402,9 @@ class Kasvatus extends CI_Controller
 			$vars['headers'][4] = array('title' => 'Rekisteröity', 'key' => 'rekisteroity', 'type' => 'date');
 			if($this->user_rights->is_allowed()){
 				$vars['headers'][5] = array('title' => 'Editoi', 'key' => 'id', 'key_link' => site_url('kasvatus/kasvattajanimet/muokkaa/'), 'image' => site_url('assets/images/icons/edit.png'));
-				$vars['headers'][6] = array('title' => 'Poista', 'key' => 'id', 'key_link' => site_url('kasvatus/kasvattajanimet/poista/'), 'image' => site_url('assets/images/icons/delete.png'));
-				
+				if($type == "ASC"){
+                    $vars['headers'][6] = array('title' => 'Poista', 'key' => 'id', 'key_link' => site_url('kasvatus/kasvattajanimet/poista/'), 'image' => site_url('assets/images/icons/delete.png'));
+                }
 			}
 				
 
@@ -410,6 +416,33 @@ class Kasvatus extends CI_Controller
 			$this->fuel->pages->render('misc/taulukko', $vars);
 	}
 	
+    
+    private function _kasvattajanimet_newest(){
+		
+
+				$vars['title'] = "Uusimmat kasvattajanimet";
+			
+			$vars['headers'][1] = array('title' => 'Rekisteröity', 'key' => 'rekisteroity', 'type'=>'date');
+			$vars['headers'][2] = array('title' => 'Kasvattajanimi', 'key' => 'kasvattajanimi');
+
+			$vars['headers'][3] = array('title' => 'Kasvatteja', 'key' => 'amount');
+			$vars['headers'][4] = array('title' => 'Id', 'key' => 'id', 'key_link' => site_url('kasvatus/kasvattajanimet/nimi/'));
+			if($this->user_rights->is_allowed()){
+				$vars['headers'][5] = array('title' => 'Editoi', 'key' => 'id', 'key_link' => site_url('kasvatus/kasvattajanimet/muokkaa/'), 'image' => site_url('assets/images/icons/edit.png'));
+                $vars['headers'][6] = array('title' => 'Poista', 'key' => 'id', 'key_link' => site_url('kasvatus/kasvattajanimet/poista/'), 'image' => site_url('assets/images/icons/delete.png'));
+                
+			}
+				
+
+			$vars['headers'] = json_encode($vars['headers']);
+				
+			$vars['data'] = json_encode($this->kasvattajanimi_model->get_names_newest());
+			
+	
+			$this->fuel->pages->render('misc/taulukko', $vars);
+	}
+    
+    
     private function _omat_kasvattajanimet()
     {
 		if(!($this->ion_auth->logged_in()))
@@ -523,6 +556,8 @@ class Kasvatus extends CI_Controller
 
 		}
 		
+        
+        
 		
 	}
 	

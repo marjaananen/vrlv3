@@ -860,7 +860,8 @@ class Virtuaalihevoset extends CI_Controller
         }
         else if($this->_is_editing_allowed($reknro, $msg['msg'])){
 	        if($this->user_rights->is_allowed()){
-                $admin = true;       
+                $admin = true;
+                $owners = $this->hevonen_model->get_horse_owners($reknro);
             }
             //adminin annettava poistolle syy
             if($admin && ($this->input->server('REQUEST_METHOD') != 'POST' || strlen($this->input->post('syy')) == 0)){
@@ -880,6 +881,7 @@ class Virtuaalihevoset extends CI_Controller
                 if($admin){
                     $syy = $this->input->post('syy');
                     foreach($owners as $owner){
+                        var_dump($owner);
                      $this->tunnukset_model->send_message($user, $owner['omistaja'], "Hevosesi " . $reknro . " poistettiin rekisteristä. Syy:  " .$syy);
                     }
                 }
