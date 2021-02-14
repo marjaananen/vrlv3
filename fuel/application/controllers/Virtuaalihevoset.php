@@ -865,7 +865,7 @@ class Virtuaalihevoset extends CI_Controller
             }
             //adminin annettava poistolle syy
             if($admin && ($this->input->server('REQUEST_METHOD') != 'POST' || strlen($this->input->post('syy')) == 0)){
-                    $this->load->library('form_builder', array('submit_value' => 'Hae'));
+                    $this->load->library('form_builder', array('submit_value' => 'Poista'));
                     $fields['syy'] = array('label'=>'Poiston syy', 'type' => 'text', 'class'=>'form-control');                 
                     $this->form_builder->form_attrs = array('method' => 'post');                            
                     $form =  $this->form_builder->render_template('_layouts/basic_form_template', $fields);
@@ -881,7 +881,6 @@ class Virtuaalihevoset extends CI_Controller
                 if($admin){
                     $syy = $this->input->post('syy');
                     foreach($owners as $owner){
-                        var_dump($owner);
                      $this->tunnukset_model->send_message($user, $owner['omistaja'], "Hevosesi " . $reknro . " poistettiin rekisteristä. Syy:  " .$syy);
                     }
                 }

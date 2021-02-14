@@ -514,7 +514,7 @@ class Tallit extends CI_Controller
         else if($this->_is_editing_allowed($tnro, $msg['msg'])){
 	        if($this->user_rights->is_allowed()){
                 $admin = true;
-                $owners = $this->tallit_model->get_stable_owners($tnro);
+                $owners = $this->tallit_model->get_stables_owners($tnro);
             }
             //adminin annettava poistolle syy
             if($admin && ($this->input->server('REQUEST_METHOD') != 'POST' || strlen($this->input->post('syy')) == 0)){

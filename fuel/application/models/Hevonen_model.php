@@ -722,8 +722,10 @@ class Hevonen_model extends Base_module_model
     
     
     function get_names_foals_by_id($id){
-        $this->db->select("reknro, nimi, rotu, vari, sukupuoli, syntymaaika");        
+        $this->db->select("reknro, nimi, r.lyhenne as rotu, vari, IF(sukupuoli='1', 'tamma', IF(sukupuoli='2', 'ori', 'ruuna')) as sukupuoli, syntymaaika");        
         $this->db->from('vrlv3_hevosrekisteri');
+        $this->db->join("vrlv3_lista_rodut as r", "vrlv3_hevosrekisteri.rotu = r.rotunro", 'left outer');
+
         $this->db->where('kasvattajanimi_id', $id);
         $query = $this->db->get();
         
@@ -1122,6 +1124,21 @@ class Hevonen_model extends Base_module_model
         $this->db->group_by("YEAR(rekisteroity)");     
         $this->db->from('vrlv3_hevosrekisteri');
         $this->db->where('rotu', $breed);
+        
+        $query = $this->db->get();
+        
+        
+        return $query->result_array();
+
+        
+    }
+    
+    function get_stats_name_year_list($name){
+        
+        $this->db->select("COUNT(reknro) as amount, YEAR(syntymaaika) as year");
+        $this->db->group_by("YEAR(syntymaaika)");     
+        $this->db->from('vrlv3_hevosrekisteri');
+        $this->db->where('kasvattajanimi_id', $name);
         
         $query = $this->db->get();
         

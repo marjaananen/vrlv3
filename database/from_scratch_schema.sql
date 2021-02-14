@@ -231,10 +231,20 @@ CREATE TABLE `vrlv3_kasvattajanimet` (
   `rekisteroity` datetime DEFAULT CURRENT_TIMESTAMP,
   `tnro` varchar(8) DEFAULT NULL,
   `tila` int(11) DEFAULT '1',
+  `rekisteroi` INT(5) UNSIGNED ZEROFILL NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `vrlv3_kasvattajanimet_talli_idx` (`tnro`),
+  KEY  `vrlv3_kasvattajanimet_rekisteroi` (`rekisteroi` ASC),
+  CONSTRAINT `vrlv3_kasvattajanimet_rekisteroi_f`
+  FOREIGN KEY (`rekisteroi`)
+  REFERENCES `vrlv3`.`vrlv3_tunnukset` (`tunnus`)
+  ON DELETE RESTRICT
+  ON UPDATE CASCADE,
   CONSTRAINT `vrlv3_kasvattajanimet_talli` FOREIGN KEY (`tnro`) REFERENCES `vrlv3_tallirekisteri` (`tnro`) ON DELETE RESTRICT ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=2840 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
+
+
+
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --

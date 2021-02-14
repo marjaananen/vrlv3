@@ -9,56 +9,51 @@ class Tallit_model extends Base_module_model
         parent::__construct();
     }
     
-    /*
+    
     
     function delete_stable($nro, &$msg, $admin = false){
-        $date = new DateTime();
-        $allowed_time = $this->allowed_time_for_delete;
-        if($admin){
-            $allowed_time = $this->allowed_time_for_delete_admin;
-        }
-        $date->setTimestamp(time() - $allowed_time);
-        $oldest_possible = $date->format('Y-m-d H:i:s');
-
         
-        $this->db->select("*");
-        $this->db->where("reknro", $this->CI->vrl_helper->vh_to_number($reknro));
-        $this->db->where("rekisteroity >", $oldest_possible);
+        $this->db->where('kotitalli', $nro);
+        $this->db->or_where('kasvattaja_talli', $nro);
         $this->db->from('vrlv3_hevosrekisteri');
-        
-        if(!$admin){
-            $this->db->where('hyvaksyi', $this->CI->ion_auth->user->row()->tunnus);
-        }
-        
-        $query = $this->db->get();
-        $hevonen = array();
-        
-        if ($query->num_rows() > 0)
-        {
-            $this->db->where('reknro', $this->CI->vrl_helper->vh_to_number($reknro));
-            $this->db->delete('vrlv3_hevosrekisteri');
+        $query = $this->db->get();        
+        if ($query->num_rows() == 0){
+            $this->db->where('tnro', $nro);
+            $query = $this->db->get('vrlv3_kasvattajanimet');
             
-            if($this->db->affected_rows() >0){
-                return true;
-             
-            }else {
-                $msg = "Mikäli hevosella on jälkeläisiä, sitä ei voi poistaa.";
-;
+            if ($query->num_rows() == 0){
+                $this->db->where('jarj_talli', $nro);
+                $query = $this->db->get('vrlv3_kisat_kisakalenteri');
+                
+                $this->db->where('jarj_talli', $nro);
+                $query2 = $this->db->get('vrlv3_kisat_nayttelykalenteri');
+                
+                if ($query->num_rows() == 0 && $query2->num_rows() == 0){
+                    $this->db->where('tnro', $nro);
+                   $this->db->delete('vrlv3_tallirekisteri');
+                   return true;
+                    
+                    
+                } else {
+                    $msg = "Et voi poistaa tallia. Tallilla ion järjestetty kisoja tai näyttelyitä.";
+                    return true;
+                }
+                
+                
+            } else {
+                $msg = "Et voi poistaa tallia. Tallille on rekisteröity kasvattajanimi!";
                 return false;
             }
-        }else {
-            if($admin){
-                $msg = "Hevosta ei ole olemassa tai poistoajan takaraja on mennyt umpeen.";
-            }else {
-                $msg = "Jos et ole ylläpitäjä, voit poistaa ainoastaan itse rekisteröimiäsi hevosia 24h sisällä rekisteröinnistä.";
-            }
+        } else {
+            
+            $msg = "Et voi poistaa tallia. Tallissa on hevosia tai sillä on kasvatteja!";
             return false;
         }
-        return true;
-        
+            
+
     }
 
-    */
+    
     
     //Tallit
     function get_users_stables($pinnumber, $cats = false, $only_online = false)

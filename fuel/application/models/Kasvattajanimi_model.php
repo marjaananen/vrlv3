@@ -60,10 +60,12 @@ class Kasvattajanimi_model extends Base_module_model
     
     function get_names_breeds($pinnumber)
     {
-        $this->db->select('rotunro, vrlv3_lista_rodut.rotu, lyhenne');
+        $this->db->select('rotunro, vrlv3_lista_rodut.rotu, lyhenne, count(reknro) as amount');
         $this->db->from('vrlv3_kasvattajanimet');
         $this->db->join('vrlv3_kasvattajanimet_rodut', 'vrlv3_kasvattajanimet.id = vrlv3_kasvattajanimet_rodut.kid', 'left');
         $this->db->join('vrlv3_lista_rodut', 'vrlv3_lista_rodut.rotunro = vrlv3_kasvattajanimet_rodut.rotu');
+        $this->db->join('vrlv3_hevosrekisteri', 'vrlv3_kasvattajanimet.id = vrlv3_hevosrekisteri.kasvattajanimi_id', 'left');
+        $this->db->group_by('vrlv3_kasvattajanimet.id');
         $this->db->where('vrlv3_kasvattajanimet.id', $pinnumber);
         $query = $this->db->get();
         
@@ -253,6 +255,7 @@ class Kasvattajanimi_model extends Base_module_model
     function delete_name($id){
         $this->db->where('id', $id);
         $this->db->delete('vrlv3_kasvattajanimet');
+        return true;
     }
     
     function update_breeds($id, $name, &$msg = ""){

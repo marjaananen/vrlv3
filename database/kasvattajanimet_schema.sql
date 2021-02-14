@@ -28,13 +28,27 @@ SET time_zone = "+00:00";
 -- Rakenne taululle `vrlv3_kasvattajanimet`
 --
 
+DROP TABLE IF EXISTS `vrlv3_kasvattajanimet`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `vrlv3_kasvattajanimet` (
-  `id` int(11) NOT NULL,
+  `id` int(11) NOT NULL AUTO_INCREMENT,
   `kasvattajanimi` varchar(45) NOT NULL,
   `rekisteroity` datetime DEFAULT CURRENT_TIMESTAMP,
   `tnro` varchar(8) DEFAULT NULL,
-  `tila` int(11) DEFAULT '1'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+  `tila` int(11) DEFAULT '1',
+  `rekisteroi` INT(5) UNSIGNED ZEROFILL NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `vrlv3_kasvattajanimet_talli_idx` (`tnro`),
+  KEY  `vrlv3_kasvattajanimet_rekisteroi` (`rekisteroi` ASC),
+  CONSTRAINT `vrlv3_kasvattajanimet_rekisteroi_f`
+  FOREIGN KEY (`rekisteroi`)
+  REFERENCES `vrlv3`.`vrlv3_tunnukset` (`tunnus`)
+  ON DELETE RESTRICT
+  ON UPDATE CASCADE,
+  CONSTRAINT `vrlv3_kasvattajanimet_talli` FOREIGN KEY (`tnro`) REFERENCES `vrlv3_tallirekisteri` (`tnro`) ON DELETE RESTRICT ON UPDATE CASCADE
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
+
 
 -- --------------------------------------------------------
 
@@ -92,20 +106,6 @@ ALTER TABLE `vrlv3_kasvattajanimet_rodut`
 --
 
 --
--- AUTO_INCREMENT for table `vrlv3_kasvattajanimet`
---
-ALTER TABLE `vrlv3_kasvattajanimet`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- Rajoitteet vedostauluille
---
-
---
--- Rajoitteet taululle `vrlv3_kasvattajanimet`
---
-ALTER TABLE `vrlv3_kasvattajanimet`
-  ADD CONSTRAINT `vrlv3_kasvattajanimet_talli` FOREIGN KEY (`tnro`) REFERENCES `vrlv3_tallirekisteri` (`tnro`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 --
 -- Rajoitteet taululle `vrlv3_kasvattajanimet_omistajat`

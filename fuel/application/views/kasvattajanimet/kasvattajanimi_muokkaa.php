@@ -1,30 +1,20 @@
 <h2>Muokkaa kasvattajanimeä: <?=$nimi['kasvattajanimi']?> (#<?=$nimi['id']?>)</h2>
 
-
-<div class="container">
-    <p><b>Talli:</b> <?=$nimi['tnro']?></p>
-    <p><b>Rekisteröity:</b> <?=$nimi['rekisteroity']?></p>
-    <p><b>Omistajat:</b>
-        <?php
-            $first = true;
-            foreach($owners as $o)
-            {
-                if($first)
-                {
-                    echo $o['nimimerkki'] . "(<a href='" . site_url('tunnus') . "/VRL-" . $o['omistaja'] . "'>VRL-" . $o['omistaja'] . "</a>)";
-                    $first = false;
-                }
-                else
-                    echo ", " . $o['nimimerkki'] . " (<a href='" . site_url('tunnus') . "/VRL-" . $o['omistaja'] . "'>VRL-" . $o['omistaja'] . "</a>)";
-            }
-        ?>
-    </p>
+<?php if(strlen(fuel_var('msg', '')) > 0){ ?>
+    <div class="alert alert-<?php echo fuel_var('msg_type', 'info')?>" role="alert">   
+        <?php echo fuel_var('msg', '')?>
+        <?php echo validation_errors(); ?>
+    </div>
     
-</div>
+    <?php } ?>
+    
+<?php echo $nimi_info;?>
 
 <h2>Muokattavat tiedot</h2>
 
    <ul class="nav nav-tabs">
+       <li role="presentation" class="<?php if ($sivu == 'tiedot'){echo "active";}?>"><a href="<?php echo base_url('kasvatus/kasvattajanimet/muokkaa/'. $nimi['id'] . '/tiedot')?>">Tiedot</a></li>
+    
         <li role="presentation" class="<?php if ($sivu == 'rodut'){echo "active";}?>"><a href="<?php echo base_url('kasvatus/kasvattajanimet/muokkaa/'. $nimi['id'] . '/rodut')?>">Rodut</a></li>
     
         <li role="presentation" class="<?php if ($sivu == 'omistajat'){echo "active";}?>"><a href="<?php echo base_url('kasvatus/kasvattajanimet/muokkaa/'. $nimi['id'] . '/omistajat')?>">Omistajat</a></li>
@@ -59,9 +49,15 @@
             
         <?php }
         
+           else if($sivu == 'tiedot'){  echo fuel_var('form', '');
+            
+           }
+           
+           ?>
+        
         
     
-    ?>
+    
 </div>
 
 

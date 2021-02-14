@@ -1,31 +1,23 @@
-<h2>Kasvattajanimi: <?=$nimi['kasvattajanimi']?> (#<?=$nimi['id']?>)</h2>
+<?php
 
+$edit = "";
 
-<div class="container">
-    <p><b>Talli:</b> <?=$nimi['tnro']?></p>
-    <p><b>Rekisteröity:</b> <?=$nimi['rekisteroity']?></p>
-    <p><b>Omistajat:</b>
-        <?php
-            $first = true;
-            foreach($owners as $o)
-            {
-                if($first)
-                {
-                    echo $o['nimimerkki'] . "(<a href='" . site_url('tunnus') . "/VRL-" . $o['omistaja'] . "'>VRL-" . $o['omistaja'] . "</a>)";
-                    $first = false;
-                }
-                else
-                    echo ", " . $o['nimimerkki'] . " (<a href='" . site_url('tunnus') . "/VRL-" . $o['omistaja'] . "'>VRL-" . $o['omistaja'] . "</a>)";
-            }
-        ?>
-    </p>
-    
-</div>
+if(isset($edit_tools) && $edit_tools == true){
+ $button = '<button type="button" class="btn btn-default">
+  <img src="'.base_url().'assets/images/icons/edit.png" /></button>';
+ $edit = '<a href="'.site_url('/kasvatus/kasvattajanimet/muokkaa/'. $nimi['id']).'">'.$button.'</a>';
+}
+
+?>
+
+<h2>Kasvattajanimi: <?=$nimi['kasvattajanimi']?> (#<?=$nimi['id']?>) <?=$edit;?></h2>
+
+<?php echo $nimi_info;?>
 
    <ul class="nav nav-tabs">
         <li role="presentation" class="<?php if ($sivu == 'rodut'){echo "active";}?>"><a href="<?php echo base_url('kasvatus/kasvattajanimet/nimi/'. $nimi['id'] . '/rodut')?>">Rodut</a></li>
-
         <li role="presentation" class="<?php if ($sivu == 'kasvatit'){echo "active";}?>"><a href="<?php echo base_url('kasvatus/kasvattajanimet/nimi/'. $nimi['id'] . '/kasvatit')?>">Kasvatit</a></li>
+        <li role="presentation" class="<?php if ($sivu == 'stats'){echo "active";}?>"><a href="<?php echo base_url('kasvatus/kasvattajanimet/nimi/'. $nimi['id'] . '/stats')?>">Statistikka</a></li>
 
     </ul>
     
@@ -35,6 +27,9 @@
         }
         else if($sivu == 'kasvatit'){
             echo $foals;
+        }
+         else if($sivu == 'stats'){
+            echo $stats;
         } 
         
     
