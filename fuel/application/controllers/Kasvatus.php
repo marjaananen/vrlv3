@@ -444,7 +444,7 @@ class Kasvatus extends CI_Controller
     private function _kasvattajanimet_newest(){
 		
 
-				$vars['title'] = "Uusimmat kasvattajanimet";
+			$vars['title'] = "Uusimmat kasvattajanimet";
 			
 			$vars['headers'][1] = array('title' => 'Rekisteröity', 'key' => 'rekisteroity', 'type'=>'date');
 			$vars['headers'][2] = array('title' => 'Kasvattajanimi', 'key' => 'kasvattajanimi');
@@ -602,7 +602,6 @@ class Kasvatus extends CI_Controller
                 $this->fuel->pages->render('misc/naytaviesti', $msg);
 
             }else {
-                echo $this->db->last_query();
                 $this->fuel->pages->render('misc/naytaviesti', $msg);
             }
 

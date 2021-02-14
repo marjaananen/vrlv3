@@ -1217,7 +1217,6 @@ private function _make_result_form($luokat, $jaos_id, $porr = false){
             }
         }
         
-        echo "<br>luokkia on " . $nro;
         return $this->form_builder->render_template('_layouts/basic_form_template', $fields);
 }
 

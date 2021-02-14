@@ -151,7 +151,6 @@ class Kisakeskus_model extends CI_Model
         
         $query = $this->db->get();
 
-        
         if(sizeof($query->result_array())>0){
 
             return $query->result_array();
@@ -172,9 +171,9 @@ class Kisakeskus_model extends CI_Model
             $this->db->join('vrlv3_kisat_nayttelytulokset as t','t.nayttely_id = n.kisa_id');
 
         }else {
-             $this->db->select('n.jaos, COUNT(kisa_id) as kpl, MIN(t.ilmoitettu) as ilmoitettu');
-            $this->db->join('vrlv3_kisat_nayttelykalenteri as n','j.id = n.jaos');
-            $this->db->join('vrlv3_kisat_nayttelytulokset as t','t.nayttely_id = n.kisa_id');
+             $this->db->select('n.jaos, COUNT(n.kisa_id) as kpl, MIN(t.ilmoitettu) as ilmoitettu');
+            $this->db->join('vrlv3_kisat_kisakalenteri as n','j.id = n.jaos');
+            $this->db->join('vrlv3_kisat_tulokset as t','t.kisa_id = n.kisa_id');
 
         }
                    $this->db->group_start();

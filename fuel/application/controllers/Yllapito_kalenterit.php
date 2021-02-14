@@ -99,7 +99,6 @@ class Yllapito_kalenterit extends CI_Controller
     
     	$this->fuel->pages->render('yllapito/kisakalenteri/kisakalenterit_etusivu', $data);
 
-
     }
     
     private function _getApplicationAmounts(){
