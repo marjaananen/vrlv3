@@ -450,7 +450,6 @@ class Hevonen_model extends Base_module_model
     }
         
     public function get_hevonen_basic($reknro){
-        $this->db->
         $this->db->where('reknro', $this->CI->vrl_helper->vh_to_number($reknro));
         $this->db->from('vrlv3_hevosrekisteri');
         $query = $this->db->get();

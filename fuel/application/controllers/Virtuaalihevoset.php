@@ -63,7 +63,7 @@ class Virtuaalihevoset extends CI_Controller
 					$reknro = $this->vrl_helper->vh_to_number($this->input->post('reknro'));
 				}
 
-				$vars['data'] = json_encode($this->hevonen_model->search_horse($reknro, $this->input->post('nimi'), $this->input->post('rotu'), $this->input->post('skp'),
+				$vars['data'] = json_encode($this->hevonen_model->search_horse($reknro, $this->input->post('nimi'), $this->input->post('rotu'), $this->input->post('sukupuoli'),
 																			   $this->input->post('kuollut'), $this->input->post('vari'), $this->input->post('syntynyt_v')));
 			}
 			
@@ -704,6 +704,129 @@ class Virtuaalihevoset extends CI_Controller
 			
     }
     
+    
+    function massarekisterointi(){
+        
+         if(!($this->ion_auth->logged_in()))
+        {
+            	$this->fuel->pages->render('misc/naytaviesti', array('msg_type' => 'danger', 'msg' => 'Kirjaudu sisään rekisteröidäksesi hevosen!'));
+        } else {
+            $data = array();
+            
+            $varsa = $this->_get_horse_edit_form('form');
+            
+            foreach($varsa as $nimi=>$field){
+                if($field['type'] == 'section' || $field['type'] == 'hidden' || (isset($field['hidden']) && $field['hidden'] == true)){
+                    continue;
+                }else {
+                    $kentta = $field;
+                    if($field['type'] == 'checkbox'){
+                        $kentta['kuvaus'] = $field['label'] ?? "";
+                        $kentta['kuvaus'] .= '<span class="form_comment">';
+                        $kentta['kuvaus'] .= 'Arvo "0" tai "1", jossa 0 = ei ja 1 = kyllä</span>';
+
+                    }else if($nimi == 'rotu'){
+                        $kentta['kuvaus'] = $field['label'] ?? "";
+                        $kentta['kuvaus'] .= '<span class="form_comment">Arvo numerona';
+                        $kentta['kuvaus'] .= ' (kts. <a href="'. site_url('virtuaalihevoset/rodut') . '">lista sallituista arvoista</a>)';
+                        $kentta['kuvaus'] .= '</span>';
+                    }
+                    else if($nimi == 'vari'){
+                        $kentta['kuvaus'] = $field['label'] ?? "";
+                        $kentta['kuvaus'] .= '<span class="form_comment">Arvo numerona';
+                        $kentta['kuvaus'] .= ' (kts. <a href="'. site_url('virtuaalihevoset/varit') . '">lista sallituista arvoista</a>)';
+                        $kentta['kuvaus'] .= '</span>';
+                    }
+                    else if($nimi == 'syntymamaa'){
+                        $kentta['kuvaus'] = $field['label'] ?? "";
+                        $kentta['kuvaus'] .= '<span class="form_comment">Arvo numerona';
+                        $kentta['kuvaus'] .= ' (kts. <a href="'. site_url('virtuaalihevoset/maat') . '">lista sallituista arvoista</a>)';
+                        $kentta['kuvaus'] .= '</span>';
+                    }
+                    else if($nimi == 'painotus'){
+                        $kentta['kuvaus'] = $field['label'] ?? "";
+                        $kentta['kuvaus'] .= '<span class="form_comment">Arvo numerona';
+                        $kentta['kuvaus'] .= ' (kts. <a href="'. site_url('virtuaalihevoset/lajit') . '">lista sallituista arvoista</a>)';
+                        $kentta['kuvaus'] .= '</span>';
+                    }
+                    else if($kentta['type'] == 'select'){
+                        $kentta['kuvaus'] = $field['label'] ?? "";
+                        $kentta['kuvaus'] .= '<span class="form_comment">Arvo numerona. ';
+                        unset($kentta['options'][-1]);
+                        
+                        foreach ($kentta['options'] as $id=>$option){
+                            $kentta['kuvaus'] .= '"'.$id.'" = ' . $option .', ';
+                        }
+                         $kentta['kuvaus'] .= '</span>';
+                    }
+                    
+                    else{
+                        $kentta['kuvaus'] = $field['label'] ?? "";
+                        $kentta['kuvaus'] .= $field['after_html'] ?? "";
+                    }
+                    $poni[$nimi] = $kentta;
+                }
+            }
+                    
+            
+            unset($poni['luin_saannot']);
+            $data['kentat'] = $poni;
+            
+            $this->fuel->pages->render('hevoset/massarekisterointi', $data);
+        }
+
+    
+    }
+    
+    function rekisterointi_csv(){
+        $result = array();
+        if(!($this->ion_auth->logged_in()))
+        {
+            	$result['error'] = 1;
+                $result['error_message'] = "Virhe! Et ole kirjautunut sisään.";
+        }else {
+            $result['error'] = 0;
+            
+            if($this->input->server('REQUEST_METHOD') == 'GET')
+            {			        
+                $result['error'] = 1;
+                $result['error_message'] = "Virhe! Et lähettänyt mitään.";
+            }
+            else if($this->input->server('REQUEST_METHOD') == 'POST'){
+                $msg = "";
+                $poni = array();
+                
+                if(!$this->_fill_horse_info_csv($poni, $msg)){
+                     $result['error'] = 1;
+                    $result['error_message'] = $msg;
+                }
+
+                else if (!$this->_validate_horse('new', $poni, $msg)){
+                    $result['error'] = 1;
+                    $result['error_message'] = $msg;
+                    
+                }
+                else {
+                    $vh = $this->hevonen_model->add_hevonen($poni, $this->ion_auth->user()->row()->tunnus, $msg);
+                    if ($vh === false){
+                        $result['error'] = 1;
+                        $result['error_message'] = $msg;
+
+                    }
+                    else {                        
+                       $result['error'] = 0;
+                       $result['vh'] = $vh;
+                    }
+                }                    
+                
+            }
+            
+
+        }
+		$this->load->view('rajapinta/json', array('json'=>json_encode($result)));
+
+    }
+    
     //////////////////////////////////////////////////////////////////////////////////////////7
     // Muokkaus
     ////////////////////////////////////////////////////////////////////////////////////////
@@ -756,8 +879,10 @@ class Virtuaalihevoset extends CI_Controller
         }
         else if($sivu == 'tiedot'){
            if($this->input->server('REQUEST_METHOD') == 'POST'){
-            echo "mo3oo";
                 $poni = $this->_fill_horse_info($mode);
+                if(!isset($poni['syntymaaika'])){
+                    $poni['syntymaaika'] = $hevonen['syntymaaika'];
+                }
                 $msg = "";
                 if (!$this->_validate_horse($mode, $poni, $msg)){
                     $data['msg'] = "Rekisteröinti epäonnistui! " . $msg;
@@ -1134,7 +1259,7 @@ class Virtuaalihevoset extends CI_Controller
 		$fields['reknro'] = array('type' => 'text', 'class'=>'form-control');
 		$fields['nimi'] = array('type' => 'text', 'class'=>'form-control');
 		$fields['rotu'] = array('type' => 'select', 'options' => $r_options, 'value' => '-1', 'class'=>'form-control');
-		$fields['skp'] = array('type' => 'select', 'options' => $skp_options, 'value' => '-1', 'class'=>'form-control');
+		$fields['sukupuoli'] = array('type' => 'select', 'options' => $skp_options, 'value' => '-1', 'class'=>'form-control');
 		$fields['kuollut'] = array('type' => 'checkbox', 'checked' => false, 'class'=>'form-control');
 		$fields['vari'] = array('type' => 'select', 'options' => $color_options, 'value' => '-1', 'class'=>'form-control');
 		$fields['syntynyt_v'] = array('type' => 'text', 'label'=>'Syntymävuosi', 'class'=>'form-control');
@@ -1150,7 +1275,7 @@ class Virtuaalihevoset extends CI_Controller
 	public function validate_horse_search_form(){
         $this->load->library('form_validation');
         
-		$this->form_validation->set_rules('skp', 'Sukupuoli', 'min_length[1]|max_length[2]|numeric');
+		$this->form_validation->set_rules('sukupuoli', 'Sukupuoli', 'min_length[1]|max_length[2]|numeric');
 		$this->form_validation->set_rules('vari', 'Väri', 'min_length[1]|max_length[4]|numeric');
 		$this->form_validation->set_rules('rotu', 'Rotu', 'min_length[1]|max_length[4]|numeric');
 		$this->form_validation->set_rules('vari', 'Väri', 'min_length[1]|max_length[4]|numeric');
@@ -1165,6 +1290,11 @@ class Virtuaalihevoset extends CI_Controller
     
     
     private function _get_horse_edit_form($type = 'new', $poni = array(), $reknro = null){
+        $form = false;
+        if($type == "form"){
+            $form = true;
+            $type = "new";
+        }
 		$r_options = $this->hevonen_model->get_breed_option_list();
 		$r_options[-1] = "";
 		$skp_options = $this->hevonen_model->get_gender_option_list();
@@ -1192,21 +1322,24 @@ class Virtuaalihevoset extends CI_Controller
 		//$fields['reknro'] = array('type' => 'text', 'class'=>'form-control');
         
         if($type == 'admin' || $type == 'new'){
-            $fields['nimi'] = array('type' => 'text', 'class'=>'form-control', 'required' => TRUE, 'value'=> $poni['nimi'] ?? '', 'after_html' => '<span class="form_comment">Nimen tulee olla hyvien tapojen mukainen, eikä se saa olla jo käytössä samanrotuisella. Sopimattomat nimet sensuroidaan!</span>');
-            $fields['skp'] = array('type' => 'select', 'label'=> 'Sukupuoli', 'options' => $skp_options, 'required' => TRUE, 'value'=> $poni['sukupuoli'] ?? -1, 'class'=>'form-control');
-            $fields['rotu'] = array('type' => 'select', 'options' => $r_options, 'required' => TRUE, 'value'=> $poni['rotu'] ?? -1, 'class'=>'form-control');
+            $fields['nimi'] = array('label'=>'Hevosen nimi', 'type' => 'text', 'class'=>'form-control', 'required' => TRUE, 'value'=> $poni['nimi'] ?? '',
+                                    'after_html' => '<span class="form_comment">Nimen tulee olla hyvien tapojen mukainen, eikä se saa olla jo käytössä samanrotuisella. Sopimattomat nimet sensuroidaan!</span>');
+            $fields['sukupuoli'] = array('type' => 'select', 'label'=> 'Sukupuoli', 'options' => $skp_options, 'required' => TRUE, 'value'=> $poni['sukupuoli'] ?? -1, 'class'=>'form-control');
+            $fields['rotu'] = array('label'=>'Rotu', 'type' => 'select', 'options' => $r_options, 'required' => TRUE, 'value'=> $poni['rotu'] ?? -1, 'class'=>'form-control');
             $fields['syntymaaika'] = array('type' => 'text', 'label'=>'Syntymäaika', 'class'=>'form-control', 'required' => TRUE, 'value'=> $poni['syntymaaika'] ?? '', 'after_html' => '<span class="form_comment">Muodossa pp.kk.vvvv</span>');
 
         }
-        $fields['url'] = array('type' => 'text', 'label'=> 'Hevosen sivujen osoite', 'class'=>'form-control', 'required' => TRUE, 'value'=> $poni['url'] ?? 'http://');
-        $fields['kuollut'] = array('type' => 'checkbox', 'checked' => $poni['kuollut'] ?? false, 'class'=>'form-control');
-        $fields['kuol_pvm'] = array('type' => 'text', 'label'=>'Kuolinpäivä', 'class'=>'form-control', 'value'=> $poni['kuol_pvm'] ?? '', 'after_html' => '<span class="form_comment">Jätä tyhjäksi, jos hevonen ei ole kuollut.</span>'); 
+        $fields['url'] = array('type' => 'text', 'label'=> 'Hevosen sivujen osoite', 'class'=>'form-control', 'required' => TRUE, 'value'=> $poni['url'] ?? 'http://',
+                               'after_html' => '<span class="form_comment">Linkki hevosen omalle sivulle, muista http:// alku!</span>');
+        $fields['kuollut'] = array('label'=>'Kuollut', 'type' => 'checkbox', 'checked' => $poni['kuollut'] ?? false, 'class'=>'form-control');
+        $fields['kuol_pvm'] = array('type' => 'text', 'label'=>'Kuolinpäivä', 'class'=>'form-control', 'value'=> $poni['kuol_pvm'] ?? '',
+                                    'after_html' => '<span class="form_comment">Muodossa pp.kk.vvvvv. Jätä tyhjäksi, jos hevonen ei ole kuollut.</span>'); 
         
         $fields['lisatiedot'] = array('type'=>'hidden', 'before_html' => '</div></div></div><div class="panel panel-default"><div class="panel-heading">Lisätiedot (ei pakollisia)</div> <div class="panel-body"><div class="form-group">');
         
         $fields['sakakorkeus'] = array('label'=>'Säkäkorkeus', 'type' => 'text', 'class'=>'form-control', 'value'=> $poni['sakakorkeus'] ?? '', 'after_html' => '<span class="form_comment">Säkäkorkeus numeroina (senttimetreinä)</span>');
         $fields['vari'] = array('label'=>'Väri', 'type' => 'select', 'options' => $color_options,  'value'=> $poni['vari'] ?? '-1', 'class'=>'form-control','after_html' => '<span class="form_comment">Jos toivomasi väri ei löydy listalta, ole yhteydessä ylläpitoon.</span>');
-		$fields['painotus'] = array('type' => 'select', 'options' => $skill_options, 'value' =>  $poni['painotus'] ?? -1, 'class'=>'form-control');
+		$fields['painotus'] = array('label'=>'Painotus', 'type' => 'select', 'options' => $skill_options, 'value' =>  $poni['painotus'] ?? -1, 'class'=>'form-control');
         $fields['porr_kilpailee'] = array('label'=>'Kilpailee porrastetuissa', 'type' => 'checkbox', 'checked' => $poni['porr_kilpailee'] ?? false, 'class'=>'form-control');
 
 		$fields['syntymamaa'] = array('label'=>'Syntymämaa', 'type' => 'select', 'options' => $country_options, 'value' => $poni['syntymamaa'] ?? -1, 'class'=>'form-control');
@@ -1219,21 +1352,33 @@ class Virtuaalihevoset extends CI_Controller
         }
 
         $option_script = $this->vrl_helper->get_option_script('kotitalli', $tallit);
+        $kotitalli_str = '<span class="form_comment">Tallitunnus muodossa XXXX0000.';
+        if(!$form){
+            $kotitalli_str .= ' Omat tallisi (klikkaa lisätäksesi): ' . $option_script['list'] . '</span>' . $option_script['script'];
+        }else{
+            $kotitalli_str .= '</span>';
+        }
 
-        $fields['kotitalli'] = array('type' => 'text', 'class'=>'form-control', 'value'=> $poni['kotitalli'] ?? '',
-                                     'after_html'=> '<span class="form_comment">Laita tunnus muodossa XXXX0000. Omat tallisi (klikkaa lisätäksesi): ' .
-                                    $option_script['list'] . '</span>' . $option_script['script']);
+        $fields['kotitalli'] = array('label'=>'Kotitalli', 'type' => 'text', 'class'=>'form-control', 'value'=> $poni['kotitalli'] ?? '',
+                                     'after_html'=> $kotitalli_str);
 
                 
                
         $fields['sukutiedot'] = array('type'=>'hidden', 'before_html' => '</div></div></div><div class="panel panel-default"><div class="panel-heading">Suku- ja kasvattajatiedot (vain suvullisille)</div> <div class="panel-body"><div class="form-group">');
         
-        $fields['kasvattajanimi'] = array('type' => 'text', 'class'=>'form-control', 'value'=> $poni['kasvattajanimi'] ?? '', 'class'=>'form-control', 'after_html' => '<span class="form_comment">Jätä tyhjäksi, jos kyseessä evm-hevonen.</span>');
+        $fields['kasvattajanimi'] = array('type' => 'text', 'label'=> 'Kasvattajanimi', 'class'=>'form-control', 'value'=> $poni['kasvattajanimi'] ?? '', 'class'=>'form-control', 'after_html' => '<span class="form_comment">Jätä tyhjäksi, jos kyseessä evm-hevonen.</span>');
         
         $option_script = $this->vrl_helper->get_option_script('kasvattaja_talli', $tallit);
-        $fields['kasvattaja_talli'] = array('type' => 'text', 'class'=>'form-control', 'value'=> $poni['kasvattaja_talli'] ?? '', 'class'=>'form-control',
-                                    'after_html'=> '<span class="form_comment">Laita tunnus muodossa XXXX0000. Jätä tyhjäksi jos kyseessä on evm-hevonen. Omat tallisi (klikkaa lisätäksesi): ' .
-                                    $option_script['list'] . '</span>' . $option_script['script']);        $fields['kasvattaja_tunnus'] = array('type' => 'text', 'class'=>'form-control', 'value'=> $poni['kasvattaja_tunnus'] ?? '', 'class'=>'form-control', 'after_html' => '<span class="form_comment">Muodossa VRL-00000. Kasvattajan VRL-tunnus. Jätä tyhjäksi, jos kyseessä evm-hevonen.</span>');
+        
+        $kasvattaja_str = '<span class="form_comment">Tallitunnus muodossa XXXX0000.';
+        if(!$form){
+            $kasvattaja_str .= ' Omat tallisi (klikkaa lisätäksesi): ' . $option_script['list'] . '</span>' . $option_script['script'];
+        }else{
+            $kasvattaja_str .= '</span>';
+        }
+        $fields['kasvattaja_talli'] = array('label'=> 'Kasvattajatalli', 'type' => 'text', 'class'=>'form-control', 'value'=> $poni['kasvattaja_talli'] ?? '', 'class'=>'form-control',
+                                    'after_html'=> $kasvattaja_str);
+        $fields['kasvattaja_tunnus'] = array('label'=>'Kasvattajan VRL-tunnus', 'type' => 'text', 'class'=>'form-control', 'value'=> $poni['kasvattaja_tunnus'] ?? '', 'class'=>'form-control', 'after_html' => '<span class="form_comment">Muodossa VRL-00000. Kasvattajan VRL-tunnus. Jätä tyhjäksi, jos kyseessä evm-hevonen.</span>');
         $fields['i_nro'] = array('type' => 'text', 'label'=> 'Isän rekisterinumero','class'=>'form-control', 'value'=> $poni['i_nro'] ?? '', 'class'=>'form-control', 'after_html' => '<span class="form_comment">Isän rekisterinumero.</span>');
         $fields['e_nro'] = array('type' => 'text', 'label'=> 'Emän rekisterinumero', 'class'=>'form-control', 'value'=> $poni['e_nro'] ?? '', 'class'=>'form-control', 'after_html' => '<span class="form_comment">Emän rekisterinumero. </span>');
         
@@ -1262,8 +1407,12 @@ class Virtuaalihevoset extends CI_Controller
                                
 		$this->load->library('form_builder', array('submit_value' => $submit[$type]['submit_value']));
 		$this->form_builder->form_attrs = array('method' => 'post', 'action' => $submit[$type]['action']);
-		        
-		return $this->form_builder->render_template('_layouts/basic_form_template', $fields);
+		
+        if($form){
+            return $fields;
+        } else {
+            return $this->form_builder->render_template('_layouts/basic_form_template', $fields);
+        }
 
 	}
     
@@ -1288,13 +1437,39 @@ class Virtuaalihevoset extends CI_Controller
 
     }
     
+    private function _fill_horse_info_csv($poni, &$msg){
+        $poni = array();
+        
+        $headers = $this->input->post('headers');
+        $values = $this->input->post('values');
+        
+        if(!isset($headers) || !isset($values)){
+             $msg = "Otsikko- tai arvorivi puuttuu";
+            return false;
+        }
+
+        
+        $headers = str_getcsv ($headers , ",","\"");
+        $values = str_getcsv ($values , ",","\"");
+
+        if(sizeof($headers) == sizeof($values)){
+            $poni = array_combine($headers, $values);
+            $poni['luin_saannot'] = 1;
+        }else {
+            $msg = "Rekisteröitävällä rivillä ei ole oikeaa määrää kenttiä";
+            return false;
+            
+        }
+        return true;
+    }
+    
 
     private function _fill_horse_info($type = 'new'){
         $poni = array();
         
         if($type == 'new' || $type == 'admin'){
             $poni['nimi'] = $this->input->post('nimi');
-            $poni['sukupuoli'] = $this->input->post('skp');
+            $poni['sukupuoli'] = $this->input->post('sukupuoli');
             $poni['syntymaaika'] = $this->input->post('syntymaaika');
         }
         $poni['luin_saannot'] = $this->input->post('luin_saannot');
@@ -1474,14 +1649,23 @@ class Virtuaalihevoset extends CI_Controller
     }
     
     private function _check_ages($poni, &$msg){
-        $birth_date = new DateTime($poni['syntymaaika']);
+        $birth_date = null;
+        
+        if(isset($poni['syntymaaika'])){
+            $birth_date = new DateTime($poni['syntymaaika']);
+        }else {
+            //todo hae syntymäaika
+             $birth_date = new DateTime('1900-01-01');
+        }
         $current_date = new DateTime();
         
         if ($birth_date > $current_date)
         {
           $msg .= "<LI>Hevosen syntymäpäivä on tulevaisuudessa!</LI>";
           return false;
+        
         }else {
+            $ok = true;
             $previous_date = $birth_date;
             
             foreach ($this->vuodet as $vuosi){
@@ -1490,10 +1674,12 @@ class Virtuaalihevoset extends CI_Controller
                     
                     if($previous_date > $vertailtava){
                         $msg .= "<li>".$vuosi."-vuotissyntymäpäivä on ennen edellistä syntymäpäivää</LI>";
+                        $ok = false;
                     }
                     $previous_date = $vertailtava;
                 }
             }
+            return $ok;
             
         }
     }
@@ -1516,8 +1702,8 @@ class Virtuaalihevoset extends CI_Controller
         if($this->vrl_helper->check_vh_syntax($reknro)){
         
             $parent = $this->hevonen_model->get_hevonen_basic($reknro);
-            $poni_date = new DateTime($poni['syntymapaiva']);
-            $parent_date = $birth_date = new DateTime($parent['syntymapaiva']);
+            $poni_date = new DateTime($poni['syntymaaika']);
+            $parent_date = $birth_date = new DateTime($parent['syntymaaika']);
             
             
             if($parent_date > $poni_date){
