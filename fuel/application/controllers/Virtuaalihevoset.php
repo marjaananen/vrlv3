@@ -226,14 +226,48 @@ class Virtuaalihevoset extends CI_Controller
               
                     
             $data['form'] =  $this->form_builder->render_template('_layouts/basic_form_template', $fields);
+            $data['title'] = 'Kaikki omat hevoset';                        
+            $vars['text_view'] = "";
             
-            $data['title'] = "Omat hevoset";
-                        
-            $vars['text_view'] = "";		
-            $this->fuel->pages->render('misc/haku', $data);
+             $sivu['sivu'] = 'omat';
+            $sivu['data'] =  $this->load->view('misc/haku', $data, TRUE);
+            
+            $this->fuel->pages->render('hevoset/omat_hevoset', $sivu);
 
         }
         
+    }
+    
+    function vastarekisteroidyt(){
+        if(!($this->ion_auth->logged_in()))
+        {
+            	$this->fuel->pages->render('misc/naytaviesti', array('msg_type' => 'danger', 'msg' => 'Kirjaudu sisään tarkastellaksesi omia hevosiasi!'));
+        }else {
+            $vars['headers'][1] = array('title' => 'Rekisterinumero', 'key' => 'reknro', 'key_link' => site_url('virtuaalihevoset/hevonen/'), 'type'=>'VH');
+			$vars['headers'][2] = array('title' => 'Nimi', 'key' => 'nimi');
+			$vars['headers'][3] = array('title' => 'Rotu', 'key' => 'rotu');
+			$vars['headers'][4] = array('title' => 'Sukupuoli', 'key' => 'sukupuoli');
+			$vars['headers'][5] = array('title' => 'Editoi', 'key' => 'reknro', 'key_link' => site_url('virtuaalihevoset/muokkaa/'),
+                                            'image' => site_url('assets/images/icons/edit.png'));
+            $vars['headers'][6] = array('title' => 'Poista', 'key' => 'reknro', 'key_link' => site_url('virtuaalihevoset/poista/'),
+                                            'image' => site_url('assets/images/icons/delete.png'));
+
+            
+            $vars['headers'] = json_encode($vars['headers']);                    
+			$vars['data'] = json_encode($this->hevonen_model->get_just_registered($this->ion_auth->user()->row()->tunnus));
+			$data['title'] = "Viimeisimmät rekisteröidyt";
+            $data['text_view'] = "Tässä näkyy kuluneen 24h sisällä rekisteröidyt hevosesi. Alle vuorokauden rekisterissä olleita hevosia voi poistaa, mikäli niillä ei ole esim. jälkeläisiä.";
+			$data['tulokset'] = $this->load->view('misc/taulukko', $vars, TRUE);
+            
+            
+            $sivu['sivu'] = 'uudet';
+            $sivu['data'] =  $this->load->view('misc/haku', $data, TRUE);
+            
+            $this->fuel->pages->render('hevoset/omat_hevoset', $sivu);
+
+
+		}
+		
     }
     
     private function _massatuho_setup_hakulomake($horses, &$fields, $haku = array()){
@@ -670,6 +704,7 @@ class Virtuaalihevoset extends CI_Controller
         {
             	$this->fuel->pages->render('misc/naytaviesti', array('msg_type' => 'danger', 'msg' => 'Kirjaudu sisään rekisteröidäksesi hevosen!'));
         }else {
+            $vars['sivu'] = 'yksi';
             $vars['title'] = 'Rekisteröi hevonen';
             $this->load->library('vrl_helper');
 
@@ -677,7 +712,7 @@ class Virtuaalihevoset extends CI_Controller
             {			        
                 $vars['form'] = $this->_get_horse_edit_form('new');
                 $vars['msg'] = 'Tähdellä merkityt kentät ovat pakollisia! Muista, että hevosen sivuilta tulee olla löydettävissä sana "virtuaalihevonen"! Sinut merkitään hevosen omistajaksi. Voit lisätä hevoselle lisää omistajia rekisteröinnin jälkeen.';
-                $this->fuel->pages->render('misc/jonorekisterointi', $vars);
+            $this->fuel->pages->render('hevoset/hevosten_rekisterointi', $vars);
             }
             else if($this->input->server('REQUEST_METHOD') == 'POST'){
                 $poni = $this->_fill_horse_info();
@@ -686,7 +721,7 @@ class Virtuaalihevoset extends CI_Controller
                     $vars['msg'] = "Rekisteröinti epäonnistui! " . $msg;
 					$vars['msg_type'] = "danger";
                     $vars['form'] = $this->_get_horse_edit_form('new', $poni);
-                    $this->fuel->pages->render('misc/jonorekisterointi', $vars);
+            $this->fuel->pages->render('hevoset/hevosten_rekisterointi', $vars);
                 }
                 else {
                     $vh = $this->hevonen_model->add_hevonen($poni, $this->ion_auth->user()->row()->tunnus, $msg);
@@ -771,8 +806,10 @@ class Virtuaalihevoset extends CI_Controller
             
             unset($poni['luin_saannot']);
             $data['kentat'] = $poni;
-            
-            $this->fuel->pages->render('hevoset/massarekisterointi', $data);
+            $data['sivu'] = 'massa';
+            $data['allowed'] = $this->hevonen_model->mass_insert_available();
+            $data['massarekisterointi'] = $this->load->view('hevoset/massarekisterointi', $data, TRUE);
+            $this->fuel->pages->render('hevoset/hevosten_rekisterointi', $data);
         }
 
     
@@ -780,10 +817,10 @@ class Virtuaalihevoset extends CI_Controller
     
     function rekisterointi_csv(){
         $result = array();
-        if(!($this->ion_auth->logged_in()))
+        if(!($this->ion_auth->logged_in()) || !$this->hevonen_model->mass_insert_available())
         {
             	$result['error'] = 1;
-                $result['error_message'] = "Virhe! Et ole kirjautunut sisään.";
+                $result['error_message'] = "Virhe! Et ole kirjautunut sisään tai sinulla ei ole oikeutta massarekisteröintiin.";
         }else {
             $result['error'] = 0;
             
@@ -1340,7 +1377,8 @@ class Virtuaalihevoset extends CI_Controller
         $fields['lisatiedot'] = array('type'=>'hidden', 'before_html' => '</div></div></div><div class="panel panel-default"><div class="panel-heading">Lisätiedot (ei pakollisia)</div> <div class="panel-body"><div class="form-group">');
         
         $fields['sakakorkeus'] = array('label'=>'Säkäkorkeus', 'type' => 'text', 'class'=>'form-control', 'value'=> $poni['sakakorkeus'] ?? '', 'after_html' => '<span class="form_comment">Säkäkorkeus numeroina (senttimetreinä)</span>');
-        $fields['vari'] = array('label'=>'Väri', 'type' => 'select', 'options' => $color_options,  'value'=> $poni['vari'] ?? '-1', 'class'=>'form-control','after_html' => '<span class="form_comment">Jos toivomasi väri ei löydy listalta, ole yhteydessä ylläpitoon.</span>');
+        $fields['vari'] = array('label'=>'Väri', 'type' => 'select', 'options' => $color_options,  'value'=> $poni['vari'] ?? '-1', 'class'=>'form-control',
+                                'after_html' => '<span class="form_comment">Jos toivomasi väri ei löydy listalta, ole yhteydessä ylläpitoon.</span>');
 		$fields['painotus'] = array('label'=>'Painotus', 'type' => 'select', 'options' => $skill_options, 'value' =>  $poni['painotus'] ?? -1, 'class'=>'form-control');
         $fields['porr_kilpailee'] = array('label'=>'Kilpailee porrastetuissa', 'type' => 'checkbox', 'checked' => $poni['porr_kilpailee'] ?? false, 'class'=>'form-control');
 

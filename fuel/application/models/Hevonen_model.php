@@ -13,6 +13,64 @@ class Hevonen_model extends Base_module_model
     var $allowed_time_for_delete = 60*60*24; //24h
     var $allowed_time_for_delete_admin = 60*60*24*30; //30 pv
     
+    function get_just_registered($nro){
+        $date = new DateTime();
+        $allowed_time = $this->allowed_time_for_delete;
+        $date->setTimestamp(time() - $allowed_time);
+        $oldest_possible = $date->format('Y-m-d H:i:s');
+
+        $this->db->select("h.reknro, h.nimi, r.lyhenne as rotu, IF(sukupuoli='1', 'tamma', IF(sukupuoli='2', 'ori', 'ruuna')) as sukupuoli,
+                          IFNULL(kotitalli,'') as kotitalli, r.rotunro, syntymaaika, kuollut, h.porr_kilpailee, h.sakakorkeus, h.painotus as painotusid,
+                          t.nimi as tallinimi, p.painotus, r.rotunro");
+        $this->db->from('vrlv3_hevosrekisteri as h');
+        $this->db->join('vrlv3_hevosrekisteri_omistajat as o', 'h.reknro = o.reknro');
+        $this->db->join("vrlv3_lista_rodut as r", "h.rotu = r.rotunro", 'left outer');
+        $this->db->join("vrlv3_lista_painotus as p", "h.painotus = p.pid", 'left outer');
+        $this->db->join("vrlv3_tallirekisteri as t", "t.tnro = h.kotitalli", 'left outer');
+        $this->db->where("rekisteroity >", $oldest_possible);
+        $this->db->where('o.omistaja', $nro);
+        $this->db->where('o.taso', 1);
+        $this->db->where('h.hyvaksyi', $nro);
+        $query=$this->db->get();
+        
+        if ($query->num_rows() > 0)
+        {
+            return $query->result_array();
+        }
+        
+        else {
+            return array();
+        }
+        
+    }
+    
+    
+    function mass_insert_available(){
+        $date = new DateTime();
+        $allowed_time = 60*60*24*(364/2);
+        $date->setTimestamp(time() - $allowed_time);
+        $oldest_possible = $date->format('Y-m-d H:i:s');
+
+        
+        $this->db->select("*");
+        $this->db->where("rekisteroity >", $oldest_possible);
+        $this->db->from('vrlv3_hevosrekisteri');
+        $this->db->where('hyvaksyi', $this->CI->ion_auth->user()->row()->tunnus);
+        
+        
+        $query = $this->db->get();
+        
+        if ($query->num_rows() >= 10)
+        {
+            return true;
+        }else {
+            return false;
+        }
+        
+    }
+    
+    
+    
     function delete_hevonen($reknro, &$msg, $admin = false){
         $date = new DateTime();
         $allowed_time = $this->allowed_time_for_delete;
@@ -29,7 +87,7 @@ class Hevonen_model extends Base_module_model
         $this->db->from('vrlv3_hevosrekisteri');
         
         if(!$admin){
-            $this->db->where('hyvaksyi', $this->CI->ion_auth->user->row()->tunnus);
+            $this->db->where('hyvaksyi', $this->CI->ion_auth->user()->row()->tunnus);
         }
         
         $query = $this->db->get();
@@ -197,7 +255,7 @@ class Hevonen_model extends Base_module_model
                 return false;
                 break;
             }
-            else if ($this->onko_tunnus($vh) == false){
+            else if ($this->onko_tunnus($this->CI->vrl_helper->vh_to_number($vh)) == false){
                 $vh_ok = true;
             }
             else if ($vh_nro >= 9999){

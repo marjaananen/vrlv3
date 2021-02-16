@@ -54,7 +54,12 @@ $nav['tallit/paivitetyt'] = array('label' => 'Viimeksi päivitetyt tallit', 'par
 //virtuaalihevoset alamenu
 $nav['virtuaalihevoset/haku'] = array('label' => 'Hevosrekisteri', 'parent_id' => 'virtuaalihevoset', 'active' => 'virtuaalihevoset/haku'); //Koodattavaa: Rekisteröintilomake
 $nav['virtuaalihevoset/rekisterointi'] = array('label' => 'Hevosten rekisteröinti', 'parent_id' => 'virtuaalihevoset', 'active' => 'virtuaalihevoset/rekisterointi'); //Koodattavaa: Rekisteröintilomake
+$nav['virtuaalihevoset/massarekisterointi'] = array('hidden'=>true, 'label' => 'Hevosten massarekisteröinti', 'parent_id' => 'virtuaalihevoset', 'active' => 'virtuaalihevoset/massarekisterointi'); //Koodattavaa: Rekisteröintilomake
+
 $nav['virtuaalihevoset/omat'] = array('label' => 'Omat hevoset', 'parent_id' => 'virtuaalihevoset', 'active' => 'virtuaalihevoset/omat'); //Koodattavaa: Syntymämaat
+$nav['virtuaalihevoset/vastarekisteroidyt'] = array('hidden'=>true, 'label' => 'Vasta rekisteröidyt hevoset', 'parent_id' => 'virtuaalihevoset', 'active' => 'virtuaalihevoset/vastarekisteroidyt'); //Koodattavaa: Syntymämaat
+
+
 $nav['virtuaalihevoset/statistiikka'] = array('label' => 'Statistiikka', 'parent_id' => 'virtuaalihevoset', 'active' => 'virtuaalihevoset/statistiikka$|virtuaalihevoset/statistiikka/:any'); //Koodattavaa: Statistiikat
 $nav['virtuaalihevoset/rodut'] = array('label' => 'Rotulista', 'parent_id' => 'virtuaalihevoset', 'active' => 'virtuaalihevoset/rodut'); //Koodattavaa: Rotulistat
 $nav['virtuaalihevoset/rotu'] = array('hidden'=>true, 'label' => 'Rotu', 'parent_id' => 'virtuaalihevoset/rodut', 'active' => 'virtuaalihevoset/rotu$|virtuaalihevoset/rotu/:any'); //Koodattavaa: Rotulistat
@@ -71,9 +76,10 @@ $nav['virtuaalihevoset/laji'] = array('hidden'=>true, 'label' => 'Laji', 'parent
 
 
 //jalostus ja kasvatus alamenu
-$nav['kasvatus/kasvattajanimet'] = array('label' => 'Kasvattajanimirekisteri', 'parent_id' => 'kasvatus', 'active' => 'kasvatus/kasvattajanimet'); 
-$nav['kasvatus/kasvattajanimet/rekisteroi'] = array('label' => 'Rekisteröi kasvattajanimi', 'parent_id' => 'kasvatus/kasvattajanimet', 'active' => 'kasvatus/kasvattajanimet/rekisteroi');
+$nav['kasvatus/kasvattajanimet'] = array('label' => 'Kasvattajanimirekisteri', 'parent_id' => 'kasvatus', 'active' => 'kasvatus/kasvattajanimet');
 $nav['kasvatus/kasvattajanimet/aktiiviset'] = array('label' => 'Aktiivisimmat kasvattajanimet', 'parent_id' => 'kasvatus/kasvattajanimet', 'active' => 'kasvatus/kasvattajanimet/aktiiviset');
+
+$nav['kasvatus/kasvattajanimet/rekisteroi'] = array('label' => 'Rekisteröi kasvattajanimi', 'parent_id' => 'kasvatus/kasvattajanimet', 'active' => 'kasvatus/kasvattajanimet/rekisteroi');
 $nav['kasvatus/kasvattajanimet/omat'] = array('label' => 'Omat kasvattajanimet', 'parent_id' => 'kasvatus/kasvattajanimet', 'active' => 'kasvatus/kasvattajanimet/omat');
 $nav['kasvatus/kasvatit'] = array('label' => 'Omat kasvatit', 'parent_id' => 'kasvatus', 'active' => 'kasvatus/kasvatit');
 $nav['kasvatus/unelmasuku'] = array('label' => 'Unelmasuku', 'parent_id' => 'kasvatus', 'active' => 'kasvatus/unelmasuku');

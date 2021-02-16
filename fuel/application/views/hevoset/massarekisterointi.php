@@ -1,5 +1,13 @@
-<h1>Hevosten massarekisteröinti</h1>
+<p>Joukkorekisteröintilomakkeen avulla voit lähettää rekisteröinnit suurelle hevosmäärälle kerralla csv tiedoston avulla. Joukkorekisteröintiin pätee
+aivan samat säännöt, kuin tavallisella lomakkeella rekisteröintiin, joten muistathan lukea rekisteröintiohjeet. Hevosen omistajaksi merkitään rekisteröintihakemuksen lähettäjä.
+Voit lisätä hevoselle lisää omistajia rekisteröinnin jälkeen. Muista, että hevosen sivuilla tulee lukea sana "virtuaalihevonen".</p>
 
+<?php if(!$allowed){ ?>
+    <div class="alert alert-danger" role="alert">   
+        Massarekisteröinti ei ole käytössäsi! Käyttääksesi massarekisteröintiä, sinun tulee olla rekisteröinyt vähintään kymmenen hevosta puolen vuoden sisällä.
+    </div>
+    
+    <?php } ?>
 
 
 
@@ -58,7 +66,16 @@
     
 </script>
 
-<h2>CSV:n kentät</h2>
+<h2>CSV:n muodostusohje</h2>
+<p>CSV:n tulee sisältää otsikkorivin, jossa on listattu allaolevia kenttiä pilkulla(,) erotettuna ja heittomerkeillä ympäröitynä, ja
+yhden arvorivin per rekisteröitävä hevonen. Rivinvaihto on sallittu vain rivin lopussa.</p>
+<p><strong>Esimerkki</strong></p>
+<pre>"nimi", "rotu", "sukupuoli", "saka", "syntymaaika", "url", "vari"
+"Karkurannan Ronan", "28", "ori", "123", "16.04.2009", "http://karkuranta.marsupieni.net/poni/karkurannan-ronan", ""
+"Karus Bazaar", "28", "ori", "126", "11.02.2015", "http://karkuranta.marsupieni.net/poni/karus-bazaar", "11"
+</pre>
+
+<p>Alla on listattu kaikki sallitut kentät ja niiden täyttöohjeet.</p>
 <p>* merkityt kentät ovat pakollisia.</p>
 <table class="table table-striped">
     
