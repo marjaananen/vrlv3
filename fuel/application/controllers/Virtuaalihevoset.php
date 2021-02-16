@@ -881,7 +881,9 @@ class Virtuaalihevoset extends CI_Controller
            if($this->input->server('REQUEST_METHOD') == 'POST'){
                 $poni = $this->_fill_horse_info($mode);
                 if(!isset($poni['syntymaaika'])){
-                    $poni['syntymaaika'] = $hevonen['syntymaaika'];
+                    $poni['syntymaaika'] =  $data['hevonen']['syntymaaika'];
+                }if(!isset($poni['nimi'])){
+                    $poni['nimi'] = $data['hevonen']['nimi'];
                 }
                 $msg = "";
                 if (!$this->_validate_horse($mode, $poni, $msg)){
@@ -891,7 +893,7 @@ class Virtuaalihevoset extends CI_Controller
                     $this->fuel->pages->render('hevoset/hevonen_muokkaa', $data);
 
                 }
-                else if (!$this->_validate_edits($mode, $poni, $data['hevonen']['reknro'], $msg)){
+                else if (!$this->_validate_edits($mode, $poni, $data['hevonen'], $msg)){
                     $data['msg'] = "Rekisteröinti epäonnistui! " . $msg;
                     $data['msg_type'] = "danger";
                     $data['editor'] = $this->_get_horse_edit_form($mode, $poni, $data['hevonen']['reknro']);
@@ -1333,7 +1335,7 @@ class Virtuaalihevoset extends CI_Controller
                                'after_html' => '<span class="form_comment">Linkki hevosen omalle sivulle, muista http:// alku!</span>');
         $fields['kuollut'] = array('label'=>'Kuollut', 'type' => 'checkbox', 'checked' => $poni['kuollut'] ?? false, 'class'=>'form-control');
         $fields['kuol_pvm'] = array('type' => 'text', 'label'=>'Kuolinpäivä', 'class'=>'form-control', 'value'=> $poni['kuol_pvm'] ?? '',
-                                    'after_html' => '<span class="form_comment">Muodossa pp.kk.vvvvv. Jätä tyhjäksi, jos hevonen ei ole kuollut.</span>'); 
+                                    'after_html' => '<span class="form_comment">Muodossa pp.kk.vvvvv. Jos hevonen on kuollut eikä kuolinpäivää anneta, päiväksi merkataan tämä päivä. </span>'); 
         
         $fields['lisatiedot'] = array('type'=>'hidden', 'before_html' => '</div></div></div><div class="panel panel-default"><div class="panel-heading">Lisätiedot (ei pakollisia)</div> <div class="panel-body"><div class="form-group">');
         
@@ -1476,10 +1478,13 @@ class Virtuaalihevoset extends CI_Controller
         $poni['url'] = $this->input->post('url');
         $poni['kuollut'] = $this->input->post('kuollut');
         if ($poni['kuollut'] == null){
-            $poni['kuollut'] = false;
+            $poni['kuollut'] = 0;
         }
         if($poni['kuollut']){
          $poni['kuol_pvm'] = $this->input->post('kuol_pvm');
+         
+        }else {
+            $poni['kuol_pvm'] = null;
         }
         if ($this->input->post('sakakorkeus')){
             $poni['sakakorkeus'] = $this->input->post('sakakorkeus');
@@ -1598,9 +1603,14 @@ class Virtuaalihevoset extends CI_Controller
             $msg .= "<li>Virheellinen kuolintieto.</li>";
             $ok = false;
         }
-        else if (isset($poni['kuollut']) && $poni['kuollut'] && !$this->vrl_helper->validateDate($poni['kuol_pvm'])){     
-            $msg .= "<li>Kuolinaika on virheellinen.</li>";
-            $ok = false;
+        else if (isset($poni['kuollut']) && $poni['kuollut']){
+            if(!isset($poni['kuol_pvm']) || strlen($poni['kuol_pvm'] )== 0){
+                $poni['kuol_pvm'] = date('Y-m-d');
+            }
+            else if(!$this->vrl_helper->validateDate($poni['kuol_pvm'])){     
+                $msg .= "<li>Kuolinaika on virheellinen.</li>";
+                $ok = false;
+            }
         }
         if (!$this->_check_parents($poni, $msg)){
             $ok = false;
@@ -1723,9 +1733,8 @@ class Virtuaalihevoset extends CI_Controller
         return $ok;
     }
     
-    private function _validate_edits ($type, &$new, $tunnus, &$msg) {
-        $old = $this->hevonen_model->get_hevonen_edit($tunnus);
-        $foals = $this->hevonen_model->get_horses_foals($tunnus);
+    private function _validate_edits ($type, &$new, $old, &$msg) {
+        $foals = $this->hevonen_model->get_horses_foals($old['reknro']);
         //jos on varsoja, tamman sukupuolta ei saa vaihtaa, ja orin ja ruunankin saa vaihtaa vain toisikseen
         if (isset($new['rotu']) && sizeof($foals) > 0 && $new['rotu'] != $old['rotu']){
             $msg = "Hevosella on jälkeläisiä, joten sen rotua ei voi muokata.";
