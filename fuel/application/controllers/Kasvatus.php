@@ -44,7 +44,7 @@ class Kasvatus extends CI_Controller
                 $vars['headers'][5] = array('title' => 'Sukupuoli', 'key' => 'sukupuoli');
                 $vars['headers'][6] = array('title' => 'Kasvattajanimi', 'key' => 'kasvattajanimi');
                 $vars['headers'][7] = array('title' => 'Kasvattajan tunnus', 'key' => 'kasvattaja_tunnus', 'key_link' => site_url('tunnus/'));
-                $vars['headers'][8] = array('title' => 'Kasvattajatalli', 'key' => 'kasvattaja_talli', 'key_link' => site_url('virtuaalitallit/talli/'));
+                $vars['headers'][8] = array('title' => 'Kasvattajatalli', 'key' => 'kasvattaja_talli', 'key_link' => site_url('tallit/talli/'));
                 
                 $vars['headers'] = json_encode($vars['headers']);
                             
@@ -865,7 +865,7 @@ class Kasvatus extends CI_Controller
          $this->form_validation->set_rules('kasvattajanimi', 'Kasvattajanimi', "required|min_length[1]|max_length[128]");
         }
         if($mode == "application"){
-            $this->form_validation->set_rules('rotu', 'Rotu', "required|min_length[2]|max_length[4]");
+            $this->form_validation->set_rules('rotu', 'Rotu', "required|min_length[1]|max_length[4]");
         }
         $this->form_validation->set_rules('talli', 'Talli', "min_length[0]|max_length[8]");
         

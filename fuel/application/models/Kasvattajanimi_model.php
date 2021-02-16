@@ -61,14 +61,15 @@ class Kasvattajanimi_model extends Base_module_model
     function get_names_breeds($pinnumber)
     {
         $this->db->select('rotunro, vrlv3_lista_rodut.rotu, lyhenne, count(reknro) as amount');
-        $this->db->from('vrlv3_kasvattajanimet');
-        $this->db->join('vrlv3_kasvattajanimet_rodut', 'vrlv3_kasvattajanimet.id = vrlv3_kasvattajanimet_rodut.kid', 'left');
-        $this->db->join('vrlv3_lista_rodut', 'vrlv3_lista_rodut.rotunro = vrlv3_kasvattajanimet_rodut.rotu');
-        $this->db->join('vrlv3_hevosrekisteri', 'vrlv3_kasvattajanimet.id = vrlv3_hevosrekisteri.kasvattajanimi_id', 'left');
-        $this->db->group_by('vrlv3_kasvattajanimet.id');
-        $this->db->where('vrlv3_kasvattajanimet.id', $pinnumber);
-        $query = $this->db->get();
         
+        $this->db->from('vrlv3_hevosrekisteri');
+        $this->db->join('vrlv3_lista_rodut', 'vrlv3_lista_rodut.rotunro = vrlv3_hevosrekisteri.rotu');
+        $this->db->where('vrlv3_hevosrekisteri.kasvattajanimi_id', $pinnumber);
+        $this->db->group_by('vrlv3_hevosrekisteri.rotu');
+        
+        
+    
+        $query = $this->db->get();
         if ($query->num_rows() > 0)
         {
             return $query->result_array(); 

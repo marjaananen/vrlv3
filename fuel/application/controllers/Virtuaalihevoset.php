@@ -1698,6 +1698,7 @@ class Virtuaalihevoset extends CI_Controller
     
     private function _check_ages($poni, &$msg){
         $birth_date = null;
+        $dead_date = null;
         
         if(isset($poni['syntymaaika'])){
             $birth_date = new DateTime($poni['syntymaaika']);
@@ -1705,15 +1706,30 @@ class Virtuaalihevoset extends CI_Controller
             //todo hae syntymäaika
              $birth_date = new DateTime('1900-01-01');
         }
+        if(isset($poni['kuollut']) && $poni['kuollut'] && isset($poni['kuol_pvm'])){
+            $dead_date = new DateTime($poni['kuol_pvm']);
+        }
         $current_date = new DateTime();
+        
+        $ok = true;
+
+        if(isset($dead_date) && $birth_date > $dead_date){
+            $msg.="<li>Hevonen on kuollut ennen syntymäänsä!</li>";
+            $ok = false;
+        }
+        
+        if(isset($dead_date) && $dead_date > $current_date){
+            $msg.="<li>Hevosen kuolinpäivä on tulevaisuudessa!</li>";
+           $ok = false;
+        }
         
         if ($birth_date > $current_date)
         {
           $msg .= "<LI>Hevosen syntymäpäivä on tulevaisuudessa!</LI>";
-          return false;
+          $ok = false;
         
-        }else {
-            $ok = true;
+        }
+        else if($ok){
             $previous_date = $birth_date;
             
             foreach ($this->vuodet as $vuosi){
@@ -1727,9 +1743,10 @@ class Virtuaalihevoset extends CI_Controller
                     $previous_date = $vertailtava;
                 }
             }
-            return $ok;
             
         }
+                    return $ok;
+
     }
     
     private function _check_parents($poni, &$msg){

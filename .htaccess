@@ -11,6 +11,8 @@ Options +FollowSymLinks
 
 	# Allow asset folders through
 	RewriteRule ^(fuel/modules/(.+)?/assets/(.+)) - [L]
+	RewriteRule ^(fuel/modules/(.+)?/tuki/(.+)) - [L]
+
 
 	# Protect application and system files from being viewed
 	RewriteRule ^(fuel/install/.+|fuel/crons/.+|fuel/data_backup/.+|fuel/codeigniter/.+|fuel/modules/.+|fuel/application/.+) - [F,L]

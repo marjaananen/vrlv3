@@ -72,13 +72,19 @@ class Tallit extends CI_Controller
 	}
 	
 	
-	
+	private function _clean_scands_from_url($tnro){
+        $tnro = str_replace('%C3%96', 'Ö', $tnro);
+        $tnro = str_replace('%C3%84', 'Ä', $tnro);
+        $tnro = str_replace('%C3%85', 'Å', $tnro);
+        
+        return $tnro;
+    }
+    
+    
 	public function talliprofiili($tnro="", $sivu ="")
     {
         $fields = array();
-		$tnro = str_replace('%C3%96', 'Ö', $tnro);
-        $tnro = str_replace('%C3%84', 'Ä', $tnro);
-        $tnro = str_replace('%C3%85', 'Å', $tnro);
+		$tnro = $this->_clean_scands_from_url($tnro);
         
 		if(empty($tnro)){
 			$this->fuel->pages->render('misc/naytaviesti', array('msg_type' => 'danger', 'msg' => 'Tallitunnus puuttuu'));
@@ -397,6 +403,7 @@ class Tallit extends CI_Controller
     
     function muokkaa($tnro, $sivu='tiedot', $tapa = null, $id = null)
     {
+        $tnro = $this->_clean_scands_from_url($tnro);
 		$mode = 'edit';
 		$msg = "";
 		
@@ -489,6 +496,7 @@ class Tallit extends CI_Controller
     
     function lopeta($tnro)
     {
+        $tnro = $this->_clean_scands_from_url($tnro);
 		if(!$this->_is_editing_allowed($tnro, $msg)){
             $this->fuel->pages->render('misc/naytaviesti', array('msg_type' => 'danger', 'msg' => $msg));
 			return;
@@ -501,6 +509,7 @@ class Tallit extends CI_Controller
     
     function poista($tnro)
     {
+        $tnro = $this->_clean_scands_from_url($tnro);
         $admin = false;
         $msg ="";
         $msg = array('msg_type' => 'danger', 'msg' => "Poisto epäonnistui!");

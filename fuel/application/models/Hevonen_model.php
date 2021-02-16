@@ -235,6 +235,10 @@ class Hevonen_model extends Base_module_model
             $hevonen['kuol_pvm'] = $this->CI->vrl_helper->normal_date_to_sql($hevonen['kuol_pvm']);
         }
         
+        if(isset($hevonen['kasvattaja_tunnus'])){
+            $hevonen['kasvattaja_tunnus'] = $this->CI->vrl_helper->vrl_to_number($hevonen['kasvattaja_tunnus']);
+        }
+        
         $ikaantymistiedot = $this->_birthday_dates($hevonen);
         
         $vh_nro = $this->db->where(array("YEAR(rekisteroity)"=> date("Y"), "rotu"=>$hevonen['rotu'] ))->count_all_results("vrlv3_hevosrekisteri");
@@ -267,6 +271,8 @@ class Hevonen_model extends Base_module_model
 
         $hevonen['reknro'] = $this->CI->vrl_helper->vh_to_number($vh);
         $suku['reknro'] = $this->CI->vrl_helper->vh_to_number($vh);
+        
+
         
         
         //porrastettujen ominaisuudet
