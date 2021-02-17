@@ -22,6 +22,11 @@ class Tallit extends CI_Controller
 	}
 	
 	public function uusimmat (){
+        if(!($this->ion_auth->logged_in()))
+        {
+            	$this->fuel->pages->render('misc/naytaviesti', array('msg_type' => 'danger', 'msg' => 'Kirjaudu sisään tarkastellaksesi tallejasi!'));
+        }
+		else {
 		$vars['title'] = 'Uusimmat tallit';
 				
 		$vars['text_view'] = $this->load->view('tallit/teksti_uusimmat', NULL, TRUE);
@@ -45,6 +50,7 @@ class Tallit extends CI_Controller
 		$vars['data'] = json_encode($stables);
 
 		$this->fuel->pages->render('misc/taulukko', $vars);
+        }
 	}
 	
 

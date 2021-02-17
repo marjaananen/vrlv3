@@ -81,6 +81,8 @@ $route['yllapito/hevosrekisteri/(:any)/(:any)/(:any)'] = "yllapito_hevosrekister
 
 $route['yllapito/tallirekisteri'] = "tallit/uusimmat/";
 $route['yllapito/tallirekisteri/poista/(:any)'] = "tallit/poista/$1";
+$route['yllapito/tallirekisteri/muokkaa/(:any)'] = "tallit/muokkaa/$1";
+
 
 $route['yllapito/kasvattajanimet'] = "kasvatus/kasvattajanimet/uusimmat/";
 $route['yllapito/kasvattajanimet/kasvatittomat'] = "kasvatus/kasvattajanimet/kasvatittomat/";

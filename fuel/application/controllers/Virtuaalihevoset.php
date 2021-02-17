@@ -1567,6 +1567,8 @@ class Virtuaalihevoset extends CI_Controller
         foreach($vuodet as $vuosi){
             if($this->input->post($vuosi."vuotta")){
             $poni[$vuosi."vuotta"] = $this->input->post($vuosi."vuotta");
+            }else {
+                $poni[$vuosi."vuotta"] = null;
             }
         }
         
@@ -1733,7 +1735,8 @@ class Virtuaalihevoset extends CI_Controller
             $previous_date = $birth_date;
             
             foreach ($this->vuodet as $vuosi){
-                if(isset($poni[$vuosi.'vuotta'])){
+                if(isset($poni[$vuosi.'vuotta']) && $this->vrl_helper->validateDate($poni[$vuosi."vuotta"])){
+                    
                     $vertailtava = new DateTime($poni[$vuosi.'vuotta']);
                     
                     if($previous_date > $vertailtava){

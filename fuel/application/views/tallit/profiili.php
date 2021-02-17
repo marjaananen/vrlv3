@@ -45,7 +45,7 @@ if(isset($edit_tools) && $edit_tools == true){
                     $first = false;
                 }
                 else
-                    echo ", " . $c['kategoria'] . " (". $c['katelyh']. ")";
+                    echo ", " . $c['nimi'] . " (". $c['katelyh']. ")";
             }
         ?>
     </td>

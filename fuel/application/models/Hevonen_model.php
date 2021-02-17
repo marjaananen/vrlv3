@@ -215,6 +215,7 @@ class Hevonen_model extends Base_module_model
     
     
     public function add_hevonen($hevonen, $tunnus, &$msg){
+        echo "mnoi";
         unset ($hevonen['luin_saannot']);
         
         $suku = array();
@@ -357,12 +358,14 @@ class Hevonen_model extends Base_module_model
     }
     
     private function _birthday_dates(&$hevonen){
+
         $vuodet = array(3, 4, 5, 6, 7, 8);
         $ikaantymistiedot = array();
         if(isset($hevonen['ikaantyminen_d'])){
             $ikaantymistiedot['ikaantyminen_d'] = $hevonen['ikaantyminen_d'];
             unset($hevonen['ikaantyminen_d']);
         }
+        
         if(isset($ikaantymistiedot['ikaantyminen_d']) && $ikaantymistiedot['ikaantyminen_d'] != 0){
             foreach($vuodet as $vuosi){
                 $ikaantymistiedot[$vuosi.'vuotta'] = date('Y-m-d', strtotime($hevonen['syntymaaika']. ' + '.$vuosi*$ikaantymistiedot['ikaantyminen_d'].' days'));
@@ -376,8 +379,12 @@ class Hevonen_model extends Base_module_model
             foreach($vuodet as $vuosi){
                 if(isset($hevonen[$vuosi.'vuotta'])){
                     $ikaantymistiedot[$vuosi.'vuotta'] = $this->CI->vrl_helper->normal_date_to_sql($hevonen[$vuosi.'vuotta']);    
-                    unset($hevonen[$vuosi.'vuotta']);
+                    
+                }else {
+                    $ikaantymistiedot[$vuosi.'vuotta'] = NULL;
+                    
                 }
+                unset($hevonen[$vuosi.'vuotta']);
                    
             }
         }
@@ -391,6 +398,8 @@ class Hevonen_model extends Base_module_model
         $hevonen['syntymaaika'] = $this->CI->vrl_helper->normal_date_to_sql($hevonen['syntymaaika']);
         if (isset($hevonen['kuol_pvm'])){
             $hevonen['kuol_pvm'] = $this->CI->vrl_helper->normal_date_to_sql($hevonen['kuol_pvm']);
+        }else {
+            $hevonen['kuol_pvm'] = null;
         }
 
         $reknro = $this->CI->vrl_helper->vh_to_number($vh);
@@ -422,7 +431,7 @@ class Hevonen_model extends Base_module_model
             }
         
         }
-        
+        echo "aivanniinjoo";
         $ikaantymistiedot = $this->_birthday_dates($hevonen);
         if(sizeof($ikaantymistiedot) > 0) {
             $this->db->where('reknro', $reknro);

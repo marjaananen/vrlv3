@@ -134,6 +134,8 @@ private function _handle_owners($taulu, $mode, $tapa, $adder, &$owner, $item, &$
     }
     
     else if ($tapa == "poista"){
+		$this->CI->load->library("vrl_helper");
+
 
 		if($this->CI->vrl_helper->vrl_to_number($owner) == $this->CI->ion_auth->user()->row()->tunnus){
 			$ok = $this->remove_me_from_horse($item, $msg);

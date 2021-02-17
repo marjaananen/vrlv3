@@ -63,6 +63,7 @@ class Kilpailutoiminta extends CI_Controller
             
             $vars = array();
             $data = array();
+            $data = $msg;
             $user = $this->ion_auth->user()->row()->tunnus;
             
      
@@ -96,9 +97,7 @@ class Kilpailutoiminta extends CI_Controller
                 
                 $data['sivu'] = $type;
                 $data['category'] = $category;
-
-                $data['msg'] = $msg;
-                
+                                
                 $this->fuel->pages->render('kilpailutoiminta/omat_kilpailut', $data);
 
             }
@@ -1252,7 +1251,6 @@ private function _make_show_result_form($jaos_id){
 }
 
 private function _send_result($kisa, $user, &$msg = array()){
-        $this->db->trans_start();
       
             $kantaan_luokat = "";
             $kantaan_tulokset = "";
@@ -1269,39 +1267,55 @@ private function _send_result($kisa, $user, &$msg = array()){
                     $kantaan_tulokset = $kantaan_tulokset . $this->input->post('tulos_'.$nro.'_os') . "~";
                     $kantaan_hylsyt = $kantaan_hylsyt . $this->input->post('tulos_'.$nro.'_hyl') . "~";
                     $nro = $nro+1;
+                                
                 }else {
                     break;
                 }
             }
+         
+         if((isset($kantaan_tulokset) && strlen(str_replace ( "~", "", $kantaan_tulokset)) > 5)
+               ||(isset($kantaan_hylsyt) && strlen(str_replace ( "~", "", $kantaan_hylsyt)) > 5)){
 
+        $this->db->trans_start();
+
+                $tulos = array();
+                $tulos['tunnus'] = $user;
+                $tulos['ilmoitettu'] = date('Y-m-d H:i:s');
+                $tulos['tulokset'] = $kantaan_tulokset;
+                $tulos['hylatyt'] = $kantaan_hylsyt;
+                $tulos['luokat'] = $kantaan_luokat;
+                $tulos['kisa_id'] = $kisa['kisa_id'];
             
-            $tulos = array();
-            $tulos['tunnus'] = $user;
-            $tulos['ilmoitettu'] = date('Y-m-d H:i:s');
-            $tulos['tulokset'] = $kantaan_tulokset;
-            $tulos['hylatyt'] = $kantaan_hylsyt;
-            $tulos['luokat'] = $kantaan_luokat;
-            $tulos['kisa_id'] = $kisa['kisa_id'];
     
-            $kutsu = $this->Kisakeskus_model->hae_kutsutiedot($kisa['kisa_id'], null, 0);
-            if(sizeof($kutsu) > 0){
-                $this->db->insert('vrlv3_kisat_tulokset', $tulos);
-                $this->db->set('tulokset', 1);
-                $this->db->where('kisa_id', $tulos['kisa_id']);
-                $this->db->update('vrlv3_kisat_kisakalenteri');
+                $kutsu = $this->Kisakeskus_model->hae_kutsutiedot($kisa['kisa_id'], null, 0);
+                if(sizeof($kutsu) > 0){
+                    $this->db->insert('vrlv3_kisat_tulokset', $tulos);
+                    $this->db->set('tulokset', 1);
+                    $this->db->where('kisa_id', $tulos['kisa_id']);
+                    $this->db->update('vrlv3_kisat_kisakalenteri');
+                    
+                    $this->db->trans_complete();
+                    return true;
+                }
+            }else {
+                $msg['msg'] = "Lähettämäsi tulokset ovat täysin tyhjät!";
+                $msg['msg_type'] = 'danger';
+                return false;
             }
             
             
         }
         else {
-            
+                    $this->db->trans_start();
+
             $this->porrastetut->ilmoita_tulokset_porrastetut($kisa, $user);
+                                $this->db->trans_complete();
+                    return true;
             
         }
         
 
-            $this->db->trans_complete();
-            return true;
+
 
 }
 

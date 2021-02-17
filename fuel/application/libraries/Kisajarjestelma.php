@@ -215,7 +215,7 @@ class Kisajarjestelma
         
             $result = $query->result_array();
          
-            if (sizeof($result)>0){
+            if (sizeof($result) == 0){
                 $rivi = array();
                 $rivi['tunnus'] = $tunnus;
                 $rivi['jaos'] = $jaos;
@@ -231,9 +231,7 @@ class Kisajarjestelma
                 $result = $result[0];
                 $rivi = array();
                 $rivi['muokattu'] = date('Y-m-d H:i:s');
-                $rivi['pisteet'] = $result['pisteet'] + $amount;
-      
-      
+                $rivi['pisteet'] = $result['pisteet'] + $amount; 
               $this->CI->db->where('id', $result['id']);
               $this->CI->db->update('vrlv3_kisat_etuuspisteet', $rivi);
             }
