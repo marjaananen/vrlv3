@@ -81,7 +81,6 @@ class Yllapito_tunnukset extends CI_Controller
         else {
             $vars['same_ip_logins'] = $this->tunnukset_model->get_logins_by_ip($vars['application_data']['ip']);
             $vars['same_nicknames'] = $this->tunnukset_model->get_pinnumbers_by_nickname($vars['application_data']['nimimerkki']);
-            
             $vars['application_data']['rekisteroitynyt'] = date('d.m.Y H:i',strtotime($vars['application_data']['rekisteroitynyt']));
                 
             $this->fuel->pages->render('yllapito/hakemusjono', $vars);
@@ -97,10 +96,7 @@ class Yllapito_tunnukset extends CI_Controller
         $this->session->set_flashdata('return_status', '');
         $rej_reason = $this->input->post('rejection_reason');
         
-        if(empty($rej_reason))
-            $rej_reason = "-";
-        
-        if($this->input->server('REQUEST_METHOD') == 'POST' && is_numeric($id) && $id >= 0 && ($approved == 'hyvaksy' || $approved == 'hylkaa'))
+        if(is_numeric($id) && $id >= 0 && ($approved == 'hyvaksy' || (isset($rej_reason) && strlen($rej_reason) > 5 && $approved == 'hylkaa')))
         {
             $this->load->library('email');
             $this->load->model('tunnukset_model');
@@ -125,7 +121,9 @@ class Yllapito_tunnukset extends CI_Controller
                 $additional_data['tunnus'] = $this->tunnukset_model->get_next_pinnumber();
                 $new_pinnumber = str_pad($additional_data['tunnus'], 5, '0', STR_PAD_LEFT);
                 
-                $this->ion_auth->register($new_pinnumber, $application_data['salasana'], $application_data['email'], $additional_data);
+                $this->ion_auth->register($new_pinnumber,
+                                          substr(str_shuffle('0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZqwertyuioplkjhgfdsazxcvbnm!"#¤%&/()=?*@£$€{[]}'),1,random_int(10, 20)),
+                                          $application_data['email'], $additional_data);
                 
                 $code = $this->ion_auth_model->forgotten_password($new_pinnumber);
                 
@@ -138,14 +136,15 @@ class Yllapito_tunnukset extends CI_Controller
             {
                 //Onko tarve? $this->tunnukset_model->add_rejected_user($id); //Hylkäys muistiin
                 
-                if($rej_reason != false)
-                    $message = 'Valitettavasti tunnushakemuksesi on hylätty!\nSyy: ' . $rej_reason . '\n\nÄlä vastaa tähän sähköpostiin!\nJos et ole lähettänyt jäsenhakemusta, ota yhteys VRL:n ylläpitoon osoitteessa yllapito@virtuaalihevoset.net';
-                else
-                    $message = 'Valitettavasti tunnushakemuksesi on hylätty!\n\nÄlä vastaa tähän sähköpostiin!\nJos et ole lähettänyt jäsenhakemusta, ota yhteys VRL:n ylläpitoon osoitteessa yllapito@virtuaalihevoset.net';
-                   
+                
+                $message = $this->load->view('email/tunnus_hylatty', array('reason'=>$rej_reason ), TRUE);
+            
+
+               
                 $this->session->set_flashdata('return_info', 'Hakemus hylätty.');
                 $this->session->set_flashdata('return_status', 'success');
             }
+            
             
                 //email
             $this->load->library('vrl_email');
@@ -160,10 +159,13 @@ class Yllapito_tunnukset extends CI_Controller
                 
             //poistetaan hakemus kun se on nyt käsitelty
             $this->tunnukset_model->delete_application($id);
-            redirect('/yllapito/tunnukset/hyvaksy');
+            $this->hakemusjono();
 
-        }
+        }else {
+            $this->fuel->pages->render('misc/naytaviesti', array('msg_type' => 'danger', 'msg' => "Virheellinen syöte."));
+
             
+        }
     }
     
     

@@ -1,12 +1,14 @@
 Hei!
 
-<p>VRL:n tunnusjonossa on uusi hakemus! Kirjaudu sisään käsittelemään se. </p>
+<p>Valitettavasti hakemuksesi VRL:n jäseneksi on hylätty! </p>
 
-<p>Tämä viesti on lähetetty automaattisesti kaikille tunnusrekisterin työntekijöille.</p>
+<p>Syy: <?php echo fuel_var('reason', 'Syytä ei annettu')?></p>
 
 
-Terveisin,
-Virtuaalisen Ratsastajainliiton ylläpito
-http://virtuaalihevoset.net
 
-Tämä on automaattisesti lähetetty viesti. Älä vastaa tähän viestiin!
+<p>Terveisin,<br />
+Virtuaalisen Ratsastajainliiton ylläpito<br />
+http://virtuaalihevoset.net<br />
+<br />
+Tämä on automaattisesti lähetetty viesti. Älä vastaa tähän viestiin!<br />
+</p>

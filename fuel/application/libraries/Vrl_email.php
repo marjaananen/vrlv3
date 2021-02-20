@@ -98,7 +98,7 @@ try {
           ],
           'Subject' => [
               'Charset' => $char_set,
-              'Data' => $subject,
+              'Data' => '[VRL] '.$subject,
           ],
         ],
         // If you aren't using a configuration set, comment or delete the

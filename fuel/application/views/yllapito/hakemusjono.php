@@ -49,15 +49,16 @@
     <div class="container">
         <h3>Hakemuksen tiedot</h3>
         
-        <p>Nimimerkki: <?=$application_data['nimimerkki']?></p>
-        <p>Sähköpostiosoite: <?=$application_data['email']?></p>
-        <p>Rekisteröitymisaika: <?=$application_data['rekisteroitynyt']?></p>
-        <p>IP-osoite: <?=$application_data['ip']?></p>
-    </div>
+        <table class="table table-striped">
+        <tr><th scope="row">Nimimerkki</th> <td><?=$application_data['nimimerkki']?></td></tr>
+        <tr><th scope="row">Sähköpostiosoite</th> <td><?=$application_data['email']?></td></tr>
+        <tr><th scope="row">Rekisteröitymisaika</th> <td><?=$application_data['rekisteroitynyt']?></td></tr>
+        <tr><th scope="row">IP-osoite</th> <td><?=$application_data['ip']?></td></tr>
+
     
     <?php if(!empty($same_ip_logins)) : ?>
-        <p>
-            Viimeisimmät kirjautumiset samasta IP:stä:
+        <tr><th scope="row">Viimeisimmät kirjautumiset samasta IP:stä</th> <td>
+            
             <ul>
                 <?php
                     foreach($same_ip_logins as $sil)
@@ -66,12 +67,12 @@
                     }
                 ?>
             </ul>
-        </p>
+        </td></tr>
     <?php endif; ?>
     
     <?php if(!empty($same_nicknames)) : ?>
-        <p>
-            Käyttäjät samalla nimimerkillä:
+        <tr><th scope="row">
+            Käyttäjät samalla nimimerkillä:</th><td>
             <ul>
                 <?php
                     foreach($same_nicknames as $sn)
@@ -80,37 +81,46 @@
                     }
                 ?>
             </ul>
-        </p>
+        </td></tr>
     <?php endif; ?>
     
-    <?php if(!empty($same_dateofbirths)) : ?>
-        <p>
-            Käyttäjät samalla syntymäpäivällä:
-            <ul>
-                <?php
-                    foreach($same_dateofbirths as $sd)
-                    {
-                        echo "<li><a href='" . site_url('/tunnukset/tunnus') . "/" . $sd['tunnus'] . "'>" . $sd['nimimerkki'] . "</a></li>";
-                    }
-                ?>
-            </ul>
-        </p>
-    <?php endif; ?>
+
         
-    <br />
     
-    <p>
-        <form method="post" action="<?=site_url('/yllapito_tunnukset/kasittele_hakemus')?>/hyvaksy/<?=$application_data['id']?>">
-            <input type="submit" value="Hyväksy">
-        </form>
-        
-        <form method="post" action="<?=site_url('yllapito/tunnukset/kasittele/')?>/hylkaa/<?=$application_data['id']?>">
-            Hylkäyssyy: <input type="text" name="rejection_reason">
-            <input type="submit" value="Hylkää">
-        </form>
-        
-        <form method="post" action="<?=site_url('/yllapito/hakemusjono')?>">
-            <input type="submit" value="Ohita ja ota seuraava">
-        </form>
-    </p>
+    </table>
+    </div>
+
+							
+	<?php				
+			echo '<form method="post" action="'.site_url('/yllapito/tunnukset/kasittele').'/hylkaa/'.$application_data['id'].'">
+					<div class="form">
+							<div class="panel panel-default">
+									<div class="panel-body">';
+												echo '<a href="'.site_url('/yllapito/tunnukset/kasittele').'/hyvaksy/'.$application_data['id'].'">'.
+										'<button type="button" class="btn btn-success">Hyväksy</button></a> ';
+					
+											echo '<a href="'.site_url('/yllapito/tunnukset/hyvaksy').'">'.
+										'<button type="button" class="btn btn-warning">Ohita</button></a> ';
+										
+										echo '<input type="submit" name="Hylkää" value="Hylkää" id="Hylkää" class="btn btn-danger"/>';
+
+            echo '
+            <div class="form-group">
+               <label for="viesti" id="label_viesti">Hylkäyksen syy<span class="required">*</span></label>
+															<input type="text" name="rejection_reason" id="rejection_reason" value="" class="field_type_text form-control" size="40" required  />
+
+            </div>
+			</div>   
+			</div>
+			</div>
+</form>';
+
+
+
+
+?>
+    
+    
+    
+   
 <?php endif; ?>

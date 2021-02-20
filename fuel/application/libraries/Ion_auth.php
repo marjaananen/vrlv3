@@ -155,7 +155,7 @@ class Ion_auth
 					'identity' => $identity,
 					'forgotten_password_code' => $code
 				];
-
+/*
 				if (!$this->config->item('use_ci_email', 'ion_auth'))
 				{
 					$this->set_message('forgot_password_successful');
@@ -163,23 +163,30 @@ class Ion_auth
 				}
 				else
 				{
+				
+				*/
 					$message = $this->load->view($this->config->item('email_templates', 'ion_auth') . $this->config->item('email_forgot_password', 'ion_auth'), $data, TRUE);
-
+/*
+					
 					
 					$this->email->clear();
 					$this->email->from($this->config->item('admin_email', 'ion_auth'), $this->config->item('site_title', 'ion_auth'));
 					$this->email->to($user->email);
 					$this->email->subject($this->config->item('site_title', 'ion_auth') . ' - ' . $this->lang->line('email_forgotten_password_subject'));
 					$this->email->message($message);
+					*/
+					
+					$to = $user->email;
+					$subject = "Salasanan palautus VRL:oon";
 					
 
-					if ($this->email->send())
+					if ($this->vrl_email->send($to, $subject, $message))
 					{
 						$this->set_message('forgot_password_successful');
 						return TRUE;
 					}
 					
-				}
+				//}
 			}
 		}
 

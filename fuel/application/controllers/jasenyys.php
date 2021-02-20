@@ -222,7 +222,7 @@ class Jasenyys extends CI_Controller
                     $to = $admin['email'];
                     $subject = "VRL-tunnusjonossa on uusi hakemus!";
                     $message = $this->load->view('email/tunnus_jonossa', array(), TRUE);
-                    //$this->vrl_email->send($to, $subject, $message);
+                    $this->vrl_email->send($to, $subject, $message);
                     $sent = $sent++;
                 }
 
