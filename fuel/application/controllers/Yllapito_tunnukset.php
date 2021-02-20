@@ -127,8 +127,10 @@ class Yllapito_tunnukset extends CI_Controller
                 
                 $this->ion_auth->register($new_pinnumber, $application_data['salasana'], $application_data['email'], $additional_data);
                 
-                $message = 'Tunnushakemuksesi on hyväksytty, tervetuloa käyttämään VRL:ää!\nVoit kirjautua sisään alla olevalla tunnuksella ja salasanalla sivuston oikeassa yläkulmassa olevan lomakkeen avulla. Kirjoita tunnuksen numero-osa ensimmäiseen laatikkoon ja salasanasi toiseen. Muista vaihtaa salasana ensimmäisellä kirjautumiskerralla!\n\n---------------------------------------\n\nVRL-tunnus: ' .  $new_pinnumber . '\nSalasana: ' .  $application_data['salasana'] . '\n\n---------------------------------------\n\nÄlä vastaa tähän sähköpostiin!\nJos et ole lähettänyt jäsenhakemusta, ota yhteys VRL:n ylläpitoon osoitteessa yllapito@virtuaalihevoset.net';
-
+                $code = $this->ion_auth_model->forgotten_password($new_pinnumber);
+                
+                $message = $this->load->view('email/tunnus_hyvaksytty', array('code'=>$code, 'new_pinnumber'=>$new_pinnumber), TRUE);
+                
                 $this->session->set_flashdata('return_info', 'Hakemus hyväksytty.');
                 $this->session->set_flashdata('return_status', 'success');
             }

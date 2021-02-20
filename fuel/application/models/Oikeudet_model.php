@@ -71,7 +71,7 @@ class Oikeudet_model extends Base_module_model
     }
     
     function users_in_group_name($group_name){
-        $this->db->select('vrlv3_tunnukset.tunnus, vrlv3_tunnukset.nimimerkki');
+        $this->db->select('vrlv3_tunnukset.tunnus, vrlv3_tunnukset.nimimerkki, email');
         $this->db->from('vrlv3_users_groups');
         $this->db->join('vrlv3_tunnukset', 'vrlv3_users_groups.user_id = vrlv3_tunnukset.id');
         $this->db->join('vrlv3_groups', 'vrlv3_groups.id = vrlv3_users_groups.group_id');

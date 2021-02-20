@@ -43,7 +43,7 @@ class Tunnukset_model extends Base_module_model
         
             if($row->email == $email && $row->varmistus == $validation)
             {
-                $data = array('vahvistettu' => 1);
+                $data = array('vahvistettu' => 1, 'varmistus' => NULL);
                 
                 $this->db->where('id', $row->id);
                 $this->db->update('vrlv3_tunnukset_jonossa', $data);

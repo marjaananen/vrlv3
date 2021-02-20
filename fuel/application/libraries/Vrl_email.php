@@ -16,7 +16,7 @@ public function __construct()
 	}
     
 public function send ($to, $subject, $message){
-	$this->aws_send($to, $subject, $message);
+	return $this->aws_send($to, $subject, $message);
 	return;
     
             $CI =& get_instance();
@@ -107,11 +107,13 @@ try {
     ]);
     $messageId = $result['MessageId'];
     echo("Email sent! Message ID: $messageId"."\n");
+	return true;
 } catch (AwsException $e) {
     // output error message if fails
     echo $e->getMessage();
     echo("The email was not sent. Error message: ".$e->getAwsErrorMessage()."\n");
     echo "\n";
+	return false;
 }
 	
 	

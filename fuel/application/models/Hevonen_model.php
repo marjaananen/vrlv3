@@ -215,7 +215,6 @@ class Hevonen_model extends Base_module_model
     
     
     public function add_hevonen($hevonen, $tunnus, &$msg){
-        echo "mnoi";
         unset ($hevonen['luin_saannot']);
         
         $suku = array();
@@ -431,7 +430,6 @@ class Hevonen_model extends Base_module_model
             }
         
         }
-        echo "aivanniinjoo";
         $ikaantymistiedot = $this->_birthday_dates($hevonen);
         if(sizeof($ikaantymistiedot) > 0) {
             $this->db->where('reknro', $reknro);

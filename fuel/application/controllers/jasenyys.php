@@ -24,7 +24,7 @@ class Jasenyys extends CI_Controller
     {
 		$this->load->library('form_validation');
         $vars['title'] = 'Liity jäseneksi';
-        $vars['msg'] = 'Tähdellä merkityt kentät ovat pakollisia! Rekisteröitymisen jälkeen saat sähköpostilla salasanan ja koodin, jolla aktivoida tunnuksesi. Huomaathan, että ylläpidon tulee tarkastaa hakemuksesi ennen kuin voit kirjautua!';
+        $vars['msg'] = 'Tähdellä merkityt kentät ovat pakollisia! Rekisteröitymisen jälkeen saat sähköpostilla salasanan ja koodin, jolla aktivoida hakemuksesi. Huomaathan, että ylläpidon tulee tarkastaa hakemuksesi ennen kuin voit kirjautua!';
         
         if($this->input->server('REQUEST_METHOD') == 'GET')
         {
@@ -70,15 +70,23 @@ class Jasenyys extends CI_Controller
                     $return_data = $this->tunnukset_model->add_new_application($this->input->post('nimimerkki'), $this->input->post('email'));
 					
 					$to = $this->input->post('email');
+                    $data = array();
+                    $data['varmistus'] = $return_data['varmistus'];
+                    $data['email'] = $this->input->post('email');
 					$subject = "Varmista VRL-tunnushakemuksesi!";
-					$message = 'Tervetuloa virtuaalisen ratsastajainliiton jäseneksi!\nVarmista lähettämäsi hakemus käymällä seuraavassa osoitteessa:\n\n---------------------------------------\n\n';
-					$message = $message . base_url() . 'jasenyys/vahvista/?email=' . $this->input->post('email') . '&code=' . $return_data['varmistus'] . '\n\n---------------------------------------\n\nÄlä vastaa tähän sähköpostiin!\nJos et ole lähettänyt jäsenhakemusta, ota yhteys VRL:n ylläpitoon osoitteessa yllapito@virtuaalihevoset.net';
+					$message = $this->load->view('email/tunnus_hakemus', $data, TRUE);
 
 					$this->load->library('vrl_email');
 					if ($this->vrl_email->send($to, $subject, $message)){
 						$vars['msg'] = "Lomakkeen lähetys onnistui!<br />Tarkasta antamasi sähköpostin postilaatikko (jos ei näy, katso roskapostikansio) ja seuraa lähetettyjä ohjeita.";
 						$vars['msg_type'] = "success";
-					}
+                        
+
+                                                
+					}else {
+                        $vars['msg'] = "Lomakkeen lähetys epäonnistui, sähköpostin lähetys antamaasi osoitteeseen ei onnistunut!";
+                        $vars['msg_type'] = 'danger';
+                    }
 					//What if sending fails?
 				}
             }
@@ -199,11 +207,31 @@ class Jasenyys extends CI_Controller
             $email = $this->input->get('email', TRUE);
             $code = $this->input->get('code', TRUE);
             
-            if($email != false && $code != false && $this->tunnukset_model->validate_application($email, $code) == true)
-                $vars['msg'] = "Sähköpostiosoitteesi vahvistaminen onnistui!<br /><br />Hakemuksesi siirtyy nyt tunnusjonoon, josta VRL:n työntekijä hyväksyy sen.<br />Saat tämän jälkeen sähköpostilla tunnuksen ja salasanan, joilla pääset kirjautumaan sisään.";
-            else
-                $vars['msg'] = "Jotain meni pieleen!<br /><br />Varmista, ettei sähköpostiisi tullut osoite katkennut osoitepalkille siirrettäessä ja yritä uudelleen.";
-                
+            if($email != false && $code != false && $this->tunnukset_model->validate_application($email, $code) == true){
+                $vars['msg'] = "Sähköpostiosoitteesi vahvistaminen onnistui!<br /><br />Hakemuksesi siirtyy nyt tunnusjonoon, josta VRL:n työntekijä hyväksyy sen.<br />
+                Saat tämän jälkeen sähköpostilla linkin jonka kautta pääset asettamaan tunnuksen ja salasanan.";
+                $vars['msg_type'] = 'success';
+                $this->load->model("oikeudet_model");
+                $admins = $this->oikeudet_model->users_in_group_name('tunnukset');
+                $sent = 0; //just for safety
+                $this->load->library('vrl_email');
+                foreach($admins as $admin){
+                    if($sent > 5){
+                        break; //safety
+                    }
+                    $to = $admin['email'];
+                    $subject = "VRL-tunnusjonossa on uusi hakemus!";
+                    $message = $this->load->view('email/tunnus_jonossa', array(), TRUE);
+                    //$this->vrl_email->send($to, $subject, $message);
+                    $sent = $sent++;
+                }
+
+            
+            }
+            else {
+                $vars['msg'] = "Jotain meni pieleen!<br /><br />Varmista, ettei sähköpostiisi tullut osoite katkennut osoitepalkille siirrettäessä, tai että et ole jo vahvistanut hakemustasi!.";
+            $vars['msg_type'] = 'danger';
+            }   
         $this->fuel->pages->render('misc/naytaviesti', $vars);
     }
     
@@ -433,6 +461,9 @@ class Jasenyys extends CI_Controller
         
         return $this->load->view('jasenyys/vastuut', $vars, TRUE);
     }
+    
+    
+    
 	
 }
 ?>

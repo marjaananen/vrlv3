@@ -1,9 +1,17 @@
-<html>
-<body>
-	<h1><?php echo sprintf(lang('email_forgot_password_heading'), $identity);?></h1>
-	<p><?php echo sprintf(lang('email_forgot_password_subheading'),
-						  anchor('auth/reset_password/'. $forgotten_password_code,
-								 lang('email_forgot_password_link')));
-	?></p>
-</body>
-</html>
+Hei!
+
+<p>Vaihda salasanasi Virtuaalisen Ratsastajainliiton sivuilla!</p>
+
+<p>Tunnus: VRL-<?=$identity?></p>
+<p>Aseta itsellesi uusi salasana allaolevasta osoitteesta!</p>
+
+<?php echo site_url() . 'auth/reset_password/' . $forgotten_password_code;?>
+
+<P>Mikäli et ole itse pyytänyt salasanan resetointia, voit jättää tämän sähköpostin huomiotta.</P>
+
+
+Terveisin,
+Virtuaalisen Ratsastajainliiton ylläpito
+http://virtuaalihevoset.net
+
+Tämä on automaattisesti lähetetty viesti. Älä vastaa tähän viestiin!
