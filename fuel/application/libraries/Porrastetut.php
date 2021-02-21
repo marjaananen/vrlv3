@@ -21,6 +21,21 @@ class Porrastetut
                             );
     private $aste = array(1=> "Seurataso", 2=>"Aluetaso", 3=> "Kansallinen taso");
     
+    private $koulutustasot = array(
+        1=>"Vt1: HeD / 40cm, 60cm / Aloittelija, Harraste, Tutustumisluokka",       
+        2=>"Vt2: HeC, KN Special, HeB / 80cm, 90cm / Helppo (vt2)",
+        3=>"Vt3: Noviisi valjakko",
+        4=>"Vt4: HeA / 100cm / CIC1",
+        5=>"Vt5: VaB / 110cm / CIC2",
+        6=>"Vt6: VaA / 120cm / CIC3",
+        7=>"Vt7: PSG / 130cm / CIC4 / Vaativa valjakko",
+        8=>"Vt8: Int I / 140cm",
+        9=>"Vt9: Int II / 150cm / Vaikea valjakko",
+        10=>"Vt10: GP / 160cm",
+        
+        
+        );
+    
     public function __construct()
     {
         $this->CI =& get_instance();
@@ -31,6 +46,9 @@ class Porrastetut
     
     public function get_levels(){
         return $this->levels;
+    }
+    public function get_skill_levels(){
+        return $this->koulutustasot;
     }
     
     public function get_level_by_points($points){

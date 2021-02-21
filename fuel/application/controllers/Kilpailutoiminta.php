@@ -229,6 +229,14 @@ class Kilpailutoiminta extends CI_Controller
                 $this->_porrastetut_kisalistat('kilpailutoiminta/porrastetut/kilpailulistat');
             }
         }
+        else if($sivu == "laatispisteet"){
+            if(!($this->ion_auth->logged_in()))
+            {
+                $this->fuel->pages->render('misc/naytaviesti', array('msg_type' => 'danger', 'msg' => 'Kirjaudu sisään käyttääksesi laatispistelakuria!'));
+            } else {
+                $this->_porrastetut_laatispisteet('kilpailutoiminta/porrastetut/laatispisteet');
+            }
+        }
         else {
             $this->fuel->pages->render('kilpailutoiminta/porrastetut_saannot', $vars);
         }
@@ -324,6 +332,135 @@ class Kilpailutoiminta extends CI_Controller
                } 
                
            }
+    }
+    
+    private function _laatispiste_form($url, $vh = true, $result = array()){
+        $this->load->library('form_builder', array('submit_value' => 'Suodata'));
+
+        $fields = array();
+        
+        $jaos_options = $this->Jaos_model->get_jaos_option_list(true, true);
+        $koulutustaso_options = $this->porrastetut->get_skill_levels();
+        
+        if($vh){       
+            $fields['vh'] = array('label'=>'Rekisterinumero', 'type' => 'text',  'value' => $result['vh'] ?? "", 'class'=>'form-control', 'required'=>true,
+                                  'after_html'=>'<span class="form-comment">Arvosteltavan hevosen rekisterinumero.</span>'
+);
+        }else {
+            $trait_fields = $this->Trait_model->get_trait_list();
+            foreach ($trait_fields as $trait){
+                $fields[$trait['id']] = array('label' => $trait['ominaisuus'], 'type' => 'number', 'value' => $result[$trait['id']] ?? 0, 'class'=>'form-control', 'represents' => 'int|smallint|mediumint|bigint', 'negative' => FALSE, 'decimal' => TRUE);    
+            }
+        }
+        $fields['jaos'] = array('type' => 'select', 'options' => $jaos_options, 'value' => $result['jaos'] ?? -1, 'class'=>'form-control',
+                                'after_html'=>'<span class="form-comment">Arvosteltava laji.</span>');
+        $fields['kotaso'] = array('type' => 'enum', 'mode'=>'radios', 'options' => $koulutustaso_options, 'value' => $result['kotaso'] ?? 1,
+                                  'wrapper_tag'=>'li', 'after_html'=>'<span class="form-comment">Hevosen koulutustaso ko. lajissa (jos haluttua koulutustasoa
+                                  ei löydy listasta, pyöristä alaspäin esim. Re50cm > Re40cm). Mikäli arvosteltavan hevosen sivuilta ei löydy koulutustasoa = 0p.</span>');
+
+
+  
+        $this->form_builder->form_attrs = array('method' => 'post', 'action' => site_url($url));
+		        
+        return $this->form_builder->render_template('_layouts/basic_form_template', $fields);
+    }
+    
+    private function _porrastetut_laatispisteet($url){
+        $input = array();  
+        $data = array();
+        $data['pisteet'] = false;
+
+        if($this->input->server('REQUEST_METHOD') == 'POST' && !isset($id)){
+            $input['jaos'] = $this->input->post('jaos');
+            $input['kotaso'] = intval($this->input->post('kotaso'));
+            $input['vh'] = $this->input->post('vh');
+            
+            if(!$this->vrl_helper->check_vh_syntax($input['vh'])){
+                $data['msg'] = $this->load->view('misc/naytaviesti', array('msg_type' => 'danger', 'msg' => 'Virheellinen VH-tunnus.'), true);
+            }else if(!isset($input['jaos']) || $input['jaos'] < 1){
+                $data['msg'] = $this->load->view('misc/naytaviesti', array('msg_type' => 'danger', 'msg' => 'Virheellinen jaos.'), true);
+            }else {
+                
+                //haetaan hevosen pisteet
+                $jaokset = array();
+                $this->db->from('vrlv3_hevosrekisteri_ominaisuudet');
+                $this->db->where('reknro', $this->vrl_helper->vh_to_number($input['vh']));          
+                $query = $this->db->get();
+                
+                if ($query->num_rows() == 0){
+                    $data['msg'] = $this->load->view('misc/naytaviesti',
+                                                     array('msg_type' => 'danger', 'msg' => 'Hevosta ei ole olemassa tai siltä ei löydy ominaisuuspisteitä.'), true);
+
+                }else {                
+                    //haetaan jaosten ominaisuudet
+                    $jaokset = $this->Jaos_model->get_jaos_option_list(true, true);
+                    foreach ($jaokset as $id => $jaos){
+                        $jaokset[$id] = array();
+                        $jaokset[$id]['ominaisuudet'] = array();
+                        $jaokset[$id]['ominaisuudet'] = $this->Trait_model->get_trait_array_by_jaos($id);
+                        
+                        $sum = 0;
+                        foreach ($query->result_array() as $row){
+                            if(in_array($row['ominaisuus'], $jaokset[$id]['ominaisuudet'])){
+                                $sum = $sum + $row['arvo'];
+                            }
+                        }
+                        
+                        $jaokset[$id]['pisteet'] = $sum;
+                        
+                    }
+
+    
+                
+                
+                    //laatiksen maksimipistet
+                    $laatis_kisamax = 40;
+                    $laatis_sukumax = 10;
+                                        
+                
+                    //Kertoimet, Cannabia, säädä tästä!
+                    $ei_vaikuttavia_lajeja = 1;
+                    $yksi_vaikuttava = 0.8;
+                    $kaksi_vaikuttavaa = 0.65;
+                    $kolme_vaikuttavaa = 0.6;
+                    
+                    $vaikuttavat_lajit_kertoimet = array(0=>$ei_vaikuttavia_lajeja, 1=>$yksi_vaikuttava, 2=>$kaksi_vaikuttavaa, 3=>$kolme_vaikuttavaa);
+                
+                    $lajin_max = $this->porrastetut->get_levels()[$input['kotaso']]['point_max'];
+                    $lajin_pisteet = $jaokset[$input['jaos']]['pisteet'];
+                
+                //Vaikuttavat lajit
+                    $vaikuttavia = 0;
+                    foreach($jaokset as $id=>$jaos){
+                        if ($id != $input['jaos']){
+                            if(($jaos['pisteet']/$jaokset[$input['jaos']]['pisteet']) > 0.75){
+                                $vaikuttavia = $vaikuttavia +1;
+                            }
+                        }
+                    }
+                    $kerroin = $vaikuttavat_lajit_kertoimet[$vaikuttavia] ?? $kolme_vaikuttavaa;
+                    
+                
+                
+                    $kisapisteet = ($lajin_pisteet/$lajin_max)*$laatis_kisamax*$kerroin;
+                    $sukupisteet = ($lajin_pisteet/$lajin_max)*$laatis_sukumax*$kerroin;
+                    
+                    $data['pisteet'] = true;
+                    $data['kisapisteet'] = min($laatis_kisamax, round($kisapisteet));
+                    $data['lajin_pisteet'] = $lajin_pisteet;
+                    $data['lajin_max'] = $lajin_max;
+                    $data['laatis_kisamax'] = $laatis_kisamax;
+                    $data['kerroin'] = $kerroin;
+                    $data['laatis_sukumax'] = $laatis_sukumax;
+                    $data['sukupisteet'] = min($laatis_sukumax, round($sukupisteet));
+                
+                   }
+            }
+        }
+        $data['form'] = $this->_laatispiste_form($url, true, $input);
+        $this->fuel->pages->render('kilpailutoiminta/laatispisteet', $data);
+
+
     }
     
     

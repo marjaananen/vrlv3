@@ -111,6 +111,7 @@ $nav['kilpailutoiminta/kilpailusaannot'] = array('label' => 'Yleiset kilpailusä
 $nav['kilpailutoiminta/porrastetut'] = array('label' => 'Porrastetut kilpailut', 'parent_id' => 'kilpailutoiminta/kilpailusaannot', 'active' => 'kilpailutoiminta/kilpailusaannot/porrastetut');
 $nav['kilpailutoiminta/porrastetut/luokat'] = array('label' => 'Luokat', 'parent_id' => 'kilpailutoiminta/porrastetut', 'active' => 'kilpailutoiminta/kilpailusaannot/porrastetut/luokat');
 $nav['kilpailutoiminta/porrastetut/kilpailulistat'] = array('label' => 'Kilpailulistat', 'parent_id' => 'kilpailutoiminta/porrastetut', 'active' => 'kilpailutoiminta/kilpailusaannot/porrastetut/kilpailulistat');
+$nav['kilpailutoiminta/porrastetut/laatispisteet'] = array('label' => 'Laatispisteet', 'parent_id' => 'kilpailutoiminta/porrastetut', 'active' => 'kilpailutoiminta/kilpailusaannot/porrastetut/laatispisteet');
 
 
 $nav['kilpailutoiminta/nayttelysaannot'] = array('label' => 'Näyttelyiden järjestäminen', 'parent_id' => 'kilpailutoiminta/kilpailusaannot', 'active' => 'kilpailutoiminta/nayttelysaannot');
