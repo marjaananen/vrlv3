@@ -833,6 +833,7 @@ class Virtuaalihevoset extends CI_Controller
                 $msg = "";
                 $poni = array();
                 
+                
                 if(!$this->_fill_horse_info_csv($poni, $msg)){
                      $result['error'] = 1;
                     $result['error_message'] = $msg;
@@ -844,7 +845,10 @@ class Virtuaalihevoset extends CI_Controller
                     
                 }
                 else {
-                    $vh = $this->hevonen_model->add_hevonen($poni, $this->ion_auth->user()->row()->tunnus, $msg);
+                    try{
+                        $vh = $this->hevonen_model->add_hevonen($poni, $this->ion_auth->user()->row()->tunnus, $msg);
+                     
+     
                     if ($vh === false){
                         $result['error'] = 1;
                         $result['error_message'] = $msg;
@@ -854,8 +858,11 @@ class Virtuaalihevoset extends CI_Controller
                        $result['error'] = 0;
                        $result['vh'] = $vh;
                     }
-                }                    
-                
+                     } catch (Exception $e) {
+                             echo 'Caught exception: ',  $e->getMessage(), "\n";
+                    }
+                }
+           
             }
             
 
@@ -1477,7 +1484,7 @@ class Virtuaalihevoset extends CI_Controller
 
     }
     
-    private function _fill_horse_info_csv($poni, &$msg){
+    private function _fill_horse_info_csv(&$poni, &$msg){
         $poni = array();
         
         $headers = $this->input->post('headers');
@@ -1489,12 +1496,26 @@ class Virtuaalihevoset extends CI_Controller
         }
 
         
-        $headers = str_getcsv ($headers , ",","\"");
-        $values = str_getcsv ($values , ",","\"");
-
+        $headers = str_getcsv($headers , ",","\"");
+        $values = str_getcsv($values , ",","\"");
+        
+        $fields = $this->_get_horse_edit_form('form');
+        $poni = array();
         if(sizeof($headers) == sizeof($values)){
-            $poni = array_combine($headers, $values);
+            for ($x = 0; $x < sizeof($headers); $x++) {
+                if(!isset($fields[$headers[$x]])){
+                    $msg = "Otsikkokenttä " . $headers[$x] . " on virheellinen.";
+                    return false;
+                }
+                else if(isset($values[$x]) && strlen($values[$x])>0){
+                    $poni[$headers[$x]] = $values[$x];
+                }
+              }
             $poni['luin_saannot'] = 1;
+            
+            if(!isset($poni['kuollut'])){
+                $poni['kuollut'] = 0;
+            }
         }else {
             $msg = "Rekisteröitävällä rivillä ei ole oikeaa määrää kenttiä";
             return false;
