@@ -28,5 +28,8 @@ Options +FollowSymLinks
 	RewriteCond %{SCRIPT_FILENAME} -f
 	RewriteRule "(^|/)\." - [F]
 	
+	php_value date.timezone 'Europe/Helsinki'
+
+	
 </IfModule>
 Options -Indexes

@@ -15,16 +15,15 @@ class Uutiset_model extends Base_module_model
     function tiedotus_tag_cloud_json()
     {
         $json = array();
-        $this->db->select("kid, COUNT(tid) as weight");
+        $this->db->select("k.kid, COUNT(k.tid) as weight, lk.kategoria");
+        $this->db->join("vrlv3_lista_tiedotuskategoriat as lk", "lk.kid = k.kid");
         $this->db->group_by("kid"); 
-        $query = $this->db->get('vrlv3_tiedotukset_kategoriat');
+        $query = $this->db->get('vrlv3_tiedotukset_kategoriat as k');
         
         foreach ($query->result() as $row){
             
             $json_row = array();
-            $this->db->where('kid', $row->kid);
-            $kid_query = $this->db->get('vrlv3_lista_tiedotuskategoriat');
-            $json_row['text'] = $kid_query->row()->kategoria;
+            $json_row['text'] = $row->kategoria;
             $json_row['weight'] = $row->weight;
             $json_row['link'] = site_url('liitto/kategoria/' . $row->kid);
             
@@ -107,11 +106,21 @@ class Uutiset_model extends Base_module_model
     }
     
     
+    function hae_vuodet_amount(){
+        $this->db->select("COUNT(tid) as amount, YEAR(aika) as year");
+        $this->db->group_by("YEAR(aika)");
+        $this->db->from('vrlv3_tiedotukset');
+        
+        $query = $this->db->get();
+        return $query->result_array();
+    }
+    
     
     function hae_kategoria($kid, $limit, $offset)
     {
-        $this->db->select("vrlv3_tiedotukset.tid, vrlv3_tiedotukset.otsikko, vrlv3_tiedotukset.teksti, vrlv3_tiedotukset.lahettaja, vrlv3_tiedotukset.aika");
+        $this->db->select("vrlv3_tiedotukset.tid, vrlv3_tiedotukset.otsikko, vrlv3_tiedotukset.teksti, vrlv3_tiedotukset.lahettaja, vrlv3_tunnukset.nimimerkki as lahettaja_nick, vrlv3_tiedotukset.aika");
         $this->db->from("vrlv3_tiedotukset");
+        $this->db->join('vrlv3_tunnukset', 'vrlv3_tunnukset.tunnus = vrlv3_tiedotukset.lahettaja');
         $this->db->join('vrlv3_tiedotukset_kategoriat', 'vrlv3_tiedotukset.tid = vrlv3_tiedotukset_kategoriat.tid');
         $this->db->where('vrlv3_tiedotukset_kategoriat.kid', $kid);
         $this->db->order_by("aika", "desc");
@@ -122,10 +131,22 @@ class Uutiset_model extends Base_module_model
         
     }
     
+    function hae_kategoria_info($kid){
+        $this->db->where('kid', $kid);
+        $query = $this->db->get('vrlv3_lista_tiedotuskategoriat');
+        
+        if ($query->num_rows() > 0)
+        {
+            return $query->result_array()[0]; 
+        }
+        
+        return array();
+    }
+    
     
     function hae_kategoria_kpl($kid)
     {
-        $this->db->select("vrlv3_tiedotukset.tid, vrlv3_tiedotukset.otsikko, vrlv3_tiedotukset.teksti, vrlv3_tiedotukset.lahettaja, vrlv3_tiedotukset.aika");
+        $this->db->select("*");
         $this->db->from("vrlv3_tiedotukset");
         $this->db->join('vrlv3_tiedotukset_kategoriat', 'vrlv3_tiedotukset.tid = vrlv3_tiedotukset_kategoriat.tid');
         $this->db->where('vrlv3_tiedotukset_kategoriat.kid', $kid);
@@ -137,14 +158,14 @@ class Uutiset_model extends Base_module_model
     function hae_tiedotukset($limit, $offset, $y = -1, $m = -1)
     {
         $json = array();
-        $this->db->select("tid, otsikko, teksti, lahettaja, aika");        
+        $this->db->select("tid, otsikko, teksti, lahettaja, aika, nimimerkki as lahettaja_nick");        
         if($y > 0){
             $this->db->where('YEAR(aika)', $y); 
             if($m > 0){
                 $this->db->where('MONTH(aika)', $m); 
             }
         }
-        
+        $this->db->join('vrlv3_tunnukset', 'vrlv3_tunnukset.tunnus = vrlv3_tiedotukset.lahettaja');
         $this->db->order_by("aika", "desc");
         if($limit > 0){
             $this->db->limit($limit, $offset);
@@ -158,7 +179,7 @@ class Uutiset_model extends Base_module_model
     function hae_tiedotukset_kpl($y = -1, $m = -1)
     {
         $json = array();
-        $this->db->select("tid, otsikko, teksti, lahettaja, aika");
+        $this->db->select("*");
          $this->db->from("vrlv3_tiedotukset");
 
         if($y > 0){
@@ -181,9 +202,11 @@ class Uutiset_model extends Base_module_model
     function hae_tiedotus($tid)
     {
         $json = array();
-        $this->db->select("tid, otsikko, teksti, lahettaja, aika");        
+        $this->db->select("tid, otsikko, teksti, lahettaja, aika, nimimerkki as lahettaja_nick");        
         $this->db->where('tid', $tid); 
-        $this->db->order_by("aika", "desc");  
+        $this->db->order_by("aika", "desc");
+        $this->db->join('vrlv3_tunnukset', 'vrlv3_tunnukset.tunnus = vrlv3_tiedotukset.lahettaja');
+
         $query = $this->db->get('vrlv3_tiedotukset');
         
         return  $this->_kasittele_tiedotukset($query->result_array());

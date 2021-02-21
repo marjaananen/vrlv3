@@ -83,12 +83,8 @@ class Liitto extends CI_Controller
     
     function tiedotukset()
     {
-	$vars = array();
+     $vars = $this->_announcement_menu($this->Uutiset_model->hae_tiedotukset_kpl());
 
-	$page = $this->input->get('sivu', TRUE);
-	$vars['pagination'] = $this->_pagination($page, $this->Uutiset_model->hae_tiedotukset_kpl());
-
-	$vars['tag_cloud'] =  $this->Uutiset_model->tiedotus_tag_cloud_json();
 	
 	$tiedotukset = $this->Uutiset_model->hae_tiedotukset($this->max_items_per_page, $vars['pagination']['offset']);
 	$vars['tiedotukset'] = $this->_kasittele_tiedotukset($tiedotukset);
@@ -102,50 +98,46 @@ class Liitto extends CI_Controller
     
     function kategoria($kat)
     {
-	$vars = array();
-	$vars['tag_cloud'] =  $this->Uutiset_model->tiedotus_tag_cloud_json();
-	
-	$page = $this->input->get('sivu', TRUE);
-	$vars['pagination'] = $this->_pagination($page, $this->Uutiset_model->hae_kategoria_kpl($kat));
-
-	
-	$tiedotukset = $this->Uutiset_model->hae_kategoria($kat, $this->max_items_per_page, $vars['pagination']['offset']);
-	$vars['tiedotukset'] = $this->_kasittele_tiedotukset($tiedotukset);
-	$vars['header'] = $tiedotukset[0]['kategoriat'][0]['kat'];
-
-	$this->fuel->pages->render('tiedotukset/tiedotukset', $vars);
+        $kategoria = $this->Uutiset_model->hae_kategoria_info($kat);
+        
+        if(sizeof($kategoria) > 0){
+            $vars = $this->_announcement_menu($this->Uutiset_model->hae_kategoria_kpl($kat));
+            
+            $tiedotukset = $this->Uutiset_model->hae_kategoria($kat, $this->max_items_per_page, $vars['pagination']['offset']);
+            $vars['tiedotukset'] = $this->_kasittele_tiedotukset($tiedotukset);
+            $vars['header'] = "#".$kategoria['kategoria'];
+        
+            $this->fuel->pages->render('tiedotukset/tiedotukset', $vars);
+        } else {
+            $this->fuel->pages->render('misc/naytaviesti', array('msg_type' => 'danger', 'msg' => 'Kategoriaa ei löydy!'));
+    
+        }
     }
 
     
     function tiedotus($tid)
     {
 	
-	$vars = array();
-	$vars['tag_cloud'] =  $this->Uutiset_model->tiedotus_tag_cloud_json();
-	
-	$tiedotukset = $this->Uutiset_model->hae_tiedotus($tid);
-	
-	$this->load->library('Vrl_helper');
-	foreach ($tiedotukset as &$tiedotus){    
-	    $this->load->model('tunnukset_model');
-	    $pinnumber = $this->vrl_helper->vrl_to_number($tiedotus['lahettaja']);
-	    $user = $this->ion_auth->user($this->tunnukset_model->get_users_id($pinnumber))->row();
-	    
-	    $tiedotus['lahettaja_nick'] = $user->nimimerkki;
-	}
-	$vars['tiedotukset'] = $tiedotukset;
-	
-	$this->fuel->pages->render('tiedotukset/tiedotukset', $vars);
+        
+        $tiedotukset = $this->Uutiset_model->hae_tiedotus($tid);
+        
+        if(sizeof($tiedotukset) > 0){
+            $vars = $this->_announcement_menu(null);
+            $vars['tiedotukset'] = $tiedotukset;
+            $vars['tag_cloud'] =  $this->Uutiset_model->tiedotus_tag_cloud_json();
+        
+            $this->fuel->pages->render('tiedotukset/tiedotukset', $vars);
+        }
+        
+        else {
+            $this->fuel->pages->render('misc/naytaviesti', array('msg_type' => 'danger', 'msg' => 'Tiedotetta ei löydy!'));
+    
+            }
     }
     
     function arkisto($v, $m = -1)
     {
-	
-	$page = $this->input->get('sivu', TRUE);
-	$vars['pagination'] = $this->_pagination($page, $this->Uutiset_model->hae_tiedotukset_kpl($v, $m));
-
-	$vars = array();
-	$vars['tag_cloud'] =  $this->Uutiset_model->tiedotus_tag_cloud_json();
+	$vars = $this->_announcement_menu($this->Uutiset_model->hae_tiedotukset_kpl($v, $m), $v);
 	$tiedotukset = $this->Uutiset_model->hae_tiedotukset($this->max_items_per_page, $vars['pagination']['offset'], $v, $m);
 	$vars['tiedotukset'] = $this->_kasittele_tiedotukset($tiedotukset);
 	
@@ -164,22 +156,27 @@ class Liitto extends CI_Controller
     private function _kasittele_tiedotukset($tiedotukset){
 	$this->load->library('Vrl_helper');
 	foreach ($tiedotukset as &$tiedotus){
-	    if (strlen($tiedotus ['teksti']) > $this->max_list_length){$tiedotus['teksti'] = substr($tiedotus['teksti'], 0, $this->max_list_length)."...";}
+	    if (strlen($tiedotus ['teksti']) > $this->max_list_length){
+            $tiedotus['teksti'] = substr($tiedotus['teksti'], 0, $this->max_list_length)."...";
+            }
 		
-	    $this->load->model('tunnukset_model');
-	    $pinnumber = $this->vrl_helper->vrl_to_number($tiedotus['lahettaja']);
-	    $user = $this->ion_auth->user($this->tunnukset_model->get_users_id($pinnumber))->row();
-		if ($user == NULL || $user == ""){
-			$tiedotus['lahettaja_nick'] = '';
-		}
-	    else {
-			$tiedotus['lahettaja_nick'] =  $user->nimimerkki;
-		}
 	}
 	
 	return $tiedotukset;
 		
     }
+    private function _announcement_menu($kpl, $v = null){
+        $page = $this->input->get('sivu', TRUE);
+           $vars = array();
+        $vars['pagination'] = $this->_pagination($page, $kpl);
+        $vars['years'] = $this->Uutiset_model->hae_vuodet_amount();
+        $vars['selected_year'] = $v;   
+        $vars['tag_cloud'] =  $this->Uutiset_model->tiedotus_tag_cloud_json();
+        
+        return $vars;
+    }
+    
+    
     
     private function _pagination($page, $items){
 	
