@@ -113,7 +113,7 @@ try {
               ],
               'Text' => [
                   'Charset' => $char_set,
-                  'Data' => $plaintext_body . $this->signature(false);,
+                  'Data' => $plaintext_body . $this->signature(false),
               ],
           ],
           'Subject' => [
