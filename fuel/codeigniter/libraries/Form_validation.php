@@ -1235,7 +1235,7 @@ class CI_Form_validation {
 	 * @return	bool
 	 */
 	public function valid_email($str)
-	{
+	{/*
 		if (function_exists('idn_to_ascii') && preg_match('#\A([^@]+)@(.+)\z#', $str, $matches))
 		{
 			$domain = defined('INTL_IDNA_VARIANT_UTS46')
@@ -1247,7 +1247,7 @@ class CI_Form_validation {
 				$str = $matches[1].'@'.$domain;
 			}
 		}
-
+*/
 		return (bool) filter_var($str, FILTER_VALIDATE_EMAIL);
 	}
 

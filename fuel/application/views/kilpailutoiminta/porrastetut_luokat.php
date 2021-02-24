@@ -33,7 +33,7 @@
         echo '<td>'.$class['taso'].'</td>';
         echo '<td>'.$aste[$class['aste']].'</td>';
         if(isset($class['minheight']) && strlen($class['minheight'])>2){
-         echo '<td>'.$class['minheight'].'cm</td>';
+         echo '<td>'.$class['minheight'].' cm</td>';
         }else {
             echo "<td>-</td>";
         }
