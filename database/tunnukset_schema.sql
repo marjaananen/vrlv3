@@ -62,7 +62,7 @@ INSERT INTO `vrlv3_groups` (`id`, `name`, `description`) VALUES
 (6, 'tallirekisteri', 'Tallirekisterityöntekijä'),
 (7, 'jaos', 'Jaosvastaava'),
 (8, 'tyovoima', 'Työvoimavastaava'),
-(11, 'kasvattajanimet', 'Kasvattajanimirekisteritiimi'),
+(14, 'kasvattajanimet', 'Kasvattajanimirekisteritiimi'),
 (9, 'jaos-yp', 'Jaoksen ylläpitäjä'),
 (10, 'kisakalenteri', 'Kalenterityöntekijä'),
 (11, 'alayhdistys-yp', 'Alayhdistyksen ylläpito'),

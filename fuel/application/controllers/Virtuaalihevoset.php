@@ -775,7 +775,7 @@ class Virtuaalihevoset extends CI_Controller
                     else if($nimi == 'syntymamaa'){
                         $kentta['kuvaus'] = $field['label'] ?? "";
                         $kentta['kuvaus'] .= '<span class="form_comment">Arvo numerona';
-                        $kentta['kuvaus'] .= ' (kts. <a href="'. site_url('virtuaalihevoset/maat') . '">lista sallituista arvoista</a>)';
+                        $kentta['kuvaus'] .= ' (kts. <a href="'. site_url('virtuaalihevoset/syntymamaat') . '">lista sallituista arvoista</a>)';
                         $kentta['kuvaus'] .= '</span>';
                     }
                     else if($nimi == 'painotus'){
