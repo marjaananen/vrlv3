@@ -95,8 +95,7 @@ class Profiili extends Loggedin_Controller
             $this->load->helper(array('form', 'url'));
             
             if($this->input->post('email') != $user->email) //validointi katsoo tietokannasta duplikaatit joten tee se vain jos vaihdetaan email
-                $this->form_validation->set_rules('email', 'Sähköpostiosoite', 'valid_email|is_unique[vrlv3_tunnukset.email]|is_unique[vrlv3_tunnukset_jonossa.email]');
-            
+             $this->form_validation->set_rules('email', 'Sähköpostiosoite', 'valid_email|is_unique[vrlv3_tunnukset.email]|is_unique[vrlv3_tunnukset_jonossa.email]');           
             $this->form_validation->set_rules('nimimerkki', 'Nimimerkki', "min_length[1]|max_length[20]|regex_match[/^[A-Za-z0-9_\-.:,; *~#&'@()]*$/]");
             $this->form_validation->set_rules('nayta_email', 'Sähköpostin näkyvyys', 'min_length[1]|max_length[1]|numeric|regex_match[/^[01]*$/]');
          

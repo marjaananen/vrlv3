@@ -230,12 +230,9 @@ class Kilpailutoiminta extends CI_Controller
             }
         }
         else if($sivu == "laatispisteet"){
-            if(!($this->ion_auth->logged_in()))
-            {
-                $this->fuel->pages->render('misc/naytaviesti', array('msg_type' => 'danger', 'msg' => 'Kirjaudu sisään käyttääksesi laatispistelakuria!'));
-            } else {
-                $this->_porrastetut_laatispisteet('kilpailutoiminta/porrastetut/laatispisteet');
-            }
+            
+            $this->_porrastetut_laatispisteet('kilpailutoiminta/porrastetut/laatispisteet');
+            
         }
         else {
             $this->fuel->pages->render('kilpailutoiminta/porrastetut_saannot', $vars);

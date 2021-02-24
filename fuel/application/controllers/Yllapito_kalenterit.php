@@ -327,7 +327,9 @@ public function etuuspisteet($jaos = null, $tunnus = null){
             }
       
         } else IF ($this->input->server('REQUEST_METHOD') == 'POST'){
-            if($this->vrl_helper->check_vrl_syntax($this->input->post('tunnus'))){
+            if($this->vrl_helper->check_vrl_syntax($this->input->post('tunnus'))
+               && $this->input->post('jaos') !== false
+               && strlen($this->input->post('tunnus')) > 0){
                 $this->etuuspisteet($this->input->post('jaos'), $this->input->post('tunnus'));
             }else {
                 $this->fuel->pages->render('misc/naytaviesti', array('msg_type' => 'danger', 'msg' => "Virheellinen VRL-tunnus."));
@@ -337,7 +339,8 @@ public function etuuspisteet($jaos = null, $tunnus = null){
                 $this->load->library('form_builder', array('submit_value' => "Hae", 'required_text' => '*Pakollinen kenttä'));
                 $this->form_builder->form_attrs = array('method' => 'post', 'action' => site_url($this->url.'etuuspisteet'));
                 $jaos_options = $this->_jaos_options();
-                $fields['jaos'] = array('type' => 'select', 'required'=> TRUE, 'options' => $jaos_options, 'value' => $data['jaos'] ?? "", 'class'=>'form-control');
+                unset($jaos_options[-1]);
+                $fields['jaos'] = array('type' => 'select', 'required'=> TRUE, 'options' => $jaos_options, 'value' => $data['jaos'] ?? "1", 'class'=>'form-control');
                 $fields['tunnus'] = array('type' => 'text', 'label' => "VRL-tunnus", 'required' => TRUE, 'class'=>'form-control');                  
                 $data['form'] =  $this->form_builder->render_template('_layouts/basic_form_template', $fields);
                 $data['title'] = "Hae käyttäjän etuuspisteeet";
