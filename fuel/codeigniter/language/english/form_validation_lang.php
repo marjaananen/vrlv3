@@ -6,7 +6,7 @@
  *
  * This content is released under the MIT License (MIT)
  *
- * Copyright (c) 2014 - 2018, British Columbia Institute of Technology
+ * Copyright (c) 2014 - 2019, British Columbia Institute of Technology
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -29,28 +29,29 @@
  * @package	CodeIgniter
  * @author	EllisLab Dev Team
  * @copyright	Copyright (c) 2008 - 2014, EllisLab, Inc. (https://ellislab.com/)
- * @copyright	Copyright (c) 2014 - 2018, British Columbia Institute of Technology (http://bcit.ca/)
- * @license	http://opensource.org/licenses/MIT	MIT License
+ * @copyright	Copyright (c) 2014 - 2019, British Columbia Institute of Technology (https://bcit.ca/)
+ * @license	https://opensource.org/licenses/MIT	MIT License
  * @link	https://codeigniter.com
  * @since	Version 1.0.0
  * @filesource
  */
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-$lang['form_validation_required']		= 'Kenttä {field} on pakollinen.';
-$lang['form_validation_isset']			= 'Kentässä {field} pitää olla arvo.';
-$lang['form_validation_valid_email']		= 'Kentässä {field} tulee olla validi sähköpostiosoite.';
-$lang['form_validation_valid_emails']		= 'Kentässä {field} kaikkien sähköpostiosoitteiden tulee olla valideja.';
-$lang['form_validation_valid_url']		= 'Kentässä {field} tulee olla validi url-osoite.';
+$lang['form_validation_required']		= 'The {field} field is required.';
+$lang['form_validation_isset']			= 'The {field} field must have a value.';
+$lang['form_validation_valid_email']		= 'The {field} field must contain a valid email address.';
+$lang['form_validation_valid_emails']		= 'The {field} field must contain all valid email addresses.';
+$lang['form_validation_valid_url']		= 'The {field} field must contain a valid URL.';
 $lang['form_validation_valid_ip']		= 'The {field} field must contain a valid IP.';
-$lang['form_validation_min_length']		= 'Kentän {field} sisällön tulee olla vähintään {param} merkkiä pitkä.';
-$lang['form_validation_max_length']		= 'Kentän {field} sisältö ei saa olla yli {param} merkkiä pitkä.';
+$lang['form_validation_valid_base64']		= 'The {field} field must contain a valid Base64 string.';
+$lang['form_validation_min_length']		= 'The {field} field must be at least {param} characters in length.';
+$lang['form_validation_max_length']		= 'The {field} field cannot exceed {param} characters in length.';
 $lang['form_validation_exact_length']		= 'The {field} field must be exactly {param} characters in length.';
 $lang['form_validation_alpha']			= 'The {field} field may only contain alphabetical characters.';
 $lang['form_validation_alpha_numeric']		= 'The {field} field may only contain alpha-numeric characters.';
 $lang['form_validation_alpha_numeric_spaces']	= 'The {field} field may only contain alpha-numeric characters and spaces.';
 $lang['form_validation_alpha_dash']		= 'The {field} field may only contain alpha-numeric characters, underscores, and dashes.';
-$lang['form_validation_numeric']		= 'Kentässä {field} saa olla vain numeroita.';
+$lang['form_validation_numeric']		= 'The {field} field must contain only numbers.';
 $lang['form_validation_is_numeric']		= 'The {field} field must contain only numeric characters.';
 $lang['form_validation_integer']		= 'The {field} field must contain an integer.';
 $lang['form_validation_regex_match']		= 'The {field} field is not in the correct format.';
