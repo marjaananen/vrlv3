@@ -61,7 +61,7 @@ if (!function_exists('lang'))
 					$args[0] = FALSE;
 				}
 			}
-			return $args[0];
+			return call_user_func_array('sprintf', $args);
 		}
 	}
 }

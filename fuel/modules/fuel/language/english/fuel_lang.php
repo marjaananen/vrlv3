@@ -8,7 +8,7 @@
 $lang['fuel_page_title'] = 'FUEL CMS';
 $lang['logged_in_as'] = 'Logged in as:';
 $lang['logout'] = 'Logout';
-$lang['fuel_developed_by'] = 'FUEL CMS version %1s is developed by <a href="http://www.thedaylightstudio.com" target="_blank">Daylight Studio</a> and built upon the <a href="http://www.codeigniter.com" target="_blank">CodeIgniter</a> framework.';
+$lang['fuel_developed_by'] = 'FUEL CMS version %1s is developed by <a href="https://www.thedaylightstudio.com" target="_blank">Daylight Studio</a> and built upon the <a href="https://www.codeigniter.com" target="_blank">CodeIgniter</a> framework.';
 $lang['fuel_copyright'] = 'Copyright &copy; %1s Daylight Studio. All Rights Reserved.';
 
 
@@ -211,6 +211,7 @@ $lang['no_data'] = 'No data to display.';
 $lang['no_preview_path'] = 'There is no preview path assigned to this module.';
 $lang['delete_item_message'] = 'You are about to delete the item:';
 $lang['replace_item_message'] = 'Select a record from the list below that you would like to replace. Replacing will transfer the data from one record to the other and then delete the old record.';
+$lang['error_select_replacement'] = 'There was an error replacing your module record.';
 
 // command line
 $lang['module_install'] = "The '%1s' module has successfully been installed.\n";
@@ -304,7 +305,8 @@ $lang['form_label_view'] = 'View';
 */
 $lang['navigation_import'] = 'Import Navigation';
 $lang['navigation_instructions'] = 'Here you create and edit the top menu items of the page.';
-$lang['navigation_import_instructions'] = 'Select a navigation group and upload a file to import below. The file should contain the PHP array variable assigned in the variable field below (e.g. <strong>$nav</strong>). For a reference of the array format, please consult the <a href="http://docs.getfuelcms.com/general/navigation" target="_blank">user guide</a>.';
+$lang['navigation_import_instructions'] = 'The following allows you to import your <code>views/_variables/nav.php</code> file OR a JSON file that represents your navigation array. For a reference of the array format, please consult the <a href="https://docs.getfuelcms.com/general/navigation" target="_blank">user guide</a>.';
+$lang['navigation_import_file_comment'] = 'If no file is uploaded, it will default to the views/_variables/nav.php file. The file must be a JSON file';
 $lang['navigation_success_upload'] = 'The navigation was successfully uploaded.';
 $lang['form_label_navigation_group'] = 'Navigation Group:';
 $lang['form_label_nav_key'] = 'Key';
@@ -356,6 +358,7 @@ $lang['assets_comment_width'] = 'Will change the width of an image to the desire
 $lang['assets_comment_height'] = 'Will change the height of an image to the desired amount. If "Create thumbnail" is selected, it will only effect the size of the thumbnail.';
 $lang['assets_comment_master_dim'] = 'Specifies the master dimension to use for resizing. If the source image size does not allow perfect resizing to those dimensions, this setting determines which axis should be used as the hard value. "auto" sets the axis automatically based on whether the image is taller then wider, or vice versa.';
 $lang['assets_comment_unzip'] = 'Unzips a zip file';
+$lang['assets_encryption_key_missing'] = 'Missing $config[\'encryption_key\'] value to your CI config file.';
 
 /*
 |--------------------------------------------------------------------------
@@ -379,6 +382,8 @@ $lang['btn_send_email'] = 'Send Email';
 $lang['new_user_email_subject'] = 'Your FUEL CMS account has been created';
 $lang['new_user_email'] = 'Your FUEL CMS account has been created with the user name of "%1s". Click the following link to set your FUEL password: 
 %2s';
+$lang['new_user_account_email'] = 'Your FUEL CMS account has been created with the user name of "%2s" and the password "%3s". 
+Click the following link to login: %1s';
 $lang['new_user_created_notification'] = 'The user information was successfully saved and a notification was sent to %1s.';
 $lang['error_cannot_deactivate_yourself'] = 'You cannot deactivate yourself.';
 
@@ -524,7 +529,7 @@ $lang['form_label_og_title'] = 'Open Graph title';
 $lang['form_label_og_description'] = 'Open Graph description';
 $lang['form_label_og_image'] = 'Open Graph image';
 $lang['form_label_category_id'] = 'Category';
-
+$lang['form_label_context'] = 'Context';
 
 $lang['form_label_group_id'] = 'Group';
 $lang['form_label_or_select'] = 'OR select';
@@ -549,6 +554,7 @@ $lang['layout_field_heading'] = 'Heading';
 $lang['layout_field_body_description'] = 'Main content of the page';
 $lang['layout_field_body_class'] = 'Body class';
 $lang['layout_field_redirect_to'] = 'Redirect to';
+$lang['layout_field_alias'] = 'Alias';
 
 $lang['layout_field_301_redirect_copy'] = 'This layout will do a 301 redirect to another page.';
 $lang['layout_field_alias_copy'] = 'This layout is similar to a 301 redirect but the location of the page does not change and <br />the page content from the specified location is used to render the page.';
@@ -634,8 +640,8 @@ $lang['install_db_pwd'] = 'What is the password for that user?';
 $lang['install_success'] = 'Your FUEL CMS installation is complete!';
 $lang['install_success_with_errors'] = "Your FUEL CMS installation is complete but the follow ERRORS did occur:\n%1s";
 $lang['install_further_info'] = "Now, to access the FUEL CMS admin, browse to your installation folder in your browser enter '/fuel' (e.g. localhost/fuel) in your location bar.\n";
-$lang['install_further_info'] .= "For additional configuration options, go to http://docs.getfuelcms.com/installation/configuration.\n";
-$lang['install_further_info'] .= "For questions, or bug reports, go to https://github.com/daylightstudio/FUEL-CMS/issues or visit us at http://forums.getfuelcms.com.\n";
+$lang['install_further_info'] .= "For additional configuration options, go to https://docs.getfuelcms.com/installation/configuration.\n";
+$lang['install_further_info'] .= "For questions, or bug reports, go to https://github.com/daylightstudio/FUEL-CMS/issues or visit us at https://forums.getfuelcms.com.\n";
 
 $lang['update_cli_intro'] = "FUEL CMS 1.4x is built on CodeIgniter 3. If you are upgrading from 1.3x or earlier, this updater will help fix some of the common issues when upgrading including:\n";
 $lang['update_cli_intro'] .= "1) Upper-case first letter for models, libraries and controller file names.\n";

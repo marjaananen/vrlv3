@@ -594,7 +594,11 @@ class Menu {
 		}
 
 		$str = '';
-		$num = count($this->_active_items) -1;
+		$act_items = 0;
+		if(isset($this->_active_items)){
+			$act_items = count($this->_active_items);
+		}
+		$num = $act_items -1;
 		if (!empty($this->home_link))
 		{
 			if (is_array($this->home_link))
