@@ -594,18 +594,13 @@ class Menu {
 		}
 
 		$str = '';
-		$num = -1;
-		if (isset($this->_active_items)){
-			$num = count($this->_active_items) -1;
-
-		}
-		
+		$num = count($this->_active_items) -1;
 		if (!empty($this->home_link))
 		{
 			if (is_array($this->home_link))
 			{
 				$home_link = each($this->home_link);
-				$home_anchor = anchor($home_link['key'], $home_link['value']);
+				$home_anchor = anchor(key($this->home_link), current($this->home_link));
 			}
 			else
 			{

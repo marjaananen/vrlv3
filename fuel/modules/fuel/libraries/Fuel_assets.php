@@ -112,12 +112,17 @@ class Fuel_assets extends Fuel_base_library {
 		$this->CI->load->library('image_lib');
 		$this->CI->load->library('encryption');
 
+		if (!config_item('encryption_key'))
+		{
+			$this->_add_error(lang('assets_encryption_key_missing'));
+		}
+
 		$valid = array( 'upload_path' => '',
 						'file_name' => '',
 						'overwrite' => FALSE,
 						'xss_clean' => FALSE,
 						'encrypt_name' => FALSE,
-						'unzip' => FALSE,
+						//'unzip' => FALSE,
 						'override_post_params' => FALSE,
 						'remove_spaces' => TRUE,
 						'posted' => $_POST,
@@ -131,6 +136,7 @@ class Fuel_assets extends Fuel_base_library {
 						'height' => NULL, 
 						'resize_and_crop' => FALSE, 
 						'resize_method' => FALSE,
+						'upscale' => TRUE
 						);
 
 		// used later
@@ -364,7 +370,8 @@ class Fuel_assets extends Fuel_base_library {
 					!empty($_params[$key]['height']) OR
 					!empty($_params[$key]['master_dim']) OR
 					!empty($_params[$key]['resize_and_crop']) OR
-					!empty($_params[$key]['resize_method'])
+					!empty($_params[$key]['resize_method']) OR
+					!empty($_params[$key]['upscale'])
 					))
 			{
 				$params = $_params[$key];
@@ -389,8 +396,17 @@ class Fuel_assets extends Fuel_base_library {
 				}
 				else
 				{
-
-					$resize = $this->CI->image_lib->resize();
+					$resize = true;
+					
+					if ($params['upscale']) 
+					{
+						$resize = $this->CI->image_lib->resize();
+					} 
+					// resize only if image is taller  or wider than $params['width']
+					elseif ($this->CI->image_lib->orig_width > $params['width'] OR $this->CI->image_lib->orig_height > $params['height'])
+					{
+						$resize = $this->CI->image_lib->resize();
+					}
 				}
 				
 				if (!$resize)
@@ -399,14 +415,14 @@ class Fuel_assets extends Fuel_base_library {
 				}
 			}
 			// unzip any zip files
-			else if (is_true_val($params['unzip']) AND $file['file_ext'] == '.zip')
-			{
-				// unzip the contents
-				$this->unzip($file['full_path']);
+			// else if (is_true_val($params['unzip']) AND $file['file_ext'] == '.zip')
+			// {
+			// 	// unzip the contents
+			// 	$this->unzip($file['full_path']);
 				
-				// then delete the zip file
-				$this->delete($file['full_path']);
-			}
+			// 	// then delete the zip file
+			// 	$this->delete($file['full_path']);
+			// }
 		}
 		
 		if ($this->has_errors())
