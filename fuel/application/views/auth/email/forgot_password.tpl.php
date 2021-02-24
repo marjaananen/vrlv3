@@ -9,9 +9,3 @@ Hei!
 
 <P>Mikäli et ole itse pyytänyt salasanan resetointia, voit jättää tämän sähköpostin huomiotta.</P>
 
-
-Terveisin,
-Virtuaalisen Ratsastajainliiton ylläpito
-http://virtuaalihevoset.net
-
-Tämä on automaattisesti lähetetty viesti. Älä vastaa tähän viestiin!

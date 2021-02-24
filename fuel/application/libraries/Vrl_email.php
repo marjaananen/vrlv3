@@ -14,11 +14,23 @@ public function __construct()
 	{
 
 	}
+	
+	private function _signature($html = true){
+		
+		return '<p>Terveisin,<br />
+			Virtuaalisen Ratsastajainliiton ylläpito<br />
+			'.site_url().'<br />
+			<br />
+			Tämä on automaattisesti lähetetty viesti. Älä vastaa tähän viestiin!<br />
+			</p>';
+		
+		
+	}
     
 public function send ($to, $subject, $message){
 	return $this->aws_send($to, $subject, $message);
 	return;
-    
+    /*
             $CI =& get_instance();
 
 		// Check compat first
@@ -47,6 +59,8 @@ public function send ($to, $subject, $message){
                 
     return FALSE;
     
+    */
+    
 }
 
 function aws_send($to, $subject, $msg){
@@ -67,7 +81,13 @@ $sender_email = 'virtuaalinenratsastajainliitto@gmail.com';
 
 // Replace these sample addresses with the addresses of your recipients. If
 // your account is still in the sandbox, these addresses must be verified.
-$recipient_emails = ["marsupieni@gmail.com"];
+$recipient_emails = array();
+
+if(is_array($to)){
+	$recipient_emails = $to;
+}else {
+	$recipient_emails[] = $to;
+}
 
 // Specify a configuration set. If you do not want to use a configuration
 // set, comment the following variable, and the
@@ -89,11 +109,11 @@ try {
           'Body' => [
               'Html' => [
                   'Charset' => $char_set,
-                  'Data' => $html_body,
+                  'Data' => $html_body . $this->signature(),
               ],
               'Text' => [
                   'Charset' => $char_set,
-                  'Data' => $plaintext_body,
+                  'Data' => $plaintext_body . $this->signature(false);,
               ],
           ],
           'Subject' => [

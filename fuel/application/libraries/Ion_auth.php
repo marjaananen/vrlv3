@@ -65,7 +65,7 @@ class Ion_auth
 		$this->check_compatibility();
 
 		$this->config->load('ion_auth', TRUE);
-		$this->load->library(['email']);
+		$this->load->library(['vrl_email']);
 		$this->lang->load('ion_auth');
 		$this->load->helper(['cookie', 'language','url']);
 
@@ -179,7 +179,6 @@ class Ion_auth
 					$to = $user->email;
 					$subject = "Salasanan palautus VRL:oon";
 					
-
 					if ($this->vrl_email->send($to, $subject, $message))
 					{
 						$this->set_message('forgot_password_successful');

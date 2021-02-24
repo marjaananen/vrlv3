@@ -6,11 +6,3 @@ Hei!
 <?php echo base_url() . 'jasenyys/vahvista/?email=' . $email . '&code=' . $varmistus;
 
 ?>
-
-
-<p>Terveisin,<br />
-Virtuaalisen Ratsastajainliiton ylläpito<br />
-http://virtuaalihevoset.net<br />
-<br />
-Tämä on automaattisesti lähetetty viesti. Älä vastaa tähän viestiin!<br />
-</p>
