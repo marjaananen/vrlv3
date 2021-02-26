@@ -273,11 +273,15 @@ class Tallit extends CI_Controller
 		$data['msg'] = 'Hae talleja tallirekisteristä. Voit käyttää tähteä * jokerimerkkinä.';
 		
 		$data['text_view'] = $this->load->view('tallit/teksti_etusivu', NULL, TRUE);
-		
-		$data['form'] = $this->_get_stable_search_form();
+		$hakudata = array();
 		
 		if($this->input->server('REQUEST_METHOD') == 'POST')
 		{
+            
+            $hakudata['nimi'] = $this->input->post('nimi');
+            $hakudata['kategoria'] = $this->input->post('kategoria');
+            $hakudata['tallinumero'] = $this->input->post('tallinumero');
+				
 	
 			if($this->_validate_stable_search_form() == true && !(empty($this->input->post('nimi')) && empty($this->input->post('tallinumero')) && $this->input->post('kategoria') == "-1"))
 			{
@@ -299,7 +303,7 @@ class Tallit extends CI_Controller
 
 			}
 		}
-		
+		$data['form'] = $this->_get_stable_search_form($hakudata);
 		$this->fuel->pages->render('misc/haku', $data);
     }
 	
@@ -707,16 +711,16 @@ class Tallit extends CI_Controller
     }
     
     
-    private function _get_stable_search_form(){
+    private function _get_stable_search_form($data = array()){
         $options = $this->tallit_model->get_category_option_list();
         $this->load->library('form_builder', array('submit_value' => 'Hae'));
 
 		
 		$options[-1] = 'Mikä tahansa';
 		
-		$fields['nimi'] = array('type' => 'text', 'class'=>'form-control');
-		$fields['kategoria'] = array('type' => 'select', 'options' => $options, 'value' => '-1', 'class'=>'form-control');
-		$fields['tallinumero'] = array('type' => 'text', 'class'=>'form-control');
+		$fields['nimi'] = array('type' => 'text', 'class'=>'form-control', 'value'=>$data['nimi'] ?? "");
+		$fields['kategoria'] = array('type' => 'select', 'options' => $options, 'value' => $data['kategoria'] ?? '-1', 'class'=>'form-control');
+		$fields['tallinumero'] = array('type' => 'text', 'class'=>'form-control', 'value'=>$data['tallinumero'] ?? "");
 	
 		$this->form_builder->form_attrs = array('method' => 'post', 'action' => site_url('/tallit/haku'));
 		return $this->form_builder->render_template('_layouts/basic_form_template', $fields);

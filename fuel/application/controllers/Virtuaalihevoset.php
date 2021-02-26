@@ -5,8 +5,8 @@ class Virtuaalihevoset extends CI_Controller
     {
         parent::__construct();
 		$this->load->model("hevonen_model");
-        		$this->load->model("breed_model");
-                $this->load->library("vrl_helper");
+        $this->load->model("breed_model");
+        $this->load->library("vrl_helper");
 
         $this->load->library('user_rights', array('groups' => $this->allowed_user_groups));
 
@@ -36,13 +36,14 @@ class Virtuaalihevoset extends CI_Controller
 		$this->load->model('hevonen_model');
 		$this->load->library('form_validation');
 		$this->load->library('vrl_helper');
+        
+        $hakudata = array();
 		$data['title'] = 'Hevosrekisteri';
 		
 		$data['msg'] = 'Hae hevosia rekisteristä. Voit käyttää tähteä * jokerimerkkinä.';
 		
 		$data['text_view'] = $this->load->view('hevoset/etusivu_teksti', NULL, TRUE);
 		
-		$data['form'] = $this->get_horse_search_form();
 		
 		if($this->input->server('REQUEST_METHOD') == 'POST')
 		{
@@ -55,6 +56,14 @@ class Virtuaalihevoset extends CI_Controller
 			}
 			
 			$vars['headers'] = json_encode($vars['headers']);
+            
+            $hakudata['reknro'] = $this->input->post('reknro');
+            $hakudata['nimi'] = $this->input->post('nimi');
+            $hakudata['rotu'] = $this->input->post('rotu');
+            $hakudata['sukupuoli'] = $this->input->post('sukupuoli');
+            $hakudata['kuollut'] = $this->input->post('kuollut');
+            $hakudata['vari'] = $this->input->post('vari');
+            $hakudata['syntynyt_v'] = $this->input->post('syntynyt_v');
 			
 			if($this->validate_horse_search_form() == true)
 			{
@@ -63,14 +72,17 @@ class Virtuaalihevoset extends CI_Controller
 					$reknro = $this->vrl_helper->vh_to_number($this->input->post('reknro'));
 				}
 
-				$vars['data'] = json_encode($this->hevonen_model->search_horse($reknro, $this->input->post('nimi'), $this->input->post('rotu'), $this->input->post('sukupuoli'),
-																			   $this->input->post('kuollut'), $this->input->post('vari'), $this->input->post('syntynyt_v')));
+				$vars['data'] = json_encode($this->hevonen_model->search_horse($reknro, $this->input->post('nimi'), $this->input->post('rotu'),
+                                                                               $this->input->post('sukupuoli'),
+																			   $this->input->post('kuollut'), $this->input->post('vari'),
+                                                                               $this->input->post('syntynyt_v')));
 			}
 			
 			$data['tulokset'] = $this->load->view('misc/taulukko', $vars, TRUE);
 
 		}
-		
+		$data['form'] = $this->get_horse_search_form($hakudata);
+
 		$this->fuel->pages->render('misc/haku', $data);
     }
     
@@ -1291,7 +1303,7 @@ class Virtuaalihevoset extends CI_Controller
 	}
 	
 	
-	public function get_horse_search_form(){
+	public function get_horse_search_form($data = array()){
 		$r_options = $this->hevonen_model->get_breed_option_list();
 		$r_options[-1] = "Ei väliä";
 		$skp_options = $this->hevonen_model->get_gender_option_list();
@@ -1302,13 +1314,13 @@ class Virtuaalihevoset extends CI_Controller
 		$this->load->library('form_builder', array('submit_value' => 'Hae'));
 
 		
-		$fields['reknro'] = array('type' => 'text', 'class'=>'form-control');
-		$fields['nimi'] = array('type' => 'text', 'class'=>'form-control');
-		$fields['rotu'] = array('type' => 'select', 'options' => $r_options, 'value' => '-1', 'class'=>'form-control');
-		$fields['sukupuoli'] = array('type' => 'select', 'options' => $skp_options, 'value' => '-1', 'class'=>'form-control');
-		$fields['kuollut'] = array('type' => 'checkbox', 'checked' => false, 'class'=>'form-control');
-		$fields['vari'] = array('type' => 'select', 'options' => $color_options, 'value' => '-1', 'class'=>'form-control');
-		$fields['syntynyt_v'] = array('type' => 'text', 'label'=>'Syntymävuosi', 'class'=>'form-control');
+		$fields['reknro'] = array('type' => 'text', 'class'=>'form-control', 'value'=>$data['reknro'] ?? "");
+		$fields['nimi'] = array('type' => 'text', 'class'=>'form-control', 'value'=>$data['nimi'] ?? "");
+		$fields['rotu'] = array('type' => 'select', 'options' => $r_options, 'value'=>$data['rotu'] ?? -1, 'class'=>'form-control');
+		$fields['sukupuoli'] = array('type' => 'select', 'options' => $skp_options, 'value'=>$data['sukupuoli'] ?? -1, 'class'=>'form-control');
+		$fields['kuollut'] = array('type' => 'checkbox', 'checked'=>$data['kuollut'] ?? false, 'class'=>'form-control');
+		$fields['vari'] = array('type' => 'select', 'options' => $color_options, 'value'=>$data['vari'] ?? -1, 'class'=>'form-control');
+		$fields['syntynyt_v'] = array('type' => 'text', 'label'=>'Syntymävuosi', 'class'=>'form-control', 'value'=>$data['syntynyt_v'] ?? "");
 		
 		$this->form_builder->form_attrs = array('method' => 'post', 'action' => site_url('/virtuaalihevoset/haku'));
 		        
@@ -1373,6 +1385,11 @@ class Virtuaalihevoset extends CI_Controller
             $fields['sukupuoli'] = array('type' => 'select', 'label'=> 'Sukupuoli', 'options' => $skp_options, 'required' => TRUE, 'value'=> $poni['sukupuoli'] ?? -1, 'class'=>'form-control');
             $fields['rotu'] = array('label'=>'Rotu', 'type' => 'select', 'options' => $r_options, 'required' => TRUE, 'value'=> $poni['rotu'] ?? -1, 'class'=>'form-control');
             $fields['syntymaaika'] = array('type' => 'text', 'label'=>'Syntymäaika', 'class'=>'form-control', 'required' => TRUE, 'value'=> $poni['syntymaaika'] ?? '', 'after_html' => '<span class="form_comment">Muodossa pp.kk.vvvv</span>');
+
+        }else if( $this->hevonen_model->spayable($poni['sukupuoli'])) {
+            
+            $skp_options = $this->hevonen_model->get_gender_spayable_option_list();
+            $fields['sukupuoli'] = array('type' => 'select', 'label'=> 'Sukupuoli', 'options' => $skp_options, 'required' => TRUE, 'value'=> $poni['sukupuoli'] ?? -1, 'class'=>'form-control');
 
         }
         $fields['url'] = array('type' => 'text', 'label'=> 'Hevosen sivujen osoite', 'class'=>'form-control', 'required' => TRUE, 'value'=> $poni['url'] ?? 'http://',

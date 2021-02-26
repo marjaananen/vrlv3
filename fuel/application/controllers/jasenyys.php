@@ -12,10 +12,15 @@ class Jasenyys extends CI_Controller
         $vars['message'] = $this->session->flashdata('message');
         $this->fuel->pages->render('jasenyys/rekisteriseloste', $vars);
     }
+    
+
 	
 	function index()
     {
+            echo 'Current PHP version: ' . phpversion();
+
        // var_dump(date("Y-m-d H:i:s", NOW()));
+       
         $this->haku();
     }
 	
@@ -243,21 +248,13 @@ class Jasenyys extends CI_Controller
 	$this->load->library('form_builder', array('submit_value' => 'Hae'));
 	$data['title'] = 'Jäsenhaku';
 	$data['msg'] = 'Hae VRL:n jäseniä. Voit käyttää tähteä * jokerimerkkinä.';
-	
-	
-	$fields['tunnus'] = array('type' => 'text', 'label' => 'VRL-tunnus', 'class'=>'form-control');
-	$fields['nimimerkki'] = array('type' => 'text', 'class'=>'form-control');
-    $fields['email'] = array('type' => 'text', 'after_html' => '<span class="form_comment"> Hakee oletuksena vain julkiseksi asetetuista sähköposteista. Ylläpidon tekemät haut hakevat kaikista.</span>', 'class'=>'form-control');
-            
+           $hakudata = array();
 
-
-	$this->form_builder->form_attrs = array('method' => 'post', 'action' => site_url('/jasenyys/haku'));
-	$data['form'] = $this->form_builder->render_template('_layouts/basic_form_template', $fields);
-	
+ 	
 	if($this->input->server('REQUEST_METHOD') == 'POST')
 	{
         $this->form_validation->set_rules('tunnus', 'VRL-tunnus', "min_length[5]|max_length[9]|regex_match[/^[VRL*\-0-9]*$/]");
-	    $this->form_validation->set_rules('nimimerkki', 'Nimimerkki', "min_length[4]|regex_match[/^[A-Za-z0-9_\-.:,; *~#&'@()]*$/]");
+	    $this->form_validation->set_rules('nimimerkki', 'Nimimerkki', "min_length[2]|regex_match[/^[A-Za-z0-9_\-.:,; *~#&'@()]*$/]");
         $this->form_validation->set_rules('email', 'Email', "min_length[4]|regex_match[/^[A-Za-z0-9_\-.:,; *~#&'@()]*$/]");
 
 
@@ -266,15 +263,14 @@ class Jasenyys extends CI_Controller
 			$vars['headers'][1] = array('title' => 'VRL-tunnus', 'key' => 'tunnus', 'key_link' => site_url('tunnus/') . '/', 'prepend_text' => 'VRL-');
 			$vars['headers'][2] = array('title' => 'Nimimerkki', 'key' => 'nimimerkki');
             $vars['headers'][3] = array('title' => 'Email', 'key' => 'email');
-
-            
+          
 			$vars['headers'] = json_encode($vars['headers']);
             
             $tunnus = null;
             $nick = null;
             $email = null;
             
-            $admin = null;
+            $admin = false;
             
             $allowed_user_groups = array('admin', 'tunnukset');
             
@@ -284,6 +280,7 @@ class Jasenyys extends CI_Controller
             }
             
             if (!empty($this->input->post('tunnus'))){
+                $hakudata['tunnus'] = $this->input->post('tunnus');
                 $valitunnus = $this->vrl_helper->vrl_to_number($this->input->post('tunnus'));
                 if($valitunnus == -1){
                     $tunnus = preg_replace('/[^0-9*]/', "", $this->input->post('tunnus'));
@@ -292,9 +289,11 @@ class Jasenyys extends CI_Controller
                 }
             }
             if (!empty($this->input->post('nimimerkki'))){
+                $hakudata['nimimerkki'] = $this->input->post('nimimerkki');
                 $nick = $this->input->post('nimimerkki');
             }
             if (!empty($this->input->post('email'))){
+                $hakudata['email'] = $this->input->post('email');
                 $email = $this->input->post('email');
             }
             $vars['data'] = $this->tunnukset_model->search_users($tunnus, $nick, $email, $admin);         
@@ -304,6 +303,19 @@ class Jasenyys extends CI_Controller
 
 	    }
 	}
+    
+    
+	
+	
+	$fields['tunnus'] = array('type' => 'text', 'label' => 'VRL-tunnus', 'class'=>'form-control', 'value'=>$hakudata['tunnus'] ?? "");
+	$fields['nimimerkki'] = array('type' => 'text', 'class'=>'form-control', 'value'=>$hakudata['nimimerkki'] ?? "");
+    $fields['email'] = array('type' => 'text', 'value'=>$hakudata['email'] ?? "", 'after_html' => '<span class="form_comment"> Hakee oletuksena vain julkiseksi asetetuista sähköposteista. Ylläpidon tekemät haut hakevat kaikista.</span>', 'class'=>'form-control');
+            
+
+
+	$this->form_builder->form_attrs = array('method' => 'post', 'action' => site_url('/jasenyys/haku'));
+	$data['form'] = $this->form_builder->render_template('_layouts/basic_form_template', $fields);
+
 	
 	$this->fuel->pages->render('misc/haku', $data);
     }

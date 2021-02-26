@@ -10,6 +10,9 @@ class Hevonen_model extends Base_module_model
     }
     
     var $genders = array(1=>'tamma', 2=>'ori', 3=>'ruuna');
+    var $genders_spay = array(2=>'ori', 3=>'ruuna');
+    var $genders_spayable = array(1=>false, 2=> true, 3=>false);
+
     var $allowed_time_for_delete = 60*60*24; //24h
     var $allowed_time_for_delete_admin = 60*60*24*30; //30 pv
     
@@ -1356,6 +1359,14 @@ class Hevonen_model extends Base_module_model
     
 	public function get_gender_option_list(){
         return $this->genders;
+    }
+    
+    public function get_gender_spayable_option_list(){
+        return $this->genders_spay;
+    }
+    
+    public function spayable($gender){
+        return $this->genders_spayable[$gender];
     }
     
 	public function get_color_option_list(){

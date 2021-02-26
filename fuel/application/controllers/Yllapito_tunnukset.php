@@ -188,14 +188,8 @@ class Yllapito_tunnukset extends CI_Controller
             }
          
         }
-        //jos haluttiin tallentaa muokkausta
-        else if ($this->input->server('REQUEST_METHOD') == 'POST' && $this->input->post('nimimerkki')){
-            
-            $this->_edit_user($tunnus);
- 
-        }
-        
-        if ($tunnus != null){
+        //jos tunnus on annettu
+        else if ($this->vrl_helper->check_vrl_syntax($tunnus)){
             $user_id = $this->ion_auth->get_user_id_from_identity($this->vrl_helper->vrl_to_number($tunnus));
             
             if ($user_id == false){
@@ -205,8 +199,47 @@ class Yllapito_tunnukset extends CI_Controller
                 $this->fuel->pages->render('misc/naytaviesti', $data);
 
             }
+            //halutaan muokata
+            else if($this->input->server('REQUEST_METHOD') == 'POST' && $this->input->post('nimimerkki')){
+    
+                $this->_edit_user($tunnus);
+                $data['msg'] = "Muutokset tallennettu!";
+                $data['msg_type'] = "success";
+                    
+                $data['form'] = $this->_edit_user_form($user_id);
+                $this->fuel->pages->render('misc/lomakemuokkaus', $data);
+ 
+            }
+           
+           //näytetään editori
             else {
-                $user = $this->ion_auth->user($user_id)->row();
+
+                // set the flash data error message if there is one
+                $data['message'] = (validation_errors() ? validation_errors() : ($this->ion_auth->errors() ? $this->ion_auth->errors() : $this->session->flashdata('message')));
+                $data['form'] = $this->_edit_user_form($user_id);
+        
+                $this->fuel->pages->render('misc/lomakemuokkaus', $data);
+    
+            }
+        
+        }
+    
+        
+        //eio tunnusta, haetaan tunnuksenhakulomake
+        else {
+            $this->load->library('form_builder', array('submit_value' => 'Hae', 'submit_name'=>'tunnushaku'));
+            $fields['VRL'] = array('type' => 'text', 'class'=>'form-control');
+            $this->form_builder->form_attrs = array('method' => 'post', 'action' => site_url('/yllapito/tunnukset/muokkaa'));                  
+            $data['form'] = $this->form_builder->render_template('_layouts/basic_form_template', $fields);
+            $this->fuel->pages->render('misc/lomakemuokkaus', $data);
+
+        }
+                    
+            
+    }
+    
+    private function _edit_user_form($user_id = null){
+                        $user = $this->ion_auth->user($user_id)->row();
                 $groups = $this->ion_auth->groups()->result_array();
                 $currentGroups = $this->ion_auth->get_users_groups($user_id)->result();
                 $groups = $this->Oikeudet_model->sanitize_automatic_groups($groups);
@@ -224,7 +257,7 @@ class Yllapito_tunnukset extends CI_Controller
            
                 $data['msg'] = "Valitse käyttäjälle sopivat oikeudet";
                 $this->load->library('form_builder', array('submit_value' => "Muokkaa oikeuksia", 'submit_name' => 'oikeus', 'required_text' => '*Pakollinen kenttä'));
-                $fields['tunnus'] = array('type' => 'hidden', 'value' => $tunnus);
+                $fields['tunnus'] = array('type' => 'hidden', 'value' => $user->tunnus);
                 
                  $fields['nimimerkki'] = array('type' => 'text', 'value' => $user->nimimerkki, 'class'=>'form-control');
                 $fields['email'] = array('type' => 'text', 'value' => $user->email, 'label' => 'Sähköpostiosoite', 'after_html' => '<span class="form_comment">Anna toimiva osoite jotta voit tarvittaessa palauttaa salasanasi!</span>', 'class'=>'form-control');
@@ -234,31 +267,11 @@ class Yllapito_tunnukset extends CI_Controller
 
                 $fields['oikeudet'] = array('type' => 'multi', 'mode' => 'checkbox', 'required' => TRUE, 'options' => $group_options, 'value'=>$users_groups, 'class'=>'form-control', 'wrapper_tag' => 'li');
 
-                $this->form_builder->form_attrs = array('method' => 'post', 'action' => '/yllapito/tunnukset/muokkaa/'.$this->vrl_helper->vrl_to_number($tunnus));
+                $this->form_builder->form_attrs = array('method' => 'post',
+                                                        'action' => '/yllapito/tunnukset/muokkaa/'.$this->vrl_helper->vrl_to_number($user->tunnus));
                 
                 
-                $data['form'] = $this->form_builder->render_template('_layouts/basic_form_template', $fields);
-                // set the flash data error message if there is one
-                $this->data['message'] = (validation_errors() ? validation_errors() : ($this->ion_auth->errors() ? $this->ion_auth->errors() : $this->session->flashdata('message')));
-                
-        
-                $this->fuel->pages->render('misc/lomakemuokkaus', $data);
-    
-            }
-        
-        }
-    
-        
-        //eio tunnusta, haetaan tunnuksenhakulomake
-        else {
-            $this->load->library('form_builder', array('submit_value' => 'Hae', 'submit_name'=>'tunnushaku'));
-            $fields['VRL'] = array('type' => 'text', 'class'=>'form-control');
-            $this->form_builder->form_attrs = array('method' => 'post', 'action' => site_url('/yllapito/tunnukset/muokkaa'));                  
-            $data['form'] = $this->form_builder->render_template('_layouts/basic_form_template', $fields);
-             $this->fuel->pages->render('misc/lomakemuokkaus', $data);
-        }
-                    
-            
+                return $this->form_builder->render_template('_layouts/basic_form_template', $fields);
     }
     
     
