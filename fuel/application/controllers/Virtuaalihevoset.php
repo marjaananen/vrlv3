@@ -295,9 +295,9 @@ class Virtuaalihevoset extends CI_Controller
                 $painotus_options[-1] = "Ei väliä";
                 $rotu_options[-1] = "Ei väliä";
                 $kuollut_options[-1] = "Ei väliä";
-                $leveled_options[-1] = "Ei väliä";
+                $leveled_options[-1] = "Ei väliä"; 
                 
-                $fields['Hakukriteerit'] = array('type' => 'section', 'tag' => 'h3', 'label' => 'Hae hevosia');
+                $fields['Hakukriteerit'] = array('type' => 'section', 'tag' => 'h3', 'label' => 'Hae hevosia', 'after_html' => '<div id="omatHevoset">');
                 $fields['rotu'] = array('type' => 'select', 'options' => $rotu_options, 'value' => $haku['rotu'] ?? '-1', 'class'=>'form-control');
                 $fields['painotus'] = array('type' => 'select', 'options' => $painotus_options, 'value' => $haku['painotus'] ?? '-1', 'class'=>'form-control');
                 $fields['kotitalli'] = array('type' => 'select', 'options' => $kotitalli_options, 'value' => $haku['kotitalli'] ?? '-1', 'class'=>'form-control');
@@ -306,8 +306,8 @@ class Virtuaalihevoset extends CI_Controller
                 $fields['kuollut'] = array('type' => 'select', 'options'=>$kuollut_options, 'value'=>$haku['kuollut'] ?? 0, 'class'=>'form-control');
                 $fields['sarakkeet'] = array('label'=>'Hakutuloksissa näytettävät sarakkeet', 'type' => 'enum', 'mode' => 'radios', 'required' => TRUE,
                                              'options' => array(1=>"perustiedot", 2=>"porrastettujen maksimit") , 'value'=>$haku['sarakkeet'] ?? 1, 'class'=>"form-check-input");
-                $fields['massatuho'] = array('label'=>'Näytä massakäsittelytoiminnot', 'type' => 'checkbox', 'checked' => $haku['massatuho'] ?? false, 'class'=>'form-control');
-                                $fields['hae'] = array('type' => 'submit', 'value' => 'Hae');
+                $fields['massatuho'] = array('label'=>'Näytä massakäsittelytoiminnot', 'type' => 'checkbox', 'checked' => $haku['massatuho'] ?? false, 'class'=>'form-control', 'after_html' => '</div>');
+                $fields['hae'] = array('type' => 'submit', 'value' => 'Hae');
 
 
     }

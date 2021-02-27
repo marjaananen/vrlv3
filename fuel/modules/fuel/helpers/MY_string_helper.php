@@ -55,10 +55,6 @@ if (!function_exists('eval_string'))
 		{
 			$str = eval('?>'.preg_replace("/;*\s*\?>/", "; ?>", str_replace('<?=', '<?php echo ', $str)).'<?php ');
 		}
-		else
-		{
-			$str = eval('?>'.$str.'<?php ');
-		}
 		$str = ob_get_clean();
 		
 		// change XML back

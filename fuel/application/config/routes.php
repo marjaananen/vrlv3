@@ -160,6 +160,7 @@ $route['tallit/talli/(:any)'] = "tallit/talliprofiili/$1";
 $route['tallit/talli/(:any)/(:any)'] = "tallit/talliprofiili/$1/$2";
 $route['tallit/muokkaa/(:any)'] = "tallit/muokkaa/$1";
 $route['tallit/rekisterointi'] = "tallit/rekisterointi";
+$route['tallit/rekisterointi/ohjeet'] = "tallit/rekisterointiohjeet";
 
 $route['virtuaalihevoset/hevonen/(:any)'] = "virtuaalihevoset/hevosprofiili/$1";
 $route['virtuaalihevoset/hevonen/(:any)/(:any)'] = "virtuaalihevoset/hevosprofiili/$1/$2";

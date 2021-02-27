@@ -48,6 +48,7 @@ $nav['jasenyys/tunnus'] = array('hidden'=>true, 'label' => 'Tunnus', 'parent_id'
 // virtuaalitallit alamenu
 $nav['tallit/haku'] = array('label' => 'Tallihaku', 'parent_id' => 'tallit', 'active' => 'tallit');
 $nav['tallit/rekisterointi'] = array('label' => 'Tallin rekisteröinti', 'parent_id' => 'tallit', 'active' => 'tallit/rekisterointi');
+$nav['tallit/rekisterointi/ohjeet'] = array('label' => 'Ohjeet rekisteröintiin', 'parent_id' => 'tallit/rekisterointi', 'active' => 'tallit/rekisterointi/ohjeet');
 $nav['tallit/omat'] = array('label' => 'Omat tallit', 'parent_id' => 'tallit', 'active' => 'tallit/omat');
 $nav['tallit/uusimmat'] = array('label' => 'Uusimmat tallit', 'parent_id' => 'tallit', 'active' => 'tallit/uusimmat'); //Koodattavaa: Uusimpien rekattujen tallien lista
 $nav['tallit/paivitetyt'] = array('label' => 'Viimeksi päivitetyt tallit', 'parent_id' => 'tallit', 'active' => 'tallit/paivitetyt'); //Koodattavaa: Viimeksi päivitetyt tallit

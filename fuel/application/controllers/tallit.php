@@ -272,7 +272,10 @@ class Tallit extends CI_Controller
 		
 		$data['msg'] = 'Hae talleja tallirekisteristä. Voit käyttää tähteä * jokerimerkkinä.';
 		
-		$data['text_view'] = $this->load->view('tallit/teksti_etusivu', NULL, TRUE);
+		$count = array();
+		$count['stableamount'] = $this->tallit_model->count_all_stables();
+		$data['text_view'] = $this->load->view('tallit/teksti_etusivu', $count, TRUE);
+		
 		$hakudata = array();
 		
 		if($this->input->server('REQUEST_METHOD') == 'POST')
@@ -410,6 +413,10 @@ class Tallit extends CI_Controller
 				redirect('/', 'refresh');
 		}
     }
+	
+	public function rekisterointiohjeet(){
+		$this->fuel->pages->render('tallit/ohjeet');
+	}
     
     function muokkaa($tnro, $sivu='tiedot', $tapa = null, $id = null)
     {
