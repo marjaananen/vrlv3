@@ -299,11 +299,11 @@ class Migraatio_model extends Base_module_model
             $this->db->insert('vrlv3_tallirekisteri', $data_talli);
             
             $this->_add_tallikategoriat($row->tnro);
-            $this->_add_tallinomistajat($row->tnro);
 
         }        
         
-        
+        $this->_add_tallinomistajat();
+
     }
     
     private function _add_tallikategoriat($tnro){
@@ -334,28 +334,20 @@ class Migraatio_model extends Base_module_model
     }
     
     
-        private function _add_tallinomistajat($tnro){
-        $this->db->select("*");
-        $this->db->from("tallirekisteri_omistajat");
-        $this->db->where('tnro', $tnro);
-        $query = $this->db->get();
-        foreach ($query->result() as $row){
-            //onko talli tai tunnus olemassa
-            if (!$this->onko_tunnus($row->omistaja)){
-                continue;
-            }
-            //onko omistaja jo merkitty
-            if ($this->it_is_there_already('vrlv3_tallirekisteri_omistajat', array('tnro'=>$row->tnro, 'omistaja'=>$row->omistaja))){
-                continue;
-            }
-            
-            $data_kat['tnro'] = $row->tnro;
-            $data_kat['omistaja'] = $row->omistaja;
-            $data_kat['taso'] = $row->taso;
-            
-            $this->db->insert('vrlv3_tallirekisteri_omistajat', $data_kat);
-            
-        }
+    private function _add_tallinomistajat(){
+            $this->db->query("INSERT INTO vrlv3_tallirekisteri_omistajat (tnro, omistaja, taso)
+            (SELECT tnro, omistaja, taso
+                FROM tallirekisteri_omistajat
+                WHERE NOT EXISTS (SELECT * FROM vrlv3_tallirekisteri_omistajat
+						WHERE vrlv3_tallirekisteri_omistajat.tnro = tallirekisteri_omistajat.tnro 
+							AND vrlv3_tallirekisteri_omistajat.omistaja = tallirekisteri_omistajat.omistaja
+							AND vrlv3_tallirekisteri_omistajat.taso = tallirekisteri_omistajat.taso)
+					AND EXISTS (SELECT * FROM vrlv3_tunnukset 
+                        WHERE vrlv3_tunnukset.tunnus = tallirekisteri_omistajat.omistaja) 
+                    AND EXISTS (SELECT * FROM vrlv3_tallirekisteri 
+                        WHERE vrlv3_tallirekisteri.tnro = tallirekisteri_omistajat.tnro)
+			)      ");
+        echo "tallit omistajat done";          
     }
     
     public function count_kaakit(){
@@ -395,6 +387,9 @@ class Migraatio_model extends Base_module_model
             $data['sukupuoli'] = $skp[$row->sukupuoli];
             $data['sakakorkeus'] = $row->sakakorkeus;
             $data['syntymaaika'] =  $row->syntymaaika;
+            $data['kuollut'] = 0;
+
+
 
             $data['url'] = $row->url;
             $data['rekisteroity'] = $row->rekisteroity;
@@ -402,39 +397,7 @@ class Migraatio_model extends Base_module_model
             $data['kotitalli'] = $this->clean_tallitunnus($row->kotitalli);
             $data['kuollut'] = $row->kuollut;
             
-            $this->db->select("*");
-            $this->db->from("hevosrekisteri_lisatiedot");
-            $this->db->where("reknro", $row->reknro);
-            $query2 = $this->db->get();
-
-            $lisatiedot = $query2->row();
             
-            if(isset($lisatiedot)){
-                if(!empty($lisatiedot->vari)){
-                    $color = $this->check_color($lisatiedot->vari);
-                    if (isset($color)){          
-                            $data['vari'] = $color;
-                    }
-                }
-                if(!empty($lisatiedot->painotus)){
-                    $painotus = $lisatiedot->painotus;
-                    if($painotus !="0"){
-                        if ($this->it_is_there_already('vrlv3_lista_painotus', array('pid'=>$painotus))){
-                        $data['painotus'] = $painotus;
-                        }
-                    }
-                }
-                if(!empty(!$lisatiedot->syntymamaa)){
-                    $syntmaa = $lisatiedot->syntymamaa;
-                    if($syntmaa !="0"){
-                        if ($this->it_is_there_already('vrlv3_lista_maat', array('id'=>$syntmaa))){
-                        $data['syntymamaa'] = $syntmaa;
-                        }
-                    }
-                }
-                
-                $data['porr_kilpailee'] = $lisatiedot->porr_kilpailee;
-            }
 
     
             $this->db->insert('vrlv3_hevosrekisteri', $data); 
@@ -443,23 +406,39 @@ class Migraatio_model extends Base_module_model
         
     }
     
+    public function migrate_lisatiedot(){
+        
+$this->db->query('        UPDATE vrlv3.vrlv3_hevosrekisteri as a
+INNER JOIN vrlv3.hevosrekisteri_lisatiedot as b ON a.reknro = b.reknro
+SET a.vari = b.vari
+WHERE EXISTS (Select * from vrlv3_lista_varit where vid = b.vari)');
+
+$this->db->query('UPDATE vrlv3.vrlv3_hevosrekisteri as a
+INNER JOIN vrlv3.hevosrekisteri_lisatiedot as b ON a.reknro = b.reknro
+SET a.painotus = b.painotus
+WHERE EXISTS (Select * from vrlv3_lista_painotus where pid = b.painotus)');
+
+$this->db->query('UPDATE vrlv3.vrlv3_hevosrekisteri as a
+INNER JOIN vrlv3.hevosrekisteri_lisatiedot as b ON a.reknro = b.reknro
+SET a.syntymamaa = b.syntymamaa
+WHERE EXISTS (Select * from vrlv3_lista_maat where id = b.syntymamaa)');
+
+
+$this->db->query('UPDATE vrlv3.vrlv3_hevosrekisteri as a
+INNER JOIN vrlv3.hevosrekisteri_lisatiedot as b ON a.reknro = b.reknro
+SET a.porr_kilpailee = b.porr_kilpailee');
+
+echo "lisätiedot_done";
+    }
+    
     
     public function migrate_kuolleet(){
-        $query = $this->db->get('hevosrekisteri_kuolleet');
-        foreach ($query->result() as $row)
-        {
-            if ($this->it_is_there_already('vrlv3_hevosrekisteri', array('reknro'=>$row->reknro, 'kuollut'=>1, 'kuol_merkkasi'=>$row->merkkasi, 'kuol_pvm'=>$row->kuoli))){
-                continue;
-            }
+        $this->db->query('UPDATE vrlv3.vrlv3_hevosrekisteri as a
+INNER JOIN vrlv3.hevosrekisteri_kuolleet as b ON a.reknro = b.reknro
+SET a.kuollut = 1, a.kuol_merkkasi = b.merkkasi, a.kuol_pvm = b.kuoli
+WHERE EXISTS (Select * from vrlv3_tunnukset where tunnus = b.merkkasi)');
+        echo "KUOLLEET_done";
 
-            $data['kuollut'] = 1;
-            $data['kuol_merkkasi'] = $this->clean_tunnus($row->merkkasi);
-            $data['kuol_pvm'] = $row->kuoli;
-            
-            $this->db->where('reknro', $row->reknro);
-            $this->db->update('vrlv3_hevosrekisteri', $data);
-            
-        }        
         
         
     }

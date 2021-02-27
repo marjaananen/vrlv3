@@ -217,6 +217,8 @@ class Migraatiot extends CI_Controller
         $this->migraatio_model->migrate_kuolleet();
         echo "kuolemat done<br>";
         
+        $this->migraatio_model->migrate_lisatiedot();
+        
         $this->migraatio_model->migrate_hevosenomistajat();
         echo "omistajat done<br>";
         */
