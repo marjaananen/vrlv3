@@ -1,1 +1,5 @@
-<p>Tallien etusivun kuvaustekstiä.</p>
+<p>Virtuaalinen ratsastajainliitto ylläpitää listaa virtuaalitalleista, jotka on rekisteröity VRL:n alaisiksi. Vain VRL-tunnuksen rekisteröineet jäsenet voivat rekisteröidä virtuaalitalleja. Rekisteriin tallennetaan tallin nimi, osoite, omistaja, kategoria ja mahdollinen kuvaus. Lisäksi tallille voi on anoa kasvattajanimiä.</p>
+
+<p>Virtuaalitallilistalle hyväksytään kaikki valmiit virtuaalitallit, joiden sivut eivät sisällä laitonta tai loukkaavaa materiaalia. Ohjeita tallin rekisteröintiin löydät täältä (linkki). Kaikille rekisteröidyille talleille myönnetään tallin rekisteritunnus, joka on muotoa XXXX0000 - ensimmäiset neljä kirjanta tulevat tallin nimestä ja yksilöivät rekisterinumeron, ja neljä viimeistä ovat järjestysnumero tallirekisterissä. Ennen vuotta 2010 rekisteröidyillä talleilla voi nähdä vielä vanhan tunnuksen, joka on muotoa 0000, eli ainoastaan tallin järjestysnumero.</p>
+
+<p>Tällä hetkellä rekisterissä on <?php echo $stableamount; ?> tallia.

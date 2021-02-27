@@ -520,6 +520,12 @@ class Tallit_model extends Base_module_model
 	}
     
 
-    
+    function count_all_stables() {
+		$this->db->select('tnro');
+        $this->db->from('vrlv3_tallirekisteri');
+        $query = $this->db->get();
+            
+        return $query->num_rows();
+	}
 }
 
