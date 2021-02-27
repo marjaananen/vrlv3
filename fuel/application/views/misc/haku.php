@@ -1,4 +1,4 @@
-<h2><?=$title?></h2>
+<h1><?=$title?></h1>
 
 <?php
     echo fuel_var('text_view', '');

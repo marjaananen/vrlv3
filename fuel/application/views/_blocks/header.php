@@ -127,9 +127,12 @@ if(!empty($this->ion_auth))
   			<div class="col-md-3" id="leftCol">
 		
 				<div class="well"> 
-					<?php if (!empty($sidemenu)) { echo $sidemenu;} else {echo $main_quickmenu;} ?>
+					<?php if (!empty($sidemenu)) { echo $sidemenu;} else {echo '<ul id="sidebar" class="nav nav-stacked">' . $main_quickmenu . '</ul>';} ?>
   				</div>
-				
+			
+<div class="mobiilimenu">
+
+			
 				<div id="infoMessage"><b><?php echo fuel_var('message', '');?></b></div>
 <?php
 //kirjautumislomake / profiili ja logout
@@ -205,6 +208,8 @@ if(!empty($this->ion_auth))
 		}
 	}
 ?>
+
+</div>
       		</div>  
       		<div class="col-md-9">
 	<?php echo fuel_nav(array('render_type' => 'breadcrumb', 'container_tag_class' => 'breadcrumb', 'delimiter' => '&nbsp;', 'order' => 'desc', 'home_link' => 'Etusivu','depth'=>'3'));?>
