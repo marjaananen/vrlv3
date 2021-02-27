@@ -452,6 +452,8 @@ class Hevonen_model extends Base_module_model
     
     public function edit_suku($hevonen, $vh){
         $reknro = $this->CI->vrl_helper->vh_to_number($vh);
+        echo "edit_suku";
+        var_dump($hevonen);
         $suku = array();
         if(isset($hevonen['i_nro'])) {
             $suku['i_nro'] = $this->CI->vrl_helper->vh_to_number($hevonen['i_nro']);

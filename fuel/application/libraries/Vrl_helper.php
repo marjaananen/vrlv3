@@ -56,7 +56,7 @@ class Vrl_helper {
     }
     
     else {
-      return "";
+      return $vh;
     }
   }
   

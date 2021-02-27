@@ -154,6 +154,8 @@ $route['kilpailutoiminta/omat/nayttelyt/jonossa/delete/(:any)'] = "kilpailutoimi
 
 
 //stables
+$route['virtuaalitallit/talli/(:any)'] = "tallit/talliprofiili/$1";
+
 $route['tallit/talli/(:any)'] = "tallit/talliprofiili/$1";
 $route['tallit/talli/(:any)/(:any)'] = "tallit/talliprofiili/$1/$2";
 $route['tallit/muokkaa/(:any)'] = "tallit/muokkaa/$1";

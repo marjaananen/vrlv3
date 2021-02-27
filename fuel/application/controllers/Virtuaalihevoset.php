@@ -1443,8 +1443,8 @@ class Virtuaalihevoset extends CI_Controller
         $fields['kasvattaja_talli'] = array('label'=> 'Kasvattajatalli', 'type' => 'text', 'class'=>'form-control', 'value'=> $poni['kasvattaja_talli'] ?? '', 'class'=>'form-control',
                                     'after_html'=> $kasvattaja_str);
         $fields['kasvattaja_tunnus'] = array('label'=>'Kasvattajan VRL-tunnus', 'type' => 'text', 'class'=>'form-control', 'value'=> $poni['kasvattaja_tunnus'] ?? '', 'class'=>'form-control', 'after_html' => '<span class="form_comment">Muodossa VRL-00000. Kasvattajan VRL-tunnus. Jätä tyhjäksi, jos kyseessä evm-hevonen.</span>');
-        $fields['i_nro'] = array('type' => 'text', 'label'=> 'Isän rekisterinumero','class'=>'form-control', 'value'=> $poni['i_nro'] ?? '', 'class'=>'form-control', 'after_html' => '<span class="form_comment">Isän rekisterinumero.</span>');
-        $fields['e_nro'] = array('type' => 'text', 'label'=> 'Emän rekisterinumero', 'class'=>'form-control', 'value'=> $poni['e_nro'] ?? '', 'class'=>'form-control', 'after_html' => '<span class="form_comment">Emän rekisterinumero. </span>');
+        $fields['i_nro'] = array('type' => 'text', 'label'=> 'Isän rekisterinumero','class'=>'form-control', 'value'=> $this->vrl_helper->get_vh($poni['i_nro']) ?? '', 'class'=>'form-control', 'after_html' => '<span class="form_comment">Isän rekisterinumero.</span>');
+        $fields['e_nro'] = array('type' => 'text', 'label'=> 'Emän rekisterinumero', 'class'=>'form-control', 'value'=> $this->vrl_helper->get_vh($poni['e_nro']) ?? '', 'class'=>'form-control', 'after_html' => '<span class="form_comment">Emän rekisterinumero. </span>');
         
         
         
@@ -1465,8 +1465,8 @@ class Virtuaalihevoset extends CI_Controller
         //uusi tai admin
         $submit = array();
         $submit['new'] = array('action' => site_url('/virtuaalihevoset/rekisterointi'), 'submit_value'=>'Rekisteröi');
-        $submit['edit'] = array('action' => site_url('/virtuaalihevoset/muokkaa/'.$reknro), 'submit_value'=>'Muokkaa');
-        $submit['admin'] = array('action' => site_url('/virtuaalihevoset/muokkaa/'.$reknro), 'submit_value'=>'Muokkaa');
+        $submit['edit'] = array('action' => site_url('/virtuaalihevoset/muokkaa/'.$this->vrl_helper->get_vh($reknro)), 'submit_value'=>'Muokkaa');
+        $submit['admin'] = array('action' => site_url('/virtuaalihevoset/muokkaa/'.$this->vrl_helper->get_vh($reknro)), 'submit_value'=>'Muokkaa');
 
                                
 		$this->load->library('form_builder', array('submit_value' => $submit[$type]['submit_value']));
@@ -1830,6 +1830,11 @@ class Virtuaalihevoset extends CI_Controller
     }
     
     private function _validate_edits ($type, &$new, $old, &$msg) {
+        echo "old <br>";
+        var_dump($old);
+        
+        echo "new <br>";
+        var_dump($new);
         $foals = $this->hevonen_model->get_horses_foals($old['reknro']);
         //jos on varsoja, tamman sukupuolta ei saa vaihtaa, ja orin ja ruunankin saa vaihtaa vain toisikseen
         if (isset($new['rotu']) && sizeof($foals) > 0 && $new['rotu'] != $old['rotu']){
@@ -1864,12 +1869,6 @@ class Virtuaalihevoset extends CI_Controller
         else if ($type != 'admin' && sizeof($foals) > 0 && isset($new['e_nro']) && isset($old['e_nro']) && !empty($old['e_nro'])){
             $msg = "Hevosella on jälkeläisiä, joten ainoastaan rekisterityöntekijät voivat muokata sukua.";
             return false;
-        }
-        
-        if (isset($new['e_nro']) && $new['e_nro'] == $old['e_nro'] ){
-            unset($new['e_nro']);
-        } if (isset($new['i_nro']) && $new['i_nro'] == $old['i_nro'] ){
-            unset($new['i_nro']);
         }
         
         if(isset($new['kuollut']) && $new['kuollut'] && !$old['kuollut'] ){
