@@ -73,7 +73,26 @@ if(!empty($this->ion_auth))
 	{
 		if ($this->ion_auth->logged_in())
 		{
-			//mitä tähän tulee?
+			echo "<p>Tervetuloa, VRL-" . $this->session->userdata( 'tunnus' ) . "!</p>";
+			
+			echo '<a href="'.site_url().'profiili"><button type="button" class="btn btn-primary btn-block">
+			<span class="glyphicon glyphicon-user" aria-hidden="true"></span> Profiili</button></a>';
+						
+						
+			echo '<a href="'.site_url('/profiili/pikaviestit').'"><button type="button" class="btn btn-primary btn-block">
+			<span class="glyphicon glyphicon-envelope" aria-hidden="true"></span> Pikaviestit <span class="badge">'
+			. $this->tunnukset_model->unread_messages($this->session->userdata('identity')) .'</span></button></a>';
+
+					
+			$group_amount = $this->ion_auth->get_users_groups()->result_array();
+          
+			if ($this->ion_auth->is_admin() || sizeof($group_amount) > 2 || (sizeof($group_amount) == 1 && $group_amount[0]['name'] !== "members")){
+				echo '<a href="'.site_url().'yllapito"><button type="button" class="btn btn-primary btn-block">
+				<span class="glyphicon glyphicon-cog" aria-hidden="true"></span> Ylläpitotoiminnot</button></a>';
+			}
+			
+			echo '<a href="'.site_url().'auth/logout"><button type="button" class="btn btn-primary btn-block">
+			<span class="glyphicon glyphicon-off" aria-hidden="true"></span> Kirjaudu ulos</button></a>';
 		}else {
 			print_login();
 		}
@@ -87,7 +106,7 @@ if(!empty($this->ion_auth))
 	
 	
 	
-  <div class="container">
+  <div class="container navigation">
     <div class="navbar-header">
       <button class="navbar-toggle" type="button" data-toggle="collapse" data-target=".navbar-collapse">
         <span class="sr-only">Toggle navigation</span>
@@ -106,10 +125,7 @@ if(!empty($this->ion_auth))
 <div class="container">
 	<div class="row">
   			<div class="col-md-3" id="leftCol">
-        
-
-				
-				
+		
 				<div class="well"> 
 					<?php if (!empty($sidemenu)) { echo $sidemenu;} else {echo $main_quickmenu;} ?>
   				</div>
