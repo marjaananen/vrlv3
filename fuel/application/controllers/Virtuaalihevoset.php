@@ -454,11 +454,10 @@ class Virtuaalihevoset extends CI_Controller
         $nro = $nro + 3;
         
         if($basic_list){
-            $vars['headers'][$nro + 1] = array('title' => 'Painotus', 'key' => 'painotus');
-            $vars['headers'][$nro + 2] = array('title' => 'Skp', 'key' => 'sukupuoli');
-            $vars['headers'][$nro + 3] = array('title' => 'Kotitalli', 'key' => 'kotitalli', 'key_link' => site_url('tallit/talli/'));
-            $vars['headers'][$nro + 4] = array('title' => 'Kuollut', 'key' => 'kuollut', 'type'=>'bool');
-            $nro = $nro+4;
+            $vars['headers'][$nro + 1] = array('title' => 'Skp', 'key' => 'sukupuoli');
+            $vars['headers'][$nro + 2] = array('title' => 'Kotitalli', 'key' => 'kotitalli', 'key_link' => site_url('tallit/talli/'));
+            $vars['headers'][$nro + 3] = array('title' => 'Kuollut', 'key' => 'kuollut', 'type'=>'bool');
+            $nro = $nro+3;
 
         }else if($leveled_list){
             $vars['headers'][$nro + 1] = array('title' => 'Pai- notus', 'key' => 'painotus');
