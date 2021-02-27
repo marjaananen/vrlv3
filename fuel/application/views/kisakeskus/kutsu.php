@@ -80,9 +80,9 @@
   <span class=\"sr-only\">Huom:</span> VIP on mennyt, ja osallistuminen on sulkeutunut!</div>";
  
 				 if (isset($tulos) && sizeof($tulos)>0){
-					    $tulosten_id = $tulos['result_id'];
 					    echo "<div class=\"alert alert-success\" role=\"alert\"> <span class=\"glyphicon glyphicon-ok\" aria-hidden=\"true\"></span>
-  <span class=\"sr-only\">Huom: Tulokset ovat tulleet ja ne löytyvät </span><a href=\"".site_url('kilpailutoiminta/tulosarkisto/tulos/'.$tulos['tulos_id'])." \">tulosarkistosta.</a></div>";
+  <span class=\"sr-only\">Huom: Tulokset ovat tulleet ja ne löytyvät </span>
+  <a href=\"".site_url('kilpailutoiminta/tulosarkisto/tulos/'.$tulos['tulos_id'])." \">tulosarkistosta.</a></div>";
 				 }
 				 
 				 else {

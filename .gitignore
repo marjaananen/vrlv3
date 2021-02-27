@@ -5,3 +5,5 @@ fuel/application/cache/
 /fuel/application/config/database.php
 tuki
 aws
+wiki
+wiki_w

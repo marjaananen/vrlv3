@@ -376,7 +376,8 @@ class Migraatio_model extends Base_module_model
         }       
         
         else {
-            $query = $this->db->query("SELECT * from hevosrekisteri_perustiedot WHERE NOT EXISTS(SELECT * FROM vrlv3_hevosrekisteri WHERE hevosrekisteri_perustiedot.reknro = vrlv3_hevosrekisteri.reknro)");
+            $query = $this->db->query("SELECT * from hevosrekisteri_perustiedot WHERE NOT EXISTS(SELECT * FROM vrlv3_hevosrekisteri
+                                      WHERE hevosrekisteri_perustiedot.reknro = vrlv3_hevosrekisteri.reknro)");
         }
         
         foreach ($query->result() as $row)
@@ -409,23 +410,26 @@ class Migraatio_model extends Base_module_model
             $lisatiedot = $query2->row();
             
             if(isset($lisatiedot)){
-            
-                $color = $this->check_color($lisatiedot->vari);
-                if (isset($color)){          
-                        $data['vari'] = $color;
-                }
-                
-                $painotus = $lisatiedot->painotus;
-                if($painotus !="0"){
-                    if ($this->it_is_there_already('vrlv3_lista_painotus', array('pid'=>$painotus))){
-                    $data['painotus'] = $painotus;
+                if(!empty($lisatiedot->vari)){
+                    $color = $this->check_color($lisatiedot->vari);
+                    if (isset($color)){          
+                            $data['vari'] = $color;
                     }
                 }
-                
-                $syntmaa = $lisatiedot->syntymamaa;
-                if($syntmaa !="0"){
-                    if ($this->it_is_there_already('vrlv3_lista_maat', array('id'=>$syntmaa))){
-                    $data['syntymamaa'] = $syntmaa;
+                if(!empty($lisatiedot->painotus)){
+                    $painotus = $lisatiedot->painotus;
+                    if($painotus !="0"){
+                        if ($this->it_is_there_already('vrlv3_lista_painotus', array('pid'=>$painotus))){
+                        $data['painotus'] = $painotus;
+                        }
+                    }
+                }
+                if(!empty(!$lisatiedot->syntymamaa)){
+                    $syntmaa = $lisatiedot->syntymamaa;
+                    if($syntmaa !="0"){
+                        if ($this->it_is_there_already('vrlv3_lista_maat', array('id'=>$syntmaa))){
+                        $data['syntymamaa'] = $syntmaa;
+                        }
                     }
                 }
                 
@@ -461,24 +465,23 @@ class Migraatio_model extends Base_module_model
     }
     
         public function migrate_hevosenomistajat(){
-        $query = $this->db->query("SELECT * from hevosrekisteri_omistajat WHERE NOT EXISTS(SELECT * FROM vrlv3_hevosrekisteri_omistajat WHERE hevosrekisteri_omistajat.reknro = vrlv3_hevosrekisteri_omistajat.reknro)");
-        foreach ($query->result() as $row){
-            //onko hevo tai tunnus olemassa
-            if (!$this->it_is_there_already('vrlv3_hevosrekisteri', array('reknro'=>$row->reknro))||!$this->onko_tunnus($row->omistaja)){
-                continue;
-            }
-            //onko omistajuus jo olemassa
-            if ($this->it_is_there_already('vrlv3_hevosrekisteri_omistajat', array('reknro'=>$row->reknro, 'omistaja'=>$row->omistaja))){
-                continue;
-            }
             
-            $data_kat['reknro'] = $row->reknro;
-            $data_kat['omistaja'] = $row->omistaja;
-            $data_kat['taso'] = $row->taso;
+            $this->db->query("INSERT INTO vrlv3_hevosrekisteri_omistajat (reknro, omistaja, taso)
+            (SELECT reknro, omistaja, taso
+                FROM hevosrekisteri_omistajat
+                WHERE NOT EXISTS (SELECT * FROM vrlv3_hevosrekisteri_omistajat
+						WHERE vrlv3_hevosrekisteri_omistajat.reknro = hevosrekisteri_omistajat.reknro 
+							AND vrlv3_hevosrekisteri_omistajat.omistaja = hevosrekisteri_omistajat.omistaja
+							AND vrlv3_hevosrekisteri_omistajat.taso = hevosrekisteri_omistajat.taso)
+					AND EXISTS (SELECT * FROM vrlv3_tunnukset 
+                        WHERE vrlv3_tunnukset.tunnus = hevosrekisteri_omistajat.omistaja) 
+                    AND EXISTS (SELECT * FROM vrlv3_hevosrekisteri 
+                        WHERE vrlv3_hevosrekisteri.reknro = hevosrekisteri_omistajat.reknro)
+			)");
+        echo "hevot omistajat done";            
             
-            $this->db->insert('vrlv3_hevosrekisteri_omistajat', $data_kat);
             
-        }
+          
     }
     
     
