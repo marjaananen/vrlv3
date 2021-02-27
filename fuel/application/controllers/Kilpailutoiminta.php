@@ -230,12 +230,9 @@ class Kilpailutoiminta extends CI_Controller
             }
         }
         else if($sivu == "laatispisteet"){
-            if(!($this->ion_auth->logged_in()))
-            {
-                $this->fuel->pages->render('misc/naytaviesti', array('msg_type' => 'danger', 'msg' => 'Kirjaudu sisään käyttääksesi laatispistelakuria!'));
-            } else {
-                $this->_porrastetut_laatispisteet('kilpailutoiminta/porrastetut/laatispisteet');
-            }
+            
+            $this->_porrastetut_laatispisteet('kilpailutoiminta/porrastetut/laatispisteet');
+            
         }
         else {
             $this->fuel->pages->render('kilpailutoiminta/porrastetut_saannot', $vars);
@@ -1121,9 +1118,14 @@ private function _handle_competition_application($porrastettu, $nayttelyt, &$kis
         $kisa['porrastettu'] = false;
     }
     
+    if(!isset($kisa['jaos'])){
+        $data['msg_type'] = 'danger';
+        $data['msg'] = "Jaos puuttuu.";
+    }
+    
     //varmistetaan loput tiedot
                 
-    if(!$this->kisajarjestelma->validate_competition_application($porrastettu, $nayttelyt)){
+    else if(!$this->kisajarjestelma->validate_competition_application($porrastettu, $nayttelyt)){
         $data['msg_type'] = 'danger';
         $data['msg'] = "Virhe syötetyissä tiedoissa.";
         
@@ -1341,6 +1343,7 @@ private function _make_result_form($luokat, $jaos_id, $porr = false){
         $luokat = explode("\n",$luokat);
         $luokat = preg_grep('/^\s*\z/', $luokat, PREG_GREP_INVERT);
         $luokat = array_values( array_filter($luokat) );
+        var_dump($luokat);
         
         $nro = 1;
             foreach ($luokat as $luokka){

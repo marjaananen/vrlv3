@@ -370,13 +370,14 @@ class Kasvatus extends CI_Controller
 		$data['msg'] = 'Hae kasvattajanimiä rekisteristä. Voit käyttää tähteä * jokerimerkkinä.';
 		
 		$data['text_view'] = $this->load->view('kasvattajanimet/teksti_etusivu', NULL, TRUE);
-		
-		$data['form'] = $this->_get_name_search_form();
+		$hakudata = array();
 		
 		
 		
 		if($this->input->server('REQUEST_METHOD') == 'POST')
 		{
+            $hakudata['kasvattajanimi'] = $this->input->post('kasvattajanimi');
+            $hakudata['kasvatusrotu'] = $this->input->post('kasvatusrotu');
 	
 			if($this->_validate_name_search_form() == true){
 				if (!(empty($this->input->post('kasvattajanimi')) && $this->input->post('kasvatusrotu') == "-1"))
@@ -394,7 +395,8 @@ class Kasvatus extends CI_Controller
 						
 						$vars['headers'] = json_encode($vars['headers']);
 						
-						$vars['data'] = json_encode($this->kasvattajanimi_model->search_names($this->input->post('kasvattajanimi'), $this->input->post('kasvatusrotu')));
+						$vars['data'] = json_encode($this->kasvattajanimi_model->search_names($this->input->post('kasvattajanimi'),
+                                                                                              $this->input->post('kasvatusrotu')));
 						
 						$data['tulokset'] = $this->load->view('misc/taulukko', $vars, TRUE);
 
@@ -405,7 +407,8 @@ class Kasvatus extends CI_Controller
 					}
 			}
 		}
-		
+		$data['form'] = $this->_get_name_search_form($hakudata);
+
 		$this->fuel->pages->render('misc/haku', $data);
 
 		
@@ -873,7 +876,7 @@ class Kasvatus extends CI_Controller
     }
     
     
-    private function _get_name_search_form(){
+    private function _get_name_search_form($data = array()){
 		$this->load->model('hevonen_model');
         $options = $this->hevonen_model->get_breed_option_list();
         $this->load->library('form_builder', array('submit_value' => 'Hae'));
@@ -881,8 +884,8 @@ class Kasvatus extends CI_Controller
 		
 		$options[-1] = 'Mikä tahansa';
 		
-		$fields['kasvattajanimi'] = array('type' => 'text', 'class'=>'form-control');
-		$fields['kasvatusrotu'] = array('type' => 'select', 'options' => $options, 'value' => '-1', 'class'=>'form-control');
+		$fields['kasvattajanimi'] = array('type' => 'text', 'class'=>'form-control', 'value'=> $data['kasvattajanimi']??"");
+		$fields['kasvatusrotu'] = array('type' => 'select', 'options' => $options, 'value' => $data['kasvatusrotu']?? -1, 'class'=>'form-control');
 	
 		$this->form_builder->form_attrs = array('method' => 'post', 'action' => site_url('kasvatus/kasvattajanimet'));
 		return $this->form_builder->render_template('_layouts/basic_form_template', $fields);

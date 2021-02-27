@@ -109,11 +109,11 @@ try {
           'Body' => [
               'Html' => [
                   'Charset' => $char_set,
-                  'Data' => $html_body . $this->signature(),
+                  'Data' => $html_body . $this->_signature(),
               ],
               'Text' => [
                   'Charset' => $char_set,
-                  'Data' => $plaintext_body . $this->signature(false),
+                  'Data' => $plaintext_body . $this->_signature(false),
               ],
           ],
           'Subject' => [

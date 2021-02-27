@@ -1032,6 +1032,7 @@ class CI_Email {
 	 */
 	public function valid_email($email)
 	{
+		/*
 		if (function_exists('idn_to_ascii') && strpos($email, '@'))
 		{
 			list($account, $domain) = explode('@', $email, 2);
@@ -1043,7 +1044,7 @@ class CI_Email {
 			{
 				$email = $account.'@'.$domain;
 			}
-		}
+		}*/
 
 		return (bool) filter_var($email, FILTER_VALIDATE_EMAIL);
 	}
@@ -1856,7 +1857,7 @@ class CI_Email {
 	 * @return	bool
 	 */
 	protected function _validate_email_for_shell(&$email)
-	{
+	{/*
 		if (function_exists('idn_to_ascii') && strpos($email, '@'))
 		{
 			list($account, $domain) = explode('@', $email, 2);
@@ -1867,7 +1868,7 @@ class CI_Email {
 			if ($domain !== FALSE)
 			{
 				$email = $account.'@'.$domain;
-			}
+			}*/
 		}
 
 		return (filter_var($email, FILTER_VALIDATE_EMAIL) === $email && preg_match('#\A[a-z0-9._+-]+@[a-z0-9.-]{1,253}\z#i', $email));
