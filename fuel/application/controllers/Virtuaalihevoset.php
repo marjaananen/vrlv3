@@ -1830,11 +1830,7 @@ class Virtuaalihevoset extends CI_Controller
     }
     
     private function _validate_edits ($type, &$new, $old, &$msg) {
-        echo "old <br>";
-        var_dump($old);
-        
-        echo "new <br>";
-        var_dump($new);
+
         $foals = $this->hevonen_model->get_horses_foals($old['reknro']);
         //jos on varsoja, tamman sukupuolta ei saa vaihtaa, ja orin ja ruunankin saa vaihtaa vain toisikseen
         if (isset($new['rotu']) && sizeof($foals) > 0 && $new['rotu'] != $old['rotu']){
