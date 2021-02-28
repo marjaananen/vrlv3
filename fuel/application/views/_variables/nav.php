@@ -55,6 +55,7 @@ $nav['tallit/paivitetyt'] = array('label' => 'Viimeksi päivitetyt tallit', 'par
 //virtuaalihevoset alamenu
 $nav['virtuaalihevoset/haku'] = array('label' => 'Hevosrekisteri', 'parent_id' => 'virtuaalihevoset', 'active' => 'virtuaalihevoset/haku'); //Koodattavaa: Rekisteröintilomake
 $nav['virtuaalihevoset/rekisterointi'] = array('label' => 'Hevosten rekisteröinti', 'parent_id' => 'virtuaalihevoset', 'active' => 'virtuaalihevoset/rekisterointi'); //Koodattavaa: Rekisteröintilomake
+$nav['virtuaalihevoset/rekisterointi/ohjeet'] = array('label' => 'Ohjeet rekisteröintiin', 'parent_id' => 'virtuaalihevoset/rekisterointi', 'active' => 'virtuaalihevoset/rekisterointi/ohjeet');
 $nav['virtuaalihevoset/massarekisterointi'] = array('hidden'=>true, 'label' => 'Hevosten massarekisteröinti', 'parent_id' => 'virtuaalihevoset', 'active' => 'virtuaalihevoset/massarekisterointi'); //Koodattavaa: Rekisteröintilomake
 
 $nav['virtuaalihevoset/omat'] = array('label' => 'Omat hevoset', 'parent_id' => 'virtuaalihevoset', 'active' => 'virtuaalihevoset/omat'); //Koodattavaa: Syntymämaat
