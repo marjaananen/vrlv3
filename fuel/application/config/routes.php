@@ -169,6 +169,7 @@ $route['virtuaalihevoset/hevonen/muokkaa/(:any)'] = "virtuaalihevoset/muokkaa/$1
 $route['virtuaalihevoset/hevonen/muokkaa/(:any)/(:any)'] = "virtuaalihevoset/muokkaa/$1/$2";
 $route['virtuaalihevoset/hevonen/muokkaa/(:any)/(:any)/(:any)'] = "virtuaalihevoset/muokkaa/$1/$2/$3";
 $route['virtuaalihevoset/hevonen/muokkaa/(:any)/(:any)/(:any)/(:any)'] = "virtuaalihevoset/muokkaa/$1/$2/$3/$4";
+$route['virtuaalihevoset/rekisterointi/ohjeet'] = "virtuaalihevoset/rekisterointiohjeet";
 
 $route['tunnus'] = "jasenyys/tunnus/";
 $route['tunnus/(:any)'] = "jasenyys/tunnus/$1";

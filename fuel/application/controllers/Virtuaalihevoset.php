@@ -305,8 +305,8 @@ class Virtuaalihevoset extends CI_Controller
                 $fields['porr_kilpailee'] = array('label'=>"Kilpailee porrastetuissa", 'type' => 'select', 'options'=>$leveled_options, 'value'=>$haku['porr_kilpailee'] ?? -1, 'class'=>'form-control');
                 $fields['kuollut'] = array('type' => 'select', 'options'=>$kuollut_options, 'value'=>$haku['kuollut'] ?? 0, 'class'=>'form-control');
                 $fields['sarakkeet'] = array('label'=>'Hakutuloksissa näytettävät sarakkeet', 'type' => 'enum', 'mode' => 'radios', 'required' => TRUE,
-                                             'options' => array(1=>"perustiedot", 2=>"porrastettujen maksimit") , 'value'=>$haku['sarakkeet'] ?? 1, 'class'=>"form-check-input");
-                $fields['massatuho'] = array('label'=>'Näytä massakäsittelytoiminnot', 'type' => 'checkbox', 'checked' => $haku['massatuho'] ?? false, 'class'=>'form-control', 'after_html' => '</div>');
+                                             'options' => array(1=>"perustiedot", 2=>"porrastettujen maksimit") , 'value'=>$haku['sarakkeet'] ?? 1, 'class'=>'form-check-input');
+                $fields['massatuho'] = array('label'=>'Näytä massakäsittelytoiminnot', 'type' => 'checkbox', 'checked' => $haku['massatuho'] ?? false, 'class'=>'form-control','after_html' => '</div>');
                 $fields['hae'] = array('type' => 'submit', 'value' => 'Hae');
 
 
@@ -749,7 +749,9 @@ class Virtuaalihevoset extends CI_Controller
         }
 			
     }
-    
+    public function rekisterointiohjeet(){
+		$this->fuel->pages->render('hevoset/ohjeet');
+	}
     
     function massarekisterointi(){
         
