@@ -722,7 +722,7 @@ class Virtuaalihevoset extends CI_Controller
             if($this->input->server('REQUEST_METHOD') == 'GET')
             {			        
                 $vars['form'] = $this->_get_horse_edit_form('new');
-                $vars['msg'] = 'Tähdellä merkityt kentät ovat pakollisia! Muista, että hevosen sivuilta tulee olla löydettävissä sana "virtuaalihevonen"! Sinut merkitään hevosen omistajaksi. Voit lisätä hevoselle lisää omistajia rekisteröinnin jälkeen.';
+                $vars['msg'] = 'Tähdellä merkityt kentät ovat pakollisia! Muista, että hevosen sivuilta tulee olla löydettävissä sana "virtuaalihevonen"! Sinut merkitään hevosen omistajaksi. Voit lisätä hevoselle lisää omistajia rekisteröinnin jälkeen. <a href="' . site_url('virtuaalihevoset/rekisterointi/ohjeet') . '" title="Lue ohjeet hevosen rekisteröintiin">Lue ohjeet hevosen rekisteröintiin</a>.';
             $this->fuel->pages->render('hevoset/hevosten_rekisterointi', $vars);
             }
             else if($this->input->server('REQUEST_METHOD') == 'POST'){
@@ -1449,7 +1449,7 @@ class Virtuaalihevoset extends CI_Controller
         
         
         
-        $fields['syntymajat'] = array('type'=>'hidden', 'before_html' => '</div></div></div><div class="panel panel-default">
+        $fields['syntymajat'] = array('type'=>'hidden', 'before_html' => '</div></div></div><div class="panel panel-default syntymaajat">
                                       <div class="panel-heading">Syntymäpäivät (tarpeellisia porrastetuissa kilpaileville)</div> <div class="panel-body"><div class="form-group">');
 
         
@@ -1458,9 +1458,7 @@ class Virtuaalihevoset extends CI_Controller
         
         $fields['end'] = array('type'=>'hidden', 'after_html' => '</div>');
         if($type == 'new' || $type == 'edit'){
-            $fields['luin_saannot'] = array('label'=>"Olen lukenut säännöt, ja hevoseni sivuilla lukee selvästi että kyseessä on virtuaalihevonen!", 'type' => 'checkbox',
-                                            'after_html' => '<span class="form_comment">Uusia hevosia valvotaan, ja sääntöjä noudattamattomat voidaan poistaa rekisteristä!
-                                        </span>', 'class'=>'form-control');
+            $fields['luin_saannot'] = array('label'=>"Olen lukenut säännöt, ja hevoseni sivuilla lukee selvästi, että kyseessä on virtuaalihevonen!", 'type' => 'checkbox', 'after_html' => '<span class="form_comment">Uusia hevosia valvotaan, ja sääntöjä noudattamattomat voidaan poistaa rekisteristä!</span>', 'class'=>'form-control');
         }
         
         //uusi tai admin

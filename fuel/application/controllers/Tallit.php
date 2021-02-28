@@ -359,7 +359,7 @@ class Tallit extends CI_Controller
 			if($this->input->server('REQUEST_METHOD') == 'GET')
 			{
 				$vars['form'] = $this->_get_stable_form('application'); //pyydetään lomake hakemusmoodissa
-				$vars['msg'] = 'Tähdellä merkityt kentät ovat pakollisia! Muista, että tallin kaikilta pääsivuilta tulee olla löydettävissä sana "virtuaalitalli"! Sinut merkitään tallin omistajaksi. Voit lisätä tallille lisää omistajia rekisteröinnin jälkeen.';
+				$vars['msg'] = 'Tähdellä merkityt kentät ovat pakollisia! Muista, että tallin kaikilta pääsivuilta tulee löytyä sana "virtuaalitalli"! Sinut merkitään tallin omistajaksi. Voit lisätä tallille lisää omistajia rekisteröinnin jälkeen. <a href="' . site_url('tallit/rekisterointi/ohjeet') . '" title="Lue ohjeet tallin rekisteröintiin">Lue ohjeet tallin rekisteröintiin</a>.';
 				
 				$this->fuel->pages->render('misc/jonorekisterointi', $vars);
 			}
@@ -679,8 +679,8 @@ class Tallit extends CI_Controller
 		{
 			$fields['tallinumero'] = array('type' => 'text', 'required' => TRUE, 'value' => $stable['tnro'], 'class'=>'form-control');
 		}else {
-            $fields['luin_saannot'] = array('label'=>"Virtuaalitallini sivuilla lukee selvästi että kyseessä on virtuaalitalli!", 'type' => 'checkbox',
-                                            'after_html' => '<span class="form_comment">Uusia talleja valvotaan, ja sääntöjä noudattamattomat voidaan poistaa rekisteristä!
+            $fields['luin_saannot'] = array('label'=>"Virtuaalitallini sivuilla lukee selvästi, että kyseessä on virtuaalitalli!", 'type' => 'checkbox',
+                                            'after_html' => '<span class="form_comment">Uusia talleja valvotaan ja sääntöjä noudattamattomat voidaan poistaa rekisteristä!
                                         </span>', 'class'=>'form-control');
 
         }

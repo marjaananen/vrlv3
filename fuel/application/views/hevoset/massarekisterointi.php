@@ -1,10 +1,10 @@
-<p>Joukkorekisteröintilomakkeen avulla voit lähettää rekisteröinnit suurelle hevosmäärälle kerralla csv tiedoston avulla. Joukkorekisteröintiin pätee
-aivan samat säännöt, kuin tavallisella lomakkeella rekisteröintiin, joten muistathan lukea rekisteröintiohjeet. Hevosen omistajaksi merkitään rekisteröintihakemuksen lähettäjä.
+<p>Joukkorekisteröintilomakkeen avulla voit lähettää rekisteröinnit suurelle hevosmäärälle kerralla csv-tiedoston avulla. Joukkorekisteröintiin pätee
+aivan samat säännöt kuin tavallisella lomakkeella rekisteröintiin, joten muistathan lukea <a href="<?php echo site_url('virtuaalihevoset/rekisterointi/ohjeet')?>" title="Lue rekisteröintiohjeet">rekisteröintiohjeet</a> huolella. Hevosen omistajaksi merkitään rekisteröintihakemuksen lähettäjä.
 Voit lisätä hevoselle lisää omistajia rekisteröinnin jälkeen. Muista, että hevosen sivuilla tulee lukea sana "virtuaalihevonen".</p>
 
 <?php if(!$allowed){ ?>
     <div class="alert alert-danger" role="alert">   
-        Massarekisteröinti ei ole käytössäsi! Käyttääksesi massarekisteröintiä, sinun tulee olla rekisteröinyt vähintään kymmenen hevosta puolen vuoden sisällä.
+        Massarekisteröinti ei ole käytössäsi! Käyttääksesi massarekisteröintiä sinun tulee olla rekisteröinyt vähintään kymmenen hevosta puolen vuoden sisällä.
     </div>
     
     <?php } ?>
@@ -144,8 +144,8 @@ Voit lisätä hevoselle lisää omistajia rekisteröinnin jälkeen. Muista, ett�
 </script>
 
 <h2>CSV:n muodostusohje</h2>
-<p>CSV:n tulee sisältää otsikkorivin, jossa on listattu allaolevia kenttiä pilkulla(,) erotettuna ja lainausmerkeillä(") ympäröitynä, ja
-yhden arvorivin per rekisteröitävä hevonen. Rivinvaihto on sallittu vain rivin lopussa.</p>
+<p>CSV:n tulee sisältää otsikkorivi, jossa on listattu allaolevia kenttiä pilkulla (,) erotettuna ja lainausmerkeillä (") ympäröitynä, sekä
+yksi arvorivi per rekisteröitävä hevonen. Rivinvaihto on sallittu vain rivin lopussa.</p>
 <p><strong>Esimerkki</strong></p>
 <pre>"nimi", "rotu", "sukupuoli", "sakakorkeus", "syntymaaika", "url", "vari"
 "Karkurannan Ronan", "28", "2", "123", "16.04.2009", "http://karkuranta.marsupieni.net/poni/karkurannan-ronan", ""
