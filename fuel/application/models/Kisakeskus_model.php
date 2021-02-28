@@ -406,6 +406,14 @@ class Kisakeskus_model extends CI_Model
             if($nayttelyt){
                 unset($parameters['porrastettu']);
                 unset($parameters['arvontatapa']);
+            }else {
+                if(isset($where['porrastettu_valinta']) && $where['porrastettu_valinta'] == 2){
+                    $where['porrastettu'] = 1;
+                    $where['k.hyvaksytty <'] = $this->CI->kisajarjestelma->new_leveled_start_time ();
+                }else if (isset($data['porrastettu_valinta']) && $data['porrastettu_valinta'] == 1){
+                    $where['porrastettu'] = 1;
+                    $where['k.hyvaksytty >'] = $this->CI->kisajarjestelma->new_leveled_start_time ();
+                }
             }
             foreach ($parameters as $key=>$parameter){
                 $where['k.'.$key] = $parameter;
@@ -413,18 +421,24 @@ class Kisakeskus_model extends CI_Model
             if(isset($where['k.tunnus'])){
                 $where['k.tunnus'] = $this->CI->vrl_helper->vrl_to_number($where['k.tunnus']);
             }
+            if(isset($where['url'])){
+                $where['url'] = trim($where['url']);
+            }
             if(isset($where['k.hyvaksyi'])){
                 $where['k.hyvaksyi'] = $this->CI->vrl_helper->vrl_to_number($where['k.hyvaksyi']);
             }
-            if(isset($where['k.kp'])){
-                $where['k.kp'] = date('Y-m-d',strtotime($where['k.kp']));
+            if(isset($where['kp'])){
+                $where['kp'] = date('Y-m-d',strtotime($where['kp']));
             }
-            if(isset($where['k.vip'])){
-                $where['k.vip'] = date('Y-m-d',strtotime($where['k.vip']));
+            if(isset($where['vip'])){
+                $where['vip'] = date('Y-m-d',strtotime($where['vip']));
             }
             if(isset($where['k.hyvaksytty'])){
                 $where['k.hyvaksytty'] = date('Y-m-d',strtotime($where['k.hyvaksytty']));
             }
+            
+            
+
 
                 $this->db->where($where);
                 

@@ -847,6 +847,129 @@ public function check_competition_info($mode = "add", &$kisa, &$msg, $direct = f
         
     }
     
+    
+    public function competition_result_search_form($result, $competition, $url, $admin = false, $jaos_options = null, $data = array()){
+        if(!isset($jaos_options)){
+            $jaos_options = $this->CI->Jaos_model->get_jaos_option_list(false, false, false);
+        }
+        
+        $this->CI->load->library('form_builder', array('submit_value' => 'Hae'));
+        
+        if($result){
+             $fields['id_type'] = array('label'=>"Hae id:llä", 'type' => 'select', 'options' => array("kisa_id"=>"Kilpailun id", "tulos_id"=>"Tuloksen id"), 'value' => $data['id_type'] ?? 'tulos_id', 'class'=>'form-control');
+        }
+        else if($competition){
+             $fields['id_type'] = array('type' => 'hidden', 'value' => "kisa_id", 'class'=>'form-control');
+        }
+        $fields['id'] = array('label' => 'ID', 'type' => 'number', 'value' =>  $data['id'] ?? "", 'class'=>'form-control', 'represents' => 'int|smallint|mediumint|bigint', 'negative' => FALSE, 'decimal' => FALSE);    
+        
+        $fields['jaos'] = array('type' => 'select', 'required'=> TRUE, 'options' => $jaos_options, 'value' => $data['jaos'] ?? "", 'class'=>'form-control');
+        
+        $fields['kp'] = array('type' => 'text', 'label'=>'Päivämäärä', 'class'=>'form-control', 'value' => $data['kp'] ?? "", 'after_html' => '<span class="form_comment">Muodossa pp.kk.vvvv</span>');
+        if($admin){
+            $fields['vip'] = array('type' => 'text', 'label'=>'Viimeinen ilmoittautumispäivä', 'class'=>'form-control','value' => $data['vip'] ?? "", 'after_html' => '<span class="form_comment">Muodossa pp.kk.vvvv</span>');
+        }
+        $porrastettu_options = array(0=>"Ei", 1=>"Kyllä (uudet)", 2=>"Kyllä (vanhat)");
+        
+        $fields['porrastettu_valinta'] = array('type' => 'select', 'required'=> TRUE, 'options' => $porrastettu_options, 'value' => $data['porrastettu_valinta'] ?? "", 'class'=>'form-control');
+        $fields['jarj_talli'] = array('type' => 'text', 'label'=>'Järjestävä talli', 'class'=>'form-control', 'value' => $data['jarj_talli'] ?? "",
+                                    'after_html'=> '<span class="form_comment">Laita tunnus muodossa XXXX0000.');
+        $fields['tunnus'] = array('type' => 'text', 'label'=>'Järjestäjä', 'class'=>'form-control', 'value' => $data['tunnus'] ?? "",
+                                    'after_html'=> '<span class="form_comment">Laita tunnus muodossa VRL-00000.');
+        if($admin){
+            $fields['hyvaksyi'] = array('type' => 'text', 'label'=>'Hyväksyi', 'class'=>'form-control', 'value' => $data['hyvaksyi'] ?? "",
+                                    'after_html'=> '<span class="form_comment">Laita tunnus muodossa VRL-00000.');
+        }
+
+        $arvontatapa_options = $this->arvontatavat_options();
+        $arvontatapa_options[0] = "";
+        $fields['url'] = array('type' => 'text', 'class'=>'form-control','value' => $data['url'] ?? "");
+        $fields['arvontatapa'] = array('type' => 'select', 'options' => $arvontatapa_options, 'value' => $data['arvontatapa'] ?? 0, 'class'=>'form-control');    
+        
+        $this->CI->form_builder->form_attrs = array('method' => 'post', 'action' => site_url($url));
+    
+        return $this->CI->form_builder->render_template('_layouts/basic_form_template', $fields);
+
+}
+
+public function competition_result_search_result_list($result, $competition, $nayttelyt,  $url,  $admin = false, $kisat = array()){
+    $vars = array();
+    
+    $vars['headers'][1] = array('title' => 'Hyväksytty', 'key' => 'hyvaksytty', 'type'=>'date');
+        $handle_id = "kisa";
+        $result_url_id = "tulos";
+            if($nayttelyt){
+                $handle_id = "nayttelyt";
+                $result_url_id = "bis";
+            }
+
+        if($result){
+   
+            $vars['headers'][2] = array('title' => '#', 'key' => 'tulos_id', 'key_link'=> site_url('kilpailutoiminta/tulosarkisto/'.$result_url_id.'/'), 'prepend_text' => '#');
+
+        }else if ($competition){
+            $vars['headers'][2] = array('title' => '#', 'key' => 'kisa_id');
+        }
+        $vars['headers'][3] = array('title' => 'KP', 'key' => 'kp', 'type'=>'date');
+        $vars['headers'][4] = array('title' => 'VIP', 'key' => 'vip', 'type'=>'date');
+        $vars['headers'][5] = array('title' => 'Jaos', 'key' => 'jaoslyhenne');
+        $vars['headers'][6] = array('title' => 'Järjestäjä', 'key' => 'tunnus', 'key_link' => site_url('tunnus/'), 'prepend_text' => 'VRL-');
+
+        
+        if($admin){
+            $vars['headers'][7] = array('title' => 'Hyväksyjä', 'key' => 'hyvaksyi', 'key_link' => site_url('tunnus/'), 'prepend_text' => 'VRL-');
+
+            if ($competition){
+                $vars['headers'][8] = array('title' => 'Tulokset', 'key' => 'tulokset');
+                $vars['headers'][9] = array('title' => 'Editoi', 'key' => 'kisa_id', 'key_link' => site_url($url) . "/edit/".$handle_id ."/", 'image' => site_url('assets/images/icons/edit.png'));
+                $vars['headers'][10] = array('title' => 'Poista', 'key' => 'kisa_id', 'key_link' => site_url($url) . "/delete/" . $handle_id ."/", 'image' => site_url('assets/images/icons/delete.png'));
+            }
+            else if($result){
+                $vars['headers'][8] = array('title' => 'Poista', 'key' => 'tulos_id', 'key_link' => site_url($url) . "/delete/" . $handle_id ."/", 'image' => site_url('assets/images/icons/delete.png'));
+    
+            }
+        }else {
+                $vars['headers'][7] = array('title' => 'Talli', 'key' => 'jarj_talli', 'key_link' => site_url('tallit/talli/'));
+                if ($competition){
+                    $vars['headers'][8] = array('title' => 'Tulokset', 'key' => 'tulokset');
+                }
+
+
+        }
+        
+        $vars['headers'] = json_encode($vars['headers']);        
+        $vars['data'] = json_encode($kisat);
+        
+        return $this->CI->load->view('misc/taulukko', $vars, TRUE);
+}
+
+public function read_result_competition_search_form(){
+    $data = array();
+    
+    $this->_read_basic_input_field($data, 'id_type');
+    $this->_read_basic_input_field($data, 'id');
+    $this->_read_basic_input_field($data, 'jaos');
+    $this->_read_basic_input_field($data, 'id_type');
+    $this->_read_basic_input_field($data, 'kp');
+    $this->_read_basic_input_field($data, 'vip');
+    $this->_read_basic_input_field($data, 'jarj_talli');
+    $this->_read_basic_input_field($data, 'tunnus');
+    $this->_read_basic_input_field($data, 'hyvaksyi');
+    $this->_read_basic_input_field($data, 'url');
+    $this->_read_basic_input_field($data, 'arvontatapa');
+    $this->_read_basic_input_field($data, 'porrastettu_valinta');
+
+    return $data;
+
+}
+
+private function _read_basic_input_field(&$data, $field){
+        if($this->CI->input->post($field)){
+        $data[$field] = $this->CI->input->post($field);
+    }
+    
+}
+    
 
 
 }

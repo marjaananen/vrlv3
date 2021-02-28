@@ -153,87 +153,6 @@ class Yllapito_kalenterit extends CI_Controller
 
     
     
-    function raceApplicationsMaintenance( $jaos, $leveled = false, $jaosdata = array()) {
-        
-        $nayttelyt = false;
-        
-        if(isset($jaosdata['nayttelyjaos']) && $jaosdata['nayttelyjaos'] == 1){
-            $nayttelyt = true;
-        } else {
-            $nayttelyt = $this->kisajarjestelma->nayttelyjaos($jaos);
-        }
-        
-        $this->db->select('COUNT(kisa_id) as kpl, MIN(ilmoitettu) as ilmoitettu');
-        if($nayttelyt){
-            $this->db->from('vrlv3_kisat_nayttelykalenteri');
-
-        } else {
-            $this->db->from('vrlv3_kisat_kisakalenteri');
-            $this->db->where('porrastettu', $leveled);
-            $this->db->where ('vanha', 0);
-
-
-
-        }
-        $this->db->where('jaos', $jaos);
-        $this->db->where('hyvaksytty', NULL);
-        if($leveled){
-            $this->load->library("Kisajarjestelma");     
-            $this->db->where('ilmoitettu <', $this->kisajarjestelma->new_leveled_start_time());
-
-        }
-        
-		 $query = $this->db->get();
-        
-        if ($query->num_rows() > 0)
-        {
-            return $query->result_array()[0]; 
-        }else {
-            return array('kpl'=>0, 'ilmoitettu'=>NULL);
-        }
-		
-	}
-    
-    function resultApplicationsMaintenance( $jaos, $leveled = false, $jaosdata = array() ) {
-        
-        $nayttelyt = false;
-        
-        if(isset($jaosdata['nayttelyjaos']) && $jaosdata['nayttelyjaos'] == 1){
-            $nayttelyt = true;
-        } else {
-            $nayttelyt = $this->kisajarjestelma->nayttelyjaos($jaos);
-        }
-        
-        if($nayttelyt){
-             $this->db->select('COUNT(t.bis_id) as kpl, MIN(t.ilmoitettu) as ilmoitettu');
-            $this->db->from('vrlv3_kisat_nayttelytulokset as t');
-            $this->db->join('vrlv3_kisat_nayttelykalenteri as k', 't.bis_id = k.kisa_id');
-
-        } 
-        else {
-        
-         $this->db->select('COUNT(t.tulos_id) as kpl, MIN(t.ilmoitettu) as ilmoitettu');
-        $this->db->from('vrlv3_kisat_tulokset as t');
-            $this->db->join('vrlv3_kisat_kisakalenteri as k', 't.kisa_id = k.kisa_id');
-            $this->db->where ('k.vanha', 0);
-            $this->db->where('k.porrastettu', $leveled);
-        }
-        $this->db->where('k.jaos', $jaos);    
-        $this->db->where('t.hyvaksytty', NULL);
-
-        
-		 $query = $this->db->get();
-        
-        if ($query->num_rows() > 0)
-        {
-            return $query->result_array()[0]; 
-        }else {
-            return array('kpl'=>0, 'ilmoitettu'=>NULL);
-        }
-    			
-	}
-    
-    
 //////////////////////////////////////////////////////////////////////////////////////////
 // Käsittele etuuspisteet
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -506,46 +425,7 @@ public function etuuspisteet($jaos = null, $tunnus = null){
             
         }
         
-
-        $vars['headers'][1] = array('title' => 'Hyväksytty', 'key' => 'hyvaksytty', 'type'=>'date');
-        $handle_id = "kisa";
-        $result_url_id = "tulos";
-            if($nayttelyt){
-                $handle_id = "nayttelyt";
-                $result_url_id = "bis";
-            }
-
-        if($result){
-   
-            $vars['headers'][2] = array('title' => '#', 'key' => 'tulos_id', 'key_link'=> site_url('kilpailutoiminta/tulosarkisto/'.$result_url_id.'/'), 'prepend_text' => '#');
-
-        }else if ($competition){
-            $vars['headers'][2] = array('title' => '#', 'key' => 'kisa_id');
-        }
-        $vars['headers'][3] = array('title' => 'KP', 'key' => 'kp', 'type'=>'date');
-        $vars['headers'][4] = array('title' => 'VIP', 'key' => 'vip', 'type'=>'date');
-        $vars['headers'][5] = array('title' => 'Jaos', 'key' => 'jaoslyhenne');
-        $vars['headers'][6] = array('title' => 'Järjestäjä', 'key' => 'tunnus', 'key_link' => site_url('tunnus/'), 'prepend_text' => 'VRL-');
-        $vars['headers'][7] = array('title' => 'Hyväksyjä', 'key' => 'hyvaksyi', 'key_link' => site_url('tunnus/'), 'prepend_text' => 'VRL-');
-
-        
-        if ($competition){
-            $vars['headers'][8] = array('title' => 'Tulokset', 'key' => 'tulokset');
-            $vars['headers'][9] = array('title' => 'Editoi', 'key' => 'kisa_id', 'key_link' => site_url($url) . "/edit/".$handle_id ."/", 'image' => site_url('assets/images/icons/edit.png'));
-            $vars['headers'][10] = array('title' => 'Poista', 'key' => 'kisa_id', 'key_link' => site_url($url) . "/delete/" . $handle_id ."/", 'image' => site_url('assets/images/icons/delete.png'));
-        }
-        else if($result){
-            $vars['headers'][8] = array('title' => 'Poista', 'key' => 'tulos_id', 'key_link' => site_url($url) . "/delete/" . $handle_id ."/", 'image' => site_url('assets/images/icons/delete.png'));
-
-        }
-        
-        $vars['headers'] = json_encode($vars['headers']);
-                
-        $vars['data'] = json_encode($data['kisat']);
-    
-		$data['tulokset'] = $this->load->view('misc/taulukko', $vars, TRUE);
-      
-        
+        $data['tulokset'] = $this->kisajarjestelma->competition_result_search_result_list($result, $competition, $nayttelyt , $url, true, $data['kisat']);
         $data['form'] = $this->_search_form($result, $competition, $url,  $data['search']);
         return $data;
     }
@@ -553,71 +433,20 @@ public function etuuspisteet($jaos = null, $tunnus = null){
     
     
     private function _search_form($result, $competition, $url, $data = array()){
-        $this->load->library('form_builder', array('submit_value' => 'Hae'));
-        
-        if($result){
-             $fields['id_type'] = array('label'=>"Hae id:llä", 'type' => 'select', 'options' => array("kisa_id"=>"Kilpailun id", "tulos_id"=>"Tuloksen id"), 'value' => $data['id_type'] ?? 'tulos_id', 'class'=>'form-control');
-        }
-        else if($competition){
-             $fields['id_type'] = array('type' => 'hidden', 'value' => "kisa_id", 'class'=>'form-control');
-        }
-        $fields['id'] = array('label' => 'ID', 'type' => 'number', 'value' =>  $data['id'] ?? "", 'class'=>'form-control', 'represents' => 'int|smallint|mediumint|bigint', 'negative' => FALSE, 'decimal' => FALSE);    
+        return $this->kisajarjestelma->competition_result_search_form($result, $competition, $url, true, $this->_jaos_options(), $data);
 
-        $jaos_options = $this->_jaos_options();
-        
-        $fields['jaos'] = array('type' => 'select', 'required'=> TRUE, 'options' => $jaos_options, 'value' => $data['jaos'] ?? "", 'class'=>'form-control');
-        
-        //$fields['kp'] = array('type' => 'date', 'first-day' => 1, 'date_format'=>'d.m.Y', 'label'=>'Päivämäärä', 'class'=>'form-control', 'value' => $data['kp'] ?? "");
-        //$fields['vip'] = array('type' => 'date', 'first-day' => 1, 'date_format'=>'d.m.Y', 'label'=>'Viimeinen ilmoittautumispäivä', 'class'=>'form-control','value' => $data['vip'] ?? "");
-        $fields['porrastettu'] = array('type' => 'checkbox', 'checked' => $data['porrastettu'] ?? false, 'class'=>'form-control');
-        $fields['jarj_talli'] = array('type' => 'text', 'label'=>'Järjestävä talli', 'class'=>'form-control', 'value' => $data['jarj_talli'] ?? "",
-                                    'after_html'=> '<span class="form_comment">Laita tunnus muodossa XXXX0000.');
-        $fields['tunnus'] = array('type' => 'text', 'label'=>'Järjestäjä', 'class'=>'form-control', 'value' => $data['tunnus'] ?? "",
-                                    'after_html'=> '<span class="form_comment">Laita tunnus muodossa VRL-00000.');
-        $fields['hyvaksyi'] = array('type' => 'text', 'label'=>'Hyväksyi', 'class'=>'form-control', 'value' => $data['hyvaksyi'] ?? "",
-                                    'after_html'=> '<span class="form_comment">Laita tunnus muodossa VRL-00000.');
-
-        $arvontatapa_options = $this->kisajarjestelma->arvontatavat_options();
-        $arvontatapa_options[0] = "";
-        $fields['url'] = array('type' => 'text', 'class'=>'form-control','value' => $data['url'] ?? "");
-        $fields['arvontatapa'] = array('type' => 'select', 'options' => $arvontatapa_options, 'value' => $data['arvontatapa'] ?? 0, 'class'=>'form-control');    
-        
-        $this->form_builder->form_attrs = array('method' => 'post', 'action' => site_url($url));
-    
-        return $this->form_builder->render_template('_layouts/basic_form_template', $fields);
-
-}
-
-private function _read_search_form(){
-    $data = array();
-    
-    $this->_read_basic_input_field($data, 'id_type');
-    $this->_read_basic_input_field($data, 'id');
-    $this->_read_basic_input_field($data, 'jaos');
-    $this->_read_basic_input_field($data, 'id_type');
-    $this->_read_basic_input_field($data, 'kp');
-    $this->_read_basic_input_field($data, 'vip');
-    $this->_read_basic_input_field($data, 'jarj_talli');
-    $this->_read_basic_input_field($data, 'tunnus');
-    $this->_read_basic_input_field($data, 'hyvaksyi');
-    $this->_read_basic_input_field($data, 'url');
-    $this->_read_basic_input_field($data, 'arvontatapa');
-    
-    if($this->input->post('porrastettu')){
-        $data['porrastettu'] = 1;
-    }else {
-        $data['porrastettu'] = 0;
     }
 
-    return $data;
-}
-
-private function _read_basic_input_field(&$data, $field){
-        if($this->input->post($field)){
-        $data[$field] = $this->input->post($field);
+    private function _read_search_form(){
+       return $this->kisajarjestelma->read_result_competition_search_form();
     }
     
-}
+    private function _read_basic_input_field(&$data, $field){
+            if($this->input->post($field)){
+            $data[$field] = $this->input->post($field);
+        }
+        
+    }
 
 
 

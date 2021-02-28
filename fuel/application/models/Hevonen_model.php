@@ -1367,7 +1367,9 @@ class Hevonen_model extends Base_module_model
     }
     
     public function spayable($gender){
+        if(isset($this->genders_spayable[$gender])){
         return $this->genders_spayable[$gender];
+        }else {return false;}
     }
     
 	public function get_color_option_list(){
