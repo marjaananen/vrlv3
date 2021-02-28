@@ -866,7 +866,6 @@ function tulosarkisto ($type = "perinteiset", $id = null, $id_type = null){
     $url = 'kilpailutoiminta/tulosarkisto';
     if($this->input->server('REQUEST_METHOD') == 'POST'){
         $data['search'] = $this->kisajarjestelma->read_result_competition_search_form();
-        var_dump($data['search']);
         if (!isset($data['search']['jaos'])){
          $data['msg'] = "Jaos on pakollinen hakukriteeri. ";
          $data['msg_type'] = "danger";
@@ -1366,7 +1365,6 @@ private function _make_result_form($luokat, $jaos_id, $porr = false){
         $luokat = explode("\n",$luokat);
         $luokat = preg_grep('/^\s*\z/', $luokat, PREG_GREP_INVERT);
         $luokat = array_values( array_filter($luokat) );
-        var_dump($luokat);
         
         $nro = 1;
             foreach ($luokat as $luokka){

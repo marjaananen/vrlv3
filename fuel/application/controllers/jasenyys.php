@@ -17,7 +17,6 @@ class Jasenyys extends CI_Controller
 	
 	function index()
     {
-            echo 'Current PHP version: ' . phpversion();
 
        // var_dump(date("Y-m-d H:i:s", NOW()));
        
