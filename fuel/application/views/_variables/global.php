@@ -17,9 +17,7 @@ $vars['sidemenu'] = fuel_nav(array('container_tag_id' => 'sidebar', 'container_t
 $vars['adminmainmenu'] = fuel_nav(array('container_tag_id' => 'sidebar', 'container_tag_class' => 'nav nav-stacked', 'parent' => 'yllapito', 'depth'=>'0'));
 $vars['main_quickmenu'] = '<li><a href="'.site_url('liitto/yllapito').'">Yhteystiedot</a></li>
 <li><a href="'.site_url('jasenyys/liity').'">Rekisteröidy jäseneksi</a></li>
-<li><a href="'.site_url('liitto/mainosta').'">Mainosta sivuillamme!</a></li>
-
-<li><a href="http://www.virtuaalihevoset.net/wiki/index.php/Etusivu">VirtuaaliWiki</a></li>    
+<li><a href="'.site_url().'wiki">VirtuaaliWiki</a></li>    
 ';
 // page specific variables
 $pages = array();

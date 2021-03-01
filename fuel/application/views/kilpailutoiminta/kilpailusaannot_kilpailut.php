@@ -140,7 +140,7 @@ Esimerkiksi: 132 osallistujan luokassa sijoittuneita olisi 13, ja jos osallistuj
         </ul>
         <b>Tulosten arkistointi</b>
         <ul>
-            <li>Tulossivun tulee säilyä internetissä vähintään kaksi (2) kuukautta kilpailupäivästä! <b>TODO: Miksi, jos kisat on VRL:n arkistossa...?</b></li>
+            <li>Suosittelemme tulossivun säilyttämistä internetissä vähintään kolme (3) kuukautta kilpailupäivästä. </li>
         </ul>
       </div>
     </div>

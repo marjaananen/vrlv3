@@ -40,7 +40,6 @@ public function send ($to, $subject, $message){
 
 	
 		$email_config = $CI->config->item('email_config');
-		var_dump($email_config);
 
 		if ($CI->config->item('use_ci_email', 'ion_auth') && isset($email_config) && is_array($email_config))
 		{

@@ -1555,9 +1555,10 @@ class Virtuaalihevoset extends CI_Controller
         
         if($type == 'new' || $type == 'admin'){
             $poni['nimi'] = $this->input->post('nimi');
-            $poni['sukupuoli'] = $this->input->post('sukupuoli');
             $poni['syntymaaika'] = $this->input->post('syntymaaika');
         }
+        $poni['sukupuoli'] = $this->input->post('sukupuoli');
+
         $poni['luin_saannot'] = $this->input->post('luin_saannot');
         $poni['url'] = $this->input->post('url');
         $poni['kuollut'] = $this->input->post('kuollut');

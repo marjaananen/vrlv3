@@ -28,6 +28,8 @@ class Jasenyys extends CI_Controller
     {
 		$this->load->library('form_validation');
         $vars['title'] = 'Liity jäseneksi';
+        $vars['text_view'] = $this->load->view('jasenyys/liity', NULL, TRUE);
+
         $vars['msg'] = 'Tähdellä merkityt kentät ovat pakollisia! Rekisteröitymisen jälkeen saat sähköpostilla salasanan ja koodin, jolla aktivoida hakemuksesi. Huomaathan, että ylläpidon tulee tarkastaa hakemuksesi ennen kuin voit kirjautua!';
         
         if($this->input->server('REQUEST_METHOD') == 'GET')

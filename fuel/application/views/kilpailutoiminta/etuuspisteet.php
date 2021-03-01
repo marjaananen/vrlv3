@@ -10,10 +10,8 @@ osoittautuneet kisanjärjestäjät voivat järjestää useita kisoja kerralla.</
       <div class="panel-heading">Tulosten lähettäminen ajoissa ja etuuspisteiden kerryttäminen</div>
     <div class="panel-body">
 
-            <p>
-Etuuspisteitä kerrytetään lähettämällä tulokset viimeistään viikon kuluttua kisapäivästä.
-Mikäli vastuuhenkilö hoitaa ensimmäiset kilpailunsa ajoissa loppuun, hän saa tuplapisteet, eli siirtyy suoraan seuraavalle etuuspistetasolle.
-            </p><p><strong>Näytteluyt tai porrastetut kilpailut eivät kerrytä eivätkä vaadi etuuspisteitä!</strong></p>
+           <p>Etuuspisteitä kerrytetään lähettämällä tulokset viimeistään viikon kuluttua kisapäivästä. Mikäli vastuuhenkilö hoitaa ensimmäiset kilpailunsa ajoissa loppuun, hän saa tuplapisteet, eli siirtyy suoraan seuraavalle etuuspistetasolle. </p>
+           <p><strong>Näyttelyt tai porrastetut kilpailut eivät kerrytä eivätkä vaadi etuuspisteitä!</strong></p>
       </div>
   </div>
 

@@ -1,7 +1,6 @@
 <h2><?=$title ?></h2>
 
-<p>Tulosarkistosta voit hakea ja tarkastella kilpailujen tuloksia. Tuloksista näytetään max. 1000 hakukriteereihin sopivaa tulosta kisapöivön mukaan uusimmasta alkaen. </p>
-
+<p> Tulosarkistosta voit hakea ja tarkastella kilpailujen tuloksia. Tuloksista näytetään max. 1000 hakukriteereihin sopivaa tulosta kisapäivän mukaan uusimmasta alkaen.</p> 
 <?php if (isset($id_form))
 { echo $id_form; }?>
 

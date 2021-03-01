@@ -1,1 +1,2 @@
-<p>Täsän kasvattajanimiasiaa.</p>
+<p>VRL ylläpitää virtuaalista kasvattajanimirekisteriä. Rekisteröidyt kasvattajanimet ovat suojattuja, eikä samaa nimeä voi rekisteröidä toiselle tallille tai henkilölle. Rekisterissä näkyvät myös kaikki nimellä kasvatetut rekisteröidyt kasvatit. Samalle kasvattajanimelle voidaan merkitä useita eri rotuja ja yhdellä tallilla voi olla useita eri kasvattajanimiä. </p>
+<p>Rekisteröidäksesi kasvattajanimen, sinulla tulee olla VRL-tunnus ja/tai rekisteröity talli. Mikäli kasvattajanimen alle ei rekisteröidä kasvatteja kolmen (3) kuukauden kuluttua rekisteröinnistä, kasvattajanimi poistetaan rekisteristä ja se on mahdollista rekisteröidä esimerkiksi toisen tallin nimiin. </p>

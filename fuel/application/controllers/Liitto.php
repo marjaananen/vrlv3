@@ -20,7 +20,6 @@ class Liitto extends CI_Controller
 	
 	function yllapito ()
     {
-        echo 'Current PHP version: ' . phpversion();
         $vars = array();
         $vars['message'] = $this->session->flashdata('message');
         $this->load->model("Oikeudet_model");
