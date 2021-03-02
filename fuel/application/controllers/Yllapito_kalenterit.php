@@ -530,7 +530,7 @@ public function etuuspisteet($jaos = null, $tunnus = null){
         }
         $this->db->trans_start();
                 
-        $this->db->select('*, t.'.$db_kisa_id_ref.' as kisa_id');
+        $this->db->select('*, t.'.$db_kisa_id_ref.' as kisa_id, t.hyvaksytty as hyvaksytty');
         $this->db->from($db_tulos.' as t');
         $this->db->join($db_kisa. ' as k', 'k.kisa_id = t.'. $db_kisa_id_ref);
         $this->db->where('t.'. $db_res_id, $result_id);
@@ -544,7 +544,29 @@ public function etuuspisteet($jaos = null, $tunnus = null){
         {
             $id = $query->result_array()[0][$db_res_id];
             $jaos = $query->result_array()[0]['jaos'];
-            if($this->_is_jaos_owner($jaos) || $this->_is_jaos_admin()){
+            
+            $jaosvastaava = $this->_is_jaos_admin();
+            $jaosyp = $this->_is_jaos_owner($jaos);
+            
+            $hyvaksytty = new DateTime($query->result_array()[0]['hyvaksytty']);
+            $date = new DateTime();
+            $allowed_time = $this->kisajarjestelma->result_allowed_delete_time($jaosvastaava, $jaosyp);
+            $date->setTimestamp(time() - $allowed_time);
+            $oldest_possible = $date->format('Y-m-d H:i:s');
+            
+            if(!($jaosvastaava || $jaosyp)){
+              $this->db->trans_complete();
+              $msg = "Vain jaosvastaavalla ja jaoksen ylläpitäjällä on oikeus poistaa tuloksia kalenterista";
+              $ok = false;
+            }
+            else if(!$this->ion_auth->is_admin() && $hyvaksytty < $oldest_possible){
+                $this->db->trans_complete();
+                $msg = "Tulos on liian vanha poistettavaksi. Jaoksen ylläpitäjällä on oikeus poistaa kalenterista tuloksia vain " .  $this->kisajarjestelma->result_allowed_delete_time(false, true)/60/60 . " tunnin kuluessa hyväksynnästä.
+                Jaosvastaava voi poistaa tuloksia " . $this->kisajarjestelma->result_allowed_delete_time(true)/60/60/24 . " päivän kuluessa hyväksynnästä.
+                VRL:n ylläpito voi poistaa tuloksia rajatta. Otathan yhteyttä tukeen jos oikeutesi eivät riitä!";
+                $ok = false;
+            }
+            else if($this->_is_jaos_owner($jaos) || $this->_is_jaos_admin()){
                 $this->db->delete($db_tulos, array($db_res_id=>$id));
                 
                 $this->db->where('kisa_id', $query->result_array()[0]['kisa_id']);
@@ -566,10 +588,6 @@ public function etuuspisteet($jaos = null, $tunnus = null){
                      $ok = false;
                 }
 
-            }else {
-              $this->db->trans_complete();
-              $msg = "Vain jaosvastaavalla ja jaoksen ylläpitäjällä on oikeus poistaa tuloksia kalenterista";
-              $ok = false;
             }
 
         } else {

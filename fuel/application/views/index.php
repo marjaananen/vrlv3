@@ -3,7 +3,8 @@
 <p>
 Virtuaalinen ratsastajainliitto eli VRL on virtuaalihevosten ja -tallien harrastajien keskusjärjestö ja kohtaamispaikka.
 Liitto on toiminut vuodesta 1999 tavoitteenaan yhtenäistää ja kehittää virtuaalimaailmaa, opastaa niin uusia kuin vanhojakin harrastajia ja
-tiedottaa ajankohtaisista asioista. VRL:n tärkeimpiin tavoitteisiin kuuluu myös virtuaalihevosmaailman perinteiden vaaliminen ja historiatiedon säilöminen, onhan VRL ollut mukana harrastuksen vaiheissa jo toista vuosikymmentä!
+tiedottaa ajankohtaisista asioista. VRL:n tärkeimpiin tavoitteisiin kuuluu myös virtuaalihevosmaailman perinteiden vaaliminen ja historiatiedon
+säilöminen, onhan VRL ollut mukana harrastuksen vaiheissa jo kolmatta vuosikymmentä!
 </p>
 
 <p>

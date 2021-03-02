@@ -16,26 +16,39 @@ class Kisajarjestelma
     ///////////////////////////////////////////////////
         
         
-    private  $old_leveled_to_new = '2020-08-30'; // ÄLÄ MUOKKAA
+    private  $old_leveled_to_new = '2021-03-02'; // ÄLÄ MUOKKAA
     var $CI;
+    
+    
     
     public function new_leveled_start_time (){
         return $this->old_leveled_to_new;
     }
 
-    
-    public function nayttelyjaos($jaos_id, $jaos = array()){
-        if(!isset($jaos['nayttelyt'])){
-            $jaos = $this->CI->Jaos_model->get_jaos($jaos_id);
-            if ( $jaos['nayttelyt'] == 1 ) { return true;}
-            else { return false;}
-
-        }else {        
-        
-         if ( $jaos['nayttelyjaos'] == 1 ) { return true;}
-         else { return false;}
+    public function result_allowed_delete_hours($admin = false, $jaos_yp =false, $basic_user = true){
+        if($admin){
+            return 60*60*24*30*6; //n.6kk
+        }else if($jaos_yp){
+            return 60*60*24; //24h
+        }
+        else {
+            return 60*60*12; //12h
+            
         }
     }
+    
+    public function result_allowed_delete_time($admin = false, $jaos_yp =false, $basic_user = true){
+        if($admin){
+            return 60*60*24*30*6; //n.6kk
+        }else if($jaos_yp){
+            return 60*60*24; //24h
+        }
+        else {
+            return 60*60*12; //12h
+            
+        }
+    }
+
     
     private function _takaaja_min_ep(){
         return 3;
@@ -185,10 +198,23 @@ class Kisajarjestelma
         return date('Y-m-d', strtotime($date.' + 1 day'));
     }
     
+    public function nayttelyjaos($jaos_id, $jaos = array()){
+        if(!isset($jaos['nayttelyt'])){
+            $jaos = $this->CI->Jaos_model->get_jaos($jaos_id);
+            if ( $jaos['nayttelyt'] == 1 ) { return true;}
+            else { return false;}
+
+        }else {        
+        
+         if ( $jaos['nayttelyjaos'] == 1 ) { return true;}
+         else { return false;}
+        }
+    }
     
     ////////////////////////////////////////////////////////////////////
     // Etuuspisteet
     ///////////////////////////////////////////////////////////////////
+    
     
     public function add_etuuspisteet($tunnus, $jaos, $kisapv, $ilmoitettu, $takaaja = false){
         
