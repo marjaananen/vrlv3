@@ -396,8 +396,9 @@ class Hevonen_model extends Base_module_model
       public function edit_hevonen($hevonen, $vh, &$msg){
         unset ($hevonen['luin_saannot']);
 
-                  
-        $hevonen['syntymaaika'] = $this->CI->vrl_helper->normal_date_to_sql($hevonen['syntymaaika']);
+        if(isset($hevonen['syntymaaika'])){         
+            $hevonen['syntymaaika'] = $this->CI->vrl_helper->normal_date_to_sql($hevonen['syntymaaika']);
+        }
         if (isset($hevonen['kuol_pvm'])){
             $hevonen['kuol_pvm'] = $this->CI->vrl_helper->normal_date_to_sql($hevonen['kuol_pvm']);
         }else {

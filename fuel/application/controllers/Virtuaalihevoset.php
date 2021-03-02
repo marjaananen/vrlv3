@@ -1376,18 +1376,14 @@ class Virtuaalihevoset extends CI_Controller
         }else {unset ($poni['kuol_pvm']);}
 
 
-
-
 		//$fields['reknro'] = array('type' => 'text', 'class'=>'form-control');
-        
-        if($type == 'admin' || $type == 'new'){
             $fields['nimi'] = array('label'=>'Hevosen nimi', 'type' => 'text', 'class'=>'form-control', 'required' => TRUE, 'value'=> $poni['nimi'] ?? '',
                                     'after_html' => '<span class="form_comment">Nimen tulee olla hyvien tapojen mukainen, eikä se saa olla jo käytössä samanrotuisella. Sopimattomat nimet sensuroidaan!</span>');
             $fields['sukupuoli'] = array('type' => 'select', 'label'=> 'Sukupuoli', 'options' => $skp_options, 'required' => TRUE, 'value'=> $poni['sukupuoli'] ?? -1, 'class'=>'form-control');
             $fields['rotu'] = array('label'=>'Rotu', 'type' => 'select', 'options' => $r_options, 'required' => TRUE, 'value'=> $poni['rotu'] ?? -1, 'class'=>'form-control');
             $fields['syntymaaika'] = array('type' => 'text', 'label'=>'Syntymäaika', 'class'=>'form-control', 'required' => TRUE, 'value'=> $poni['syntymaaika'] ?? '', 'after_html' => '<span class="form_comment">Muodossa pp.kk.vvvv</span>');
 
-        }else if( isset($poni['sukupuoli']) && $this->hevonen_model->spayable($poni['sukupuoli'])) {
+        if( isset($poni['sukupuoli']) && $this->hevonen_model->spayable($poni['sukupuoli'])) {
             
             $skp_options = $this->hevonen_model->get_gender_spayable_option_list();
             $fields['sukupuoli'] = array('type' => 'select', 'label'=> 'Sukupuoli', 'options' => $skp_options, 'required' => TRUE, 'value'=> $poni['sukupuoli'] ?? -1, 'class'=>'form-control');
@@ -1443,7 +1439,7 @@ class Virtuaalihevoset extends CI_Controller
         }
         $fields['kasvattaja_talli'] = array('label'=> 'Kasvattajatalli', 'type' => 'text', 'class'=>'form-control', 'value'=> $poni['kasvattaja_talli'] ?? '', 'class'=>'form-control',
                                     'after_html'=> $kasvattaja_str);
-        $fields['kasvattaja_tunnus'] = array('label'=>'Kasvattajan VRL-tunnus', 'type' => 'text', 'class'=>'form-control', 'value'=> $poni['kasvattaja_tunnus'] ?? '', 'class'=>'form-control', 'after_html' => '<span class="form_comment">Muodossa VRL-00000. Kasvattajan VRL-tunnus. Jätä tyhjäksi, jos kyseessä evm-hevonen.</span>');
+        $fields['kasvattaja_tunnus'] = array('label'=>'Kasvattajan VRL-tunnus', 'type' => 'text', 'class'=>'form-control', 'value'=>  $this->vrl_helper->get_vrl($poni['kasvattaja_tunnus'] ?? "") , 'class'=>'form-control', 'after_html' => '<span class="form_comment">Muodossa VRL-00000. Kasvattajan VRL-tunnus. Jätä tyhjäksi, jos kyseessä evm-hevonen.</span>');
         $i = null;
         $e = null;
         
@@ -1470,6 +1466,11 @@ class Virtuaalihevoset extends CI_Controller
             $fields['luin_saannot'] = array('label'=>"Olen lukenut säännöt, ja hevoseni sivuilla lukee selvästi, että kyseessä on virtuaalihevonen!", 'type' => 'checkbox', 'after_html' => '<span class="form_comment">Uusia hevosia valvotaan, ja sääntöjä noudattamattomat voidaan poistaa rekisteristä!</span>', 'class'=>'form-control');
         }
         
+        //asetetaan readonlyt paikalleen
+        foreach ($fields as $key=>&$input){
+            $input['readonly'] = $this->_set_readonly($type, $key, $poni);
+        }
+        
         //uusi tai admin
         $submit = array();
         $submit['new'] = array('action' => site_url('/virtuaalihevoset/rekisterointi'), 'submit_value'=>'Rekisteröi');
@@ -1487,6 +1488,23 @@ class Virtuaalihevoset extends CI_Controller
         }
 
 	}
+    
+    private function _set_readonly($type, $field, $poni = array()){
+        $readonly = array("nimi", "rotu", "syntymaaika", "sukupuoli", "kuol_pvm", "syntymamaa", "kasvattaja_talli", "kasvattaja_tunnus", "kasvattajanimi"); 
+        if($type == 'admin' || $type == 'new'){
+            return false; //adminit saa muokata kaikkea, rekisteröintiin saa kirjata kaikkea
+        }else if(!isset($poni[$field])){
+            return false; // jos kenttään ei ole aiemmin kirjattu mitään, nyt saa kirjata
+        }else if($field == 'kuollut' && $poni['kuollut'] == 1){
+            return true;
+        }else if($field == 'sukupuoli' && $this->hevonen_model->spayable($poni['sukupuoli'])){
+            return false; //ruunattavaa saa muokata, muita ei
+        } else if(in_array($field, $readonly)){
+            return true; //jos kyse on readonlykentästä ja kentässä on joku arvo
+        }
+        return false;
+
+    }
     
     private function _horse_birthdays_form_fields(&$fields, $poni = array()){
    
@@ -1839,6 +1857,16 @@ class Virtuaalihevoset extends CI_Controller
     }
     
     private function _validate_edits ($type, &$new, $old, &$msg) {
+        //jos on tullut muutoksia readonly-kenttiin, poistetaan muutokset
+        foreach ($new as $key=>$value){
+            if($this->_set_readonly($type, $key, $old)){
+                if(isset($old[$key])){
+                    $new[$key] = $old[$key];
+                } else {
+                    unset($new[$key]);
+                }
+            }
+        }
 
         $foals = $this->hevonen_model->get_horses_foals($old['reknro']);
         //jos on varsoja, tamman sukupuolta ei saa vaihtaa, ja orin ja ruunankin saa vaihtaa vain toisikseen
