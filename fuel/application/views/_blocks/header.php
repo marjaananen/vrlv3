@@ -122,6 +122,11 @@ if(!empty($this->ion_auth))
   </div>
 </header>
 <!-- Begin Body -->
+
+<!-- <div class="info"><p>Tähän tulee tarvittaessa info-viesti</p></div> -->
+
+
+
 <div class="container">
 	<div class="row">
   			<div class="col-md-3" id="leftCol">
