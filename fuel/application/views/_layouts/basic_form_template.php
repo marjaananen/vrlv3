@@ -10,7 +10,7 @@
                     <?=$field['field']?>
                     
                 <?php } else {?>
-                    <b><?=$field['label']?></b> <?=$field['field']?>
+                    <div class="checkbox-label"><?=$field['field']?> <b class="label-text"><?=$field['label']?></b></div>
                     
                     <?php } ?>
                 <?php } else echo $field['field']; ?>
