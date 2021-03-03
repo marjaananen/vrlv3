@@ -1,6 +1,6 @@
-<h2>Omat kilpailut</h2>
+<h1>Omat kilpailut</h1>
 
-<p>Tältä sivulta näet kaikki omat kilpailusi, sekä lähettämäsi tulokset. Tämän sivun kautta voit lähettää tuloksia ja poistaa jonossa olevia kutsuja ja tuloksia. Vuosia vanhoja tuloksellisia kilpailuja on silloin tällöin poistettu kalenterista. Etuuspisteet ja hevosten ansaitsemat sijoitukset yms. kuitenkin säilyvät. </p>
+<p>Tältä sivulta näet kaikki omat kilpailusi sekä lähettämäsi tulokset. Tämän sivun kautta voit lähettää tuloksia ja poistaa jonossa olevia kutsuja ja tuloksia. Vuosia vanhoja tuloksellisia kilpailuja on silloin tällöin poistettu kalenterista. Etuuspisteet ja hevosten ansaitsemat sijoitukset yms. kuitenkin säilyvät. </p>
 
 
 <?php if(strlen(fuel_var('msg', '')) > 0){ ?>
@@ -11,7 +11,7 @@
     
     <?php } ?>
     
- <h3>Kilpailut</h3>
+ <h2>Kilpailut</h2>
 
 
  <ul class="nav nav-tabs">
@@ -30,7 +30,7 @@
     }?>
 
 
-<h3>Näyttelyt</h3>
+<h2>Näyttelyt</h2>
 
  <ul class="nav nav-tabs">
         <li role="presentation" class="<?php if ($category == 'nayttelyt' && $sivu == 'jonossa'){echo "active";}?>"><a href="<?php echo base_url('kilpailutoiminta/omat/nayttelyt/jonossa'); ?>">Kutsujonossa</a></li>

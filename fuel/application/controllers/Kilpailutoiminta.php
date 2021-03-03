@@ -352,7 +352,7 @@ class Kilpailutoiminta extends CI_Controller
                                 'after_html'=>'<span class="form-comment">Arvosteltava laji.</span>');
         $fields['kotaso'] = array('type' => 'enum', 'mode'=>'radios', 'options' => $koulutustaso_options, 'value' => $result['kotaso'] ?? 1,
                                   'wrapper_tag'=>'li', 'after_html'=>'<span class="form-comment">Hevosen koulutustaso ko. lajissa (jos haluttua koulutustasoa
-                                  ei löydy listasta, pyöristä alaspäin esim. Re50cm > Re40cm). Mikäli arvosteltavan hevosen sivuilta ei löydy koulutustasoa = 0p.</span>');
+                                  ei löydy listasta, pyöristä alaspäin esim. Re 50 cm > Re 40 cm). Mikäli arvosteltavan hevosen sivuilta ei löydy koulutustasoa = 0p.</span>');
 
 
   

@@ -1,4 +1,4 @@
-<h2>Porrastetut kilpailut</h2>
+<h1>Porrastetut kilpailut</h1>
 <div class="panel-group">
     <div class="panel panel-default">
       <div class="panel-heading">Osallistuminen</div>
@@ -44,7 +44,7 @@
         Ominaisuuspistemäärä lasketaan yhteensä lajiin vaikuttavista ominaisuuksista. Pisteiden summan tulee olla yli alimmaispisterajan.
         Hyvät pisteet toisessa ominaisuudessa siis korvaavat mahdollisesti toisessa ominaisuudessa puuttuvia pisteitä.</p>
         
-        <p>Oman tasonsa lisäksi Hevonen voi kilpailla yhtä isommalla tasolla. Poikkeuksena tasot 1 ja 2,
+        <p>Oman tasonsa lisäksi hevonen voi kilpailla yhtä isommalla tasolla. Poikkeuksena tasot 1 ja 2,
         joilla voi kilpailla myös yhtä alemmalla tasolla nopeamman pisteiden kerryttämisen vuoksi.
         </p>
         
@@ -82,7 +82,7 @@
  <div class="panel panel-default">
       <div class="panel-heading">Pisteiden periytyminen</div>
       <div class="panel-body">
-Ominaisuuspisteet periytyvät emältä ja isältä varsalle. Varsa saa pisteitä jokaisesta ominaisuudesta kaavalla (isän pisteet+emän pisteet)/2*0.25, eli 25% isän ja emän keskiarvosta, ja pisteet lisätään varsan profiiliin heti, kun rekisteröinti hyväksytään.
+Ominaisuuspisteet periytyvät emältä ja isältä varsalle. Varsa saa pisteitä jokaisesta ominaisuudesta kaavalla (isän pisteet + emän pisteet) / 2 * 0.25, eli 25 % isän ja emän keskiarvosta, ja pisteet lisätään varsan profiiliin heti kun rekisteröinti hyväksytään.
 </div>
     </div>
 
@@ -103,9 +103,9 @@ Jokainen hyväksytty kilpailusuoritus kasvattaa hevosen ominaisuuspisteitä seur
 (1+ [tason maksimipistemäärä] / [ratsukon sijoitus]) ) / 10</pre>
 
 <p>
-Kaavaa ei tarvitse osata laskea itse. Kilpailujärjestelnä huolehtii pisteiden laskusta, ja ne kirjataan hevosen profiiliin kun porrastetut tulokset on hyväksytty VRL:n tulosarkistoon.
+Kaavaa ei tarvitse osata laskea itse. Kilpailujärjestelmä huolehtii pisteiden laskusta, ja ne kirjataan hevosen profiiliin, kun porrastetut tulokset on hyväksytty VRL:n tulosarkistoon.
 </p><p>
-Hevosen kerryttämä pistemäärä riippuu luokan tasosta, hevosen sijoituksesta ja satunnaistekijästä. Kaikki lajiin vaikuttavat ominaisuuspisteet kasvavat jokaisen hyväksytyn suorituksen myötä. Kokonaispistemäärä jaetaan satunnaisesti kaikkien lajissa vaikuttavan ominaisuuden kesken, eli hevonen voi olla toisessa ominaisuudessaan paljon parempi kuin toisessa. Hylätyt hevoset eivät saa pisteitä.
+Hevosen kerryttämä pistemäärä riippuu luokan tasosta, hevosen sijoituksesta ja satunnaistekijästä. Kaikki lajiin vaikuttavat ominaisuuspisteet kasvavat jokaisen hyväksytyn suorituksen myötä. Kokonaispistemäärä jaetaan satunnaisesti kaikkien lajissa vaikuttavien ominaisuuksien kesken, eli hevonen voi olla toisessa ominaisuudessaan paljon parempi kuin toisessa. Hylätyt hevoset eivät saa pisteitä.
 </p><p>
 
 Hevosen keräämät ominaisuuspisteet löytyvät hevosen profiilisivulta. 
