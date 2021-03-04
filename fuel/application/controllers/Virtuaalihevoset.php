@@ -238,8 +238,7 @@ class Virtuaalihevoset extends CI_Controller
               
                     
             $data['form'] =  $this->form_builder->render_template('_layouts/basic_form_template', $fields);
-            $data['title'] = 'Kaikki omat hevoset';                        
-            $vars['text_view'] = "";
+            $data['title2'] = "Kaikki omat hevoset";
             
              $sivu['sivu'] = 'omat';
             $sivu['data'] =  $this->load->view('misc/haku', $data, TRUE);
@@ -267,7 +266,7 @@ class Virtuaalihevoset extends CI_Controller
             
             $vars['headers'] = json_encode($vars['headers']);                    
 			$vars['data'] = json_encode($this->hevonen_model->get_just_registered($this->ion_auth->user()->row()->tunnus));
-			$data['title'] = "Viimeisimmät rekisteröidyt";
+			$data['title2'] = "Viimeisimmät rekisteröidyt";
             $data['text_view'] = "Tässä näkyy kuluneen 24 h sisällä rekisteröidyt hevosesi. Alle vuorokauden rekisterissä olleita hevosia voi poistaa, mikäli niillä ei ole esim. jälkeläisiä.";
 			$data['tulokset'] = $this->load->view('misc/taulukko', $vars, TRUE);
             

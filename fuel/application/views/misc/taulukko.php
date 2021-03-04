@@ -1,5 +1,12 @@
-    <h1><?php echo fuel_var('title', '')?></h1>
-    <?php echo fuel_var('text_view', '')?>
+<?php if (isset($title)){
+    echo "<h1>".$title."</h1>";
+}
+
+if (isset($title2)){
+    echo "<h2>".$title2."</h2>";
+}
+
+?><?php echo fuel_var('text_view', '')?>
     
     <?php
         if (isset($massatuho)){
