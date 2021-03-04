@@ -1,15 +1,13 @@
+<h1>Porrastettujen kilpailulistat</h1>
+<p>Tältä sivulta näet kaikki elävät hevosesi ja ponisi, jotka ovat yli kolmevuotiaita ja joille on merkitty kolmevuotissyntymäpäivä sekä säkäkorkeus rekisteriin. Hevoset on listattu yleisimpään osallistumismuotoon ja jaoteltu lajeittain saavutetun vaikeustason mukaan. Voit suodattaa hevosia painotuksen, kotitallin ja rodun mukaan.</p>
+<p>Hevosten rekisterisivulta voit asettaa yksittäisille hevosille maksimitasot tai estää niiden näkymisen tällä listalla kokonaan merkitsemällä, ettei hevonen kilpaile porrastetuissa.</p>
 
-
-<h2>Porrastettujen kilpailulistat</h2>
-<p>Tältä sivulta näet kaikki elävät hevosesi ja ponisi, jotka ovat yli kolme vuotiaita, ja joille on merkitty 3v syntymäpäivä ja säkäkorkeus rekisteriin. Hevoset on listattu yleisimpään osallistumismuotoon ja jaoteltu lajeittain saavutetun vaikeustason mukaan. Voit suodattaa hevosia painotuksen, kotitallin ja rodun mukaan.</p>
-	<p>Hevosten rekisterisivulta voit asettaa yksittäisille hevosille maksimitasot, tai estää niiden näkymisen tällä listalla kokonaan merkitsemällä ettei hevonen kilpaile porrastetuissa.</p>
-
-<h3>Suodata hevosia</h3>
+<h2>Suodata hevosia</h2>
 <?php echo $form; ?>
 
 
 
-<h3>Listat</h3>
+<h2>Listat</h2>
 
 
 <?php foreach ($jaokset as $jaos){

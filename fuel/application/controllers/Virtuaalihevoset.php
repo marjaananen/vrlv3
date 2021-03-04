@@ -268,7 +268,7 @@ class Virtuaalihevoset extends CI_Controller
             $vars['headers'] = json_encode($vars['headers']);                    
 			$vars['data'] = json_encode($this->hevonen_model->get_just_registered($this->ion_auth->user()->row()->tunnus));
 			$data['title'] = "Viimeisimmät rekisteröidyt";
-            $data['text_view'] = "Tässä näkyy kuluneen 24h sisällä rekisteröidyt hevosesi. Alle vuorokauden rekisterissä olleita hevosia voi poistaa, mikäli niillä ei ole esim. jälkeläisiä.";
+            $data['text_view'] = "Tässä näkyy kuluneen 24 h sisällä rekisteröidyt hevosesi. Alle vuorokauden rekisterissä olleita hevosia voi poistaa, mikäli niillä ei ole esim. jälkeläisiä.";
 			$data['tulokset'] = $this->load->view('misc/taulukko', $vars, TRUE);
             
             
@@ -322,8 +322,7 @@ class Virtuaalihevoset extends CI_Controller
             $this->load->model('Jaos_model');
             $this->jaokset = $this->Jaos_model->get_jaos_porr_list();
         }
-        $fields['operaatiot2'] = array('type' => 'section', 'tag' => 'h3', 'label' => 'Maksimitasot', 'after_html'=>'<span class="form_comment">Nämä vaikuttavat hevosen näkymiseen kilpailulistalla. -1 estää hevosta näkymästä ko. lajin listalla. Kun hevonen ylittää tässä esitetyn maksimitasonsa,
-                                                       se ei näy enää kyseisen lajin listalla. Sillä voi silti kilpailla normaalien sääntöjen puitteissa. Jätä tyhjäksi jos et halua muokata kyseistä arvoa.</span>'
+        $fields['operaatiot2'] = array('type' => 'section', 'tag' => 'h3', 'label' => 'Maksimitasot', 'after_html'=>'<span class="form_comment">Nämä vaikuttavat hevosen näkymiseen kilpailulistalla. -1 estää hevosta näkymästä ko. lajin listalla. Kun hevonen ylittää tässä esitetyn maksimitasonsa, se ei näy enää kyseisen lajin listalla. Sillä voi silti kilpailla normaalien sääntöjen puitteissa. Jätä tyhjäksi jos et halua muokata kyseistä arvoa.</span>'
 );
 
         foreach($this->jaokset as $jaos){
@@ -340,7 +339,7 @@ class Virtuaalihevoset extends CI_Controller
         $skill_options = $this->hevonen_model->get_skill_option_list();
         $skill_options[-1] = "";
         $fields['aseta_painotus'] = array('label'=>'Painotus', 'type' => 'select', 'options' => $skill_options, 'value' =>  -1, 'class'=>'form-control',
-                                          'after_html'=>'<span class="form_comment">Jätä tyhjäksi jos et halua muokata painotusta.</span>');
+                                          'after_html'=>'<span class="form_comment">Jätä tyhjäksi, jos et halua muokata painotusta.</span>');
         
         
         $tallilista  = $this->Tallit_model->get_users_stables($tunnus, false, true);
@@ -354,7 +353,7 @@ class Virtuaalihevoset extends CI_Controller
         
 
         $fields['aseta_kotitalli'] = array('label'=>'Kotitalli', 'type' => 'text', 'class'=>'form-control', 
-                                     'after_html'=> '<span class="form_comment">Jätä tyhjäksi jos et halua muokata kotitallia. Laita tunnus muodossa XXXX0000. Omat tallisi (klikkaa lisätäksesi): ' .
+                                     'after_html'=> '<span class="form_comment">Jätä tyhjäksi, jos et halua muokata kotitallia. Laita tunnus muodossa XXXX0000. Omat tallisi (klikkaa lisätäksesi): ' .
                                     $option_script['list'] . '</span>' . $option_script['script']);
         
 
@@ -722,7 +721,7 @@ class Virtuaalihevoset extends CI_Controller
             if($this->input->server('REQUEST_METHOD') == 'GET')
             {			        
                 $vars['form'] = $this->_get_horse_edit_form('new');
-                $vars['msg'] = 'Tähdellä merkityt kentät ovat pakollisia! Muista, että hevosen sivuilta tulee olla löydettävissä sana "virtuaalihevonen"! Sinut merkitään hevosen omistajaksi. Voit lisätä hevoselle lisää omistajia rekisteröinnin jälkeen. <a href="' . site_url('virtuaalihevoset/rekisterointi/ohjeet') . '" title="Lue ohjeet hevosen rekisteröintiin">Lue ohjeet hevosen rekisteröintiin</a>.';
+                $vars['msg'] = 'Tähdellä merkityt kentät ovat pakollisia! Muista, että hevosen sivuilta tulee löytyä sana "virtuaalihevonen"! Sinut merkitään hevosen omistajaksi. Voit lisätä hevoselle lisää omistajia rekisteröinnin jälkeen. <a href="' . site_url('virtuaalihevoset/rekisterointi/ohjeet') . '" title="Lue ohjeet hevosen rekisteröintiin">Lue ohjeet hevosen rekisteröintiin</a>.';
             $this->fuel->pages->render('hevoset/hevosten_rekisterointi', $vars);
             }
             else if($this->input->server('REQUEST_METHOD') == 'POST'){
