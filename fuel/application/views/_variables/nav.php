@@ -37,6 +37,7 @@ $nav['liitto/somessa'] = array('label' => 'VRL sosiaalisessa mediassa', 'parent_
 //Kehitysblogi, porkkanat, Virma, tuki, kehitysblogi
  
 // jäsenyys alamenu
+$nav['jasenyys/haku'] = array('label' => 'Hae jäseniä', 'parent_id' => 'jasenyys', 'active' => 'jasenyys/hae');
 $nav['jasenyys/liity'] = array('label' => 'Liity jäseneksi', 'parent_id' => 'jasenyys', 'active' => 'jasenyys/liity');
 $nav['jasenyys/rekisteriseloste'] = array('label' => 'Rekisteriseloste', 'parent_id' => 'jasenyys', 'active' => 'jasenyys/rekisteriseloste');
 $nav['tunnus'] = array('hidden'=>true, 'label' => 'Tunnus', 'parent_id' => 'jasenyys', 'active' => 'tunnus$|tunnus/:any');
