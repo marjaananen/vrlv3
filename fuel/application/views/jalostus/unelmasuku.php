@@ -20,7 +20,7 @@ if(isset($suku) and sizeof($suku) > 0){
  
  
  echo '<h3>Suvun tiedot</h3>';
- echo '<p>Sukusiitosprosentti: '.$sspros .'%<br />Sukukatokerroin: '.round($skatopros) .'</p>';
+ echo '<p>Sukusiitosprosentti: '.$sspros .'%<br />Sukukatokerroin: '.$skatopros .'</p>';
  echo '<p><a href="'.site_url(). 'kasvatus/jalostus">Lue lisää</a></p>';
 }
  

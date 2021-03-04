@@ -27,7 +27,7 @@ class Pedigree_printer {
 		print	'</table>'."\n";
 	}
  
- private function _handle_multiples($pedigree, $max = 12){
+ private function _handle_multiples($pedigree, $max = 4 ){
   $horses = array();
   $multiples = array();
   foreach($pedigree as $id=>$horse){
@@ -149,10 +149,11 @@ class Pedigree_printer {
 
    IF(sizeof($this->uniques) > 0 && sizeof($pedigree) > 0){
     $pros = sizeof($this->uniques)/sizeof($pedigree);
-    return $pros;
+    return round($pros,2);
    }
     else {
-     return 1;}
+     return 1;
+     }
   }
   
   
@@ -165,7 +166,7 @@ class Pedigree_printer {
      }else {
       $lasketut = array();
       $yhteiset_nimet = $this->_get_names_in_common("", $pedigree);
-      return $this->_inbreedingPercentage(null, $pedigree, $lasketut, $yhteiset_nimet);
+      return round($this->_inbreedingPercentage(null, $pedigree, $lasketut, $yhteiset_nimet),2);
      }
    
   }
@@ -251,11 +252,11 @@ class Pedigree_printer {
 			}
 			
 			//Lasketaan sukulaisen oma prosentti, ja sukulaisen osuus laskettavasta prosentista
-				$sukulaisen_osuus = $this->percentagecount ($emanp_lapikaymattomat, $isanp_lapikaymattomat, $emanpuoli, $isanpuoli, $sukulaisid);
+				$sukulaisen_osuus = $this->_percentagecount ($emanp_lapikaymattomat, $isanp_lapikaymattomat, $emanpuoli, $isanpuoli, $sukulaisid);
 
 				
 				//Merkitään oma prosentti lasketuksi kys. sukulaiselle
-				$lasketut[$sukulaisid] = $this->inbreedingPercentage($sukulaisid, $lasketut);
+				$lasketut[$sukulaisid] = $this->_inbreedingPercentage($sukulaisid, $lasketut, $pedigree);
 				$sukulaisen_oma = $lasketut[$sukulaisid] + 1;
 				$sukulaisen_kokonaispros_osuus = $sukulaisen_osuus * $sukulaisen_oma;
 				
@@ -278,44 +279,66 @@ class Pedigree_printer {
  private function _get_names_in_common($tunnus, $pedigree){
   $kaikki_i = array();
   $kaikki_e = array();
-
   $yhteiset = array();
+
+
+  
   foreach ($pedigree as $key=>$value){
      //jos haetaan esim. ei:n sukulaisia, e ja i, eli lyhemmät eli jälkeläoiset skipataan suorilta
-   //samoin skipataan ne jotka ei ala "ei", eli esim. eee jne.
-   if(!(strlen($tunnus) < strlen($key)) && substr($key, 0, strlen($tunnus)) === $tunnus && isset($value['reknro'])) {
-    if(substr($key, 0, strlen($tunnus)+1) === $tunnus.'i'){
-     if(in_array($value['reknro'], $kaikki_e)){
-      $value['vanhempi'] = $value['reknro'];
-      $value['tunnus'] = $key;
-      $value['syvyys'] = strlen($key);
-      $yhteiset[] = $value;
-     } else {
-      $kaikki_i[] = $value['reknro'];
-     }
+   if (strlen($key) > strlen($tunnus) && isset($value['reknro'])){
+    //samoin skipataan ne jotka ei ala "ei", eli esim. eee jne.
+    if((strlen($tunnus) == 0) || substr($key, 0, strlen($tunnus)) === $tunnus){
+     //jos on isän puolella
+        $temptunnus = $tunnus.'i';
+        if(substr($key, 0, strlen($temptunnus)) === $temptunnus){
+         $kaikki_i[] = $this->_updateValue($key, $value);
+        }
+        //jos_emanpuolella
+        $temptunnus = $tunnus.'e';
+        if(substr($key, 0, strlen($temptunnus)) === $temptunnus){
+         $kaikki_e[] = $this->_updateValue($key, $value);
+        } 
     }
-    else if(substr($key, 0, strlen($tunnus)+1) === $tunnus.'e'){
-     if(in_array($value['reknro'], $kaikki_i)){
-      $value['vanhempi'] = $value['reknro'];
-      $value['tunnus'] = $key;
-      $value['syvyys'] = strlen($key);
-      $yhteiset[] = $value;
-     } else {
-      $kaikki_e[] = $value['reknro'];
-     }
+   }
+  }
+
+  //jos  molemmilla puolilla on nimiä
+ if(!(sizeof($kaikki_i) == 0 || sizeof($kaikki_e) == 0)){
+  foreach ($kaikki_e as $ekarivi){
+   foreach($kaikki_i as $tokarivi){
+    if($ekarivi['reknro'] == $tokarivi['reknro']){
+     $yhteiset[] = $tokarivi;
     }
-   
-   } 
+   }   
   }
   
+   foreach ($kaikki_i as $ekarivi){
+   foreach($kaikki_e as $tokarivi){
+    if($ekarivi['reknro'] == $tokarivi['reknro']){
+     $yhteiset[] = $tokarivi;
+    }
+   }   
+  }
+  
+ }
+
   return $yhteiset;
+ }
+ 
+ private function _updateValue($tunnus, $value){
+  $value['vanhempi'] = $value['reknro'];
+    $value['tunnus'] = $tunnus;
+      $value['syvyys'] = strlen($tunnus);
+      
+      return $value;
  }
 	
 	
 	private function _percentagecount ($isanpl, $emanpl, $isanp, $emanp, $id){
 		
 		$summa = 0;
-		
+
+  
 		if (sizeof($isanpl) == 0){
 			$isanpl = $isanp[$id];
 			
