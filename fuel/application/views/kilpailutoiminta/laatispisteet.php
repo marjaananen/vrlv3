@@ -2,11 +2,7 @@
 
 <p>Porrastettujen kilpailujen pisteytys jaosten laatuarvosteluissa lasketaan tällä laskurilla. </p>
 
-<p>
-Koska hevonen pystyy keräämään esim. ERJ kilpailuissa myös KRJ:n laatuarvosteluissa tarvittavia pisteitä, useammassa lajissa
-kilpailleelta hevoselta vaaditaan enemmän pisteitä kuin tiettyyn lajiin keskittyneeltä hevoselta.
-Hevosen lajikohtaisesti kerryttämistä ominaisuuspisteistä huomioidaan siis tietty %-määrä riippuen siitä paljonko pisteitä se on
-kerännyt toisiinsa vaikuttavista lajeista. </p>
+<p>Koska hevonen pystyy keräämään esim. ERJ:n kilpailuissa myös KRJ:n laatuarvosteluissa tarvittavia pisteitä, useammassa lajissa kilpailleelta hevoselta vaaditaan enemmän pisteitä kuin tiettyyn lajiin keskittyneeltä hevoselta. Hevosen lajikohtaisesti kerryttämistä ominaisuuspisteistä huomioidaan siis tietty prosenttimäärä riippuen siitä, paljonko pisteitä se on kerännyt toisiinsa vaikuttavista lajeista. </p>
 <p>
 <b>Toisiinsa vaikuttavat lajit</b><br />
 <u>ERJ</u>: KRJ, VVJ, KERJ<br />
@@ -15,11 +11,11 @@ kerännyt toisiinsa vaikuttavista lajeista. </p>
 <u>KERJ</u>: ERJ<br />
 </p>
 <p>
-Vaikuttavaksi lajiksi lasketaan kaikki ne lajit, joissa ominaisuuspisteet ovat vähintään 75% arvosteltavaan lajiin nähden.<br />
-0 vaikuttavaa lajia (100%)<br />
-1 vaikuttava laji (80%)<br />
-2 vaikuttavaa lajia (65%)<br />
-3 vaikuttavaa lajia (60%)<br />
+Vaikuttavaksi lajiksi lasketaan kaikki ne lajit, joissa ominaisuuspisteet ovat vähintään 75 % arvosteltavaan lajiin nähden.<br />
+0 vaikuttavaa lajia (100% )<br />
+1 vaikuttava laji (80 %)<br />
+2 vaikuttavaa lajia (65 %)<br />
+3 vaikuttavaa lajia (60 %)<br />
 
 </p>
 

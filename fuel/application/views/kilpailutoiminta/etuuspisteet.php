@@ -3,14 +3,14 @@
 <p>
 Jokainen VRL:n jäsen kerää etuuspisteitä järjestäessään kisoja ja lähettäessään näistä tulokset ajoissa.
 Etuuspisteet säätelevät sitä, kuinka monta avointa kutsua kalenterissa kyseisellä ihmisellä voi olla yhtä aikaa.
-Rajoitukset ovat tehty sen vuoksi että kilpailuista saataisiin tulokset ajallaan, ja että vain tunnollisiksi
+Rajoitukset ovat tehty sen vuoksi, että kilpailuista saataisiin tulokset ajallaan ja että vain tunnollisiksi
 osoittautuneet kisanjärjestäjät voivat järjestää useita kisoja kerralla.</p>
 
 <div class="panel panel-default">
       <div class="panel-heading">Tulosten lähettäminen ajoissa ja etuuspisteiden kerryttäminen</div>
     <div class="panel-body">
 
-           <p>Etuuspisteitä kerrytetään lähettämällä tulokset viimeistään viikon kuluttua kisapäivästä. Mikäli vastuuhenkilö hoitaa ensimmäiset kilpailunsa ajoissa loppuun, hän saa tuplapisteet, eli siirtyy suoraan seuraavalle etuuspistetasolle. </p>
+           <p>Etuuspisteitä kerrytetään lähettämällä tulokset viimeistään viikon kuluttua kisapäivästä. Mikäli vastuuhenkilö hoitaa ensimmäiset kilpailunsa ajoissa loppuun, hän saa tuplapisteet eli siirtyy suoraan seuraavalle etuuspistetasolle. </p>
            <p><strong>Näyttelyt tai porrastetut kilpailut eivät kerrytä eivätkä vaadi etuuspisteitä!</strong></p>
       </div>
   </div>
@@ -62,7 +62,7 @@ while ($pisteet < 110){
         if($kisajarjestelma->directlyCalender($tulosta, null)){
             $cal = '<img src="'.site_url('assets/images/icons/accept.png').'" alt="Kyllä"/>';
         }
-        echo "<tr><td>". $alkup . "-" .$tulosta." </td><td> " . $avoimet . "kpl" . "</td><td>".$cal."</td></tr>";
+        echo "<tr><td>". $alkup . "-" .$tulosta." </td><td> " . $avoimet . " kpl" . "</td><td>".$cal."</td></tr>";
         $alkup = $pisteet;
         $avoimet = $avoimet_uusi;
         

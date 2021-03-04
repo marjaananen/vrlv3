@@ -1,4 +1,4 @@
-<h2>Näyttelyiden järjestäminen</h2>
+<h1>Näyttelyiden järjestäminen</h1>
 <div class="panel-group">
     
     <div class="panel panel-default">
@@ -6,9 +6,9 @@
       <div class="panel-body">
         <b>Näyttelyn ajankohta</b>
         <ul>
-            <li>Kilpailut tulee ilmoittaa kalenteriin Vähintään neljä vuorokautta ennen viimeistä ilmoittautumispäivää (VIP).</li>
-            <li>Viimeisen ilmoittautumispäivän ja näyttelypäivän välissä tulee olla vähintään viikko (esim. VIP 01.01.2013 ja NP 07.01.2013)</li>
-            <li>Kilpailut voi järjestää kuluvalle tai enintään seuraavalle kalenterikuukaudelle (esim. elokussa voi anoa kilpailun enintään syyskuun viimeiselle päivälle)</li>
+            <li>Näyttelyt tulee ilmoittaa kalenteriin vähintään neljä vuorokautta ennen viimeistä ilmoittautumispäivää (VIP).</li>
+            <li>Viimeisen ilmoittautumispäivän ja näyttelypäivän välissä tulee olla vähintään viikko (esim. VIP 01.01.2013 ja NP 07.01.2013).</li>
+            <li>Näyttelyt voi järjestää kuluvalle tai enintään seuraavalle kalenterikuukaudelle (esim. elokuussa voi anoa näyttelyn enintään syyskuun viimeiselle päivälle).</li>
             <li>Viimeistä ilmoittautumispäivää ei saa rajata tiettyyn kellonaikaan. Päivän vaihtuminen lasketaan Suomen aikavyöhykkeen mukaan.</li>
         </ul>
         
@@ -34,7 +34,7 @@
       </div>
     </div>
 
-    <div class="panel panel-info">
+    <div class="panel panel-default">
       <div class="panel-heading">Osallistumisvaatimukset ja rajaukset</div>
       <div class="panel-body">
 
@@ -67,7 +67,7 @@
         </div>
     </div>
         
-    <div class="panel panel-info">
+    <div class="panel panel-default">
       <div class="panel-heading">Tulokset ja tuomarointi</div>
       <div class="panel-body">
         
@@ -75,8 +75,8 @@
         <ul>
             <li>Osallistujien poisjättäminen luokasta, johon he mahtuisivat ja ovat ajoissa (ja oikein) ilmoittautuneet, on vilpillistä toimintaa.</li>
             <li>Näyttelyissä saa käyttää vain jaoksen hyväksymiä tuomareita. Tarkastathan ajantasaisen listan jaoksen sivuilta!</li>
-            <li>Kilpailunjärjestäjä saa osallistujia lisätessään hylätä luokasta hevoset joiden sivut eivät toimi tai joilta puuttuu kuva tms. vaadittu tieto</li>
-            <li>Osallistujat tulee linkittää kutsutivulla ennen tuomaroinnin aloittamista.</li>
+            <li>Kilpailunjärjestäjä saa osallistujia lisätessään hylätä luokasta hevoset, joiden sivut eivät toimi tai joilta puuttuu kuva tms. vaadittu tieto.</li>
+            <li>Osallistujat tulee linkittää kutsusivulle ennen tuomaroinnin aloittamista.</li>
             <li>Tuomarointi tulee tehdä täysin puolueettomasti. Tuomarit eivät tuomaroi omia hevosiaan.</li>
             <li>Kilpailun järjestäjä on vastuussa tuomarien valinnasta ja kutsumisesta, ja tulosten pyytämisestä tuomareilta.</li>
         </ul>
