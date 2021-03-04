@@ -41,10 +41,10 @@ class Kasvatus extends CI_Controller
                 $vars['headers'][2] = array('title' => 'Nimi', 'key' => 'nimi');
                 $vars['headers'][3] = array('title' => 'Syntymäaika', 'key' => 'syntymaaika', 'type'=>'date');
                 $vars['headers'][4] = array('title' => 'Rotu', 'key' => 'rotu');
-                $vars['headers'][5] = array('title' => 'Sukupuoli', 'key' => 'sukupuoli');
+                $vars['headers'][5] = array('title' => 'Sukup.', 'key' => 'sukupuoli');
                 $vars['headers'][6] = array('title' => 'Kasvattajanimi', 'key' => 'kasvattajanimi');
                 $vars['headers'][7] = array('title' => 'Kasvattajan tunnus', 'key' => 'kasvattaja_tunnus', 'key_link' => site_url('tunnus/'));
-                $vars['headers'][8] = array('title' => 'Kasvattajatalli', 'key' => 'kasvattaja_talli', 'key_link' => site_url('tallit/talli/'));
+                $vars['headers'][8] = array('title' => 'Kasvattaja- talli', 'key' => 'kasvattaja_talli', 'key_link' => site_url('tallit/talli/'));
                 
                 $vars['headers'] = json_encode($vars['headers']);
                             

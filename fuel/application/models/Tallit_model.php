@@ -137,12 +137,12 @@ class Tallit_model extends Base_module_model
             
         }
         
-    function edit_stable($name, $desc, $url, $tnro, $new_tnro=-1)
+    function edit_stable($data, $tnro, $new_tnro=null)
     {
-        $data = array('nimi' => $name, 'kuvaus' => $desc, 'url' => $url);
         
-        if($new_tnro != -1)
+        if(isset($new_tnro)){
             $data['tnro'] = $new_tnro;
+        }
 
         $this->db->where('tnro', $tnro);
         $this->db->update('vrlv3_tallirekisteri', $data);

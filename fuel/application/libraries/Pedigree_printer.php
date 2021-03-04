@@ -8,6 +8,7 @@ class Pedigree_printer {
   var $multiples = array();
 
  public function createPedigree($pedigree, $max = 4) {
+  //var_dump($pedigree);
   $this->_handle_multiples($pedigree, $max);
 		
 		$rowspan = (pow(2, $max)); 
@@ -31,7 +32,7 @@ class Pedigree_printer {
   foreach($pedigree as $id=>$horse){
    if(strlen($id) <= $max){
     if(isset($horse['reknro'])){
-     if(array_search($horse['reknro'], $horses) && !isset($multiples[$horse['reknro']])){
+     if(in_array($horse['reknro'], $horses) && !isset($multiples[$horse['reknro']])){
       $multiples[$horse['reknro']] = $this->colours[sizeof($multiples)];
      }else {
        $horses[] = $horse['reknro'];
@@ -141,6 +142,139 @@ class Pedigree_printer {
 
     
   }
+  
+  
+  
+  
+  
+  public function inbreedingPercentage ($id, &$lasketut = array(), $yhteiset_nimet = array()){
+		if (array_key_exists($id, $lasketut)){
+			return $lasketut[$id];
+		}
+		
+		$CI =& get_instance();
+		$CI->load->model('Arkisto_model');
+
+		//Annettiinko yhteisiä nimiä valmiiksi?
+		if ($id > -1 || empty($yhteiset_nimet)){
+			$yhteiset_nimet = $CI->Arkisto_model->hae_yhteiset_nimet($id);
+	
+		}
+		
+		//löytyikö vieläkään?
+		if (empty($yhteiset_nimet)){			
+			$lasketut[$id] = 0;
+			$CI->Arkisto_model->muokkaa_perustietotaulu($id, array("ssprosentti"=>0), true);
+			return 0; //Jos ei yhteisiä nimiä, prosentti on 0.
+		}
+		
+		$kaikki = array();
+		$isanpuoli = array();
+		$emanpuoli = array();
+		
+		foreach ($yhteiset_nimet as $nimi){
+			$kaikki[$nimi['vanhempi']][] = $nimi['tunnus'];
+			
+			/*if (isset($nimi['ssprosentti']) || !is_null($nimi['ssprosentti'])){
+				$lasketut[$nimi['vanhempi']][] = $nimi['ssprosentti'];
+			}*/
+			
+			if (substr($nimi['tunnus'], 0, 1) == 'e'){
+				$emanpuoli[$nimi['vanhempi']][] = $nimi['tunnus'];
+			}
+			
+			else if (substr($nimi['tunnus'], 0, 1) == 'i'){
+				$isanpuoli[$nimi['vanhempi']][] = $nimi['tunnus'];
+			
+			}
+				
+		}
+		
+		$lapikaydyt_tunnukset = array();
+		$prosentti = 0;
+		
+		foreach ($kaikki as $sukulaisid=>$tunnuslista){
+			$isanp_lapikaymattomat = array();
+			$emanp_lapikaymattomat = array();
+			
+	
+			
+			foreach ($tunnuslista as $tunnus){
+				//Onko varsa jo tarkistettu? Tiputetaan vika merkki pois niin katsotaan.
+				$varsantunnus = substr($tunnus, 0, (strlen($tunnus)-1));
+				
+				//Jo ko. otuksen varsaa ei olla käyty läpi...
+				if (!isset($lapikaydyt_tunnukset[$varsantunnus])){
+					if (substr($tunnus, 0, 1) == 'e'){
+						$emanp_lapikaymattomat[] = $tunnus;
+					}
+					else if (substr($tunnus, 0, 1) == 'i'){
+						$isanp_lapikaymattomat[] = $tunnus;
+					}
+					
+				}
+				//Varsa oli käyty läpi, ni sitten on otus itsekin
+				else {
+					
+					$lapikaydyt_tunnukset[] = $tunnus;
+				}						
+				
+			}
+			
+			//Lasketaan sukulaisen oma prosentti, ja sukulaisen osuus laskettavasta prosentista
+				$sukulaisen_osuus = $this->percentagecount ($emanp_lapikaymattomat, $isanp_lapikaymattomat, $emanpuoli, $isanpuoli, $sukulaisid);
+
+				
+				//Merkitään oma prosentti lasketuksi kys. sukulaiselle
+				$lasketut[$sukulaisid] = $this->inbreedingPercentage($sukulaisid, $lasketut);
+				$sukulaisen_oma = $lasketut[$sukulaisid] + 1;
+				$sukulaisen_kokonaispros_osuus = $sukulaisen_osuus * $sukulaisen_oma;
+				
+
+
+			
+			//Kaikki nyt läpikäydyt tunnukset merkitään läpikäydyiksi
+				$lapikaydyt_tunnukset = array_merge($lapikaydyt_tunnukset, $isanp_lapikaymattomat, $emanp_lapikaymattomat);
+			
+			//Lisätään tämän sukulaisen osuus kokonaisprosenttiin	
+			$prosentti = $prosentti + $sukulaisen_kokonaispros_osuus;	
+			
+		}
+		
+		if ($id > -1){
+			$CI->Arkisto_model->muokkaa_perustietotaulu($id, array("ssprosentti"=>$prosentti), true);
+		}
+		return  $prosentti;
+			
+		
+	}
+	
+	
+	private function percentagecount ($isanpl, $emanpl, $isanp, $emanp, $id){
+		
+		$summa = 0;
+		
+		if (sizeof($isanpl) == 0){
+			$isanpl = $isanp[$id];
+			
+		}
+		
+		if (sizeof($emanpl) == 0){
+			$emanpl = $emanp[$id];
+			
+		}
+
+		foreach ($isanpl as $itunnus){
+			foreach ($emanpl as $etunnus){
+
+				$potenssi = (strlen($itunnus) - 1) + (strlen($etunnus) - 1) + 1;
+				$summa = $summa + pow (0.5, $potenssi);				
+			}
+		}
+		
+		return $summa;
+		
+	}
 
 
 }

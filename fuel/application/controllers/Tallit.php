@@ -488,8 +488,23 @@ class Tallit extends CI_Controller
 					{
 						$vars['msg'] = "Muokkaus onnistui!";
 						$vars['msg_type'] = "success";
+                        
+                        $new_stable = array();
+                        $new_stable['nimi'] = $this->input->post('nimi');
+                        $new_stable['kuvaus'] = $this->input->post('kuvaus');
+                        $new_stable['url'] = $this->input->post('osoite');
+                        
+                        foreach ($new_stable as $key=>$value){
+                            if($this->_set_readonly($mode, $key, $data['stable'])){
+                                if(isset($data['stable'][$key])){
+                                    $new_stable[$key] = $data['stable'][$key];
+                                } else {
+                                    unset($new_stable[$key]);
+                                }
+                            }
+                        }
 						
-						$this->tallit_model->edit_stable($this->input->post('nimi'), $this->input->post('kuvaus'), $this->input->post('osoite'), $tnro);
+						$this->tallit_model->edit_stable($new_stable, $tnro);
 						$this->tallit_model->mass_edit_categories($tnro, $this->input->post('kategoria'));
 						
 						$vars['form'] = $this->_get_stable_form($mode, $tnro);
@@ -631,20 +646,10 @@ class Tallit extends CI_Controller
         
         $this->load->model('tallit_model');
 		
-		//set up empty stable array
-		$stable = array();
-		$stable['nimi'] ="";
-		$stable['kategoria'] = array();
-		$stable['kuvaus'] = "";
-		$stable['url'] = "http://";
-		$stable['lyhehd'] = "";
-		$stable['tallinumero'] = "";
-		
 		//fill it if needed
 		if($mode == 'edit' || $mode == 'admin')
         {
-            $stable = $this->tallit_model->get_stable($tnro);
-					
+			$stable = $this->tallit_model->get_stable($tnro);
 			$cats = $this->tallit_model->get_stables_categories($tnro);
             foreach ($cats as $cat) {
                 $stable['kategoria'][] = $cat['kategoria'];
@@ -661,34 +666,56 @@ class Tallit extends CI_Controller
 		//start the form
 		$this->load->library('form_builder', array('submit_value' => $submit[$mode]['text'], 'required_text' => '*Pakollinen kenttä'));
 		
-		$fields['nimi'] = array('type' => 'text', 'required' => TRUE, 'value' => $stable['nimi'], 'class'=>'form-control');
-        $fields['kuvaus'] = array('type' => 'textarea', 'value' => $stable['kuvaus'], 'cols' => 40, 'rows' => 3, 'class'=>'form-control');
-        $fields['osoite'] = array('type' => 'text', 'required' => TRUE, 'value' => $stable['url'], 'class'=>'form-control');
+		$fields['nimi'] = array('type' => 'text', 'required' => TRUE, 'value' => $stable['nimi'] ?? "", 'class'=>'form-control');
+        $fields['kuvaus'] = array('type' => 'textarea', 'value' => $stable['kuvaus'] ?? "", 'cols' => 40, 'rows' => 3, 'class'=>'form-control');
+        $fields['osoite'] = array('type' => 'text', 'required' => TRUE, 'value' => $stable['url'] ?? "http://", 'class'=>'form-control');
 		$fields['kategoria'] = array('type' => 'multi', 'mode' => 'checkbox', 'required' => TRUE,
-                                     'options' => $this->tallit_model->get_category_option_list(), 'value'=>$stable['kategoria'],
+                                     'options' => $this->tallit_model->get_category_option_list(), 'value'=>$stable['kategoria'] ?? null,
                                      'class'=>'form-control', 'wrapper_tag' => 'li');
 
 
         //make edits depending on the mode
         if($mode == 'application')
         {
-            $fields['lyhehd'] = array('type' => 'text', 'required' => TRUE, 'label' => 'Lyhenne', 'after_html' => '<span class="form_comment">2-4 merkin lyhenne tallillesi. Tästä muodostuu tallitunnus.</span>', 'class'=>'form-control');          
+            $fields['lyhehd'] = array('type' => 'text', 'required' => TRUE, 'label' => 'Lyhenne',
+                                      'after_html' => '<span class="form_comment">2-4 merkin lyhenne tallillesi. Tästä muodostuu tallitunnus.</span>',
+                                      'class'=>'form-control');          
         }
            
 		if($mode == 'admin')
 		{
-			$fields['tallinumero'] = array('type' => 'text', 'required' => TRUE, 'value' => $stable['tnro'], 'class'=>'form-control');
+			$fields['tallinumero'] = array('type' => 'text', 'required' => TRUE, 'value' => $stable['tnro'] ?? "", 'class'=>'form-control');
 		}else {
             $fields['luin_saannot'] = array('label'=>"Virtuaalitallini sivuilla lukee selvästi, että kyseessä on virtuaalitalli!", 'type' => 'checkbox',
                                             'after_html' => '<span class="form_comment">Uusia talleja valvotaan ja sääntöjä noudattamattomat voidaan poistaa rekisteristä!
                                         </span>', 'class'=>'form-control');
 
         }
+        
+        //asetetaan readonlyt paikalleen
+        foreach ($fields as $key=>&$input){
+            $input['readonly'] = $this->_set_readonly($mode, $key, $stable);
+        }
 
 		$this->form_builder->form_attrs = array('method' => 'post', 'action' => $submit[$mode]["url"]);
 
 
         return $this->form_builder->render_template('_layouts/basic_form_template', $fields);
+    }
+    
+    private function _set_readonly($type, $field, $stable = array()){
+        $readonly = array("nimi");
+        if($field == "tnro" || $field == "tallinumero"){
+            return true;
+        }else         if($type == 'admin' || $type == 'application'){
+            return false; //adminit saa muokata kaikkea, rekisteröintiin saa kirjata kaikkea
+        }else if(!isset($stable[$field])){
+            return false; // jos kenttään ei ole aiemmin kirjattu mitään, nyt saa kirjata
+        } else if(in_array($field, $readonly)){
+            return true; //jos kyse on readonlykentästä ja kentässä on joku arvo
+        }
+        return false;
+
     }
     
     private function _validate_stable_form($mode)
