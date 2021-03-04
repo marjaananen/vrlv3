@@ -151,7 +151,20 @@ if (isset($palkinnot) && sizeof($palkinnot) > 0){
     <?php
         if($sivu == 'suku' || empty($sivu))
         {
-             $pedigree_printer->createPedigree($suku, 4);
+             $pedigree_printer->createPedigree($suku, 4);             
+             $sspros = 0;
+             $skatopros = 1;
+             if(isset($suku) and sizeof($suku) > 0){
+              $sspros = $pedigree_printer->countInbreedingPercentage($suku);
+              $skatopros = $pedigree_printer->countMissingPercentage($suku);
+             }
+              
+              ?>
+              <h3>Suvun tiedot</h3>
+              <p>Sukusiitosprosentti: <?=$sspros;?>%<br />Sukukatokerroin: <?=$skatopros;?></p>
+              <p><a href="<?php echo site_url(). 'kasvatus/jalostus';?>">Lue lisää</a></p>
+              
+              <?php
         }
         else if($sivu == 'varsat'){
             echo $foals;

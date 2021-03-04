@@ -11,11 +11,21 @@
 <?php echo fuel_var('form', "")?>
 
 <?php
+$sspros = 0;
+$skatopros = 1;
 if(isset($suku) and sizeof($suku) > 0){
  $pedigree_printer->createPedigree($suku, 4);
- }
+ $sspros = $pedigree_printer->countInbreedingPercentage($suku);
+ $skatopros = $pedigree_printer->countMissingPercentage($suku);
+ 
+ 
+ echo '<h3>Suvun tiedot</h3>';
+ echo '<p>Sukusiitosprosentti: '.$sspros .'%<br />Sukukatokerroin: '.round($skatopros) .'</p>';
+ echo '<p><a href="'.site_url(). 'kasvatus/jalostus">Lue lisää</a></p>';
+}
  
  ?>
+ 
  <?php if(isset($varit)){?>
   <script src="<?php echo base_url();?>assets/js/periytymisjavascript.js"></script>
 

@@ -57,8 +57,8 @@ class Kasvatus extends CI_Controller
         
     }
     
-    public function varijalostus(){
-		$this->fuel->pages->render('kasvatus/varijalostus');
+    public function jalostus(){
+		$this->fuel->pages->render('jalostus/perinnollisyys');
 	}
     
     public function unelmasuku(){

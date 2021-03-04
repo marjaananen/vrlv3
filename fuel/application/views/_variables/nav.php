@@ -86,8 +86,8 @@ $nav['kasvatus/kasvattajanimet/rekisteroi'] = array('label' => 'Rekisteröi kasv
 $nav['kasvatus/kasvattajanimet/omat'] = array('label' => 'Omat kasvattajanimet', 'parent_id' => 'kasvatus/kasvattajanimet', 'active' => 'kasvatus/kasvattajanimet/omat');
 $nav['kasvatus/kasvatit'] = array('label' => 'Omat kasvatit', 'parent_id' => 'kasvatus', 'active' => 'kasvatus/kasvatit');
 $nav['kasvatus/unelmasuku'] = array('label' => 'Unelmasuku', 'parent_id' => 'kasvatus', 'active' => 'kasvatus/unelmasuku');
-$nav['kasvatus/varijalostus'] = array('label' => 'Värien periytyminen', 'parent_id' => 'kasvatus', 'active' => 'kasvatus/varijalostus'); 
-$nav['kasvatus/varilaskuri'] = array('label' => 'Periytymislaskuri', 'parent_id' => 'kasvatus/varijalostus', 'active' => 'kasvatus/varilaskuri'); 
+$nav['kasvatus/jalostus'] = array('label' => 'Perinnöllisyys', 'parent_id' => 'kasvatus', 'active' => 'kasvatus/jalostus'); 
+$nav['kasvatus/varilaskuri'] = array('label' => 'Värilaskuri', 'parent_id' => 'kasvatus/jalostus', 'active' => 'kasvatus/varilaskuri'); 
 
 //kantakirjat, laatikset, rekkaa kasvinimi
 //kilpailutoiminta alamenu

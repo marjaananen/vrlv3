@@ -6,6 +6,7 @@ class Pedigree_printer {
   var $td_class = "sukutk";
   var $colours = array('#FFDFD3', '#E2F0CB', '#C7CEEA', '#ECE4D0', ' #BCE0F0', '#DAE795', '#FBFBCC', '#F8E3EB', '#A8C1C6', '#D2C3C3', '#E7E3E0', '#F8C8A5', '#F6FFE5', '#BFEADC', '#E4FFFF');
   var $multiples = array();
+  var $uniques = array();
 
  public function createPedigree($pedigree, $max = 4) {
   //var_dump($pedigree);
@@ -26,7 +27,7 @@ class Pedigree_printer {
 		print	'</table>'."\n";
 	}
  
- private function _handle_multiples($pedigree, $max){
+ private function _handle_multiples($pedigree, $max = 12){
   $horses = array();
   $multiples = array();
   foreach($pedigree as $id=>$horse){
@@ -41,7 +42,7 @@ class Pedigree_printer {
     }
    }
   }
-  
+  $this->uniques = $horses;
   $this->multiples = $multiples;
  }
 
@@ -143,28 +144,56 @@ class Pedigree_printer {
     
   }
   
+  public function countMissingPercentage($pedigree){
+   $this->_handle_multiples($pedigree);
+
+   IF(sizeof($this->uniques) > 0 && sizeof($pedigree) > 0){
+    $pros = sizeof($this->uniques)/sizeof($pedigree);
+    return $pros;
+   }
+    else {
+     return 1;}
+  }
+  
+  
+  public function countInbreedingPercentage($pedigree){
+     //var_dump($pedigree);
+     $this->_handle_multiples($pedigree);
+     
+     if(sizeof($this->multiples) == 0){
+      return 0;
+     }else {
+      $lasketut = array();
+      $yhteiset_nimet = $this->_get_names_in_common("", $pedigree);
+      return $this->_inbreedingPercentage(null, $pedigree, $lasketut, $yhteiset_nimet);
+     }
+   
+  }
   
   
   
+  private function _inbreedingPercentage ($id, $pedigree, &$lasketut = array(), $yhteiset_nimet = array()){
+  if(isset($id) && empty($yhteiset_nimet)){ 
+   
+    foreach($pedigree as $key => $sukulainen){
+     if(isset($sukulainen['reknro'] ) && $sukulainen['reknro'] == $id){
+      $yhteiset_nimet = $this->_get_names_in_common($key, $pedigree);
+      break;
+     }
+    } 
+  }
   
-  public function inbreedingPercentage ($id, &$lasketut = array(), $yhteiset_nimet = array()){
-		if (array_key_exists($id, $lasketut)){
+  
+  //jos tämä on jo laskettu
+		if (isset($id) && array_key_exists($id, $lasketut)){
 			return $lasketut[$id];
 		}
 		
-		$CI =& get_instance();
-		$CI->load->model('Arkisto_model');
-
-		//Annettiinko yhteisiä nimiä valmiiksi?
-		if ($id > -1 || empty($yhteiset_nimet)){
-			$yhteiset_nimet = $CI->Arkisto_model->hae_yhteiset_nimet($id);
-	
-		}
-		
-		//löytyikö vieläkään?
-		if (empty($yhteiset_nimet)){			
-			$lasketut[$id] = 0;
-			$CI->Arkisto_model->muokkaa_perustietotaulu($id, array("ssprosentti"=>0), true);
+		//löytyikö yhteisiä nimiä?
+		if (empty($yhteiset_nimet)){
+   if(isset($id)){
+    $lasketut[$id] = 0;
+   }
 			return 0; //Jos ei yhteisiä nimiä, prosentti on 0.
 		}
 		
@@ -241,16 +270,49 @@ class Pedigree_printer {
 			
 		}
 		
-		if ($id > -1){
-			$CI->Arkisto_model->muokkaa_perustietotaulu($id, array("ssprosentti"=>$prosentti), true);
-		}
 		return  $prosentti;
 			
 		
 	}
+ 
+ private function _get_names_in_common($tunnus, $pedigree){
+  $kaikki_i = array();
+  $kaikki_e = array();
+
+  $yhteiset = array();
+  foreach ($pedigree as $key=>$value){
+     //jos haetaan esim. ei:n sukulaisia, e ja i, eli lyhemmät eli jälkeläoiset skipataan suorilta
+   //samoin skipataan ne jotka ei ala "ei", eli esim. eee jne.
+   if(!(strlen($tunnus) < strlen($key)) && substr($key, 0, strlen($tunnus)) === $tunnus && isset($value['reknro'])) {
+    if(substr($key, 0, strlen($tunnus)+1) === $tunnus.'i'){
+     if(in_array($value['reknro'], $kaikki_e)){
+      $value['vanhempi'] = $value['reknro'];
+      $value['tunnus'] = $key;
+      $value['syvyys'] = strlen($key);
+      $yhteiset[] = $value;
+     } else {
+      $kaikki_i[] = $value['reknro'];
+     }
+    }
+    else if(substr($key, 0, strlen($tunnus)+1) === $tunnus.'e'){
+     if(in_array($value['reknro'], $kaikki_i)){
+      $value['vanhempi'] = $value['reknro'];
+      $value['tunnus'] = $key;
+      $value['syvyys'] = strlen($key);
+      $yhteiset[] = $value;
+     } else {
+      $kaikki_e[] = $value['reknro'];
+     }
+    }
+   
+   } 
+  }
+  
+  return $yhteiset;
+ }
 	
 	
-	private function percentagecount ($isanpl, $emanpl, $isanp, $emanp, $id){
+	private function _percentagecount ($isanpl, $emanpl, $isanp, $emanp, $id){
 		
 		$summa = 0;
 		
