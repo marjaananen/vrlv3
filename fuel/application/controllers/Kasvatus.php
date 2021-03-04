@@ -399,6 +399,9 @@ class Kasvatus extends CI_Controller
                                                                                               $this->input->post('kasvatusrotu')));
 						
 						$data['tulokset'] = $this->load->view('misc/taulukko', $vars, TRUE);
+                        $data['form'] = $this->_get_name_search_form($hakudata);
+
+                        $this->fuel->pages->render('misc/haku', $data);
 
 					}
 					else {
@@ -406,10 +409,11 @@ class Kasvatus extends CI_Controller
 					
 					}
 			}
-		}
+		}else {
 		$data['form'] = $this->_get_name_search_form($hakudata);
 
 		$this->fuel->pages->render('misc/haku', $data);
+        }
 
 		
 	}
