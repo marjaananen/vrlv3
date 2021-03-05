@@ -238,8 +238,7 @@ class Virtuaalihevoset extends CI_Controller
               
                     
             $data['form'] =  $this->form_builder->render_template('_layouts/basic_form_template', $fields);
-            $data['title2'] = "Kaikki omat hevoset";
-            
+
              $sivu['sivu'] = 'omat';
             $sivu['data'] =  $this->load->view('misc/haku', $data, TRUE);
             
@@ -329,7 +328,7 @@ class Virtuaalihevoset extends CI_Controller
         }
         $fields['tasot'] = array('type' => 'submit', 'value' => 'Muokkaa maksimitasoja');
         
-        $fields['operaatiot3'] = array('type' => 'section', 'tag' => 'h3', 'label' => 'Muokkaa', 'before_html'=>'</div><div class="form">');
+        $fields['operaatiot3'] = array('type' => 'section', 'tag' => 'h3', 'label' => 'Muokkaa', 'before_html'=>'</div><div class="form muokkaa-massatuhoase">');
         
         
         $this->load->model("Tallit_model");

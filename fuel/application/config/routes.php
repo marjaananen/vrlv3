@@ -183,9 +183,10 @@ $route['liitto/rajapinta'] = "rajapinta";
 $route['profiili/vaihda_salasana'] = 'auth/change_password';
 $route['profiili/tunnus'] = "jasenyys/tunnus/";
 $route['profiili/tunnus/(:any)/(:any)'] = "jasenyys/tunnus/$1/$2";
-
-
-
+$route['profiili/hevoset'] = "virtuaalihevoset/omat";
+$route['profiili/tallit'] = "tallit/omat";
+$route['profiili/kasvattajanimet'] = "kasvatus/kasvattajanimet/omat";
+$route['profiili/kilpailut'] = "kilpailutoiminta/omat";
 
 $route['default_controller'] = 'Main';
 

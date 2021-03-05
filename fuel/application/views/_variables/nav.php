@@ -180,6 +180,10 @@ $nav['profiili/tunnus'] = array('label' => 'Omat tiedot', 'parent_id' => 'profii
 $nav['profiili/tiedot'] = array('label' => 'Muokkaa tietoja', 'parent_id' => 'profiili', 'active' => 'profiili/tiedot');
 $nav['profiili/vaihda_salasana'] = array('label' => 'Vaihda salasana', 'parent_id' => 'profiili', 'active' => 'profiili/vaihda_salasana');
 $nav['profiili/pikaviestit'] = array('label' => 'Omat pikaviestit', 'parent_id' => 'profiili', 'active' => 'profiili/pikaviestit');
+$nav['profiili/hevoset'] = array('label' => 'Omat hevoset', 'parent_id' => 'profiili', 'active' => 'profiili/hevoset');
+$nav['profiili/tallit'] = array('label' => 'Omat tallit', 'parent_id' => 'profiili', 'active' => 'profiili/tallit');
+$nav['profiili/kasvattajanimet'] = array('label' => 'Omat kasvattajanimet', 'parent_id' => 'profiili', 'active' => 'profiili/kasvattajanimet');
+$nav['profiili/kilpailut'] = array('label' => 'Omat kilpailut', 'parent_id' => 'profiili', 'active' => 'profiili/kilpailut');
 
 $nav['yllapito/hevosrekisteri/polveutumistarkastus'] = array('label' => 'Polveutumistarkastus', 'parent_id' => 'yllapito/hevosrekisteri', 'active' => 'yllapito/hevosrekisteri/polveutumistarkastus$|yllapito/hevosrekisteri/polveutumistarkastus/:any');
 $nav['yllapito/hevosrekisteri/varit'] = array('label' => 'Hallitse värejä', 'parent_id' => 'yllapito/hevosrekisteri', 'active' => 'yllapito/hevosrekisteri/varit');
