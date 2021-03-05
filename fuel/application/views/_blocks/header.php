@@ -86,7 +86,7 @@ if(!empty($this->ion_auth))
 					
 			$group_amount = $this->ion_auth->get_users_groups()->result_array();
           
-			if ($this->ion_auth->is_admin() || sizeof($group_amount) > 2 || (sizeof($group_amount) == 1 && $group_amount[0]['name'] !== "members")){
+			if ($this->ion_auth->is_admin() || sizeof($group_amount) >= 2 || (sizeof($group_amount) == 1 && $group_amount[0]['name'] !== "members")){
 				echo '<a href="'.site_url().'yllapito"><button type="button" class="btn btn-primary btn-block">
 				<span class="glyphicon glyphicon-cog" aria-hidden="true"></span> Ylläpitotoiminnot</button></a>';
 			}
@@ -158,7 +158,7 @@ if(!empty($this->ion_auth))
 					
 			$group_amount = $this->ion_auth->get_users_groups()->result_array();
           
-			if ($this->ion_auth->is_admin() || sizeof($group_amount) > 2 || (sizeof($group_amount) == 1 && $group_amount[0]['name'] !== "members")){
+			if ($this->ion_auth->is_admin() || sizeof($group_amount) >= 2 || (sizeof($group_amount) == 1 && $group_amount[0]['name'] !== "members")){
 				echo '<a href="'.site_url().'yllapito"><button type="button" class="btn btn-primary btn-block">
 				<span class="glyphicon glyphicon-cog" aria-hidden="true"></span> Ylläpitotoiminnot</button></a>';
 			}

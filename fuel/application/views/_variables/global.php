@@ -19,6 +19,12 @@ $vars['main_quickmenu'] = '<li><a href="'.site_url('liitto/yllapito').'">Yhteyst
 <li><a href="'.site_url('jasenyys/liity').'">Rekisteröidy jäseneksi</a></li>
 <li><a href="'.site_url().'wiki">VirtuaaliWiki</a></li>    
 ';
+
+
+
+$vars['red_bar'] = false;
+$vars['red_bar_message'] = "Uusi VRL on nyt otettu käyttöön! Osoite virtuaalihevoset.net osoittaa toistaiseksi vanhaan VRL:oon,
+joka ei ole enää käytössä, mutta sen vaihtaminen on työn alla.";
 // page specific variables
 $pages = array();
 
