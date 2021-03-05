@@ -123,8 +123,10 @@ if(!empty($this->ion_auth))
 </header>
 <!-- Begin Body -->
 
-<!-- <div class="info"><p>Tähän tulee tarvittaessa info-viesti</p></div> -->
 
+<?php if($red_bar) { ?>
+	<div class="info"><p><?php echo $red_bar_message; ?></p></div>
+<?php } ?>
 
 
 <div class="container">
