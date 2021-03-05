@@ -56,9 +56,9 @@ CREATE TABLE `vrlv3_hevosrekisteri` (
   `polv_tark` INT(1) UNSIGNED NULL DEFAULT 0,
   `polv_tark_vrl` INT(5) UNSIGNED ZEROFILL NULL DEFAULT NULL,
   `polv_tark_date` DATETIME NULL DEFAULT NULL,
-  `polv_pros` DECIMAL(11,8) NULL DEFAULT NULL;
+  `polv_pros` DECIMAL(11,8) NULL DEFAULT NULL,
 
-  PRIMARY KEY (`reknro`);
+  PRIMARY KEY (`reknro`)
 
 
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
@@ -97,7 +97,6 @@ CREATE TABLE `vrlv3_hevosrekisteri_sukutaulut` (
 -- Indexes for table `vrlv3_hevosrekisteri`
 --
 ALTER TABLE `vrlv3_hevosrekisteri`
-  ADD PRIMARY KEY (`reknro`),
   ADD KEY `rotu` (`rotu`),
   ADD KEY `hyvaksyi` (`hyvaksyi`),
   ADD KEY `vrlv3_hevosrekisteri_ibfk_3` (`kotitalli`),
@@ -145,7 +144,7 @@ ALTER TABLE `vrlv3_hevosrekisteri`
   ADD CONSTRAINT `vrlv3_hevosrekisteri_ibfk_6` FOREIGN KEY (`painotus`) REFERENCES `vrlv3_lista_painotus` (`pid`),
   ADD CONSTRAINT `vrlv3_hevosrekisteri_ibfk_7` FOREIGN KEY (`syntymamaa`) REFERENCES `vrlv3_lista_maat` (`id`),
   ADD CONSTRAINT `vrlv3_hevosrekisteri_ibfk_8` FOREIGN KEY (`kasvattaja_tunnus`) REFERENCES `vrlv3_tunnukset` (`tunnus`) ON DELETE SET NULL ON UPDATE SET NULL,
-  ADD CONSTRAINT `vrlv3_hevosrekisteri_ibfk_9` FOREIGN KEY (`kasvattaja_talli`) REFERENCES `vrlv3_tallirekisteri` (`tnro`) ON DELETE RESTRICTON ON UPDATE CASCADE,
+  ADD CONSTRAINT `vrlv3_hevosrekisteri_ibfk_9` FOREIGN KEY (`kasvattaja_talli`) REFERENCES `vrlv3_tallirekisteri` (`tnro`) ON DELETE RESTRICT ON UPDATE CASCADE,
   ADD  CONSTRAINT `vrlv3_hevosrekisteri_ibfk_13` FOREIGN KEY (`polv_tark_vrl`) REFERENCES `vrlv3_tunnukset` (`tunnus`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 --

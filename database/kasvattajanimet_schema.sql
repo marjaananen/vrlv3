@@ -58,7 +58,7 @@ CREATE TABLE `vrlv3_kasvattajanimet` (
 
 CREATE TABLE `vrlv3_kasvattajanimet_omistajat` (
   `kid` int(11) NOT NULL,
-  `tunnus` int(5) UNSIGNED ZEROFILL NOT NULL
+  `tunnus` int(5) UNSIGNED ZEROFILL NOT NULL,
   `taso` int(1) NOT NULL DEFAULT '1'
 
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
@@ -81,9 +81,7 @@ CREATE TABLE `vrlv3_kasvattajanimet_rodut` (
 --
 -- Indexes for table `vrlv3_kasvattajanimet`
 --
-ALTER TABLE `vrlv3_kasvattajanimet`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `vrlv3_kasvattajanimet_talli_idx` (`tnro`);
+
 
 --
 -- Indexes for table `vrlv3_kasvattajanimet_omistajat`

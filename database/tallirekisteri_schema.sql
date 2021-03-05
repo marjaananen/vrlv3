@@ -69,7 +69,7 @@ CREATE TABLE `vrlv3_tallirekisteri_muutokset` (
   `id` int(11) NOT NULL,
   `tnro` varchar(8) NOT NULL,
   `muokkasi` int(5) UNSIGNED ZEROFILL NOT NULL,
-  `aika` datetime NOT NULL DEFAULT '0000-00-00 00:00:00' ON UPDATE CURRENT_TIMESTAMP,
+  `aika` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `old_value` varchar(255) DEFAULT NULL,
   `new_value` varchar(255) DEFAULT NULL,
   `description` varchar(255) DEFAULT NULL,
@@ -99,7 +99,7 @@ CREATE TABLE `vrlv3_tallirekisteri_paivitetty` (
   `id` int(11) NOT NULL,
   `tnro` varchar(8) NOT NULL,
   `paivitti` int(5) UNSIGNED ZEROFILL NOT NULL,
-  `aika` datetime NOT NULL
+  `aika` datetime NOT NULL,
   `text` text DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 

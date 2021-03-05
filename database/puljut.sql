@@ -1,8 +1,4 @@
-CREATE TABLE `vrlv3_lista_puljutyyppi` (
-  `pid` smallint(2) NOT NULL AUTO_INCREMENT,
-  `tyyppi` varchar(20) NOT NULL,
-  PRIMARY KEY (`pid`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
 
 CREATE TABLE `vrlv3_puljut` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -37,10 +33,6 @@ CREATE TABLE `vrlv3_puljut_rodut` (
   CONSTRAINT `puljunimi` FOREIGN KEY (`pulju`) REFERENCES `vrlv3_puljut` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
-
-INSERT INTO `vrlv3`.`vrlv3_lista_puljutyyppi` (`pid`, `tyyppi`) VALUES ('1', 'kantakirja');
-INSERT INTO `vrlv3`.`vrlv3_lista_puljutyyppi` (`pid`, `tyyppi`) VALUES ('2', 'rotuyhdistys');
-INSERT INTO `vrlv3`.`vrlv3_lista_puljutyyppi` (`pid`, `tyyppi`) VALUES ('3', 'laatuarvostelu');
 
 INSERT INTO `vrlv3`.`vrlv3_puljut` (`id`, `nimi`, `lyhenne`, `toiminnassa`, `url`, `kuvaus`, `tyyppi`) VALUES ('1', 'Virtuaalinen Hevoskantakirja', 'hevosktk', '1', 'http://sumuvuorten.net/hevosktk/', 'Virtuaalinen Hevoskantakirja on kantakirja kaikille niille virtuaalihevosroduille joille ei ole omaa kantakirjaa. Hevoskantakirja on ponikantakirjan ohella vanhimpia virtuaalikantakirjoja.', '1');
 INSERT INTO `vrlv3`.`vrlv3_puljut` (`nimi`, `lyhenne`, `toiminnassa`, `url`, `kuvaus`, `tyyppi`) VALUES ('Virtuaalinen Ponikantakirja', 'poniktk', '1', 'http://sudenmarja.org/poniktk/', 'Virtuaalinen Ponikantakirja on kantakirja kaikille niille virtuaaliponiroduille, joille ei ole omaa kantakirjaa. Ponikantakirja perustettiin vuonna 2001. ', '1');
