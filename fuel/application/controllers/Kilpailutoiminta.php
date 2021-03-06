@@ -715,6 +715,12 @@ public function k($id = -1, $error = array()){
         $this->load->helper('form');
         
         $data = $this->Kisakeskus_model->hae_kutsutiedot($id);
+        
+        if(isset($data['url']) && strlen($data['url']) > 10){
+                $this->fuel->pages->render('misc/naytaviesti', array('msg_type' => 'info',
+                                                                     'msg' => 'Tämä on vanhan tyyppinen porrastettu kilpailu. Kilpailukutsu: <a href="'.$data['url'].'">'.$data['url'].'</a>'));
+
+        }else {
         $data['id'] = $id;
         $data['error'] = $error;
         $data['vip_sql'] = $data["vip"];
@@ -736,6 +742,7 @@ public function k($id = -1, $error = array()){
         $data['tulos'] = $this->Kisakeskus_model->get_result(null, $data['kisa_id']);
         
         $this->fuel->pages->render('kisakeskus/kutsu', $data);
+        }
     }
 }
 
