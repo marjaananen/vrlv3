@@ -24,7 +24,7 @@
                     echo ", ";
                     }?>
                     
-                <a href="<?php site_url('tunnus/VRL-'.$yp['omistaja']); ?>">VRL-<?php echo $yp['omistaja']; ?></a> <strong><?php echo $yp['nimimerkki'];?></strong>
+                <a href="<?php ECHO site_url('tunnus/VRL-'.$yp['omistaja']); ?>">VRL-<?php echo $yp['omistaja']; ?></a> <strong><?php echo $yp['nimimerkki'];?></strong>
         
             <?php
             }}

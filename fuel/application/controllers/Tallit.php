@@ -763,7 +763,7 @@ class Tallit extends CI_Controller
     private function _validate_stable_search_form(){
         $this->load->library('form_validation');
         
-        $this->form_validation->set_rules('nimi', 'Nimi', "min_length[4]|regex_match[/^[A-Za-z0-9_\-.:,; *~#&'@()]*$/]");
+        $this->form_validation->set_rules('nimi', 'Nimi', "min_length[4]");
 		$this->form_validation->set_rules('kategoria', 'Kategoria', 'min_length[1]|max_length[2]');
 		$this->form_validation->set_rules('tallinumero', 'Tallinumero', "min_length[6]|max_length[8]|regex_match[/^[A-Z0-9]*$/]");
         return $this->form_validation->run();

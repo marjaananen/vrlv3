@@ -102,6 +102,7 @@ class Migraatio_model extends Base_module_model
     //Applications
     function migrate_tunnukset()
     {
+
         //VRLV3_TUNNUKSET
         $query = $this->db->query("SELECT * from tunnukset WHERE NOT EXISTS(SELECT * FROM vrlv3_tunnukset WHERE tunnukset.tunnus = vrlv3_tunnukset.tunnus)");
         foreach ($query->result() as $row)
@@ -194,7 +195,9 @@ class Migraatio_model extends Base_module_model
             $data_nick['vaihtanut'] = $row->vaihtanut;
             $data_nick['piilotettu'] = $row->piilotettu;
         
-            
+            if($data_nick['vaihtanut'] == '0000-00-00 00:00:00'){
+                $data_nick['vaihtanut'] = null;
+            }
             $this->db->where(array('tunnus'=>$row->tunnus, 'vaihtanut'=>$row->vaihtanut));
             $this->db->from('vrlv3_tunnukset_nimimerkit');
             $amount = $this->db->count_all_results();
@@ -548,7 +551,9 @@ WHERE EXISTS (Select * from vrlv3_tunnukset where tunnus = b.merkkasi)');
     
     
     public function migrate_kasvattajanimet(){
-        /*//siirretään kasvattajanimet sellaisenaan
+    
+    /*
+        //siirretään kasvattajanimet sellaisenaan
         $this->db->query("INSERT INTO vrlv3_kasvattajanimet (id, kasvattajanimi, rekisteroity, tila) SELECT id, kasvattajanimi, rekisteroity, tila FROM kasvattajanimet");
         //lisätään kasvattajanimelle tallit, mutta tarkistetaan onko talli olemassa
         $this->db->query("UPDATE vrlv3_kasvattajanimet
@@ -580,7 +585,7 @@ WHERE EXISTS (Select * from vrlv3_tunnukset where tunnus = b.merkkasi)');
                         WHERE vrlv3_kasvattajanimet.id = kasvattajanimet.id))");
         echo "kasvatajanimen omistajat done";
                 
-
+*/
         $this->db->query("UPDATE vrlv3_hevosrekisteri
             INNER JOIN hevosrekisteri_kasvattaja ON vrlv3_hevosrekisteri.reknro = hevosrekisteri_kasvattaja.reknro
             SET vrlv3_hevosrekisteri.kasvattajanimi = hevosrekisteri_kasvattaja.kasvattajanimi");
@@ -596,9 +601,9 @@ WHERE EXISTS (Select * from vrlv3_tunnukset where tunnus = b.merkkasi)');
             SET vrlv3_hevosrekisteri.kasvattaja_talli = hevosrekisteri_kasvattaja.kasvattajatalli
             WHERE EXISTS(SELECT * FROM vrlv3_tallirekisteri 
                         WHERE vrlv3_tallirekisteri.tnro = hevosrekisteri_kasvattaja.kasvattajatalli)");
-        */
         
-                
+        
+            
         $this->db->query("UPDATE vrlv3_hevosrekisteri
             INNER JOIN vrlv3_kasvattajanimet ON vrlv3_hevosrekisteri.kasvattajanimi = vrlv3_kasvattajanimet.kasvattajanimi
             SET vrlv3_hevosrekisteri.kasvattajanimi_id = vrlv3_kasvattajanimet.id

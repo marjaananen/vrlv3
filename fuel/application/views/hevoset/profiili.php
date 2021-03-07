@@ -66,6 +66,14 @@ if(isset($hevonen['polv_tark']) && $hevonen['polv_tark'] == 1){
     
 }
 
+$exomistajatieto = "";
+foreach($exowners as $o){
+ 
+    $exomistajatieto .= '<li>'.$o['nimimerkki'] . " (<a href='" . site_url('tunnus') . "/VRL-" . $o['omistaja'] . "'>VRL-" . $o['omistaja'] . "</a>) " .
+    " <small>Muutettu: ".date("d.m.Y",strtotime($o['aika'])).", Muutti: VRL-" . $o['muokkasi'] . "</small></li>";
+
+}
+
 $edit = "";
 
 if(isset($edit_tools) && $edit_tools == true){
@@ -92,6 +100,8 @@ if(isset($edit_tools) && $edit_tools == true){
 }
 
 
+
+
 ?>
 
 <table class="table table-striped">
@@ -107,6 +117,10 @@ if(isset($edit_tools) && $edit_tools == true){
    <tr><th scope="row">Kasvattajanimi</th><td> <?php echo $kasvattajanimitieto; ?></td></tr>
    <tr><th scope="row">Kasvattaja</th><td> <?php echo $kasvattajatieto; ?></td></tr>
    <tr><th scope="row">Omistajat</th><td> <?php echo $omistajatieto; ?></td></tr>
+   <?php if (strlen($exomistajatieto)>1){?>
+      <tr><th scope="row">Omistajahistoria</th><td> <?php echo $exomistajatieto; ?></td></tr>
+   <?php } ?>
+
 </table>
  
 

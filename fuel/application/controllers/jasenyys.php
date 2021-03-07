@@ -154,18 +154,16 @@ class Jasenyys extends CI_Controller
             $fields['email'] = "Ei saatavilla.";
             
             
-            if($user->nayta_email == 1){
-                if (!$fields['logged_in']){
-                      $fields['email'] = "Kirjaudu sisään nähdäksesi!";
-                }else {
-                     $fields['email'] = $user->email;
-                }
-            } else {
-                 if($fields['oma'] || $fields['admin']){
+            if (!$fields['logged_in']){
+                 $fields['email'] = "Kirjaudu sisään nähdäksesi!";
+            }else if($user->nayta_email == 1){
+                 $fields['email'] = $user->email;
+            
+            } else if($fields['oma'] || $fields['admin']){
                     $fields['email'] = $user->email;
                     $fields['email'] .= " (Näytetään vain käyttäjälle itselleen ja ylläpidolle)";
-                 }
-            }         
+            }
+                    
         
             
             if($fields['logged_in']){

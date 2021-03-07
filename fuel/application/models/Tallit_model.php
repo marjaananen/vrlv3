@@ -64,7 +64,7 @@ class Tallit_model extends Base_module_model
         if($cats){
             $this->db->select('vrlv3_tallirekisteri.tnro, nimi, perustettu, lopettanut, katelyh, kuvaus');
             $this->db->join('vrlv3_tallirekisteri_kategoriat', 'vrlv3_tallirekisteri.tnro = vrlv3_tallirekisteri_kategoriat.tnro', 'left');
-            $this->db->join('vrlv3_lista_tallikategoriat', 'vrlv3_lista_tallikategoriat.kat = vrlv3_tallirekisteri_kategoriat.kategoria');
+            $this->db->join('vrlv3_lista_tallikategoriat', 'vrlv3_lista_tallikategoriat.kat = vrlv3_tallirekisteri_kategoriat.kategoria', 'left');
         }else {
             $this->db->select('vrlv3_tallirekisteri.tnro, nimi, perustettu, lopettanut, kuvaus');
 
@@ -258,7 +258,7 @@ class Tallit_model extends Base_module_model
         $this->db->select('vrlv3_tallirekisteri.tnro, nimi, perustettu, katelyh, lopettanut');
         $this->db->from('vrlv3_tallirekisteri');
         $this->db->join('vrlv3_tallirekisteri_kategoriat', 'vrlv3_tallirekisteri.tnro = vrlv3_tallirekisteri_kategoriat.tnro', 'left');
-        $this->db->join('vrlv3_lista_tallikategoriat', 'vrlv3_lista_tallikategoriat.kat = vrlv3_tallirekisteri_kategoriat.kategoria');
+        $this->db->join('vrlv3_lista_tallikategoriat', 'vrlv3_lista_tallikategoriat.kat = vrlv3_tallirekisteri_kategoriat.kategoria', 'left');
         
         if(!empty($name))
         {
@@ -296,7 +296,7 @@ class Tallit_model extends Base_module_model
         $this->db->select('MAX(vrlv3_tallirekisteri_paivitetty.aika) as aika, vrlv3_tallirekisteri_paivitetty.tnro, nimi, perustettu, katelyh, lopettanut');
         $this->db->from('vrlv3_tallirekisteri');
         $this->db->join('vrlv3_tallirekisteri_kategoriat', 'vrlv3_tallirekisteri.tnro = vrlv3_tallirekisteri_kategoriat.tnro', 'left');
-        $this->db->join('vrlv3_lista_tallikategoriat', 'vrlv3_lista_tallikategoriat.kat = vrlv3_tallirekisteri_kategoriat.kategoria');
+        $this->db->join('vrlv3_lista_tallikategoriat', 'vrlv3_lista_tallikategoriat.kat = vrlv3_tallirekisteri_kategoriat.kategoria', 'left');
         $this->db->join('vrlv3_tallirekisteri_paivitetty', 'vrlv3_tallirekisteri_paivitetty.tnro = vrlv3_tallirekisteri.tnro');
         $this->db->group_by('tnro');
         $this->db->order_by('aika', 'DESC');

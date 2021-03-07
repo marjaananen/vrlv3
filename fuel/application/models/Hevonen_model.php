@@ -559,6 +559,22 @@ class Hevonen_model extends Base_module_model
         return array();
     }
     
+    function get_horse_ex_owners($reknro)
+    {
+        $this->db->select('omistaja, nimimerkki, aika, muokkasi');
+        $this->db->from('vrlv3_hevosrekisteri_omistajamuutokset');
+        $this->db->join('vrlv3_tunnukset', 'vrlv3_tunnukset.tunnus = vrlv3_hevosrekisteri_omistajamuutokset.omistaja');
+        $this->db->where('reknro', $this->CI->vrl_helper->vh_to_number($reknro));
+        $query = $this->db->get();
+        
+        if ($query->num_rows() > 0)
+        {
+            return $query->result_array();
+        }
+        
+        return array();
+    }
+    
     function get_owners_horses($nro, $only_alive = false, $rotu = null)
     {
         $this->db->select("h.reknro, h.nimi, r.lyhenne as rotu, IF(sukupuoli='1', 'tamma', IF(sukupuoli='2', 'ori', 'ruuna')) as sukupuoli,

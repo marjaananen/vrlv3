@@ -11,15 +11,15 @@ public function __construct()
 	}
     
     public $taulut = array("hev"=>array("t"=>"vrlv3_hevosrekisteri", "id"=>"reknro",
-										"ot"=>array("om"=>"omistaja", "id"=> "reknro", "t"=>"taso")),
+										"ot"=>array("om"=>"omistaja", "id"=> "reknro", "t"=>"taso"), "tm"=>true),
                            "tal"=>array("t"=>"vrlv3_tallirekisteri", "id"=>"tnro",
-										"ot"=>array("om"=>"omistaja", "id"=> "tnro", "t"=>"taso")),
+										"ot"=>array("om"=>"omistaja", "id"=> "tnro", "t"=>"taso"),"tm"=>false),
                            "kasv"=>array("t"=>"vrlv3_kasvattajanimet", "id"=>"id",
-										 "ot"=>array("om"=>"tunnus", "id"=> "kid", "t"=>"taso")),
+										 "ot"=>array("om"=>"tunnus", "id"=> "kid", "t"=>"taso"),"tm"=>false),
 						    "jaos"=>array("t"=>"vrlv3_kisat_jaokset", "id"=>"id",
-										  "ot"=>array("om"=>"tunnus", "id"=> "jid", "t"=>"taso")),
+										  "ot"=>array("om"=>"tunnus", "id"=> "jid", "t"=>"taso"),"tm"=>false),
 							"pulju"=>array("t"=>"vrlv3_puljut", "id"=>"id",
-										  "ot"=>array("om"=>"tunnus", "id"=> "jid", "t"=>"taso"))
+										  "ot"=>array("om"=>"tunnus", "id"=> "jid", "t"=>"taso"),"tm"=>false)
 
                           );
                            
@@ -385,6 +385,16 @@ private function _remove_me($item, $taulu, &$msg){
                 $data = array($id => $item, $om => $owner);
                 $this->CI->db->where($data);
                 $this->CI->db->delete($taulunimi);
+				
+				if($taulu['tm']){
+
+					$data['muokkasi'] = $this->CI->ion_auth->user()->row()->tunnus;
+					$data['aika'] = date('Y-m-d H.i.s');
+					$taulunimi = $taulu['t'] . "_omistajamuutokset";
+					
+					$this->CI->db->insert($taulunimi, $data);
+
+				}
                 
             }
             return true;

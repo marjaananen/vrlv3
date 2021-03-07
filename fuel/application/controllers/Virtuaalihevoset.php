@@ -112,6 +112,8 @@ class Virtuaalihevoset extends CI_Controller
         }
         
         $vars['owners'] = $this->hevonen_model->get_horse_owners($reknro);
+        $vars['exowners'] = $this->hevonen_model->get_horse_ex_owners($reknro);
+
         $vars['palkinnot'] = $this->jaos_model->get_event_horse_prizes($this->vrl_helper->vh_to_number($reknro));
         $vars['show_palkinnot'] = $this->jaos_model->get_show_horse_prizes($this->vrl_helper->vh_to_number($reknro));
 
