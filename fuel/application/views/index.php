@@ -8,7 +8,7 @@ säilöminen, onhan VRL ollut mukana harrastuksen vaiheissa jo kolmatta vuosikym
 </p>
 
 <p>
-Toimintaan on helppo tulla mukaan. Ensikertalaisen kannattaa aloittaa Mikä on virtuaalimaailma? Infosivulta. Monipuolisemmin harrastuksen koukeroita ja historiaa avaa VirtuaaliWiki. Jos kiinnostuit virtuaalihevosharrastuksesta, tai olet jo harrastaja, saat VRL:stä eniten irti rekisteröimällä itsellesi VRL-tunnuksen. VRL-tunnuksen avulla jatkaa tutustumista esimerkiksi ilmoittamalla virtuaalitallisi tallilistalle, rekisteröimällä hevosesi tai osallistumalla kilpailuihin. Tutustu myös moniin liiton alaisiin järjestöihin ja yhdistyksiin, jotka järjestävät erilaista toimintaa virtuaalimaailmassa.
+Toimintaan on helppo tulla mukaan. Ensikertalaisen kannattaa aloittaa <a href="<?php echo base_url('wiki')?>" title="Lue lisää VirtuaaliWikistä" target="_blank">VirtuaaliWikistä</a>, joka avaa monipuolisesti harrastuksen koukeroita ja historiaa. Jos kiinnostuit virtuaalihevosharrastuksesta tai olet jo harrastaja, saat VRL:stä eniten irti rekisteröimällä itsellesi VRL-tunnuksen. VRL-tunnuksen avulla voit jatkaa tutustumista esimerkiksi ilmoittamalla virtuaalitallisi tallilistalle, rekisteröimällä hevosesi tai osallistumalla kilpailuihin. Tutustu myös moniin liiton alaisiin järjestöihin ja yhdistyksiin, jotka järjestävät erilaista toimintaa virtuaalimaailmassa.
 
 </p>
 <h2>Ylläpito</h2>
