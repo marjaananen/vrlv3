@@ -1438,15 +1438,16 @@ class Virtuaalihevoset extends CI_Controller
         }
         $fields['kasvattaja_talli'] = array('label'=> 'Kasvattajatalli', 'type' => 'text', 'class'=>'form-control', 'value'=> $poni['kasvattaja_talli'] ?? '', 'class'=>'form-control',
                                     'after_html'=> $kasvattaja_str);
-        $fields['kasvattaja_tunnus'] = array('label'=>'Kasvattajan VRL-tunnus', 'type' => 'text', 'class'=>'form-control', 'value'=>  $this->vrl_helper->get_vrl($poni['kasvattaja_tunnus'] ?? "") , 'class'=>'form-control', 'after_html' => '<span class="form_comment">Muodossa VRL-00000. Kasvattajan VRL-tunnus. Jätä tyhjäksi, jos kyseessä evm-hevonen.</span>');
+        $kasvattaja_tunnus = $poni['kasvattaja_tunnus'] ?? "";
+        $fields['kasvattaja_tunnus'] = array('label'=>'Kasvattajan VRL-tunnus', 'type' => 'text', 'class'=>'form-control', 'value'=>  $this->vrl_helper->get_vrl($kasvattaja_tunnus) , 'class'=>'form-control', 'after_html' => '<span class="form_comment">Muodossa VRL-00000. Kasvattajan VRL-tunnus. Jätä tyhjäksi, jos kyseessä evm-hevonen.</span>');
         $i = null;
         $e = null;
         
         if(isset($poni['i_nro'])){
-            $this->vrl_helper->get_vh($poni['i_nro']);  
+            $i = $this->vrl_helper->get_vh($poni['i_nro']);  
         }
         if(isset($poni['e_nro'])){
-            $this->vrl_helper->get_vh($poni['e_nro']);  
+            $e = $this->vrl_helper->get_vh($poni['e_nro']);  
         }
         $fields['i_nro'] = array('type' => 'text', 'label'=> 'Isän rekisterinumero','class'=>'form-control', 'value'=> $i ?? '', 'class'=>'form-control', 'after_html' => '<span class="form_comment">Isän rekisterinumero.</span>');
         $fields['e_nro'] = array('type' => 'text', 'label'=> 'Emän rekisterinumero', 'class'=>'form-control', 'value'=> $e ?? '', 'class'=>'form-control', 'after_html' => '<span class="form_comment">Emän rekisterinumero. </span>');

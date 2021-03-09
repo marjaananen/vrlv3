@@ -418,6 +418,9 @@ class Hevonen_model extends Base_module_model
 
         }
         
+        if(isset($hevonen['kasvattaja_tunnus'])){
+            $hevonen['kasvattaja_tunnus'] = $this->CI->vrl_helper->vrl_to_number($hevonen['kasvattaja_tunnus']);
+        }
 
         if(isset($hevonen['kasvattajanimi'])){
             $this->db->select('id');
