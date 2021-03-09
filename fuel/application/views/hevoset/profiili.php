@@ -5,7 +5,7 @@
     $kasvattajanimitieto = "-";
     if (!isset($hevonen['kasvattajanimi_id']) || strlen($hevonen['kasvattajanimi_id']) == 0){
         if (isset($hevonen['kasvattajanimi'])){
-            $kasvattajanimitieto == $hevonen['kasvattajanimi'];
+            $kasvattajanimitieto = $hevonen['kasvattajanimi'] . " (ei rekisteröity)";
         }    
     }
     else {

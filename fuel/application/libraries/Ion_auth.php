@@ -361,6 +361,7 @@ class Ion_auth
 		return TRUE;
 	}
 
+	
 	/**
 	 * Auto logs-in the user if they are remembered
 	 * @return bool Whether the user is logged in

@@ -472,7 +472,7 @@ class Jaos
     
     function validate_class_form(){
       $this->CI->load->library('form_validation');
-      $this->CI->form_validation->set_rules('nimi', 'Nimi', 'min_length[1]|max_length[45]|required');
+      $this->CI->form_validation->set_rules('nimi', 'Nimi', 'min_length[1]|max_length[100]|required');
       $this->CI->form_validation->set_rules('jarjnro', 'Järjestysnumero', 'min_length[1]|max_length[3]|numeric|required');
       $this->CI->form_validation->set_rules('taso', 'Taso', 'min_length[1]|max_length[3]|numeric');
       $this->CI->form_validation->set_rules('aste', 'Aste', 'min_length[1]|max_length[3]|numeric');

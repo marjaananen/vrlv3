@@ -191,7 +191,7 @@ class Migraatiot extends CI_Controller
     
     function hevoset(){
         $this->load->model('migraatio_model');
-        /*
+        
         $montako=$this->migraatio_model->count_kaakit();
         
         if ($montako > 100000){
@@ -221,7 +221,7 @@ class Migraatiot extends CI_Controller
         
         $this->migraatio_model->migrate_hevosenomistajat();
         echo "omistajat done<br>";
-        */
+        
         $this->migraatio_model->migrate_hevosuvut();
         echo "suvut done";
 
