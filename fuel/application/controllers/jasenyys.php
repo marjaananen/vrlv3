@@ -369,11 +369,11 @@ class Jasenyys extends CI_Controller
 		
 	
 		
-        $vars['headers'][1] = array('title' => 'Rekisterinumero', 'key' => 'reknro', 'key_link' => site_url('virtuaalihevoset/hevonen/'), 'type'=>'VH');
+        $vars['headers'][1] = array('title' => 'Rekisteri&shy;numero', 'key' => 'reknro', 'key_link' => site_url('virtuaalihevoset/hevonen/'), 'type'=>'VH');
         $vars['headers'][2] = array('title' => 'Nimi', 'key' => 'nimi');
         $vars['headers'][3] = array('title' => 'Rotu', 'key' => 'rotu');
         $vars['headers'][4] = array('title' => 'Sukupuoli', 'key' => 'sukupuoli');
-        $vars['headers'][5] = array('title' => 'Syntymäaika', 'key' => 'syntymaaika', 'type'=>'date');
+        $vars['headers'][5] = array('title' => 'Syntymä&shy;aika', 'key' => 'syntymaaika', 'type'=>'date');
 
         
         if($oma || $admin){
@@ -407,14 +407,14 @@ class Jasenyys extends CI_Controller
 	
 	
 		
-			$vars['headers'][1] = array('title' => 'Rekisterinumero', 'key' => 'reknro', 'key_link' => site_url('virtuaalihevoset/hevonen/'), 'type'=>'VH');
+			$vars['headers'][1] = array('title' => 'Rekisteri&shy;numero', 'key' => 'reknro', 'key_link' => site_url('virtuaalihevoset/hevonen/'), 'type'=>'VH');
 			$vars['headers'][2] = array('title' => 'Nimi', 'key' => 'nimi');
-            $vars['headers'][3] = array('title' => 'Syntymäaika', 'key' => 'syntymaaika', 'type'=>'date');
+            $vars['headers'][3] = array('title' => 'Syntymä&shy;aika', 'key' => 'syntymaaika', 'type'=>'date');
 			$vars['headers'][4] = array('title' => 'Rotu', 'key' => 'rotu');
-			$vars['headers'][5] = array('title' => 'Sukupuoli', 'key' => 'sukupuoli');
-            $vars['headers'][6] = array('title' => 'Kasvattajanimi', 'key' => 'kasvattajanimi');
+			$vars['headers'][5] = array('title' => 'Suku&shy;puoli', 'key' => 'sukupuoli');
+            $vars['headers'][6] = array('title' => 'Kasvattaja&shy;nimi', 'key' => 'kasvattajanimi');
             $vars['headers'][7] = array('title' => 'Kasvattajan tunnus', 'key' => 'kasvattaja_tunnus', 'key_link' => site_url('tunnus/'));
-            $vars['headers'][8] = array('title' => 'Kasvattajatalli', 'key' => 'kasvattaja_talli', 'key_link' => site_url('virtuaalitallit/talli/'));
+            $vars['headers'][8] = array('title' => 'Kasvattaja&shy;talli', 'key' => 'kasvattaja_talli', 'key_link' => site_url('virtuaalitallit/talli/'));
 			
 			$vars['headers'] = json_encode($vars['headers']);
 						

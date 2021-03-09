@@ -37,42 +37,43 @@
 		<script type="text/javascript" charset="utf8" src="//cdn.datatables.net/1.10.18/js/jquery.dataTables.min.js"></script>
 		<!-- moment -->
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
-<script>
-	$.fn.dataTable.moment = function ( format, locale ) {
-    var types = $.fn.dataTable.ext.type;
- 
-    // Add type detection
-    types.detect.unshift( function ( d ) {
-        return moment( d, format, locale, true ).isValid() ?
-            'moment-'+format :
-            null;
-    } );
- 
-    // Add sorting method - use an integer for the sorting
-    types.order[ 'moment-'+format+'-pre' ] = function ( d ) {
-        return moment( d, format, locale, true ).unix();
-    };
-};
-</script>
-		
+		<script>
+			$.fn.dataTable.moment = function ( format, locale ) {
+			var types = $.fn.dataTable.ext.type;
+		 
+			// Add type detection
+			types.detect.unshift( function ( d ) {
+				return moment( d, format, locale, true ).isValid() ?
+					'moment-'+format :
+					null;
+			} );
+		 
+			// Add sorting method - use an integer for the sorting
+			types.order[ 'moment-'+format+'-pre' ] = function ( d ) {
+				return moment( d, format, locale, true ).unix();
+			};
+		};
+		</script>
+				
 		<?php echo js('jqcloud.min.js'); ?>
 		<?php echo css('jqcloud.min.css'); ?>
 		<?php echo css('vrl.css'); ?>
 		<link rel="stylesheet" href="http://tiritomba.net/virtuaali/vrl/style.css" />
-
-		
 	</head>
-	<body>
+<body>
+
 <header class="navbar navbar-default navbar-static-top" role="banner">
 	<div class="container-fluid login-area">
-    <div class="row">
-
+		<div class="row">
+	<div class="virheviesti"><?php echo fuel_var('message', '');?></div>		
 <?php
 
 if(!empty($this->ion_auth))
 	{
 		if ($this->ion_auth->logged_in())
-		{
+		{ ?> 
+			
+			<?php
 			echo "<p>Tervetuloa, VRL-" . $this->session->userdata( 'tunnus' ) . "!</p>";
 			
 			echo '<a href="'.site_url().'profiili"><button type="button" class="btn btn-primary btn-block">
@@ -101,8 +102,10 @@ if(!empty($this->ion_auth))
 	}
 
 
-?></div>
-  </div>
+?>
+
+</div>
+</div>
 	
 	
 	
