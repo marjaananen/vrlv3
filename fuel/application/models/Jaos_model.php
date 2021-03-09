@@ -144,7 +144,7 @@ class Jaos_model extends Base_module_model
 
     }
     
-    function delete_event($id, $jaos_id, $pulju_id){
+    function delete_event($id, $jaos_id = null, $pulju_id = null){
         $data = array('id' => $id, 'jaos_id'=>$jaos_id, 'pulju_id'=>$pulju_id);
         $this->db->delete('vrlv3_tapahtumat', $data);
         return true;

@@ -1,4 +1,22 @@
 <h2><?=$tapahtuma['otsikko']?> (<?php echo $jaos['lyhenne']; ?>)</h2>
+ <?php
+ if (isset($msg)){
+    ?>
+    
+       <div class="alert alert-<?php echo fuel_var('msg_type', 'info')?>" role="alert">   
+        <?php echo fuel_var('msg', '')?>
+        <?php echo validation_errors(); ?>
+        
+        <?php if(isset($msg_details)){
+            foreach ($msg_details as $detail){
+                echo "<br># ".$detail;
+            }
+        }?>
+		
+		    </div>
+    
+<?php
+ }?>
 
 
 <table class="table table-striped">

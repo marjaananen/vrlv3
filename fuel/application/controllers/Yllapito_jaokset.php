@@ -899,6 +899,7 @@ class Yllapito_jaokset extends CI_Controller
             }
             else if(!$this->_is_editing_allowed($jaos_id, $msg)){
                $this->fuel->pages->render('misc/naytaviesti', array('msg_type' => 'danger', 'msg' => "Tapahtuman käsittely epäonnistui. " . $msg));
+               return;
 
             }
             else if($tapa == "poista"){
@@ -913,7 +914,7 @@ class Yllapito_jaokset extends CI_Controller
                 
             }    
             else if($tapa == "muokkaa"){
-                $this->_edit_event($id, $data['jaos'], $tapa2, $os_id, $edit_url);
+                $this->events->handle_event(false, $id, $data['jaos'], $tapa2, $os_id, $edit_url);
                 
             }else {
                 $this->events->print_event_list($data, $edit_url);
@@ -924,28 +925,7 @@ class Yllapito_jaokset extends CI_Controller
     
     
     private function _edit_event($id, $jaos, $tapa = null, $os_id = null, $edit_url){
-        $this->load->library('vrl_helper');
-    
-        $tapahtuma = $this->Jaos_model->get_event($id, $jaos['id']);
-        if (sizeof($tapahtuma)>0){
-            //poistetaan palkittu 
-            if (isset($tapa) && $tapa == "poista"){
-                $this->events->delete_event_horse($os_id, $id);
-                $this->tapahtumat($jaos['id'], "muokkaa", $id);
-            //muokataan tapahtumaa
-            } else {
-                 $this->events->edit_event($id, $jaos);
-                }
-                $this->events->tapahtuma($id, true, $edit_url);            
-            
-            
-
-            
-        }else {
-            $this->fuel->pages->render('misc/naytaviesti', array('msg_type' => 'danger', 'msg' => "Tapahtumaa jota yrität muokata ei ole olemassa."));
-
-        }        
-        
+        $this->events->handle_event(false, true, $id, $jaos, $tapa, $os_id, $edit_url);
     }
         
     

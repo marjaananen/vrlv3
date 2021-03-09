@@ -314,7 +314,7 @@ public function tapahtumat($jaos_id = null, $tapa=null, $id=null, $tapa2 = null,
                 
             }    
             else if($tapa == "muokkaa"){
-                $this->_edit_event($id, $data['jaos'], $tapa2, $os_id, $edit_url);
+                $this->events->handle_event(false, $id, $data['jaos'], $tapa2, $os_id, $edit_url);
                 
             }else {
                 $this->events->print_event_list($data, $edit_url, true);
@@ -324,30 +324,7 @@ public function tapahtumat($jaos_id = null, $tapa=null, $id=null, $tapa2 = null,
     }
     
     
-    private function _edit_event($id, $jaos, $tapa = null, $os_id = null, $edit_url){
-        $this->load->library('vrl_helper');
     
-        $tapahtuma = $this->Jaos_model->get_event($id, null, $jaos['id']);
-        if (sizeof($tapahtuma)>0){
-            //poistetaan palkittu 
-            if (isset($tapa) && $tapa == "poista"){
-                $this->events->delete_event_horse($os_id, $id);
-                $this->tapahtumat($jaos['id'], "muokkaa", $id);
-            //muokataan tapahtumaa
-            } else {
-                 $this->events->edit_event($id, $jaos, true);
-                }
-                $this->events->tapahtuma($id, true, $edit_url);            
-            
-            
-
-            
-        }else {
-            $this->fuel->pages->render('misc/naytaviesti', array('msg_type' => 'danger', 'msg' => "Tapahtumaa jota yrität muokata ei ole olemassa."));
-
-        }        
-        
-    }
         
 
     

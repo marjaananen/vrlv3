@@ -9,6 +9,40 @@ public function __construct()
 	{
         $this->CI =& get_instance();
 	}
+	
+	public function handle_event($pulju, $id, $jaos, $tapa = null, $os_id = null, $edit_url, $data = array()){
+		$this->CI->load->library('vrl_helper');
+		$tapahtuma = array();
+		if($pulju){
+			 $tapahtuma = $this->CI->Jaos_model->get_event($id, null, $jaos['id']);
+
+		}else {
+			$tapahtuma = $this->CI->Jaos_model->get_event($id, $jaos['id']);
+
+		}
+        if (sizeof($tapahtuma)>0){
+            //jos poistetaan palkittu 
+            if (isset($tapa) && $tapa == "poista"){
+                if($this->_delete_event_horse($os_id, $id, $data)){
+					$data['msg_type'] = "success";
+					$data['msg'] = "Hevosen poisto onnistui!";
+				}
+            //muokataan tapahtumaa
+            } else {
+                 if($this->_edit_event($id, $jaos, $data, $pulju)){
+					$data['msg_type'] = "success";
+					$data['msg'] = "Muokkaus onnistui!";
+				 }
+            }
+            
+            
+        }else {
+            $data = array('msg_type' => 'danger', 'msg' => "Tapahtumaa jota yrität muokata ei ole olemassa.");
+
+        }
+		$this->tapahtuma($id, true, $edit_url, $data);            
+
+	}
     
     private function _parse_event_horses($osallistujalista_input, &$data, &$luetut_rivit){
         $this->CI->load->library("Vrl_helper");
@@ -41,7 +75,7 @@ public function __construct()
                                         
                     
                         if(isset($rivi[1])){
-                            $luettu['tulos'] = $rivi[1];
+                            $luettu['tulos'] = str_replace(",", ".", $rivi[1]);
                         }
                         
                         if(isset($rivi[3])){
@@ -64,7 +98,7 @@ public function __construct()
         }
         
         if(sizeof($virhe)>0){
-            $data['msg'] = "Virhe lisäyksessä!";
+            $data['msg'] = "Virhe osallistujien lisäyksessä!";
             $data['msg_details'] = $virhe;
             $data['msg_type'] = 'danger';
             return false;
@@ -75,10 +109,8 @@ public function __construct()
     }
     
     
-    function tapahtuma($id, $admin = false, $edit_url = null){
-        $data = array();
+    function tapahtuma($id, $admin = false, $edit_url = null, $data = array()){
         
-
         $data['tapahtumatyyppi'] ="Muu arvostelutilaisuus";
         $data['tapahtuma'] = $this->CI->Jaos_model->get_event($id);
 
@@ -141,9 +173,12 @@ public function __construct()
     
     }
     
-    function edit_event($id, $jaos, $pulju = false){
+    private function _edit_event($id, $jaos, &$data=array(), $pulju = false){
        if($this->CI->input->server('REQUEST_METHOD') == 'POST'){
-        //tapahtuman tiedot
+		$data['otsikko'] = $this->CI->input->post('otsikko');
+		$data['pv'] = $this->CI->input->post('pv');
+		$data['osallistujat'] = $this->CI->input->post('osallistujat');
+         //tapahtuman tiedot
         if($this->CI->input->post('otsikko') && $this->CI->input->post('pv')
            && strlen($this->CI->input->post('otsikko')) > 5
            && $this->CI->vrl_helper->validateDate($this->CI->input->post('pv'))){
@@ -156,15 +191,25 @@ public function __construct()
                     $osallistujat_ok = $this->_parse_event_horses($this->CI->input->post('osallistujat'), $data, $osallistujat);
                     if($osallistujat_ok){
                         $this->CI->Jaos_model->add_event_participants($id, $osallistujat);
-                    }
+
+                    }else {
+						return false;
+					}
+					
+					$data['msg'] = "Tapahtuman tiedot muokattu onnistuneesti.";
+					$data['msg_type'] = 'success';
                 }
             }
             
         else {
-            $this->CI->fuel->pages->render('misc/naytaviesti', array('msg_type' => 'danger', 'msg' => "Tapahtuman tiedot virheelliset."));
+			$data['msg'] = "Tapahtuman tiedot virheelliset.";
+			$data['msg_type'] = 'danger';
+			return false;
+
 
         }
        }
+	   return true;
         
         
     }
@@ -310,7 +355,7 @@ public function __construct()
                     $this->CI->Jaos_model->delete_event($id, null, $data['jaos']['id']);
 
                 }else {
-                    $this->CI->Jaos_model->delete_event($id, $data['jaos']['id']);
+                    $this->CI->Jaos_model->delete_event($id, $data['jaos']['id'], null);
                 }
                 $data['msg_type'] = "success";
                 $data['msg'] = "Poisto onnistui!";
@@ -324,8 +369,9 @@ public function __construct()
         
     }
     
-    public function delete_event_horse($os_id, $id){
+    private function _delete_event_horse($os_id, $id, $data = array()){
         $this->CI->Jaos_model->delete_event_horse($os_id, $id);
+		return true;
 
     }
     
