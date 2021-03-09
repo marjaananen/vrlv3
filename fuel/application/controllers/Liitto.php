@@ -11,9 +11,7 @@ class Liitto extends CI_Controller
 	
 	function index ()
     {
-        $vars = array();
-        $vars['message'] = $this->session->flashdata('message');
-        $this->fuel->pages->render('liitto/index', $vars);
+        $this->yllapito();
     }
     
 

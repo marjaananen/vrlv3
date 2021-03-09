@@ -2,7 +2,7 @@
 class Yllapito_tiedotukset extends CI_Controller
 {
     
-    private $allowed_user_groups = array('admin', 'tiedotukset');
+    private $allowed_user_groups = array('admin', 'tiedotukset', 'tunnukset', 'jaos',  'alayhdistys','tyovoima', 'jaos-yp', 'alayhdistys-yp');
     private $url;
     
     function __construct()
