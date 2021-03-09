@@ -4,17 +4,22 @@ Options +FollowSymLinks
 	RewriteEngine On
 	RewriteBase /
 
+
+	RewriteCond %{QUERY_STRING} hevoset/hevosrekisteri/hevonen\.html\?vh=(.*) [NC]
+	RewriteRule (.*) /virtuaalihevoset/hevonen/%1 [R=302,L,QSD]
+
 	<Files .*>
 		Order Deny,Allow
 		Deny From All
 	</Files>
+	
+	
 
 	# Allow asset folders through
 	RewriteRule ^(fuel/modules/(.+)?/assets/(.+)) - [L]
 	RewriteRule ^(fuel/modules/(.+)?/tuki/(.+)) - [L]
-	RewriteRule ^(fuel/modules/(.+)?/wiki/(.+)) - [L]
-
 	
+
 
 
 	# Protect application and system files from being viewed
