@@ -39,6 +39,7 @@ class Rajapinta extends CI_Controller
                                               teet sivuillesi uutta toteutusta! Käytä \"porrastetut\"-rajapintaa tämän sijaan. ");
         $vars['rajapinnat']['porrastetut'] = array("parametrit"=>array("vh-tunnus"),
                                               "esimerkki"=>array("VH03-028-8756"),
+                                              "esimerkkikoodi" => "https://github.com/marjaananen/vrlv3/blob/master/esimerkit/rajapinta/porrastetut.php",
                                               "kuvaus" => "Tällä komennolla voit hakea valitsemasi hevosen porrastettujen ominaisuuspisteet ja tason kaikissa
                                               jaoksissa ja ominaisuuksissa. Koska jaoksia ja ominaisuuksia voi tulla lisää, rajapinta palauttaa myös tiedot jaoksista ja ominaisuuksista.
                                               Rajapinta palauttaa myös hevosen ikä- ja säkäkorkeustiedot sekä VRL:n sivuilla asetetun maksimitason. 

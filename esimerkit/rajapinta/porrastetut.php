@@ -49,7 +49,7 @@ if(isset($obj['error']) && $obj['error'] == 0){
      *     ESIMERKKEJÄ TULOSTAMISEEN
      *     *********************************************************************************/
     
-    //Näin tulostetaan ominaisuuspisteet
+    //ESIMERKKI 1: Näin tulostetaan ominaisuuspisteet
     foreach ($hevonen['ominaisuudet'] as $id=>$ominaisuus){
         $ominaisuusnimi = $info['ominaisuudet'][$id];
         $ominaisuuspisteet = $ominaisuus ['pisteet'];
@@ -58,7 +58,7 @@ if(isset($obj['error']) && $obj['error'] == 0){
         echo $ominaisuusnimi . ": " . $ominaisuuspisteet . "<br>";
     }
     
-    //Näin tulostetaan tasot
+    //ESIMERKKI 2: Näin tulostetaan tasot
     if($hevonen['error'] == 1){
         echo $hevonen['error_message'];
     }else {
@@ -80,7 +80,7 @@ if(isset($obj['error']) && $obj['error'] == 0){
         }
     }
     
-    //Näin tulostetaan vain yksi jaos (pitää tietää jaoksen ID)
+    //ESIMERKKI 3: Näin tulostetaan vain yksi jaos (pitää tietää jaoksen ID)
     $jaos_id = 1; //tämä on erj
     
     if($hevonen['error'] == 1){

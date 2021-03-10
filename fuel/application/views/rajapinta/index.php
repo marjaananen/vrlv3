@@ -67,8 +67,12 @@ function print_apis($rajapinnat){
         foreach ($sisalto['esimerkki'] as $p){
             $esimerkkiurl .= $p . "/";
         }
-        echo "Esimerkki: ";
+        echo "Esimerkkihaku: ";
         echo '<a href="'.$esimerkkiurl.'">'.$esimerkkiurl.'</a>';
+        if(isset($sisalto['esimerkkikoodi'])){
+            echo "<br />Esimerkkikoodi: ";
+            echo '<a href="'.$sisalto['esimerkkikoodi'].'">Esimerkkikoodi Githubissa</a>';
+        }
         echo "</div>";
         echo '</div>';
             
