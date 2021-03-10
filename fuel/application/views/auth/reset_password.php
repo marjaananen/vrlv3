@@ -5,7 +5,7 @@
 <?php echo form_open('auth/reset_password/' . $code);?>
 
 	<p>
-		<label for="new_password">Uusi salasana (min. <?php $min_password_length; ?> merkkiä)</label> <br />
+		<label for="new_password">Uusi salasana (min. <?php echo $min_password_length; ?> merkkiä)</label> <br />
 		<?php echo form_input($new_password);?>
 	</p>
 

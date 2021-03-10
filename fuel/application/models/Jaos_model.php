@@ -753,6 +753,7 @@ class Jaos_model extends Base_module_model
         }
     
     function edit_pulju($id, $pulju){
+        unset($pulju['pulju']);
         $this->db->where('id', $id);
         $this->db->update('vrlv3_puljut', $pulju);
     }

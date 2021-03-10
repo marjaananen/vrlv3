@@ -1208,7 +1208,7 @@ class Virtuaalihevoset extends CI_Controller
 		$vars['headers'][1] = array('title' => 'ID', 'key' => 'rotunro', 'key_link' => site_url('virtuaalihevoset/rotu/'));
 		$vars['headers'][2] = array('title' => 'Rotu', 'key' => 'rotu');
 		$vars['headers'][3] = array('title' => 'Lyhenne', 'key' => 'lyhenne');
-        $vars['headers'][4] = array('title' => 'Harvinainen', 'key' => 'harvinainen');
+        $vars['headers'][4] = array('title' => 'Harvinainen', 'key' => 'harvinainen', 'type'=> 'bool');
 		$vars['headers'] = json_encode($vars['headers']);
 					
 		$vars['data'] = json_encode($this->hevonen_model->get_breed_list());
@@ -1895,11 +1895,13 @@ class Virtuaalihevoset extends CI_Controller
             }
         }
         //jos on jälkeläisiä, vanhempia ei voi vaihtaa (mutta puuttuvan voi lisätä)
-        else if ($type != 'admin' && sizeof($foals) > 0 && isset($new['i_nro']) && isset($old['i_nro']) && !empty($old['i_nro'])){
+        else if ($type != 'admin' && sizeof($foals) > 0 && isset($new['i_nro']) && isset($old['i_nro'])
+                 && !empty($old['i_nro']) && $old['i_nro'] != $new['i_nro']){
             $msg = "Hevosella on jälkeläisiä, joten ainoastaan rekisterityöntekijät voivat muokata sukua.";
             return false;
         }
-        else if ($type != 'admin' && sizeof($foals) > 0 && isset($new['e_nro']) && isset($old['e_nro']) && !empty($old['e_nro'])){
+        else if ($type != 'admin' && sizeof($foals) > 0 && isset($new['e_nro']) && isset($old['e_nro'])
+                 && !empty($old['e_nro']) && $old['e_nro'] != $new['e_nro']){
             $msg = "Hevosella on jälkeläisiä, joten ainoastaan rekisterityöntekijät voivat muokata sukua.";
             return false;
         }

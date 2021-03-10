@@ -1368,14 +1368,13 @@ private function _make_result_form($luokat, $jaos_id, $porr = false){
                 $nro = $nro + 1;
             }
         }else {
-
         $luokat = explode("\n",$luokat);
         $luokat = preg_grep('/^\s*\z/', $luokat, PREG_GREP_INVERT);
         $luokat = array_values( array_filter($luokat) );
         
         $nro = 1;
-            foreach ($luokat as $luokka){
-                $fields['tulos_'.$nro.'_h'] = array('type' => 'section', 'tag' => 'h3', 'value' => $luokka, 'display_label' => FALSE);
+        foreach ($luokat as $luokka){
+                $fields['tulos_'.$nro.'_h'] = array('type' => 'section', 'tag' => 'h3', 'value' => $luokka, 'label'=>$luokka);
                 $fields['tulos_'.$nro.'_os'] = array('label'=>'Osallistujat', 'type' => 'textarea', 'cols' => 40, 'rows' => 5, 'class' => 'form-control');
                 $fields['tulos_'.$nro.'_hyl'] = array('label'=>'Hylätyt', 'type' => 'textarea', 'cols' => 40, 'rows' => 5, 'class' => 'form-control');
                 $fields['tulos_'.$nro.'_luokka'] = array('type'=>'hidden', 'value'=>$luokka);
