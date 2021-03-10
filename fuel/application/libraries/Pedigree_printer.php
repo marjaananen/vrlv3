@@ -145,8 +145,8 @@ class Pedigree_printer {
   }
   
   public function countMissingPercentage($pedigree){
-   $this->_handle_multiples($pedigree);
-
+   $this->_handle_multiples($pedigree, 12);
+   
    IF(sizeof($this->uniques) > 0 && sizeof($pedigree) > 0){
     $pros = sizeof($this->uniques)/sizeof($pedigree);
     return round($pros,2);
@@ -159,14 +159,14 @@ class Pedigree_printer {
   
   public function countInbreedingPercentage($pedigree){
      //var_dump($pedigree);
-     $this->_handle_multiples($pedigree);
+     $this->_handle_multiples($pedigree, 12);
      
      if(sizeof($this->multiples) == 0){
       return 0;
      }else {
       $lasketut = array();
       $yhteiset_nimet = $this->_get_names_in_common("", $pedigree);
-      return round($this->_inbreedingPercentage(null, $pedigree, $lasketut, $yhteiset_nimet),2);
+      return round($this->_inbreedingPercentage(null, $pedigree, $lasketut, $yhteiset_nimet)*100,2);
      }
    
   }
