@@ -204,13 +204,13 @@ class Rajapinta extends CI_Controller
                     if( $return_data['hevonen']['error']  == 0){
                         $level_per_points = $this->porrastetut->get_level_by_points($points);
                         $level_per_age = $return_data['hevonen']['info']['max_taso_per_ika'];
-                        $return_data['hevonen']['tasot'][] = array("jaos"=>$id,
+                        $return_data['hevonen']['tasot'][$id] = array("jaos"=>$id,
                                                                "pisteet" => $points,
                                                                "taso" => min($level_per_age, $level_per_points),
                                                                 "max_taso_per_pisteet" => $level_per_points,             
                                                                 "taso_rajoitus" => $maxs[$id] ?? 10);
                     }else {
-                        $return_data['hevonen']['tasot'][] = array("jaos"=>$id,
+                        $return_data['hevonen']['tasot'][$id] = array("jaos"=>$id,
                                                                 "pisteet" => $points,
                                                                 "taso" => 0,
                                                                 "max_taso_per_pisteet" => 0,             
@@ -219,7 +219,7 @@ class Rajapinta extends CI_Controller
                 }
                 
                 foreach ($return_data['info']['ominaisuudet'] as $id => $ominaisuus){
-                    $return_data['hevonen']['ominaisuudet'][] = array("ominaisuus"=>$id,
+                    $return_data['hevonen']['ominaisuudet'][$id] = array("ominaisuus"=>$id,
                                                               "pisteet" => $this->_parse_leveled_info_skills_sum($horse_info, array($id)));
                 }
                 
