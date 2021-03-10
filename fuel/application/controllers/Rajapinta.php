@@ -360,7 +360,7 @@ class Rajapinta extends CI_Controller
     private function _get_horses_foals($nro)
     {
         $nro = $this->vrl_helper->vh_to_number($nro);
-        $this->db->select("h.reknro, h.nimi, r.rotunro, r.lyhenne as rotulyhenne, h.vari, v.lyhenne as varilyhenne, sukupuoli, syntymaaika, url");
+        $this->db->select("h.reknro, h.nimi, r.rotunro, r.lyhenne as rotulyhenne, h.vari, v.lyhenne as varilyhenne, sukupuoli, syntymaaika, url, i_nro, e_nro");
         $this->db->from('vrlv3_hevosrekisteri as h');
         $this->db->join("vrlv3_lista_rodut as r", "h.rotu = r.rotunro", 'left outer');
         $this->db->join("vrlv3_lista_varit as v", "h.vari = v.vid", 'left outer');
@@ -382,7 +382,41 @@ class Rajapinta extends CI_Controller
                 $hevonen['reknro'] = $this->vrl_helper->get_vh($hevonen['reknro']);
                 $hevonen['syntymaaika'] = $this->vrl_helper->sql_date_to_normal($hevonen['syntymaaika']);
                 $hevonen['rek_url'] = $this->hevonen_url . $hevonen['reknro'];
+                $hevonen['vanhempi'] = array();
                 
+                $haettava = "";
+                $vanhempi = false;
+                //jos hettava oli emä, katsotaan onko isää
+                if(isset($hevonen['e_nro']) && $hevonen['e_nro'] == $nro && isset($hevonen['i_nro'])){
+                    $haettava = $hevonen['i_nro'];
+                    $vanhempi = true;
+                }else if(isset($hevonen['e_nro'])){
+                    $haettava = $hevonen['i_nro'];
+                    $vanhempi = true;
+                }
+                
+                if($vanhempi){
+                    $this->db->select("h.reknro, h.nimi, r.rotunro, r.lyhenne as rotulyhenne, h.vari, v.lyhenne as varilyhenne,
+                                      sukupuoli, syntymaaika, url");
+                    $this->db->from('vrlv3_hevosrekisteri as h');
+                    $this->db->join("vrlv3_lista_rodut as r", "h.rotu = r.rotunro", 'left outer');
+                    $this->db->join("vrlv3_lista_varit as v", "h.vari = v.vid", 'left outer');
+                    $this->db->where('h.reknro', $haettava);
+                    $query2 = $this->db->get();
+                    
+                    
+                    if ($query2->num_rows() > 0)
+                    {
+                        $hevonen['vanhempi'] = $query2->result_array()[0];
+                        $hevonen['vanhempi']['reknro'] = $this->vrl_helper->get_vh($hevonen['vanhempi']['reknro']);
+                        $hevonen['vanhempi']['syntymaaika'] = $this->vrl_helper->sql_date_to_normal($hevonen['vanhempi']['syntymaaika']);
+                        $hevonen['vanhempi']['rek_url'] = $this->hevonen_url . $hevonen['vanhempi']['reknro'];
+                    }
+                
+                                
+                }
+                unset($hevonen['i_nro']);
+                unset($hevonen['e_nro']);
             }
         }
         
