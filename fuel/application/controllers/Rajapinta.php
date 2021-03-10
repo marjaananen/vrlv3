@@ -23,6 +23,7 @@ class Rajapinta extends CI_Controller
         $vars['rajapinnat'] = array();
         $vars['rajapinnat']['varsat'] = array("parametrit"=>array("vh-tunnus"),
                                               "esimerkki"=>array("VH03-028-8756"),
+                                              "esimerkkikoodi" => "https://github.com/marjaananen/vrlv3/blob/master/esimerkit/rajapinta/varsat.php",
                                               "kuvaus" => "Tällä komennolla voit hakea valitsemasi hevosen jälkeläiset.");
         $vars['rajapinnat']['tulos_id'] = array("parametrit"=>array("kisan id"),
                                               "esimerkki"=>array(153969),

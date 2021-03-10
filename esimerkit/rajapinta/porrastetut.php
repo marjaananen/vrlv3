@@ -79,13 +79,14 @@ if(isset($obj['error']) && $obj['error'] == 0){
             
         }
     }
-    
+        
     //ESIMERKKI 3: Näin tulostetaan vain yksi jaos (pitää tietää jaoksen ID)
-    $jaos_id = 1; //tämä on erj
+    $jaos = 1; //tämä on erj
     
     if($hevonen['error'] == 1){
         echo $hevonen['error_message'];
     }else {
+        $tasoinfo = $hevonen['tasot'][$jaos];
         $jaosnimi = $info['jaokset'][$jaos]['jaos_nimi'];
         $jaoslyhenne = $info['jaokset'][$jaos]['jaos_lyhenne'];
         $taso = $tasoinfo['taso'];
