@@ -44,6 +44,11 @@ if (isset($title2)){
                 }
                 return value;
             }
+            
+            function massCheck(checkbox_id) {
+                var checkbox_value = $("#checkbox_header_" + checkbox_id).is(":checked");
+                $(".checkbox_" + checkbox_id).prop('checked', checkbox_value);
+            }
         
             $(document).ready(function() {
                 var headers = <?=$headers?>;
@@ -55,7 +60,12 @@ if (isset($title2)){
 
                 for(var i in headers)
                 {
-                    table += "<th>" + headers[i].title + "</th>";
+                    var checkbox_string = "";
+                    if (headers[i].checkbox_id) {
+                        checkbox_string = '<input id="checkbox_header_' + headers[i].checkbox_id + '" type="checkbox" onclick="massCheck(\'' + headers[i].checkbox_id + '\')" />';
+                    }
+                    
+                    table += "<th>" + headers[i].title + checkbox_string + "</th>";
                     numcolumns++;
                 }
                 
@@ -98,7 +108,7 @@ if (isset($title2)){
                         } else if (headers[i].static_text != undefined) {
                             output = headers[i].static_text;
                         }else if (headers[i].checkbox_id != undefined){
-                            output = "<input type=\"checkbox\" name=\"" + headers[i].checkbox_id +"[]\" value=\"" + data[d][headers[i].key] +"\" >";
+                            output = "<input type=\"checkbox\" class=\"checkbox_" + headers[i].checkbox_id + "\" name=\"" + headers[i].checkbox_id +"[]\" value=\"" + data[d][headers[i].key] +"\" >";
                         } else {
                             output = prepend_text + formatValue(data[d][headers[i].key], headers[i].type);
                         }
