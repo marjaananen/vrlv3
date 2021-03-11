@@ -30,8 +30,7 @@ public function __construct()
             //muokataan tapahtumaa
             } else {
                  if($this->_edit_event($id, $jaos, $data, $pulju)){
-					$data['msg_type'] = "success";
-					$data['msg'] = "Muokkaus onnistui!";
+
 				 }
             }
             

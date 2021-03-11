@@ -314,7 +314,7 @@ public function tapahtumat($jaos_id = null, $tapa=null, $id=null, $tapa2 = null,
                 
             }    
             else if($tapa == "muokkaa"){
-                $this->events->handle_event(false, $id, $data['jaos'], $tapa2, $os_id, $edit_url);
+                $this->events->handle_event(true, $id, $data['jaos'], $tapa2, $os_id, $edit_url);
                 
             }else {
                 $this->events->print_event_list($data, $edit_url, true);
