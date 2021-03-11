@@ -379,40 +379,43 @@ class Kasvatus extends CI_Controller
             $hakudata['kasvattajanimi'] = $this->input->post('kasvattajanimi');
             $hakudata['kasvatusrotu'] = $this->input->post('kasvatusrotu');
 	
-			if($this->_validate_name_search_form() == true){
-				if (!(empty($this->input->post('kasvattajanimi')) && $this->input->post('kasvatusrotu') == "-1"))
-					{
-						$vars['headers'][1] = array('title' => 'Id', 'key' => 'id', 'key_link' => site_url('kasvatus/kasvattajanimet/nimi/'));
-						$vars['headers'][2] = array('title' => 'Kasvattajanimi', 'key' => 'kasvattajanimi');
-						$vars['headers'][3] = array('title' => 'Rodut', 'key' => 'lyhenne', 'aggregated_by' => 'id');
-						$vars['headers'][4] = array('title' => 'Rekisteröity', 'key' => 'rekisteroity', 'type' => 'date');
-						if($this->user_rights->is_allowed()){
-							$vars['headers'][5] = array('title' => 'Editoi', 'key' => 'id', 'key_link' => site_url('kasvatus/kasvattajanimet/muokkaa/'), 'image' => site_url('assets/images/icons/edit.png'));
-							$vars['headers'][6] = array('title' => 'Poista', 'key' => 'id', 'key_link' => site_url('kasvatus/kasvattajanimet/poista/'), 'image' => site_url('assets/images/icons/delete.png'));
+			if(!(empty($this->input->post('kasvattajanimi')) && $this->input->post('kasvatusrotu') == "-1") && $this->_validate_name_search_form() == true){
+				
+                $vars['headers'][1] = array('title' => 'Id', 'key' => 'id', 'key_link' => site_url('kasvatus/kasvattajanimet/nimi/'));
+                $vars['headers'][2] = array('title' => 'Kasvattajanimi', 'key' => 'kasvattajanimi');
+                $vars['headers'][3] = array('title' => 'Rodut', 'key' => 'lyhenne', 'aggregated_by' => 'id');
+                $vars['headers'][4] = array('title' => 'Rekisteröity', 'key' => 'rekisteroity', 'type' => 'date');
+                if($this->user_rights->is_allowed()){
+                    $vars['headers'][5] = array('title' => 'Editoi', 'key' => 'id', 'key_link' => site_url('kasvatus/kasvattajanimet/muokkaa/'), 'image' => site_url('assets/images/icons/edit.png'));
+                    $vars['headers'][6] = array('title' => 'Poista', 'key' => 'id', 'key_link' => site_url('kasvatus/kasvattajanimet/poista/'), 'image' => site_url('assets/images/icons/delete.png'));
+                
+                }
 						
-						}
 						
-						
-						$vars['headers'] = json_encode($vars['headers']);
-						
-						$vars['data'] = json_encode($this->kasvattajanimi_model->search_names($this->input->post('kasvattajanimi'),
-                                                                                              $this->input->post('kasvatusrotu')));
-						
-						$data['tulokset'] = $this->load->view('misc/taulukko', $vars, TRUE);
-                        $data['form'] = $this->_get_name_search_form($hakudata);
+                $vars['headers'] = json_encode($vars['headers']);
+                
+                $vars['data'] = json_encode($this->kasvattajanimi_model->search_names($this->input->post('kasvattajanimi'),
+                                                                                      $this->input->post('kasvatusrotu')));
+                
+                $data['tulokset'] = $this->load->view('misc/taulukko', $vars, TRUE);
+                $data['form'] = $this->_get_name_search_form($hakudata);
 
-                        $this->fuel->pages->render('misc/haku', $data);
+                $this->fuel->pages->render('misc/haku', $data);
 
-					}
-					else {
-						$this->fuel->pages->render('misc/naytaviesti', array('msg_type' => 'danger', 'msg' => 'Haut ilman hakuehtoja eivät ole sallittuja'));
-					
-					}
-			}
+            }
+            else {
+                $data['msg_type'] = 'danger';
+                $data['msg'] = 'Virheelliset hakuehdot.';
+                $data['form'] = $this->_get_name_search_form($hakudata);
+    
+                $this->fuel->pages->render('misc/haku', $data);
+            
+            }
+			
 		}else {
-		$data['form'] = $this->_get_name_search_form($hakudata);
-
-		$this->fuel->pages->render('misc/haku', $data);
+            $data['form'] = $this->_get_name_search_form($hakudata);
+    
+            $this->fuel->pages->render('misc/haku', $data);
         }
 
 		
@@ -897,7 +900,7 @@ class Kasvatus extends CI_Controller
     
     private function _validate_name_search_form(){
         $this->load->library('form_validation');        
-        $this->form_validation->set_rules('kasvattajanimi', 'Nimi', "min_length[3]|regex_match[/^[A-Za-z0-9_\-.:,; *~#&'@()]*$/]");
+        $this->form_validation->set_rules('kasvattajanimi', 'Nimi', "min_length[1]|max_length[100]");
 		$this->form_validation->set_rules('kasvatusrotu', 'Kategoria', 'min_length[1]|max_length[4]');
         return $this->form_validation->run();
 
