@@ -33,7 +33,7 @@ class Pedigree_printer {
   foreach($pedigree as $id=>$horse){
    if(strlen($id) <= $max){
     if(isset($horse['reknro'])){
-     if(in_array($horse['reknro'], $horses) && !isset($multiples[$horse['reknro']])){
+     if(in_array($horse['reknro'], $horses) && !isset($multiples[$horse['reknro']]) && isset($this->colours[sizeof($multiples)])){
       $multiples[$horse['reknro']] = $this->colours[sizeof($multiples)];
      }else {
        $horses[] = $horse['reknro'];
