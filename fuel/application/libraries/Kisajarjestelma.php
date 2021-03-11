@@ -275,6 +275,7 @@ class Kisajarjestelma
     
     public function add_stats($tulos, $jaos, $porr = false){
         
+        
         $voi = array(); //voittajat
         $sij = array(); //sijoittuneet
         $os = array(); //osallistumiset
@@ -343,6 +344,7 @@ class Kisajarjestelma
                         
                 
         $stats_info = $this->_get_horses_stats_info($vh_list, $jaos);
+     
                 
         $bulk_add = array();
         $bulk_edit = array();
@@ -352,28 +354,26 @@ class Kisajarjestelma
         foreach ($stats_info as $horse=>$data){
               $new_data = array();
               $new_data['reknro'] = $horse;
-              $stats_ok = false;
               
             //jos hevosella ei ole tuloksia aiemmalti
             if(!isset($data['jaos'])){       
-                $new_data['jaos'] = $jaos;        
+                $new_data['jaos'] = $jaos;
+                $new_data[$pre_txt.'voi'] = 0;
+                $new_data[$pre_txt.'sij'] = 0;
+                $new_data[$pre_txt.'os'] = 0;
+
                 
                 if(isset($voi[$horse])){
                     $new_data[$pre_txt.'voi'] = $voi[$horse];
-                    $stats_ok = true;
                 }
                 if(isset($sij[$horse])){
                     $new_data[$pre_txt.'sij'] = $sij[$horse];
-                    $stats_ok = true;
                 }
                 if(isset($os[$horse])){
                     $new_data[$pre_txt.'os'] = $os[$horse];
-                    $stats_ok = true;
                 }
                 //jos statistiikkatietoja oli, lisätään
-                if($stats_ok){
-                    $bulk_add[] = $new_data;
-                }
+                $bulk_add[] = $new_data;
             } //jos hevosella on aiempia *tulok*sia
             else {
                  if(isset($voi[$horse])){
@@ -394,13 +394,17 @@ class Kisajarjestelma
                 }
             }
             
+      
+
+        foreach($bulk_edit as $edit){
+            $this->CI->db->where('jaos', $jaos);
+            $this->CI->db->where('reknro', $edit['reknro']);
+            unset( $edit['reknro']);
+            $this->CI->db->update('vrlv3_hevosrekisteri_kisatiedot', $edit);
         }
         
-        if(sizeof($bulk_edit)>0){
-            $this->CI->db->update_batch('vrlv3_hevosrekisteri_kisatiedot',$bulk_edit, 'reknro'); 
-        }
         
-        else if(sizeof($bulk_add)>0){
+        if(sizeof($bulk_add)>0){
             $this->CI->db->insert_batch('vrlv3_hevosrekisteri_kisatiedot',$bulk_add); 
         }
         
@@ -420,10 +424,13 @@ class Kisajarjestelma
         $stats_data = array();
         
         if(sizeof($vhs) > 0){
+            $this->CI->db->select('nimi, k.*, h.reknro');
             $this->CI->db->from('vrlv3_hevosrekisteri as h');
             $this->CI->db->join('vrlv3_hevosrekisteri_kisatiedot as k', 'h.reknro = k.reknro', 'LEFT');
     
             $this->CI->db->where_in('h.reknro', $vhs);
+            $this->CI->db->where_in('k.jaos', $jaos);
+
             
             $query = $this->CI->db->get();
             

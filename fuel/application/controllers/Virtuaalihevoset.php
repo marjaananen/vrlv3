@@ -1319,7 +1319,7 @@ class Virtuaalihevoset extends CI_Controller
 		$fields['rotu'] = array('type' => 'select', 'options' => $r_options, 'value'=>$data['rotu'] ?? -1, 'class'=>'form-control');
 		$fields['sukupuoli'] = array('type' => 'select', 'options' => $skp_options, 'value'=>$data['sukupuoli'] ?? -1, 'class'=>'form-control');
 		$fields['kuollut'] = array('type' => 'checkbox', 'checked'=>$data['kuollut'] ?? false, 'class'=>'form-control');
-		$fields['vari'] = array('type' => 'select', 'options' => $color_options, 'value'=>$data['vari'] ?? -1, 'class'=>'form-control');
+		$fields['vari'] = array('label'=>"Väri", 'type' => 'select', 'options' => $color_options, 'value'=>$data['vari'] ?? -1, 'class'=>'form-control');
 		$fields['syntynyt_v'] = array('type' => 'text', 'label'=>'Syntymävuosi', 'class'=>'form-control', 'value'=>$data['syntynyt_v'] ?? "");
 		
 		$this->form_builder->form_attrs = array('method' => 'post', 'action' => site_url('/virtuaalihevoset/haku'));
