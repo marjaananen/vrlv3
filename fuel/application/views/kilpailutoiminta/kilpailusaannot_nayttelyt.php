@@ -88,7 +88,7 @@
         </ul>
         <b>Tulosten arkistointi</b>
         <ul>
-            <li>Tulossivun tulee säilyä internetissä vähintään kaksi (2) kuukautta näyttelypäivästä! <b>TODO: Miksi, jos kisat on VRL:n arkistossa...?</b></li>
+            <li>Suosittelemme tulossivun säilyttämistä internetissä vähintään kaksi (2) kuukautta kilpailupäivästä. </li>
         </ul>
       </div>
     </div>

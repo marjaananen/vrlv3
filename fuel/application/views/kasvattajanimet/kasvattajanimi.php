@@ -17,7 +17,7 @@ if(isset($edit_tools) && $edit_tools == true){
    <ul class="nav nav-tabs">
         <li role="presentation" class="<?php if ($sivu == 'rodut'){echo "active";}?>"><a href="<?php echo base_url('kasvatus/kasvattajanimet/nimi/'. $nimi['id'] . '/rodut')?>">Rodut</a></li>
         <li role="presentation" class="<?php if ($sivu == 'kasvatit'){echo "active";}?>"><a href="<?php echo base_url('kasvatus/kasvattajanimet/nimi/'. $nimi['id'] . '/kasvatit')?>">Kasvatit</a></li>
-        <li role="presentation" class="<?php if ($sivu == 'stats'){echo "active";}?>"><a href="<?php echo base_url('kasvatus/kasvattajanimet/nimi/'. $nimi['id'] . '/stats')?>">Statistikka</a></li>
+        <li role="presentation" class="<?php if ($sivu == 'stats'){echo "active";}?>"><a href="<?php echo base_url('kasvatus/kasvattajanimet/nimi/'. $nimi['id'] . '/stats')?>">Statistiikka</a></li>
 
     </ul>
     
