@@ -392,7 +392,7 @@ class Rajapinta extends CI_Controller
                     $haettava = $hevonen['i_nro'];
                     $vanhempi = true;
                 }else if(isset($hevonen['e_nro'])){
-                    $haettava = $hevonen['i_nro'];
+                    $haettava = $hevonen['e_nro'];
                     $vanhempi = true;
                 }
                 
