@@ -593,12 +593,14 @@ class Virtuaalihevoset extends CI_Controller
                         $painotus = $this->input->post('aseta_painotus');
                         $kotitalli = $this->input->post('aseta_kotitalli');
                         $this->load->model('Tallit_model');
-                        if(isset($kotitalli) && strlen($kotitalli) > 4 && $this->Tallit_model->is_tnro_in_use($kotitalli)){
-                        
-                            $edit_data['kotitalli'] = $kotitalli;
-                        }else {
+                        if(isset($kotitalli) && strlen($kotitalli) > 0){
+                            echo "mit'";
+                            if(strlen($kotitalli) > 4 && $this->Tallit_model->is_tnro_in_use($kotitalli)){                 
+                                $edit_data['kotitalli'] = $kotitalli;
+                            }else {
                                 $msg = "Antamasi kotitallin tunnus on virheellinen.";
                                 return false;
+                            }
                         }
                         
                         
