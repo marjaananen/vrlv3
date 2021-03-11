@@ -273,8 +273,7 @@ class Kisajarjestelma
     // Statistiikka
     //////////////////////////////////////////////////////////////
     
-    public function add_stats($tulos, $jaos, $porr = false){
-        
+    public function add_stats($tulos, $jaos, $porr = false){    
         
         $voi = array(); //voittajat
         $sij = array(); //sijoittuneet
@@ -352,8 +351,8 @@ class Kisajarjestelma
         if($porr){ $pre_txt = "porr_";}
         
         foreach ($stats_info as $horse=>$data){
-              $new_data = array();
-              $new_data['reknro'] = $horse;
+            $new_data = array();
+            $new_data['reknro'] = $horse;
               
             //jos hevosella ei ole tuloksia aiemmalti
             if(!isset($data['jaos'])){       
@@ -394,7 +393,7 @@ class Kisajarjestelma
                 }
             }
             
-      
+        }
 
         foreach($bulk_edit as $edit){
             $this->CI->db->where('jaos', $jaos);
@@ -407,6 +406,7 @@ class Kisajarjestelma
         if(sizeof($bulk_add)>0){
             $this->CI->db->insert_batch('vrlv3_hevosrekisteri_kisatiedot',$bulk_add); 
         }
+    
         
 
     }
