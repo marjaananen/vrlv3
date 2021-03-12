@@ -49,11 +49,36 @@ public function __construct()
 //handling the owners
 
     public function handle_horse_ownerships($mode, $tapa, $adder, $owner, $item, &$fields){
-        return $this->_handle_owners ($this->taulut['hev'], $mode, $tapa, $adder, $owner, $item, $fields);
+        if($this->_handle_owners ($this->taulut['hev'], $mode, $tapa, $adder, $owner, $item, $fields)){
+			$this->CI->load->library('vrl_helper');
+			if($tapa == "poista"){
+				$this->send_message($this->CI->ion_auth->user()->row()->tunnus, $owner, "Hevonen " . $this->CI->vrl_helper->get_vh($item) . " siirrettiin pois omistuksestasi.");
+			}else if($tapa == "lisaa"){
+				$this->send_message($this->CI->ion_auth->user()->row()->tunnus, $owner, "Sinun omistukseesi siirrettiin hevonen " . $this->CI->vrl_helper->get_vh($item));
+
+			}
+			return true;
+			
+		}else {
+			return false;
+		}
+		
     }
     
     public function handle_stable_ownerships($mode, $tapa, $adder, $owner, $item, &$fields){
-        return $this->_handle_owners  ($this->taulut['tal'],$mode, $tapa, $adder, $owner, $item, $fields);
+        if ($this->_handle_owners ($this->taulut['tal'],$mode, $tapa, $adder, $owner, $item, $fields))			{
+			$this->CI->load->library('vrl_helper');
+			if($tapa == "poista"){
+				$this->send_message($this->CI->ion_auth->user()->row()->tunnus, $owner, "Talli " . $item . " siirrettiin pois omistuksestasi.");
+			}else if($tapa == "lisaa"){
+				$this->send_message($this->CI->ion_auth->user()->row()->tunnus, $owner, "Sinun omistukseesi siirrettiin talli " . $item);
+
+			}
+			return true;
+			
+		}else {
+			return false;
+		}
     }
     
     public function handle_name_ownerships($mode, $tapa, $adder, $owner, $item, &$fields){
@@ -82,7 +107,7 @@ private function _handle_owners($taulu, $mode, $tapa, $adder, &$owner, $item, &$
 	
 	$om = $this->_owner_names($taulu, 1);
 	$om2 = $this->_owner_names($taulu, 2);
-	
+	$ok = true;
     
     if($this->CI->input->server('REQUEST_METHOD') == 'POST'){
 
@@ -104,10 +129,12 @@ private function _handle_owners($taulu, $mode, $tapa, $adder, &$owner, $item, &$
             }
             else {
                 $type = "warning"; $msg = "Virheellinen syöte!";
+				$ok = false;
             }
         }
         else {
             $type = "warning"; $msg = "Virheellinen syöte!";
+			$ok = false;
         }
             
             $fields['info'] = $this->CI->load->view('misc/naytaviesti', array('msg_type' => $type, 'msg' => $msg), true);
@@ -138,7 +165,7 @@ private function _handle_owners($taulu, $mode, $tapa, $adder, &$owner, $item, &$
 
 
 		if($this->CI->vrl_helper->vrl_to_number($owner) == $this->CI->ion_auth->user()->row()->tunnus){
-			$ok = $this->remove_me_from_horse($item, $msg);
+			$ok = $this->_remove_me($item, $taulu, $fields);
 			if ($ok){ $type = "success"; $msg = "Poisto onnistui!";}
             else {$type = "danger"; $msg = "Poisto epäonnistui. Ainutta ".$om."a ei saa poistaa.";}
 		}
@@ -158,6 +185,8 @@ private function _handle_owners($taulu, $mode, $tapa, $adder, &$owner, $item, &$
 
     
     }
+	
+	return $ok;
     
 }
 
@@ -293,15 +322,30 @@ private function _remove_me($item, $taulu, &$msg){
 // Add Ownership    
     
     public function add_horse_ownerships($owner, $item, $level=1){
-        return $this->_add($this->taulut['hev'], $owner, $item, $level);
+        if($this->_add($this->taulut['hev'], $owner, $item, $level)){
+			$this->CI->load->library('vrl_helper');
+			$this->send_message($this->CI->ion_auth->user()->row()->tunnus, $owner, "Sinun omistukseesi siirrettiin hevonen " . $this->CI->vrl_helper->get_vh($item));
+			
+			return true;
+			
+		}else {
+			return false;
+		}
     }
     
     public function add_stable_ownerships($owner, $item, $level=1){
-        return $this->_add($this->taulut['tal'],  $owner, $item, $level); 
+        if($this->_add($this->taulut['tal'],  $owner, $item, $level)){
+			$this->send_message($this->CI->ion_auth->user()->row()->tunnus, $owner, "Sinun omistukseesi siirrettiin talli " . $item);
+			
+			return true;
+			
+		}else {
+			return false;
+		}
     }
     
     public function add_name_ownerships( $owner, $item, $level=1){
-        return $this->_add($this->taulut['kasv'], $owner, $item, $level);             
+         $this->_add($this->taulut['kasv'], $owner, $item, $level);             
 
     }
 	
@@ -315,7 +359,7 @@ private function _remove_me($item, $taulu, &$msg){
     }
     
     
-    private function _add($taulu, $owner, $item, $taso = 1){
+    private function _add($taulu, $owner, $item, $taso = 1, $viesti = null){
         $taulunimi = $taulu['t'] . "_omistajat";
         $id = $taulu['ot']['id'];
         $om = $taulu['ot']['om'];
@@ -342,11 +386,26 @@ private function _remove_me($item, $taulu, &$msg){
     // Delete Ownership    
     
     public function del_horse_ownerships($owner, $item){
-        return $this->_del($this->taulut['hev'], $owner, $item);
+         if($this->_del($this->taulut['hev'], $owner, $item)){
+			$this->CI->load->library('vrl_helper');
+			$this->send_message($this->CI->ion_auth->user()->row()->tunnus, $owner, "Hevonen " . $this->CI->vrl_helper->get_vh($item) . " siirrettiin pois omistuksestasi.");
+			
+			return true;
+			
+		}else {
+			return false;
+		}
     }
     
     public function del_stable_ownerships( $owner, $item){
-        return $this->_del($this->taulut['tal'], $owner, $item); 
+        if($this->_del($this->taulut['tal'],  $owner, $item)){
+			$this->send_message($this->CI->ion_auth->user()->row()->tunnus, $owner, "Talli " . $item . " siirrettiin pois omistuksestasi.");
+			
+			return true;
+			
+		}else {
+			return false;
+		}
     }
     
     public function del_name_ownerships( $owner, $item){
@@ -387,7 +446,6 @@ private function _remove_me($item, $taulu, &$msg){
                 $this->CI->db->delete($taulunimi);
 				
 				if($taulu['tm']){
-
 					$data['muokkasi'] = $this->CI->ion_auth->user()->row()->tunnus;
 					$data['aika'] = date('Y-m-d H.i.s');
 					$taulunimi = $taulu['t'] . "_omistajamuutokset";
@@ -395,6 +453,7 @@ private function _remove_me($item, $taulu, &$msg){
 					$this->CI->db->insert($taulunimi, $data);
 
 				}
+
                 
             }
             return true;
@@ -544,6 +603,11 @@ private function _remove_me($item, $taulu, &$msg){
 		$this->CI->form_builder->form_attrs = array('method' => 'post', 'action' => site_url("".$url."omistajat/lisaa"));
 		return $this->CI->form_builder->render_template('_layouts/basic_form_template', $fields);
     }
+	
+	private function send_message($from, $to, $msg){
+		$this->CI->load->model('Tunnukset_model');
+		$this->CI->Tunnukset_model->send_message($from, $to, $msg);
+	}
 
 
 }
