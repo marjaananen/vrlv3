@@ -99,9 +99,9 @@ $ikaantymistieto = "";
                 $ikaantymistieto .= " vuotta, ikääntyminen: " . $ikaantyminen . "pv = 1v";
             }
         }else {
-            $ikaantymistieto .= $calculated_age;
+            $ikaantymistieto .= $calculated_age . " vuotta";
             if($ikaantyminen > 0){
-                $ikaantymistieto .= " vuotta, ikääntyminen: " . $ikaantyminen . "pv = 1v";
+                $ikaantymistieto .= ", ikääntyminen: " . $ikaantyminen . "pv = 1v";
             }
 
         }

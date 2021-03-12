@@ -439,8 +439,15 @@ class Hevonen_model extends Base_module_model
         }
         $ikaantymistiedot = $this->_birthday_dates($hevonen);
         if(sizeof($ikaantymistiedot) > 0) {
-            $this->db->where('reknro', $reknro);
-            $this->db->update('vrlv3_hevosrekisteri_ikaantyminen', $ikaantymistiedot);
+            $ages = $this->get_hevonen_ages($reknro);
+            if(sizeof($ages)>0){
+                $this->db->where('reknro', $this->CI->vrl_helper->vh_to_number($reknro));
+                $this->db->update('vrlv3_hevosrekisteri_ikaantyminen', $ikaantymistiedot);
+            }else {
+                $ikaantymistiedot['reknro'] = $this->CI->vrl_helper->vh_to_number($reknro);
+                $this->db->insert('vrlv3_hevosrekisteri_ikaantyminen', $ikaantymistiedot);
+
+            }
         }
 
     
