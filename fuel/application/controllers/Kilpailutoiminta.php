@@ -513,11 +513,12 @@ class Kilpailutoiminta extends CI_Controller
                     continue;
                 }
                 //Haetaan ikä
-                $levelByAge = $this->porrastetut->level_by_age($poni);
+                $age = $this->porrastetut->calculate_age($poni);
+                $levelByAge = $this->porrastetut->level_by_age($age);
                 $full_traits = $this->porrastetut->get_horses_full_level_list($poni['reknro'], $empty_trait_list, $vars['jaokset']);
                 $full_sport_info = $this->Hevonen_model->get_horse_sport_info_by_jaos($poni['reknro']);
                 //On ikää kisata, ja säkäkorkeus merkitty
-                if( $levelByAge > 2 && $poni['sakakorkeus'] > 10) {
+                if( $age >= $min_ika && $levelByAge > -1 && $poni['sakakorkeus'] > 10) {
                     
                 
                     foreach ($vars['jaokset'] as $jaos){
