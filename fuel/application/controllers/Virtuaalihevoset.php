@@ -98,6 +98,7 @@ class Virtuaalihevoset extends CI_Controller
 				
 		if(empty($reknro) || !$this->vrl_helper->check_vh_syntax($reknro)){
 			$this->fuel->pages->render('misc/naytaviesti', array('msg_type' => 'danger', 'msg' => 'Rekisterinumero on virheellinen.'));
+            return;
 
 		}
 		
@@ -108,8 +109,12 @@ class Virtuaalihevoset extends CI_Controller
         
         if(sizeof($vars['hevonen']) == 0){
             $this->fuel->pages->render('misc/naytaviesti', array('msg_type' => 'danger', 'msg' => 'Etsimääsi hevosta ei löydy.'));
+            return;
 
         }
+        //Ikääntymistiedot
+        $vars['hevonen']['age'] = $this->hevonen_model->get_hevonen_ages($reknro);
+        
         
         $vars['owners'] = $this->hevonen_model->get_horse_owners($reknro);
         $vars['exowners'] = $this->hevonen_model->get_horse_ex_owners($reknro);
@@ -150,8 +155,13 @@ class Virtuaalihevoset extends CI_Controller
             $vars['pedigree_printer'] = & $this->pedigree_printer;
         
         }
-        
+        $this->load->library("age_calc");
+        $this->load->library("porrastetut");
         $vars['vrl_helper'] = & $this->vrl_helper;
+        $vars['age_calc'] = & $this->age_calc;
+        $vars['porrastetut'] = & $this->porrastetut;
+
+
 
 		
 		

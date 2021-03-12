@@ -274,7 +274,7 @@ public function calculate_age($age, $today = null){
        $today =  strtotime($today);
     }
 
-        if( $age['3vuotta'] != '0000-00-00' AND !empty($age['3vuotta']) ) {
+        if( isset($age['3vuotta']) && $age['3vuotta'] != '0000-00-00' AND !empty($age['3vuotta']) ) {
         
             if( empty($age['4vuotta']) OR $age['4vuotta'] == '0000-00-00' ) { $age['4vuotta'] = strtotime( "+1 year", $today ); }
             if( empty($age['5vuotta']) OR $age['5vuotta'] == '0000-00-00' ) { $age['5vuotta'] = strtotime( "+1 year", $today ); }

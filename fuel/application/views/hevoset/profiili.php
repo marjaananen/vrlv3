@@ -74,6 +74,39 @@ foreach($exowners as $o){
 
 }
 
+$ikaantymistieto = "";
+
+        $compare_day = date("Y-m-d");
+        if(isset($hevonen['kuollut']) && $hevonen['kuollut']){
+            $compare_day = date($hevonen['kuol_pvm']);
+            $ikaantymistieto = "Kuollessaan ";
+        }
+        $calculated_age = $this->porrastetut->calculate_age($hevonen['age'], $compare_day);
+        $ikaantyminen = $hevonen['age']['ikaantyminen_d'] ?? 0;
+        
+        if($calculated_age == 0){
+            if( $ikaantyminen < 1){
+                $ikaantymistieto .= "alle 3v, tai ikääntymistä ei ole ilmoitettu";
+            }else {
+                $ikaantymistieto .= $this->age_calc->calculateAge ($hevonen['syntymaaika'],  $ikaantyminen, $compare_day);
+                $ikaantymistieto .= " vuotta, ikääntyminen: " . $ikaantyminen . "pv = 1v";
+            }
+        }else if ($calculated_age == 8){
+            if($ikaantyminen < 1){
+                $ikaantymistieto.= "yli 8v";
+            }else {
+                $ikaantymistieto .= $this->age_calc->calculateAge ($hevonen['syntymaaika'], $ikaantyminen, $compare_day);
+                $ikaantymistieto .= " vuotta, ikääntyminen: " . $ikaantyminen . "pv = 1v";
+            }
+        }else {
+            $ikaantymistieto .= $calculated_age;
+            if($ikaantyminen > 0){
+                $ikaantymistieto .= " vuotta, ikääntyminen: " . $ikaantyminen . "pv = 1v";
+            }
+
+        }
+
+
 $edit = "";
 
 if(isset($edit_tools) && $edit_tools == true){
@@ -108,7 +141,7 @@ if(isset($edit_tools) && $edit_tools == true){
    <tr><th scope="row">Rotu</th><td> <a href="<?php echo site_url().'/virtuaalihevoset/rotu/'.$hevonen['rotunro'];?>"><?=$hevonen['h_rotunimi']?></a><?=$rotutieto;?></td></tr>
    <tr><th scope="row">Sukupuoli</th><td> <?=$hevonen['sukupuoli']?></td></tr>
    <tr><th scope="row">Säkäkorkeus</th><td> <?php if(isset($hevonen['sakakorkeus']) && $hevonen['sakakorkeus'] > 0){ echo $hevonen['sakakorkeus'] . " cm"; } ?></td></tr>
-   <tr><th scope="row">Syntynyt</th><td> <?=$hevonen['syntymaaika']?><?=$maatieto;?></td></tr>
+   <tr><th scope="row">Syntynyt</th><td> <?=$hevonen['syntymaaika']?><?=$maatieto;?>, <?=$ikaantymistieto;?></td></tr>
    <tr><th scope="row">Väri</th><td> <a href="<?php echo site_url().'/virtuaalihevoset/vari/'.$hevonen['vid'];?>"><?=$hevonen['h_varinimi']?></a></td></tr>
    <tr><th scope="row">Painotus</th><td> <?php echo $painotustieto; ?></td></tr>
    <tr><th scope="row">Sivut</th><td> <a href="<?=$hevonen['h_url']?>"><?=$hevonen['h_url']?></a></td></tr>
@@ -165,6 +198,8 @@ if (isset($palkinnot) && sizeof($palkinnot) > 0){
     <?php
         if($sivu == 'suku' || empty($sivu))
         {
+           
+
              $pedigree_printer->createPedigree($suku, 4);             
              $sspros = 0;
              $skatopros = 1;
@@ -177,6 +212,15 @@ if (isset($palkinnot) && sizeof($palkinnot) > 0){
               <h3>Suvun tiedot</h3>
               <p>Sukusiitosprosentti: <?=$sspros;?>%<br />Sukukatokerroin: <?=$skatopros;?></p>
               <p><a href="<?php echo site_url(). 'kasvatus/jalostus';?>">Lue lisää</a></p>
+              <?php
+              echo "<h4>Isälinja</h4> <p>";
+             $pedigree_printer->print_line('i', $suku);
+             echo "</p>";
+             echo "<h4>Emälinja</h4><p> ";
+             $pedigree_printer->print_line('e', $suku);
+             echo "</p>";
+           
+           ?>
               
               <?php
         }

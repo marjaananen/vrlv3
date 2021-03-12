@@ -538,7 +538,7 @@ class Jaos_model extends Base_module_model
     }
     
     function get_class_options($jaos = null, $only_usable = true, $only_porrastetut = true){
-         $this->db->select("j.lyhenne, l.nimi, l.id");
+         $this->db->select("j.lyhenne, l.nimi, l.id, l.taso");
         $this->db->from('vrlv3_kisat_luokat as l');
         $this->db->join('vrlv3_kisat_jaokset as j', 'j.id = l.jaos');
         if(isset($jaos)){
@@ -561,7 +561,7 @@ class Jaos_model extends Base_module_model
         if ($query->num_rows() > 0)
         {
            foreach ($query->result_array() as $class){
-            $options[$class['id']] = $class['lyhenne'] . ": " . $class['nimi'];
+            $options[$class['id']] = $class['lyhenne'] . ": " . $class['nimi'] . " (vt. " . $class['taso'] . ")";
            }
         }
         

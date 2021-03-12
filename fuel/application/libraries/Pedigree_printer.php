@@ -79,6 +79,7 @@ class Pedigree_printer {
 		
 	}
  
+ 
  private function _set_td_colour($hevonen){
     if (isset($hevonen['reknro']) && isset($this->multiples[$hevonen['reknro']])){
     return  ' bgcolor="'. $this->multiples[$hevonen['reknro']] .'" ';
@@ -130,6 +131,9 @@ class Pedigree_printer {
     print $hevonen['nimi'] .$break. '(<a href="'. site_url("virtuaalihevoset/hevonen/".$hevonen['reknro']) . '">'.$hevonen['reknro'].'</a>)';
     print $break;
     
+    if($line_breaks == false){
+     echo "<small>";
+    }
     if (isset($hevonen['rotu'])){
       print $hevonen['rotu'];
     }
@@ -140,9 +144,32 @@ class Pedigree_printer {
     if (isset($hevonen['vari'])){
       print ", ". $hevonen['vari'];
     }
+    
+        
+    if($line_breaks == false){
+     echo "</small>";
+    }
 
     
   }
+  
+   public function print_line ($tunnus, $pedigree){
+    
+     $haettava = $tunnus;
+     $ok = true;
+     while($ok){   
+      if (isset($pedigree[$haettava])) {
+       if(strlen($haettava) > 1){
+        print '<span class="glyphicon glyphicon-menu-right" aria-hidden="true"></span>';
+       }
+       print '<strong>'.$haettava.". </strong>";
+       $this->_print_hevonen($pedigree[$haettava], false);
+       $haettava = $haettava.$tunnus;
+       }
+       else { $ok = false; break;}
+     
+    }
+   }
   
   public function countMissingPercentage($pedigree){
    $this->_handle_multiples($pedigree, 12);

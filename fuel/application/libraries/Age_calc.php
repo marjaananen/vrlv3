@@ -3,12 +3,14 @@
 
 class Age_calc
 {
-	public function calculateAge ($date, $aging = 84) {
+	public function calculateAge ($date, $aging = 84, $today = null) {
+		
+		if(!isset($today)){
+			$today = date("d.m.Y");
+		}
 	
 		if( empty($aging) ) { $agingdays = 84;} else { $agingdays = $aging; }
-	
-		$today = date("d.m.Y");
-		
+			
 		# How many days from date of birth, $date?
 		$difference = strtotime($today) - strtotime($date);
 		
