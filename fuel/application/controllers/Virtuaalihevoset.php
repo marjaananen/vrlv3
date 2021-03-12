@@ -508,6 +508,8 @@ class Virtuaalihevoset extends CI_Controller
         }
     }
     
+    
+    
     private function _massatuho_options($horses, &$stables, &$breeds, &$sports, &$dead, &$leveled){
         $stables = array();
         $breeds = array();
@@ -644,9 +646,12 @@ class Virtuaalihevoset extends CI_Controller
                         //luetaan arvot
                         $values = array();
                         foreach ($this->jaokset as $jaokset){
-                            $this->_massatuho_clean_input($jaokset['id'], $values, 99);
-                        }
+                            
+                            if($this->input->post($jaokset['id']) != 99){
+                                $values[$jaokset['id']] = $this->input->post($jaokset['id']);
+                            }
                         
+                        }
                         if(sizeof($values) == 0){
                             $msg = "Et asettanut yhtäkään kilpailutasoa muokattavaksi.";
                             return false;
