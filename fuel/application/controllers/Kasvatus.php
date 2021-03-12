@@ -586,7 +586,8 @@ class Kasvatus extends CI_Controller
             $foal_amount = $this->hevonen_model->count_breedingname_amount($id);
             if ($foal_amount > 0){
                 $msg['msg'] = "Kasvattajanimellä on " . $foal_amount . " kasvattia, joten sitä ei voi poistaa. Poista ensin kasvateilta kasvattajanimi!";
-    
+                $this->fuel->pages->render('misc/naytaviesti', $msg);
+
             }
             //adminin annettava poistolle syy
             else if($admin && ($this->input->server('REQUEST_METHOD') != 'POST' || strlen($this->input->post('syy')) == 0)){
@@ -624,7 +625,7 @@ class Kasvatus extends CI_Controller
         
 		
         
-        
+
 		
 	}
 	

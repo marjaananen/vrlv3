@@ -22,11 +22,7 @@ class Tallit extends CI_Controller
 	}
 	
 	public function uusimmat (){
-        if(!($this->ion_auth->logged_in()))
-        {
-            	$this->fuel->pages->render('misc/naytaviesti', array('msg_type' => 'danger', 'msg' => 'Kirjaudu sisään tarkastellaksesi tallejasi!'));
-        }
-		else {
+        
 		$vars['title'] = 'Uusimmat tallit';
 				
 		$vars['text_view'] = $this->load->view('tallit/teksti_uusimmat', NULL, TRUE);
@@ -38,7 +34,7 @@ class Tallit extends CI_Controller
         $vars['headers'][6] = array('title' => 'Rekisteröi', 'key' => 'hyvaksyi', 'prepend_text'=>'VRL-', 'key_link' => site_url('/tunnus/'));
 
 
-		if($this->user_rights->is_allowed()){
+		if($this->ion_auth->logged_in() && $this->user_rights->is_allowed()){
 			$vars['headers'][7] = array('title' => 'Editoi', 'key' => 'tnro', 'key_link' => site_url('yllapito/tallirekisteri/muokkaa/'), 'image' => site_url('assets/images/icons/edit.png'));
             $vars['headers'][8] = array('title' => 'Poista', 'key' => 'tnro', 'key_link' => site_url('yllapito/tallirekisteri/poista/'), 'image' => site_url('assets/images/icons/delete.png'));
 
@@ -50,7 +46,7 @@ class Tallit extends CI_Controller
 		$vars['data'] = json_encode($stables);
 
 		$this->fuel->pages->render('misc/taulukko', $vars);
-        }
+        
 	}
 	
 
