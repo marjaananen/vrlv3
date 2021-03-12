@@ -233,19 +233,27 @@ class Jaos_model extends Base_module_model
         return array();
     }
     
-    function get_show_horse_prizes($reknro){
+    function get_show_horse_prizes($reknro, $nimi = null){
         $this->db->select('o.*, t.*, tu.paatuomari_nimi');
         $this->db->from('vrlv3_kisat_bis_tulosrivit as o');
         $this->db->join('vrlv3_kisat_nayttelykalenteri as t', 't.kisa_id = o.nayttely_id');
         $this->db->join('vrlv3_kisat_nayttelytulokset as tu', 'tu.nayttely_id = o.nayttely_id');
 
-        $this->db->where('o.vh_id', $reknro);
+        
+        if(isset($nimi) && strlen($nimi)>1){
+            $this->db->where('o.vh_id', NULL);
+            $this->db->like('o.vh_nimi', $nimi);
+        }else {
+            $this->db->where('o.vh_id', $reknro);
+
+        }
+        
         $this->db->where('tu.hyvaksytty IS NOT NULL');
         $this->db->where('tu.hyvaksytty != \'0000-00-00 00:00:00\'');
         $this->db->order_by("t.kp", 'desc');
         
          $query = $this->db->get();
-        
+
         if ($query->num_rows() > 0)
         {
             return $query->result_array(); 

@@ -116,6 +116,8 @@ class Virtuaalihevoset extends CI_Controller
 
         $vars['palkinnot'] = $this->jaos_model->get_event_horse_prizes($this->vrl_helper->vh_to_number($reknro));
         $vars['show_palkinnot'] = $this->jaos_model->get_show_horse_prizes($this->vrl_helper->vh_to_number($reknro));
+        $vars['old_show_palkinnot'] = $this->jaos_model->get_show_horse_prizes(null, $vars['hevonen']['h_nimi']);
+
 
 		$vars['hevonen']['rekisteroity'] = $this->vrl_helper->sanitize_registration_date($vars['hevonen']['rekisteroity']);
         
@@ -1722,7 +1724,9 @@ class Virtuaalihevoset extends CI_Controller
         if (!$this->_check_parents($poni, $msg)){
             $ok = false;
         }
-        if (isset($poni['kasvattajanimi']) && !empty($poni['kasvattajanimi']) && (strlen($poni['kasvattajanimi']) > 25 ||strpos($poni['nimi'], $poni['kasvattajanimi']) === false)){
+        if (isset($poni['kasvattajanimi']) && !empty($poni['kasvattajanimi'])
+            && (strlen($poni['kasvattajanimi']) > 25
+                ||strpos(strtolower($poni['nimi']), strtolower($poni['kasvattajanimi'])) === false)){
 
             $msg .= "<li>Ilmoittamasi kasvattajanimi on liian pitkä tai se ei ole hevosen nimessä.</li>";
                 $ok = false;

@@ -198,34 +198,25 @@ if (isset($palkinnot) && sizeof($palkinnot) > 0){
         }
         
         else if($sivu == 'nayttelyt'){
+         if((isset($show_palkinnot) && sizeof($show_palkinnot)> 0) || (isset($old_show_palkinnot) && sizeof($old_show_palkinnot)> 0)){
+          
             if(isset($show_palkinnot) && sizeof($show_palkinnot)> 0){
-             echo '<ul>';
-
-             $last_id = 0;
-             $shows = array();
-             $rewards = array();
-             foreach($show_palkinnot as $show){
-              $shows[$show['bis_id']] = $show;
-              if(isset($rewards[$show['bis_id']])){
-               $rewards[$show['bis_id']] = $rewards[$show['bis_id']] . ", " . $show['palkinto'];
-              }
-              else {
-               $rewards[$show['bis_id']] = $show['palkinto'];
-              }
-             }
-             
-             foreach ($shows as $id => $show){
-              $bis = '(<a href="'.site_url().'/kilpailutoiminta/tulosarkisto/bis/'.$id.'">tulosarkisto</a>)';
-
-              echo '<li>' . $vrl_helper->sql_date_to_normal($show['kp']).', <b>' . $rewards[$id] .'</b>, päätuomari: ' . $show['paatuomari_nimi'] . ' ' . $bis; 
-              echo '</li>';
-      
-             
-             }
+             echo '<ul>';            
+             print_shows($show_palkinnot, $vrl_helper);           
              echo '</ul>';
-            }else {
-             echo "<p>Ei näyttelypalkintoja</p>";
             }
+            if(isset($old_show_palkinnot) && sizeof($old_show_palkinnot)> 0){
+             echo '<strong>Vanhat näyttelypalkinnot*</strong><br />';
+             echo '<ul>';            
+             print_shows($old_show_palkinnot, $vrl_helper);           
+             echo '</ul>';
+             echo '*<small>Nämä palkinnot on saatu kun hevonen on kilpaillut näyttelyissä ilman rekisterinumeroa.
+             Nämä on haettu tietokannasta nimen perusteella, ja esim. ktk-tuomareiden tulee tarkastaa tulosarkistosivulta
+             onko palkinto ok (vai onko kyseessä esim. erirotuinen tai ennen tämän hevosen syntymää kilpaillut kaima).</small>';
+            }
+         }else {
+             echo "<p>Ei näyttelypalkintoja</p>";
+          }
 
         }
         
@@ -267,3 +258,28 @@ if (isset($palkinnot) && sizeof($palkinnot) > 0){
 
 
 
+<?php
+function print_shows($show_palkinnot, $vrl_helper){
+ 
+     $last_id = 0;
+    $shows = array();
+    $rewards = array();
+    foreach($show_palkinnot as $show){
+     $shows[$show['bis_id']] = $show;
+     if(isset($rewards[$show['bis_id']])){
+      $rewards[$show['bis_id']] = $rewards[$show['bis_id']] . ", " . $show['palkinto'];
+     }
+     else {
+      $rewards[$show['bis_id']] = $show['palkinto'];
+     }
+    }
+    
+    foreach ($shows as $id => $show){
+     $bis = '(<a href="'.site_url().'/kilpailutoiminta/tulosarkisto/bis/'.$id.'">tulosarkisto</a>)';
+
+     echo '<li>' . $vrl_helper->sql_date_to_normal($show['kp']).', <b>' . $rewards[$id] .'</b>, päätuomari: ' . $show['paatuomari_nimi'] . ' ' . $bis; 
+     echo '</li>';
+
+    
+    }
+}?>
