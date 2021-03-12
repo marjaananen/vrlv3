@@ -38,7 +38,9 @@
    </tr>
       <tr>
       <td>Kilpailut</td>
-      <td><a href="<?php echo $kisat_url;?>">Järjestetyt kilpailut</a> <br /><a href="<?php echo $etuus_url;?>">Etuuspisteet</a></td>
+      <td><a href="<?php echo $kisat_url;?>">Järjestetyt kilpailut</a>
+      <br /><a href="<?php echo $etuus_url;?>">Etuuspisteet</a>
+      <br /><a href="<?php echo site_url(). "kilpailutoiminta/porrastetut/kilpailulistat";?>">Kilpailulistat</a></td>
    </tr>
    
 </table>
