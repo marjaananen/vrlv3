@@ -329,7 +329,8 @@ class Jaos
 
       $fields = array();
       $fields['s_luokkia_per_kisa_min'] = array('label' => 'Luokkamäärä/kisa (min)', 'type' => 'number', 'value' => $jaos['s_luokkia_per_kisa_min'] ?? 0, 'class'=>'form-control', 'represents' => 'int|smallint|mediumint|bigint', 'negative' => FALSE, 'decimal' => FALSE);
-      $fields['s_luokkia_per_kisa_max'] = array('label' => 'Luokkamäärä/kisa (max)', 'type' => 'number', 'value' => $jaos['s_luokkia_per_kisa_max'] ?? 0, 'class'=>'form-control', 'represents' => 'int|smallint|mediumint|bigint', 'negative' => FALSE, 'decimal' => FALSE);
+      $fields['s_luokkia_per_kisa_max'] = array('label' => 'Porrastetut: Luokkamäärä/kisa (max)', 'type' => 'number', 'value' => $jaos['s_luokkia_per_kisa_max'] ?? 0, 'class'=>'form-control', 'represents' => 'int|smallint|mediumint|bigint', 'negative' => FALSE, 'decimal' => FALSE);
+      $fields['s_luokkia_per_kisa_max_norm'] = array('label' => 'Perinteiset: Luokkamäärä/kisa (max)', 'type' => 'number', 'value' => $jaos['s_luokkia_per_kisa_max_norm'] ?? 0, 'class'=>'form-control', 'represents' => 'int|smallint|mediumint|bigint', 'negative' => FALSE, 'decimal' => FALSE);
 
       $fields['s_hevosia_per_luokka_min'] = array('label' => 'Hevosia/luokka/ratsastaja (min)', 'type' => 'number', 'value' => $jaos['s_hevosia_per_luokka_min'] ?? 0, 'class'=>'form-control', 'represents' => 'int|smallint|mediumint|bigint', 'negative' => FALSE, 'decimal' => FALSE);
       $fields['s_hevosia_per_luokka_max'] = array('label' => 'Hevosia/luokka/ratsastaja (max)', 'type' => 'number', 'value' => $jaos['s_hevosia_per_luokka_max'] ?? 0, 'class'=>'form-control', 'represents' => 'int|smallint|mediumint|bigint', 'negative' => FALSE, 'decimal' => FALSE);
@@ -343,6 +344,7 @@ class Jaos
     }
     
     var $rules_array = array("s_luokkia_per_kisa_max" => 0,
+                             "s_luokkia_per_kisa_max_norm" => 0,
                              "s_luokkia_per_kisa_min" => 0,
                              "s_hevosia_per_luokka_max"=>0,
                              "s_hevosia_per_luokka_min"=>0,
@@ -378,7 +380,8 @@ class Jaos
       
       else if(($jaos['s_luokkia_per_kisa_max']<$jaos['s_luokkia_per_kisa_min'])
          ||($jaos['s_hevosia_per_luokka_max']<$jaos['s_hevosia_per_luokka_min'])
-         ||($jaos['s_luokkia_per_hevonen_max']<$jaos['s_luokkia_per_hevonen_min'])){
+         ||($jaos['s_luokkia_per_hevonen_max']<$jaos['s_luokkia_per_hevonen_min'])
+         || ($jaos['s_luokkia_per_kisa_max_norm']<$jaos['s_luokkia_per_kisa_min'])){
          $msg = "Maksimin pitää olla aina suurempi kuin minimin!";
          return false;
       }

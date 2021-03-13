@@ -94,6 +94,9 @@ class Kisakeskus_model extends CI_Model
         if(isset($arvontatapa)){
             $this->db->where('arvontatapa', $arvontatapa);
         }
+        if(isset($jaos)){
+            $this->db->where('k.jaos', $jaos);
+        }
 
         $this->db->where('tulokset', 0);
         $this->db->where('k.hyvaksytty is NOT NULL', NULL, FALSE);
@@ -406,14 +409,17 @@ class Kisakeskus_model extends CI_Model
             if($nayttelyt){
                 unset($parameters['porrastettu']);
                 unset($parameters['arvontatapa']);
+                unset($parameters['porrastettu_valinta']);
+
             }else {
-                if(isset($where['porrastettu_valinta']) && $where['porrastettu_valinta'] == 2){
+                if(isset($parameters['porrastettu_valinta']) && $parameters['porrastettu_valinta'] == 2){
                     $where['porrastettu'] = 1;
                     $where['k.hyvaksytty <'] = $this->CI->kisajarjestelma->new_leveled_start_time ();
-                }else if (isset($data['porrastettu_valinta']) && $data['porrastettu_valinta'] == 1){
+                }else if (isset($parameters['porrastettu_valinta']) && $parameters['porrastettu_valinta'] == 1){
                     $where['porrastettu'] = 1;
                     $where['k.hyvaksytty >'] = $this->CI->kisajarjestelma->new_leveled_start_time ();
                 }
+                unset($parameters['porrastettu_valinta']);
             }
             foreach ($parameters as $key=>$parameter){
                 $where['k.'.$key] = $parameter;

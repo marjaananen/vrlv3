@@ -666,18 +666,19 @@ function kilpailukalenteri ($type = "perinteiset"){
     $arvontatapa = null;
         
     if($type == "perinteiset" || $type == "tarinalliset"){
-
+        
         $porrastettu = 0;
         if($type == "tarinalliset"){
             $arvontatapa = 4;
         }
-        $vars['headers'][1] = array('title' => 'KP', 'key' => 'kp', 'type'=>'date');
-        $vars['headers'][2] = array('title' => 'VIP', 'key' => 'vip', 'type'=>'date');
-        $vars['headers'][3] = array('title' => 'Jaos', 'key' => 'jaoslyhenne');
-        $vars['headers'][4] = array('title' => 'Järjestäjä', 'key' => 'jarj_talli', 'reknro', 'key_link' => site_url('virtuaalitallit/talli'));
-        $vars['headers'][5] = array('title'=> 'Kutsu', 'key'=>'url', 'type'=>'url', 'static_text'=>"Kutsu");
-        $vars['headers'][6] = array('title' => 'Info', 'key' => 'info', 'type'=>'small');
-        $vars['headers'][7] = array('title' => 'Hyväksytty', 'key' => 'hyvaksytty', 'type'=>'date');
+        $vars['headers'][1] = array('title' => '#', 'key' => 'kisa_id', 'type'=>'small');
+        $vars['headers'][2] = array('title' => 'KP', 'key' => 'kp', 'type'=>'date');
+        $vars['headers'][3] = array('title' => 'VIP', 'key' => 'vip', 'type'=>'date');
+        $vars['headers'][4] = array('title' => 'Jaos', 'key' => 'jaoslyhenne');
+        $vars['headers'][5] = array('title' => 'Järjestäjä', 'key' => 'jarj_talli', 'reknro', 'key_link' => site_url('virtuaalitallit/talli'));
+        $vars['headers'][6] = array('title'=> 'Kutsu', 'key'=>'url', 'type'=>'url', 'static_text'=>"Kutsu");
+        $vars['headers'][7] = array('title' => 'Info', 'key' => 'info', 'type'=>'small');
+        $vars['headers'][8] = array('title' => 'Hyväksytty', 'key' => 'hyvaksytty', 'type'=>'date');
         
     }else if($type == "porrastetut"){
         $porrastettu = 1;
@@ -692,8 +693,11 @@ function kilpailukalenteri ($type = "perinteiset"){
     }
     
     $vars['headers'] = json_encode($vars['headers']);
-                
-    $vars['data'] = json_encode(    $this->Kisakeskus_model->get_calendar($porrastettu, $arvontatapa));
+    $jaos = null;
+    if($this->input->get('jaos')){
+        $jaos = $this->input->get('jaos');
+    } 
+    $vars['data'] = json_encode( $this->Kisakeskus_model->get_calendar($porrastettu, $arvontatapa, $jaos));
 
 	$vars['kalenteri'] = $this->load->view('misc/taulukko', $vars, TRUE);
 	
