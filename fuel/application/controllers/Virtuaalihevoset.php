@@ -171,7 +171,7 @@ class Virtuaalihevoset extends CI_Controller
 	}
     
     	
-	private function _hevosen_varsat($reknro)
+	private function _hevosen_varsat($reknro, $admin=false, $url="")
     {
 		$vars['title'] = "";
 		
@@ -185,6 +185,10 @@ class Virtuaalihevoset extends CI_Controller
 			$vars['headers'][3] = array('title' => 'Nimi', 'key' => 'nimi');
 			$vars['headers'][4] = array('title' => 'Rotu', 'key' => 'rotu');
 			$vars['headers'][5] = array('title' => 'Sukupuoli', 'key' => 'sukupuoli');
+            if($admin){
+                $vars['headers'][6] = array('title' => 'Poista', 'key' => 'reknro', 'key_link' => site_url($url),
+                                            'image' => site_url('assets/images/icons/delete.png'));
+            }
 			
 			$vars['headers'] = json_encode($vars['headers']);
 						
@@ -996,8 +1000,88 @@ class Virtuaalihevoset extends CI_Controller
                 $data['editor'] = $this->_get_horse_edit_form($mode, $data['hevonen'], $data['hevonen']['reknro']);
                 $this->fuel->pages->render('hevoset/hevonen_muokkaa', $data);
             }
-        }
+        }else if($sivu == "varsat"){
             
+            if($this->input->server('REQUEST_METHOD') == 'POST'){
+                    $varsa_vh = $this->input->post('varsa_vh');
+                    if(!isset($varsa_vh) || $varsa_vh === false || !$this->vrl_helper->check_vh_syntax($varsa_vh)){
+                        $data['msg'] = "Virheellinen rekisterinumero";
+                        $data['msg_type'] = "danger";
+                        $data['varsa_vh'] = $varsa_vh;
+                    }else {
+                        $varsa = $this->hevonen_model->get_hevonen_edit($varsa_vh);
+                        $msg = "";
+                        if(sizeof($varsa) == 0){
+                            $data['msg'] = "Hakemaasi varsaa ei ole olemassa";
+                            $data['msg_type'] = "danger";
+                        }else if(($data['hevonen']['sukupuoli'] == 1 && !empty($varsa['e_nro']))
+                             || ($data['hevonen']['sukupuoli'] != 1 && !empty($varsa['i_nro']))){
+                                $data['msg'] = "Varsalle on jo asetettu suku, et voi muuttaa sitä tällä työkalulla.";
+                               $data['msg_type'] = "danger";
+                                $data['varsa_vh'] = $varsa_vh;
+
+                        }else if(!$this->_check_parent($varsa, $reknro, $data['hevonen']['nimi'], $msg)){
+                            $data['msg'] = $msg;
+                            $data['msg_type'] = "danger";
+                            $data['varsa_vh'] = $varsa_vh;
+
+                        }else {
+                             $suku = array("i_nro"=>$varsa['i_nro'], "e_nro"=>$varsa['e_nro']);
+                            if($data['hevonen']['sukupuoli'] == 1){
+                                $suku['e_nro'] = $this->vrl_helper->vh_to_number($reknro);
+                            }else {
+                                $suku['i_nro'] = $this->vrl_helper->vh_to_number($reknro);
+                            }
+                            
+                            $this->hevonen_model->edit_suku($suku, $varsa['reknro']);
+                            $data['msg'] = "Varsa lisätty!.";
+                            $data['msg_type'] = "success";
+                        }
+
+                    }                
+            }else if($tapa == "poista" && !isset($id)){
+             $data['msg'] = "Et valinnut poistettavaa varsaa!";
+             $data['msg_type'] = "danger";
+
+            }else if($tapa == "poista"){
+                $varsa = $this->hevonen_model->get_hevonen_edit($id);
+
+                if(sizeof($varsa) == 0){
+                    $data['msg'] = "Hakemaasi varsaa ei ole olemassa";
+                    $data['msg_type'] = "danger";
+                }else if(($data['hevonen']['sukupuoli'] == 1 && $varsa['e_nro'] != $this->vrl_helper->vh_to_number($reknro))
+                     || ($data['hevonen']['sukupuoli'] != 1 && $varsa['i_nro'] != $this->vrl_helper->vh_to_number($reknro) )){
+                        $data['msg'] = "Yrität käsitellä väärän hevosen varsaa.";
+                       $data['msg_type'] = "danger";
+                }else {
+                        $suku = array("i_nro"=>$varsa['i_nro'], "e_nro"=>$varsa['e_nro']);
+                        if($data['hevonen']['sukupuoli'] == 1){
+                            $suku['e_nro'] = null;
+                        }else {
+                            $suku['i_nro'] = null;
+                        }
+                        $this->hevonen_model->edit_suku($suku, $varsa['reknro']);
+                        $data['msg'] = "Varsa poistettu!.";
+                        $data['msg_type'] = "success";
+
+                }
+            }
+            
+                
+            $data['foals'] = $this->_hevosen_varsat($data['hevonen']['reknro'], true, "virtuaalihevoset/muokkaa/".$reknro."/varsat/poista/");
+            $this->load->library('form_builder', array('submit_value' => 'Lisää varsa'));
+            $fields['varsa_vh'] = array('label'=>'Varsan rekisterinumero', 'type' => 'text', 'class'=>'form-control', 'value'=>$data['varsa_vh'] ?? "");                 
+            $this->form_builder->form_attrs = array('method' => 'post');                            
+            $data['form'] =  $this->form_builder->render_template('_layouts/basic_form_template', $fields);
+            $this->fuel->pages->render('hevoset/hevonen_muokkaa', $data);
+
+
+        }
+
+            
+
+            
+    
 		
     }
 	

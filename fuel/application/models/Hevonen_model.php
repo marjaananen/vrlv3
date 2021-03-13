@@ -1312,6 +1312,8 @@ class Hevonen_model extends Base_module_model
     }
     
 
+    
+
        public function get_country_list(){
         
         $this->db->select('id, maa, lyh');

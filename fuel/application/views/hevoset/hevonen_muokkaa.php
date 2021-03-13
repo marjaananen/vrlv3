@@ -11,8 +11,8 @@
 
    <ul class="nav nav-tabs">
         <li role="presentation" class="<?php if ($sivu == 'tiedot'){echo "active";}?>"><a href="<?php echo base_url('virtuaalihevoset/muokkaa/'. $hevonen['reknro'] . '/tiedot')?>">Tiedot</a></li>
-    
         <li role="presentation" class="<?php if ($sivu == 'omistajat'){echo "active";}?>"><a href="<?php echo base_url('virtuaalihevoset/muokkaa/'. $hevonen['reknro'] . '/omistajat')?>">Omistajat</a></li>
+        <li role="presentation" class="<?php if ($sivu == 'varsat'){echo "active";}?>"><a href="<?php echo base_url('virtuaalihevoset/muokkaa/'. $hevonen['reknro'] . '/varsat')?>">Jälkeläiset</a></li>
 
     </ul>
        <?php echo fuel_var('info', '');?>
@@ -22,6 +22,11 @@
     if($sivu == 'tiedot'){     
         echo fuel_var('editor', '');
         }
+        
+   else if($sivu == 'varsat'){
+      echo $form;
+        echo $foals;
+   }
 
     else if($sivu == 'omistajat'){?>
           <div class="panel panel-default"><div class="panel-body">
