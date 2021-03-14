@@ -29,7 +29,12 @@ if(isset($obj['error']) && $obj['error'] == 0){
      *          "5vuotta":"2008-08-18",
      *          "6vuotta":"2008-10-05",
      *          "7vuotta":"2008-11-22",
-     *          "8vuotta":"2009-01-09"}
+     *          "8vuotta":"2009-01-09",
+     *          "ika": 7,
+     *          "ikaantyminen_paivaa": 0,
+     *          "ikaantyminen_ika" = 0}
+     *          Ikä sisältää iän syntymäpäivien mukaan, ikääntyminen sisältää hevosen ikääntymisen (montako päivää on yksi vuosi),
+     *          ja ikaantyminen_ika on sen perusteella laskettu ikä. Porrastetuissa käytetään kuitenkin aina "ika" kentässä olevaa ikää.
      * $hevonen['ominaisuudet'] sisältää taulukon hevosen ominaisuuspisteistä ominaisuuksittain esim.
      *          1=>{"ominaisuus":1,"pisteet":230.25},
      *          2=>{"ominaisuus":2,"pisteet":230.25}

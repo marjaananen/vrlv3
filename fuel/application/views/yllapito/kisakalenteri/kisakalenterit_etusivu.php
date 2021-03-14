@@ -18,8 +18,8 @@ if ($porrastetut_amount < 100) {
 ?>
 <button type="button" class="btn btn-<?php echo $type;?>">Arvontajono <span class="badge"><?php echo $amount;?></span></button>
 </a><p>
-Porrastettujen arvontajonossa on <?php if ($porrastetut_amount < 100) { echo $porrastetut_amount;} else { echo "yli 100"; } ?> porrastettua kisaa joiden kilpailupäivä on mennyt.
-Käynnistä arvonta klikkaamalla yo. painiketta. Jonain päivänä tämä alkaa tapahtua automaattisesti, mutta sitä
+Porrastettujen arvontajonossa on <?php if ($porrastetut_amount < 100) { echo $porrastetut_amount;} else { echo "yli 100"; } ?> porrastettua kisaa joiden
+kilpailupäivä on tänään tai aiemmin. Käynnistä arvonta klikkaamalla yo. painiketta. Jonain päivänä tämä alkaa tapahtua automaattisesti, mutta sitä
 ennen jonkun (kenen tahansa) on välillä klikattava tätä nappulaa.
 </p>
 

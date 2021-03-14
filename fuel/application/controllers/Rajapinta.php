@@ -156,10 +156,16 @@ class Rajapinta extends CI_Controller
                 $ominaisuus_per_jaos = array();
                 $maxs = array ();
                 $this->_get_all_traits($ominaisuudet_id_name, $ominaisuus_per_jaos, $jaokset_id_name);
-                
-                $age = $this->porrastetut->calculate_age($horse);        
+                $this->load->library("age_calc");
+                $age = $this->porrastetut->calculate_age($horse);
                 $levelByAge =  $this->porrastetut->level_by_age($age);
-                
+                $compare_day = date("Y-m-d");
+                $ikaantyminen = $horse['ikaantyminen_d'] ?? 0;
+                $calculated_age = 0;
+                if($ikaantyminen > 0){
+                     $calculated_age = $this->age_calc->calculateAge ($horse['syntymaaika'],  $ikaantyminen, $compare_day);
+                }
+                        
                 
                 //kaikki ominaisuudet ja jaokset listaan
                 $return_data['info'] = array();
@@ -192,7 +198,10 @@ class Rajapinta extends CI_Controller
                                                                    "5vuotta"=>$horse['5vuotta'],
                                                                    "6vuotta"=>$horse['6vuotta'],
                                                                    "7vuotta"=>$horse['7vuotta'],
-                                                                   "8vuotta"=>$horse['8vuotta']);
+                                                                   "8vuotta"=>$horse['8vuotta'],
+                                                                   "ika"=> $age,
+                                                                   "ikaantyminen_paivaa"=> $ikaantyminen,
+                                                                   "ikaantyminen_ika"=>$calculated_age);
                     
 
                 }
@@ -372,7 +381,7 @@ class Rajapinta extends CI_Controller
         $this->db->group_end(); //this will end grouping
         $this->db->order_by('syntymaaika', 'desc');
         $query = $this->db->get();
-        
+                
         $hevoset = array();
         
         if ($query->num_rows() > 0)
@@ -391,7 +400,7 @@ class Rajapinta extends CI_Controller
                 if(isset($hevonen['e_nro']) && $hevonen['e_nro'] == $nro && isset($hevonen['i_nro'])){
                     $haettava = $hevonen['i_nro'];
                     $vanhempi = true;
-                }else if(isset($hevonen['e_nro'])){
+                }else if(isset($hevonen['i_nro']) && $hevonen['i_nro'] == $nro  && isset($hevonen['e_nro'])){
                     $haettava = $hevonen['e_nro'];
                     $vanhempi = true;
                 }
