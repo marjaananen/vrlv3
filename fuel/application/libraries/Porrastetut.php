@@ -275,26 +275,19 @@ public function calculate_age($age, $today = null){
     }
     $ageNow = 0;
     if( isset($age['3vuotta']) && $age['3vuotta'] != '0000-00-00' AND !empty($age['3vuotta']) ) {
-    
-        if( empty($age['4vuotta']) OR $age['4vuotta'] == '0000-00-00' ) { $age['4vuotta'] = strtotime( "+1 year", $today ); }
-        if( empty($age['5vuotta']) OR $age['5vuotta'] == '0000-00-00' ) { $age['5vuotta'] = strtotime( "+1 year", $today ); }
-        if( empty($age['6vuotta']) OR $age['6vuotta'] == '0000-00-00' ) { $age['6vuotta'] = strtotime( "+1 year", $today ); }
-        if( empty($age['7vuotta']) OR $age['7vuotta'] == '0000-00-00' ) { $age['7vuotta'] = strtotime( "+1 year", $today ); }
-        if( empty($age['8vuotta']) OR $age['8vuotta'] == '0000-00-00' ) { $age['8vuotta'] = strtotime( "+1 year", $today ); }
-    
-        
-        if ( $today >= strtotime($age['3vuotta']) AND $today < strtotime($age['4vuotta']) ) {
+            
+        if ( $today >= strtotime($age['3vuotta']) AND (!isset($age['4vuotta']) ||$today < strtotime($age['4vuotta']) )) {
             $ageNow = 3;
             // print '-'.$today.' >= '.strtotime($age['3vuotta']).'-';
-        } elseif ( $today >= strtotime($age['4vuotta']) AND $today < strtotime($age['5vuotta']) ) {
+        } elseif ( isset($age['4vuotta']) && $today >= strtotime($age['4vuotta']) AND (!isset($age['5vuotta']) || $today < strtotime($age['5vuotta']) )) {
             $ageNow = 4;
-        } elseif ( $today >= strtotime($age['5vuotta']) AND $today < strtotime($age['6vuotta']) ) {
+        } elseif (  isset($age['5vuotta']) && $today >= strtotime($age['5vuotta']) AND (!isset($age['6vuotta']) ||$today < strtotime($age['6vuotta']) )) {
             $ageNow = 5;
-        } elseif ( $today >= strtotime($age['6vuotta']) AND $today < strtotime($age['7vuotta']) ) {
+        } elseif ( isset($age['6vuotta']) && $today >= strtotime($age['6vuotta']) AND (!isset($age['7vuotta']) ||$today < strtotime($age['7vuotta']) )) {
             $ageNow = 6;
-        } elseif ( $today >= strtotime($age['7vuotta']) AND $today < strtotime($age['8vuotta']) ) {
+        } elseif ( isset($age['7vuotta']) && $today >= strtotime($age['7vuotta']) AND (!isset($age['8vuotta']) ||$today < strtotime($age['8vuotta']) )) {
             $ageNow = 7;
-        } elseif ( $today >= strtotime($age['8vuotta']) ) {
+        } elseif (isset($age['8vuotta']) &&  $today >= strtotime($age['8vuotta']) ) {
             $ageNow = 8;
         } else {
             $ageNow = 0;
