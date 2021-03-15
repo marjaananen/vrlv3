@@ -23,7 +23,16 @@
         
 
  </ul>
-    
+ 
+ 
+ <?php if($sivu == 'porrastetut' || $sivu == 'avoimet'){?>
+<p> <div class="alert alert-warning" role="alert">   <span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span>
+
+<b>Huom!</b> Vanhantyyppisistä porrastetuista tulosten lähetys onnistuu seuraavalla osoitteella (loppuosan [id] korvataan kyseisen kilpailun ID:llä): <br />
+ <b>http://virtuaalihevoset.net/kilpailutoiminta/ilmoita_tulokset/<i>[id]</i></b></p>
+    </div>
+ 
+ <?php }?>
     
     <?php if(isset($kisat)){
         echo $kisat;
