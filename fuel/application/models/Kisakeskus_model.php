@@ -495,7 +495,20 @@ class Kisakeskus_model extends CI_Model
             if($nayttelyt){
                 unset($parameters['porrastettu']);
                 unset($parameters['arvontatapa']);
+                unset($parameters['porrastettu_valinta']);
+
             }
+        
+            
+            if(isset($parameters['porrastettu_valinta']) && $parameters['porrastettu_valinta'] == 2){
+                $where['porrastettu'] = 1;
+                $where['k.hyvaksytty <'] = $this->CI->kisajarjestelma->new_leveled_start_time ();
+            }else if (isset($parameters['porrastettu_valinta']) && $parameters['porrastettu_valinta'] == 1){
+                $where['porrastettu'] = 1;
+                $where['k.hyvaksytty >'] = $this->CI->kisajarjestelma->new_leveled_start_time ();
+            }
+            unset($parameters['porrastettu_valinta']);
+            
 
             
             foreach ($parameters as $key=>$parameter){

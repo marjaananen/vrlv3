@@ -129,7 +129,7 @@ class Kilpailutoiminta extends CI_Controller
                 $vars['headers'][2] = array('title' => 'KP', 'key' => 'kp', 'type'=>'date');
                 $vars['headers'][3] = array('title' => 'VIP', 'key' => 'vip', 'type'=>'date');
                 $vars['headers'][4] = array('title' => 'Jaos', 'key' => 'jaoslyhenne');
-                $vars['headers'][5] = array('title' => 'Järjestäjä', 'key' => 'jarj_talli', 'reknro', 'key_link' => site_url('virtuaalitallit/talli'));
+                $vars['headers'][5] = array('title' => 'Järjestäjä', 'key' => 'jarj_talli', 'reknro', 'key_link' => site_url('virtuaalitallit/talli/'));
                 $vars['headers'][6] = array('title'=> 'Kutsu', 'key'=>'url', 'type'=>'url', 'static_text'=>"Kutsu");
                 $vars['headers'][7] = array('title' => 'Info', 'key' => 'info', 'type'=>'small');
                 
@@ -172,7 +172,7 @@ class Kilpailutoiminta extends CI_Controller
         $vars['headers'][2] = array('title' => 'KP', 'key' => 'kp', 'type'=>'date');
         $vars['headers'][3] = array('title' => 'VIP', 'key' => 'vip', 'type'=>'date');
         $vars['headers'][4] = array('title' => 'Jaos', 'key' => 'jaoslyhenne');
-        $vars['headers'][5] = array('title' => 'Järjestäjä', 'key' => 'jarj_talli', 'reknro', 'key_link' => site_url('virtuaalitallit/talli'));
+        $vars['headers'][5] = array('title' => 'Järjestäjä', 'key' => 'jarj_talli', 'reknro', 'key_link' => site_url('virtuaalitallit/talli/'));
         $vars['headers'][6] = array('title'=> 'Kutsu', 'key'=>'url', 'type'=>'url', 'static_text'=>"Kutsu");
         $vars['headers'][7] = array('title' => 'Info', 'key' => 'info', 'type'=>'small');
         
@@ -230,7 +230,7 @@ class Kilpailutoiminta extends CI_Controller
         }
         else if($sivu == "laatispisteet"){
             
-            $this->_porrastetut_laatispisteet('kilpailutoiminta/porrastetut/laatispisteet');
+            $this->_porrastetut_laatispisteet($vars, 'kilpailutoiminta/porrastetut/laatispisteet');
             
         }
         else {
@@ -361,9 +361,8 @@ class Kilpailutoiminta extends CI_Controller
         return $this->form_builder->render_template('_layouts/basic_form_template', $fields);
     }
     
-    private function _porrastetut_laatispisteet($url){
+    private function _porrastetut_laatispisteet($data = array(), $url){
         $input = array();  
-        $data = array();
         $data['pisteet'] = false;
 
         if($this->input->server('REQUEST_METHOD') == 'POST' && !isset($id)){
@@ -429,7 +428,10 @@ class Kilpailutoiminta extends CI_Controller
                     $vaikuttavia = 0;
                     foreach($jaokset as $id=>$jaos){
                         if ($id != $input['jaos']){
-                            if(($jaos['pisteet']/$jaokset[$input['jaos']]['pisteet']) > 0.75){
+                            
+                            
+                            if($this->_traits_in_common($jaos['ominaisuudet'], $jaokset[$input['jaos']]['ominaisuudet']) &&
+                               ($jaos['pisteet']/$jaokset[$input['jaos']]['pisteet']) > 0.75){
                                 $vaikuttavia = $vaikuttavia +1;
                             }
                         }
@@ -458,6 +460,21 @@ class Kilpailutoiminta extends CI_Controller
 
 
     }
+    
+    private function _traits_in_common($eka, $toka){
+
+        foreach ($eka as $traits1){
+          foreach ($toka as $traits2){
+            if($traits1 == $traits2){
+            return true;
+            }
+          }
+        }
+
+        return false;
+    
+      }
+
     
     
     private function _porrastetut_kisalistat($url){
@@ -636,7 +653,7 @@ function nayttelykalenteri (){
     $vars['headers'][1] = array('title' => 'KP', 'key' => 'kp', 'type'=>'date');
     $vars['headers'][2] = array('title' => 'VIP', 'key' => 'vip', 'type'=>'date');
     $vars['headers'][3] = array('title' => 'Jaos', 'key' => 'jaoslyhenne');
-    $vars['headers'][4] = array('title' => 'Järjestäjä', 'key' => 'jarj_talli', 'reknro', 'key_link' => site_url('virtuaalitallit/talli'));
+    $vars['headers'][4] = array('title' => 'Järjestäjä', 'key' => 'jarj_talli', 'reknro', 'key_link' => site_url('virtuaalitallit/talli/'));
     $vars['headers'][5] = array('title'=> 'Kutsu', 'key'=>'url', 'type'=>'url', 'static_text'=>"Kutsu");
     $vars['headers'][6] = array('title' => 'Info', 'key' => 'info', 'type'=>'small');
     $vars['headers'][7] = array('title' => 'Hyväksytty', 'key' => 'hyvaksytty', 'type'=>'date');
@@ -675,7 +692,7 @@ function kilpailukalenteri ($type = "perinteiset"){
         $vars['headers'][2] = array('title' => 'KP', 'key' => 'kp', 'type'=>'date');
         $vars['headers'][3] = array('title' => 'VIP', 'key' => 'vip', 'type'=>'date');
         $vars['headers'][4] = array('title' => 'Jaos', 'key' => 'jaoslyhenne');
-        $vars['headers'][5] = array('title' => 'Järjestäjä', 'key' => 'jarj_talli', 'reknro', 'key_link' => site_url('virtuaalitallit/talli'));
+        $vars['headers'][5] = array('title' => 'Järjestäjä', 'key' => 'jarj_talli', 'reknro', 'key_link' => site_url('virtuaalitallit/talli/'));
         $vars['headers'][6] = array('title'=> 'Kutsu', 'key'=>'url', 'type'=>'url', 'static_text'=>"Kutsu");
         $vars['headers'][7] = array('title' => 'Info', 'key' => 'info', 'type'=>'small');
         $vars['headers'][8] = array('title' => 'Hyväksytty', 'key' => 'hyvaksytty', 'type'=>'date');

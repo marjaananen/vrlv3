@@ -22,16 +22,16 @@ class Porrastetut
     private $aste = array(1=> "Seurataso", 2=>"Aluetaso", 3=> "Kansallinen taso");
     
     private $koulutustasot = array(
-        1=>"Vt1: HeD / 40cm, 60cm / Aloittelija, Harraste, Tutustumisluokka",       
-        2=>"Vt2: HeC, KN Special, HeB / 80cm, 90cm / Helppo (vt2)",
-        3=>"Vt3: Noviisi valjakko",
-        4=>"Vt4: HeA / 100cm / CIC1",
-        5=>"Vt5: VaB / 110cm / CIC2",
-        6=>"Vt6: VaA / 120cm / CIC3",
-        7=>"Vt7: PSG / 130cm / CIC4 / Vaativa valjakko",
-        8=>"Vt8: Int I / 140cm",
-        9=>"Vt9: Int II / 150cm / Vaikea valjakko",
-        10=>"Vt10: GP / 160cm",
+        1=>"Vt1: HeD / ERJ: 40cm, 60cm / MEJ: 50cm tai alle / Aloittelija, Harraste, Tutustumisluokka",       
+        2=>"Vt2: HeC, KN Special, HeB / ERJ: 80cm, 90cm, MEJ: 60cm, 70cm / Helppo (vt2)",
+        3=>"Vt3: Noviisi valjakko / MEJ: 80cm",
+        4=>"Vt4: HeA / ERJ: 100cm / CIC1",
+        5=>"Vt5: VaB / ERJ: 110cm / MEJ: 90cm / CIC2",
+        6=>"Vt6: VaA / ERJ: 120cm / MEJ: 100cm / CIC3",
+        7=>"Vt7: PSG / ERJ: 130cm / MEJ: 110cm / CIC4 / Vaativa valjakko",
+        8=>"Vt8: Int I / ERJ: 140cm / MEJ: 120cm",
+        9=>"Vt9: Int II / ERJ: 150cm / MEJ: 130CM / Vaikea valjakko",
+        10=>"Vt10: GP / ERJ: 160cm",
         
         
         );
@@ -95,7 +95,7 @@ class Porrastetut
         $points =  round($points, 2);
         
         //Taikakerroin on kerroin jolla säädellään porrastettujen pistesaantitasoa kulloisenkin virtuaalimaailmantilanteen mukaan.
-        $taikakerroin = 8.7;
+        $taikakerroin = 4.18;
                                 
         return $taikakerroin * $points;
     }
@@ -137,6 +137,7 @@ class Porrastetut
         return $this->aste;
     }
     
+   
     //Ominaisuudet
     public function get_traits($jaos = null){
         return $this->CI->Trait_model->get_trait_list($jaos);
@@ -571,7 +572,8 @@ public function handle_porrastettu_class_results($jaos, $kisa, $classinfo, $part
                             
                             // 1.4. Laske hevoselle pistemäärä ja lisää se taulukkoon $accepted
                             
-                            $pointsInClass = ( $horsePropertyPoints / 3 )+(rand(0,100)/100) * ( (rand(0,100)/100) + (rand(0,100)/100) + (rand(0,100)/100) + 1.00);
+                            $pointsInClass = ( $horsePropertyPoints / 3 )
+                            +(rand(1,150)/100) * ( (rand(99,666)/10) + (rand(66,666)/10) + (rand(0,100)/10) + 1.00);
                             $accepted[] = array('vh' => $vh, 'horse' => $participants[$i], 'points' => $pointsInClass);
                             
                             
@@ -709,7 +711,8 @@ public function handle_porrastettu_class_results($jaos, $kisa, $classinfo, $part
             
         }
         if(sizeof($bulk_insert)>0){
-            $this->CI->db->insert_batch('vrlv3_hevosrekisteri_ominaisuudet_jonossa',$bulk_insert); 
+            $this->CI->db->insert_batch('vrlv3_hevosrekisteri_ominaisuudet_jonossa',$bulk_insert);
+            $this->approve_propertyPoints_from_queue($tulos_id);
         }
     }
     
@@ -719,6 +722,12 @@ public function handle_porrastettu_class_results($jaos, $kisa, $classinfo, $part
                         JOIN vrlv3_hevosrekisteri_ominaisuudet_jonossa j ON o.reknro = j.reknro
                         SET o.arvo = o.arvo + j.arvo
                         WHERE o.ominaisuus = j.ominaisuus AND j.tulos_id = '.$tulos_id);
+                    
+                    $this->CI->db->query('INSERT INTO vrlv3_hevosrekisteri_ominaisuudet (reknro, ominaisuus, arvo)
+                                         SELECT reknro, ominaisuus, arvo
+                                         FROM vrlv3_hevosrekisteri_ominaisuudet_jonossa as j
+                                         WHERE j.tulos_id = '.$tulos_id .' AND NOT EXISTS
+                                         (SELECT reknro FROM vrlv3_hevosrekisteri_ominaisuudet WHERE vrlv3_hevosrekisteri_ominaisuudet.reknro = j.reknro)');
                     
                     $this->CI->db->delete('vrlv3_hevosrekisteri_ominaisuudet_jonossa', array("tulos_id"=>$tulos_id));
                 

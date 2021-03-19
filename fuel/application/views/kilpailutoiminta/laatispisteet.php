@@ -4,14 +4,46 @@
 
 <p>Koska hevonen pystyy keräämään esim. ERJ:n kilpailuissa myös KRJ:n laatuarvosteluissa tarvittavia pisteitä, useammassa lajissa kilpailleelta hevoselta vaaditaan enemmän pisteitä kuin tiettyyn lajiin keskittyneeltä hevoselta. Hevosen lajikohtaisesti kerryttämistä ominaisuuspisteistä huomioidaan siis tietty prosenttimäärä riippuen siitä, paljonko pisteitä se on kerännyt toisiinsa vaikuttavista lajeista. </p>
 <p>
-<b>Toisiinsa vaikuttavat lajit</b><br />
-<u>ERJ</u>: KRJ, VVJ, KERJ<br />
-<u>KRJ</u>: ERJ, VVJ<br />
-<u>VVJ</u>: KRJ, ERJ<br />
-<u>KERJ</u>: ERJ<br />
-</p>
+<b>Toisiinsa vaikuttavat lajit</b></p>
+<ul>
+
+ <?php
+
+ 
+        foreach ($jaokset as $jaos=>$info){
+              $eka = true;
+
+            echo "<li><b>".$info['jaos']['lyhenne']."</b>: ";
+            foreach ($jaokset as $vrt_jaos => $vrt_info){
+              if($jaos != $vrt_jaos){
+                $common = array();
+                $common = yhteiset_traitit($info['traits'],$vrt_info['traits']);
+
+                if (sizeof($common) > 0){
+                  if(!$eka){
+                    echo ", ";
+                  }else {
+                    $eka = false;
+                  }
+                    echo $vrt_info['jaos']['lyhenne'];
+                  
+                  
+                }
+                
+              }
+                
+            }
+            
+            
+            
+            
+            echo "</li>";
+        }?>
+        
+</ul>
 <p>
-Vaikuttavaksi lajiksi lasketaan kaikki ne lajit, joissa ominaisuuspisteet ovat vähintään 75 % arvosteltavaan lajiin nähden.<br />
+Hevosen pisteistä lasketaan vain tietty prosentti pisteistä, mikäli se on kilpaillut myös muissa kyseiseen lajiin vaikuttavissa lajeissa.
+Laatuarvostelupisteisiin vaikuttavaksi lajiksi lasketaan kaikki ne lajit, joissa ominaisuuspisteet ovat vähintään 75 % arvosteltavaan lajiin nähden.<br />
 0 vaikuttavaa lajia (100% )<br />
 1 vaikuttava laji (80 %)<br />
 2 vaikuttavaa lajia (65 %)<br />
@@ -63,4 +95,20 @@ Mikäli vanhempaa/jälkeläistä, poimi pisteet alempi.</small></p>
 }
 ?>
 <?=$form?>
+
+
+<?php
+
+function yhteiset_traitit($eka, $toka){
+  $same = array();
+  foreach ($eka as $traits1){
+    foreach ($toka as $traits2){
+      if($traits1['id'] == $traits2['id']){
+        $same[] = $traits2['id'];
+      }
+    }
+  }
+  
+  return $same;
+}
 
