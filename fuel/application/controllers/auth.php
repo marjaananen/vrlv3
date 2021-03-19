@@ -259,8 +259,10 @@ class Auth extends CI_Controller
 		}
 		else
 		{
+			$this->load->library('vrl_helper');
+
 			$identity_column = $this->config->item('identity', 'ion_auth');
-			$identity = $this->ion_auth->where($identity_column, $this->input->post('identity'))->users()->row();
+			$identity = $this->ion_auth->where($identity_column, $this->vrl_helper->vrl_to_number($this->input->post('identity')))->users()->row();
 
 			if (empty($identity))
 			{
@@ -277,6 +279,8 @@ class Auth extends CI_Controller
 				$this->session->set_flashdata('message', $this->ion_auth->errors());
 				redirect("auth/forgot_password", 'refresh');
 			}
+			
+			
 
 			// run the forgotten password method to email an activation code to the user
 			$forgotten = $this->ion_auth->forgotten_password($identity->{$this->config->item('identity', 'ion_auth')});
