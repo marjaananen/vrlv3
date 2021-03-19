@@ -274,7 +274,7 @@ class Hevonen_model extends Base_module_model
 
         $hevonen['reknro'] = $this->CI->vrl_helper->vh_to_number($vh);
         $suku['reknro'] = $this->CI->vrl_helper->vh_to_number($vh);
-        
+
 
         
         
@@ -320,6 +320,11 @@ class Hevonen_model extends Base_module_model
             }
         
         }
+        $tasot = array();
+        if (isset($hevonen['tasot'])){
+            $tasot = $hevonen['tasot'];
+            unset($hevonen['tasot']);
+        }
     
         $this->db->trans_start();
         $this->db->insert('vrlv3_hevosrekisteri', $hevonen);
@@ -328,6 +333,10 @@ class Hevonen_model extends Base_module_model
         if(sizeof($ikaantymistiedot)>0){
             $ikaantymistiedot['reknro'] = $hevonen['reknro'];
             $this->db->insert('vrlv3_hevosrekisteri_ikaantyminen', $ikaantymistiedot);
+        }
+        
+        if(sizeof($tasot)> 0){
+            $this->_add_maxlevels($hevonen['reknro'], $tasot);
         }
 
         if(sizeof($suku)>0){
@@ -357,6 +366,63 @@ class Hevonen_model extends Base_module_model
         
     
         
+    }
+    
+    public function get_maxlevels($reknro){
+        $this->db->select('*');
+        $this->db->from('vrlv3_hevosrekisteri_kisatiedot');
+        $this->db->where('reknro', $reknro);
+        $query = $this->db->get();
+        
+        $oldvalues = array();
+        foreach($query->result_array() as $result){
+            $oldvalues[$result['jaos']] = $result['taso_max'];
+            
+            
+        }
+        return $oldvalues;
+    }
+    
+    
+    private function _add_maxlevels($reknro, $values){
+        $this->db->select('*');
+        $this->db->from('vrlv3_hevosrekisteri_kisatiedot');
+        $this->db->where('reknro', $reknro);
+        $query = $this->db->get();
+        
+        $old_values = array();
+        foreach($query->result_array() as $result){
+            if(isset($oldvalues[$result['reknro']])){
+                $oldvalues[$result['jaos']] = $result['taso_max'];
+            }
+            
+        }
+            
+        $insert_values = array();
+        $update_values = array();
+        foreach ($values as $jaos=>$value){
+            if(isset($oldvalues[$jaos])){
+                if($oldvalues[$jaos] != $value){
+                    $update_values[$jaos] = array("taso_max"=>$value);
+                } 
+            }else {
+                $insert_values[] =  array("reknro" => $reknro, "jaos"=>$jaos, "taso_max"=>$value);
+            }
+        }
+            
+        
+            
+            if(sizeof($insert_values) > 0){
+                $this->db->insert_batch('vrlv3_hevosrekisteri_kisatiedot', $insert_values);
+            }
+            if(sizeof($update_values) > 0){
+                foreach ($update_values as $jaos=>$update_value){
+                    $this->db->where('jaos', $jaos);
+                    $this->db->where('reknro', $reknro);
+                    $this->db->update('vrlv3_hevosrekisteri_kisatiedot', array("taso_max"=>$values[$jaos]));
+                    
+                }
+            }
     }
     
     private function _birthday_dates(&$hevonen){
@@ -449,14 +515,21 @@ class Hevonen_model extends Base_module_model
 
             }
         }
-
+        
+        if(isset($hevonen['tasot'])){
+            $tasot = $hevonen['tasot'];
+            unset($hevonen['tasot']);
+                
+        }
+        if(sizeof($tasot)> 0){
+            $this->_add_maxlevels($reknro, $tasot);
+        }
     
         $this->db->where('reknro', $reknro);
         $this->db->update('vrlv3_hevosrekisteri', $hevonen);
         $this->edit_suku($suku, $reknro);
         return true;
         //
-
         
     }
     

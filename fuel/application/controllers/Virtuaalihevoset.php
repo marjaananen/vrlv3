@@ -1502,9 +1502,6 @@ class Virtuaalihevoset extends CI_Controller
         $fields['sakakorkeus'] = array('label'=>'Säkäkorkeus', 'type' => 'text', 'class'=>'form-control', 'value'=> $poni['sakakorkeus'] ?? '', 'after_html' => '<span class="form_comment">Säkäkorkeus numeroina (senttimetreinä)</span>');
         $fields['vari'] = array('label'=>'Väri', 'type' => 'select', 'options' => $color_options,  'value'=> $poni['vari'] ?? '-1', 'class'=>'form-control',
                                 'after_html' => '<span class="form_comment">Jos toivomasi väri ei löydy listalta, ole yhteydessä ylläpitoon.</span>');
-		$fields['painotus'] = array('label'=>'Painotus', 'type' => 'select', 'options' => $skill_options, 'value' =>  $poni['painotus'] ?? -1, 'class'=>'form-control');
-        $fields['porr_kilpailee'] = array('label'=>'Kilpailee porrastetuissa', 'type' => 'checkbox', 'checked' => $poni['porr_kilpailee'] ?? false, 'class'=>'form-control');
-
 		$fields['syntymamaa'] = array('label'=>'Syntymämaa', 'type' => 'select', 'options' => $country_options, 'value' => $poni['syntymamaa'] ?? -1, 'class'=>'form-control');
         $this->load->model("Tallit_model");
         $tallilista  = $this->Tallit_model->get_users_stables($this->ion_auth->user()->row()->tunnus, false, true);
@@ -1526,6 +1523,7 @@ class Virtuaalihevoset extends CI_Controller
                                      'after_html'=> $kotitalli_str);
 
                 
+
                
         $fields['sukutiedot'] = array('type'=>'hidden', 'before_html' => '</div></div></div><div class="panel panel-default"><div class="panel-heading">Suku- ja kasvattajatiedot (vain suvullisille)</div> <div class="panel-body"><div class="form-group">');
         
@@ -1555,7 +1553,26 @@ class Virtuaalihevoset extends CI_Controller
         $fields['i_nro'] = array('type' => 'text', 'label'=> 'Isän rekisterinumero','class'=>'form-control', 'value'=> $i ?? '', 'class'=>'form-control', 'after_html' => '<span class="form_comment">Isän rekisterinumero.</span>');
         $fields['e_nro'] = array('type' => 'text', 'label'=> 'Emän rekisterinumero', 'class'=>'form-control', 'value'=> $e ?? '', 'class'=>'form-control', 'after_html' => '<span class="form_comment">Emän rekisterinumero. </span>');
         
+        $fields['kisatiedot'] = array('type'=>'hidden', 'before_html' => '</div></div></div><div class="panel panel-default"><div class="panel-heading">Kilpailutiedot (ei pakollisia)</div> <div class="panel-body"><div class="form-group">');
+
+        $fields['painotus'] = array('label'=>'Painotus', 'type' => 'select', 'options' => $skill_options, 'value' =>  $poni['painotus'] ?? -1, 'class'=>'form-control');
+        $fields['porr_kilpailee'] = array('label'=>'Kilpailee porrastetuissa', 'type' => 'checkbox', 'checked' => $poni['porr_kilpailee'] ?? false, 'class'=>'form-control');
+        if(!isset($this->jaokset)){
+            $this->load->model('Jaos_model');
+            $this->jaokset = $this->Jaos_model->get_jaos_porr_list();
+        }
+        $poni['tasot'] = array();
+        if($type != 'new' && $type != 'form'){
+            $poni['tasot'] = $this->hevonen_model->get_maxlevels($this->vrl_helper->vh_to_number($poni['reknro']));
+        }
         
+        foreach($this->jaokset as $jaos){
+             $fields['porr_max_taso_jaos_'.$jaos['id']] = array('label'=> 'Maksimitaso: ' . $jaos['lyhenne'],
+                                          'type' => 'select',
+                                          'options'=>array('-1'=>'-1', 0=>0, 1=>1, 2=>2, 3=>3, 4=>4, 5=>5, 6=>6, 7=>7, 8=>8, 9=>9, 10=>10),
+                                          'value'=>$poni['tasot'][$jaos['id']] ?? 10, 'class'=>'form-control');
+         }
+		
         
         $fields['syntymajat'] = array('type'=>'hidden', 'before_html' => '</div></div></div><div class="panel panel-default syntymaajat">
                                       <div class="panel-heading">Syntymäpäivät (tarpeellisia porrastetuissa kilpaileville)</div> <div class="panel-body"><div class="form-group">');
@@ -1662,6 +1679,32 @@ class Virtuaalihevoset extends CI_Controller
             if(!isset($poni['kuollut'])){
                 $poni['kuollut'] = 0;
             }
+            
+            if(!isset($this->jaokset)){
+            $this->load->model('Jaos_model');
+            $this->jaokset = $this->Jaos_model->get_jaos_porr_list();
+        }
+            
+            //luetaan arvot
+            $poni['tasot'] = array();
+            foreach ($this->jaokset as $jaokset){
+                $value = $poni['porr_max_taso_jaos_'.$jaokset['id']];
+                if(is_numeric($value) && $value >= -1 && $value <= 10 ){
+                    $poni['tasot'][$jaokset['id']] = $value;
+                }else {
+                    $msg = "Virheellinen taso jaoksella " . $jaokset['id'] . " (".$value.")";
+                    return false;
+                }
+                
+                unset($poni['porr_max_taso_jaos_'.$jaokset['id']]);
+            
+            }
+            
+            if($this->input->post('ikaantyminen_d')){
+                $poni['ikaantyminen_d'] = $this->input->post('ikaantyminen_d');
+            }
+            
+            
         }else {
             $msg = "Rekisteröitävällä rivillä ei ole oikeaa määrää kenttiä";
             return false;
@@ -1738,6 +1781,22 @@ class Virtuaalihevoset extends CI_Controller
             }else {
                 $poni[$vuosi."vuotta"] = null;
             }
+        }
+        
+        
+        if(!isset($this->jaokset)){
+            $this->load->model('Jaos_model');
+            $this->jaokset = $this->Jaos_model->get_jaos_porr_list();
+        }
+        
+        //luetaan arvot
+        $poni['tasot'] = array();
+        foreach ($this->jaokset as $jaokset){
+            
+            if($this->input->post('porr_max_taso_jaos_'.$jaokset['id']) != 99){
+                $poni['tasot'][$jaokset['id']] = $this->input->post('porr_max_taso_jaos_'.$jaokset['id']);
+            }
+        
         }
         
         if($this->input->post('ikaantyminen_d')){
