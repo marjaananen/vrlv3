@@ -71,7 +71,11 @@ if (isset($jaos['pulju']) && $jaos['pulju'] == true){
        
       else if($sivu == 'ominaisuudet'){
          echo '<p>Tältä sivuilta voit valita mitkä ominaisuudet vaikuttavat jaoksesi porrastetuissa kilpailuissa!
-         Ominaisuuksia voi valita 2-4. Voit muokata tätä vain, jos jaoksen porrastetut kilpailut eivät ole vielä asetettu toimintaan.</p>';
+         Ominaisuuksia voi valita 2-4. Voit muokata tätä vain, jos jaoksen porrastetut kilpailut eivät ole vielä asetettu toimintaan.</p>
+         
+         <p>Kun valitset ominaisuuksia, tarkastathan että muilla jaoksilla ei ole käytössä liian samankaltaista ominaisuuskombinaatiota.
+         Nyrkkisääntö: Laske jokaisen samankaltaisen jaoksen kohdalla (yhteisten ominaisuuksien määrä) / (tässä valitsemiesi ominaisuuksien määrä).
+         Luvun tulee olla alle 0,75 mutta mieluiten vähemmän, jotta esimerkiksi laatuarvostelupisteiden kohdalla jaokset eivät haittaa toisiaan.</p>';
                 }
                 
       else if($sivu == 'omistajat'){

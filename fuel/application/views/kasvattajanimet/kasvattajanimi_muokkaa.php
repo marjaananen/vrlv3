@@ -14,9 +14,8 @@
 
    <ul class="nav nav-tabs">
        <li role="presentation" class="<?php if ($sivu == 'tiedot'){echo "active";}?>"><a href="<?php echo base_url('kasvatus/kasvattajanimet/muokkaa/'. $nimi['id'] . '/tiedot')?>">Tiedot</a></li>
-    
         <li role="presentation" class="<?php if ($sivu == 'rodut'){echo "active";}?>"><a href="<?php echo base_url('kasvatus/kasvattajanimet/muokkaa/'. $nimi['id'] . '/rodut')?>">Rodut</a></li>
-    
+        <li role="presentation" class="<?php if ($sivu == 'kasvatit'){echo "active";}?>"><a href="<?php echo base_url('kasvatus/kasvattajanimet/muokkaa/'. $nimi['id'] . '/kasvatit')?>">Kasvatit</a></li>
         <li role="presentation" class="<?php if ($sivu == 'omistajat'){echo "active";}?>"><a href="<?php echo base_url('kasvatus/kasvattajanimet/muokkaa/'. $nimi['id'] . '/omistajat')?>">Omistajat</a></li>
 
 
@@ -49,9 +48,9 @@
             
         <?php }
         
-           else if($sivu == 'tiedot'){  echo fuel_var('form', '');
-            
-           }
+           else if($sivu == 'tiedot'){  echo fuel_var('form', '');}
+          else if($sivu == 'kasvatit'){  echo fuel_var('foals', '');}
+
            
            ?>
         

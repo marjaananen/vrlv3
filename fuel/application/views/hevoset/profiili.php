@@ -178,14 +178,14 @@ if (isset($palkinnot) && sizeof($palkinnot) > 0){
  
  ?>
  
-   <a href="<?php echo base_url('virtuaalihevoset/hevonen/'. $hevonen['reknro'] . '/palkinnot')?>">Tarkemmat kuvaukset palkinnoista</a>
+   <a href="<?php echo base_url('virtuaalihevoset/hevonen/'. $hevonen['reknro'] . '/palkinnot#tab')?>">Tarkemmat kuvaukset palkinnoista</a>
 <?php
  echo '</div>';
  echo '</div>';
 }
 ?>
 
-
+<a name="tab"></a>
  <ul class="nav nav-tabs">
         <li role="presentation" class="<?php if ($sivu == 'suku' || empty($sivu)){echo "active";}?>"><a href="<?php echo base_url('virtuaalihevoset/hevonen/'. $hevonen['reknro'] . '/suku')?>">Suku</a></li>
         <li role="presentation" class="<?php if ($sivu == 'varsat'){echo "active";}?>"><a href="<?php echo base_url('virtuaalihevoset/hevonen/'. $hevonen['reknro'] . '/varsat')?>">Jälkeläiset</a></li>

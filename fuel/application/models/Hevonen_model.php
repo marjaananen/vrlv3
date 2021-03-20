@@ -432,6 +432,9 @@ class Hevonen_model extends Base_module_model
             unset($hevonen['ikaantyminen_d']);
         }
         
+        unset($hevonen['ikaantyminen_d']);
+
+        
         if(isset($ikaantymistiedot['ikaantyminen_d']) && $ikaantymistiedot['ikaantyminen_d'] != 0){
             foreach($vuodet as $vuosi){
                 $ikaantymistiedot[$vuosi.'vuotta'] = date('Y-m-d', strtotime($hevonen['syntymaaika']. ' + '.$vuosi*$ikaantymistiedot['ikaantyminen_d'].' days'));
