@@ -991,6 +991,7 @@ class Virtuaalihevoset extends CI_Controller
                         $data['msg_type'] = "success";
                         $data['hevonen'] = $this->hevonen_model->get_hevonen_edit($reknro);
                         $data['editor'] = $this->_get_horse_edit_form($mode, $data['hevonen'], $data['hevonen']['reknro']);
+                        $data['hevonen']['reknro'] = $this->vrl_helper->get_vh($data['hevonen']['reknro']);
                         $this->fuel->pages->render('hevoset/hevonen_muokkaa', $data);
                     }
                 }
@@ -1561,11 +1562,12 @@ class Virtuaalihevoset extends CI_Controller
             $this->load->model('Jaos_model');
             $this->jaokset = $this->Jaos_model->get_jaos_porr_list();
         }
-        $poni['tasot'] = array();
-        if($type != 'new' && $type != 'form'){
-            $poni['tasot'] = $this->hevonen_model->get_maxlevels($this->vrl_helper->vh_to_number($poni['reknro']));
+        if(!isset($poni['tasot'])){
+            $poni['tasot'] = array();
+            if($type != 'new' && $type != 'form'){
+                $poni['tasot'] = $this->hevonen_model->get_maxlevels($this->vrl_helper->vh_to_number($poni['reknro']));
+            }
         }
-        
         foreach($this->jaokset as $jaos){
              $fields['porr_max_taso_jaos_'.$jaos['id']] = array('label'=> 'Maksimitaso: ' . $jaos['lyhenne'],
                                           'type' => 'select',
@@ -1931,13 +1933,13 @@ class Virtuaalihevoset extends CI_Controller
         $birth_date = null;
         $dead_date = null;
         
-        if(isset($poni['syntymaaika'])){
+        if(isset($poni['syntymaaika']) && $this->vrl_helper->validateDate($poni['syntymaaika'])){
             $birth_date = new DateTime($poni['syntymaaika']);
         }else {
             //todo hae syntymäaika
              $birth_date = new DateTime('1900-01-01');
         }
-        if(isset($poni['kuollut']) && $poni['kuollut'] && isset($poni['kuol_pvm'])){
+        if(isset($poni['kuollut']) && $poni['kuollut'] && isset($poni['kuol_pvm']) && $this->vrl_helper->validateDate($poni['kuol_pvm'])){
             $dead_date = new DateTime($poni['kuol_pvm']);
         }
         $current_date = new DateTime();
@@ -1982,14 +1984,16 @@ class Virtuaalihevoset extends CI_Controller
     }
     
     private function _check_parents($poni, &$msg){
-        $ok = true;
+        $dad_ok = true;
+        $mom_ok = true;
         if (isset($poni['i_nro'])){
-            $ok = $this->_check_parent($poni, $poni['i_nro'], "isä", $msg);
+            $dad_ok = $this->_check_parent($poni, $poni['i_nro'], "isä", $msg);
         }
         if (isset($poni['e_nro'])) {
-            $ok = $this->_check_parent($poni, $poni['e_nro'], "emä", $msg);
+            $mom_ok = $this->_check_parent($poni, $poni['e_nro'], "emä", $msg);
+            
         }
-        return $ok;
+        return $dad_ok && $mom_ok;
     }
     
     private function _check_parent($poni, $reknro, $vanhempi, &$msg){
@@ -1999,13 +2003,15 @@ class Virtuaalihevoset extends CI_Controller
         if($this->vrl_helper->check_vh_syntax($reknro)){
         
             $parent = $this->hevonen_model->get_hevonen_basic($reknro);
-            $poni_date = new DateTime($poni['syntymaaika']);
-            $parent_date = $birth_date = new DateTime($parent['syntymaaika']);
-            
-            
-            if($parent_date > $poni_date){
-                $msg .= "<li>Hevonen on vanhempi kuin sen " . $vanhempi . "</li>";
-                $ok = false;
+            if($this->vrl_helper->validateDate($poni['syntymaaika'])){
+                $poni_date = new DateTime($poni['syntymaaika']);
+                $parent_date = $birth_date = new DateTime($parent['syntymaaika']);
+                
+                
+                if($parent_date > $poni_date){
+                    $msg .= "<li>Hevonen on vanhempi kuin sen " . $vanhempi . "</li>";
+                    $ok = false;
+                }
             }
             if(($vanhempi == "isä" && $parent['sukupuoli'] == 1)|| ($vanhempi == "ema" && $parent['sukupuoli'] != 1 )){
                 $msg .= "<li>Hevosen " . $vanhempi . " on väärää sukupuolta!</li>";

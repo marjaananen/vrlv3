@@ -318,7 +318,7 @@ class Kasvatus extends CI_Controller
     }
 	
 	
-	private function _nimen_kasvatit($nro)
+	private function _nimen_kasvatit($nro, $admin = false, $url="")
     {
 		$this->load->model('hevonen_model');
 		$vars['title'] = "";	
@@ -332,6 +332,9 @@ class Kasvatus extends CI_Controller
 			$vars['headers'][3] = array('title' => 'Rotu', 'key' => 'rotu');
 			$vars['headers'][4] = array('title' => 'Sukupuoli', 'key' => 'sukupuoli');
             $vars['headers'][5] = array('title' => 'Syntymäaika', 'key' => 'syntymaaika', 'type'=>'date');
+            if($admin){
+               $vars['headers'][6] = array('title' => 'Poista', 'key' => 'reknro', 'key_link' => site_url($url.'poista/'), 'image' => site_url('assets/images/icons/delete.png'));
+            }
 
             
 			
@@ -691,6 +694,31 @@ class Kasvatus extends CI_Controller
 				$fields['breeds'] = $this->_nimen_rodut($nimi);
 				$hidden = array("nimi" => $nimi);
 				$fields['form'] = form_open('kasvatus/kasvattajanimet/muokkaa/' . $nimi . '/rodut/', $hidden) . form_submit('rodut', 'Päivitä rodut');
+			}
+            else if($sivu == 'kasvatit'){
+                $msg = "";
+				if($tapa == "poista" && $this->vrl_helper->check_vh_syntax($this->vrl_helper->get_vh($id)))
+				{
+                    $this->load->model("hevonen_model");
+                    $hevonen = $this->hevonen_model->get_hevonen_edit($id);
+                    $hevonen['kasvattajanimi'] = "";
+                    $hevonen['kasvattajanimi_id'] = null;
+                    if($this->hevonen_model->edit_hevonen($hevonen, $id, $msg)){
+                        $this->kasvattajanimi_model->update_breeds($nimi, $fields['nimi']['kasvattajanimi'], $msg);
+						$type = "success";
+						$fields['info'] = $this->load->view('misc/naytaviesti', array('msg_type' => $type, 'msg' => "Poisto onnistui!"), true);
+
+                    }else {
+						$fields['info'] = $this->load->view('misc/naytaviesti', array('msg_type' => $type, 'msg' => $msg), true);
+                    }
+				}else if($tapa == "poista"){
+                    $msg = "Virheellinen rekisterinumero poistossa!";
+                    $type = 'danger';
+                    $fields['info'] = $this->load->view('misc/naytaviesti', array('msg_type' => $type, 'msg' => $msg), true);
+
+                }
+			
+				$fields['foals'] = $this->_nimen_kasvatit($nimi, true, 'kasvatus/kasvattajanimet/muokkaa/'.$nimi.'/kasvatit/');
 			}
             
             else if($sivu == 'tiedot'){

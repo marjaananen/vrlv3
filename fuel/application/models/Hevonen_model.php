@@ -390,12 +390,10 @@ class Hevonen_model extends Base_module_model
         $this->db->where('reknro', $reknro);
         $query = $this->db->get();
         
-        $old_values = array();
+        $oldvalues = array();
+
         foreach($query->result_array() as $result){
-            if(isset($oldvalues[$result['reknro']])){
-                $oldvalues[$result['jaos']] = $result['taso_max'];
-            }
-            
+            $oldvalues[$result['jaos']] = $result['taso_max'];
         }
             
         $insert_values = array();
@@ -467,8 +465,6 @@ class Hevonen_model extends Base_module_model
         }
         if (isset($hevonen['kuol_pvm'])){
             $hevonen['kuol_pvm'] = $this->CI->vrl_helper->normal_date_to_sql($hevonen['kuol_pvm']);
-        }else {
-            $hevonen['kuol_pvm'] = null;
         }
 
         $reknro = $this->CI->vrl_helper->vh_to_number($vh);
@@ -515,7 +511,7 @@ class Hevonen_model extends Base_module_model
 
             }
         }
-        
+        $tasot = array();
         if(isset($hevonen['tasot'])){
             $tasot = $hevonen['tasot'];
             unset($hevonen['tasot']);
@@ -527,7 +523,9 @@ class Hevonen_model extends Base_module_model
     
         $this->db->where('reknro', $reknro);
         $this->db->update('vrlv3_hevosrekisteri', $hevonen);
-        $this->edit_suku($suku, $reknro);
+        if(sizeof($suku) > 0){
+            $this->edit_suku($suku, $reknro);
+        }
         return true;
         //
         
