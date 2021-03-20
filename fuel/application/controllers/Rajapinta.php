@@ -45,6 +45,14 @@ class Rajapinta extends CI_Controller
                                               jaoksissa ja ominaisuuksissa. Koska jaoksia ja ominaisuuksia voi tulla lisää, rajapinta palauttaa myös tiedot jaoksista ja ominaisuuksista.
                                               Rajapinta palauttaa myös hevosen ikä- ja säkäkorkeustiedot sekä VRL:n sivuilla asetetun maksimitason. 
                                               ");
+        $vars['rajapinnat']['tallinkasvatit'] = array("parametrit"=>array("tallitunnus", "rotunro (ei pakollinen)"),
+                                              "esimerkki"=>array("KARK4835", "28"),
+                                              "kuvaus" => "Haetaan tietyn tallin kasvatit, parametrina tallin tallitunnus, ja halutessaan valitun rodun id.
+                                              Rodun id:n antaminen ei ole pakollista. Ilman ID:tä haetaan kaikenrotuiset kasvatit.");
+        $vars['rajapinnat']['nimenkasvatit'] = array("parametrit"=>array("kasvattajanimi_id", "rotunro (ei pakollinen)"),
+                                              "esimerkki"=>array("2047", "28"),
+                                              "kuvaus" => "Haetaan tietyn kasvattajanimen kasvatit, parametrina kasvattajanimen id, ja halutessaan valitun rodun id.
+                                              Rodun id:n antaminen ei ole pakollista. Ilman ID:tä haetaan kaikenrotuiset kasvatit.");
         
         
         
@@ -95,6 +103,156 @@ class Rajapinta extends CI_Controller
 
         $this->_print($data);        
     }
+    
+    function tallinkasvatit ($tnro, $rotunro = null){
+        $data = $this->_base_array();
+
+        $data['tallinkasvatit'] = $this->_get_stables_foals($tnro, $rotunro);
+
+        $this->_print($data);        
+    }
+    
+    private function _get_stables_foals($tnro, $rotunro = null){
+    
+    
+        $this->db->select("h.reknro, h.nimi, r.rotunro, r.lyhenne as rotulyhenne, h.kasvattajanimi, h.kasvattajanimi_id, h.vari, v.lyhenne as varilyhenne, sukupuoli, syntymaaika, url, i_nro, e_nro");
+        $this->db->from('vrlv3_hevosrekisteri as h');
+        $this->db->join("vrlv3_lista_rodut as r", "h.rotu = r.rotunro", 'left outer');
+        $this->db->join("vrlv3_lista_varit as v", "h.vari = v.vid", 'left outer');
+        $this->db->join("vrlv3_hevosrekisteri_sukutaulut as s", "s.reknro = h.reknro", 'left outer');
+        if(isset($rotunro)){
+            $this->db->where('h.rotu', $rotunro);
+        }
+        $this->db->where('h.kasvattaja_talli', $tnro);
+        $query = $this->db->get();
+        
+        if ($query->num_rows() > 0)
+        {
+            $return_array = array();
+            
+            foreach($query->result_array() as $rivi){
+                $rivi['reknro'] = $this->vrl_helper->get_vh($rivi['reknro']);
+                $rivi['i_nro'] = $this->vrl_helper->get_vh($rivi['i_nro']);
+                $rivi['e_nro'] = $this->vrl_helper->get_vh($rivi['e_nro']);
+                $rivi['syntymaaika'] = $this->vrl_helper->sql_date_to_normal($rivi['syntymaaika']);
+                
+                //haetaan vanhemmat
+                if(isset($rivi['i_nro'])){
+                    $this->db->select("h.reknro, h.nimi, r.rotunro, r.lyhenne as rotulyhenne, h.vari, v.lyhenne as varilyhenne, url");
+                    $this->db->from('vrlv3_hevosrekisteri as h');
+                    $this->db->join("vrlv3_lista_rodut as r", "h.rotu = r.rotunro", 'left outer');
+                    $this->db->join("vrlv3_lista_varit as v", "h.vari = v.vid", 'left outer');
+                    $this->db->join("vrlv3_hevosrekisteri_sukutaulut as s", "s.reknro = h.reknro", 'left outer'); 
+                    $this->db->where('h.reknro', $this->vrl_helper->vh_to_number($rivi['i_nro']));
+                    $i_query = $this->db->get();
+                    
+                    if ($i_query->num_rows() > 0){
+                        $isa = $i_query->result_array()[0];                  
+                        $isa['reknro'] = $this->vrl_helper->get_vh($isa['reknro']);
+                        $rivi['i'] = $isa;
+                    }
+                }
+                
+                if(isset($rivi['e_nro'])){
+                    $this->db->select("h.reknro, h.nimi, r.rotunro, r.lyhenne as rotulyhenne, h.vari, v.lyhenne as varilyhenne, url");
+                    $this->db->from('vrlv3_hevosrekisteri as h');
+                    $this->db->join("vrlv3_lista_rodut as r", "h.rotu = r.rotunro", 'left outer');
+                    $this->db->join("vrlv3_lista_varit as v", "h.vari = v.vid", 'left outer');
+                    $this->db->join("vrlv3_hevosrekisteri_sukutaulut as s", "s.reknro = h.reknro", 'left outer'); 
+                    $this->db->where('h.reknro', $this->vrl_helper->vh_to_number($rivi['e_nro']));
+                    $e_query = $this->db->get();
+                    
+                    if ($e_query->num_rows() > 0){
+                        $ema = $e_query->result_array()[0];                  
+                        $ema['reknro'] = $this->vrl_helper->get_vh($ema['reknro']);
+                        $rivi['e'] = $ema;
+                    }
+                }
+                
+
+                $return_array[] = $rivi;
+            }
+            return $return_array; 
+        }
+        
+        return array();
+    }
+    
+    
+    function nimenkasvatit ($id, $rotunro = null){
+        $data = $this->_base_array();
+
+        $data['nimenkasvatit'] = $this->_get_names_foals($id, $rotunro);
+
+        $this->_print($data);        
+    }
+    
+    private function _get_names_foals($id, $rotunro = null){
+    
+    
+        $this->db->select("h.reknro, h.nimi, r.rotunro, r.lyhenne as rotulyhenne, h.kasvattaja_talli, h.kasvattajanimi, h.kasvattajanimi_id, h.vari, v.lyhenne as varilyhenne, sukupuoli, syntymaaika, url, i_nro, e_nro");
+        $this->db->from('vrlv3_hevosrekisteri as h');
+        $this->db->join("vrlv3_lista_rodut as r", "h.rotu = r.rotunro", 'left outer');
+        $this->db->join("vrlv3_lista_varit as v", "h.vari = v.vid", 'left outer');
+        $this->db->join("vrlv3_hevosrekisteri_sukutaulut as s", "s.reknro = h.reknro", 'left outer');
+        if(isset($rotunro)){
+            $this->db->where('h.rotu', $rotunro);
+        }
+        $this->db->where('h.kasvattajanimi_id', $id);
+        $query = $this->db->get();
+        
+        if ($query->num_rows() > 0)
+        {
+            $return_array = array();
+            
+            foreach($query->result_array() as $rivi){
+                $rivi['reknro'] = $this->vrl_helper->get_vh($rivi['reknro']);
+                $rivi['i_nro'] = $this->vrl_helper->get_vh($rivi['i_nro']);
+                $rivi['e_nro'] = $this->vrl_helper->get_vh($rivi['e_nro']);
+                $rivi['syntymaaika'] = $this->vrl_helper->sql_date_to_normal($rivi['syntymaaika']);
+                
+                //haetaan vanhemmat
+                if(isset($rivi['i_nro'])){
+                    $this->db->select("h.reknro, h.nimi, r.rotunro, r.lyhenne as rotulyhenne, h.vari, v.lyhenne as varilyhenne, url");
+                    $this->db->from('vrlv3_hevosrekisteri as h');
+                    $this->db->join("vrlv3_lista_rodut as r", "h.rotu = r.rotunro", 'left outer');
+                    $this->db->join("vrlv3_lista_varit as v", "h.vari = v.vid", 'left outer');
+                    $this->db->join("vrlv3_hevosrekisteri_sukutaulut as s", "s.reknro = h.reknro", 'left outer'); 
+                    $this->db->where('h.reknro', $this->vrl_helper->vh_to_number($rivi['i_nro']));
+                    $i_query = $this->db->get();
+                    
+                    if ($i_query->num_rows() > 0){
+                        $isa = $i_query->result_array()[0];                  
+                        $isa['reknro'] = $this->vrl_helper->get_vh($isa['reknro']);
+                        $rivi['i'] = $isa;
+                    }
+                }
+                
+                if(isset($rivi['e_nro'])){
+                    $this->db->select("h.reknro, h.nimi, r.rotunro, r.lyhenne as rotulyhenne, h.vari, v.lyhenne as varilyhenne, url");
+                    $this->db->from('vrlv3_hevosrekisteri as h');
+                    $this->db->join("vrlv3_lista_rodut as r", "h.rotu = r.rotunro", 'left outer');
+                    $this->db->join("vrlv3_lista_varit as v", "h.vari = v.vid", 'left outer');
+                    $this->db->join("vrlv3_hevosrekisteri_sukutaulut as s", "s.reknro = h.reknro", 'left outer'); 
+                    $this->db->where('h.reknro', $this->vrl_helper->vh_to_number($rivi['e_nro']));
+                    $e_query = $this->db->get();
+                    
+                    if ($e_query->num_rows() > 0){
+                        $ema = $e_query->result_array()[0];                  
+                        $ema['reknro'] = $this->vrl_helper->get_vh($ema['reknro']);
+                        $rivi['e'] = $ema;
+                    }
+                }
+                
+
+                $return_array[] = $rivi;
+            }
+            return $return_array; 
+        }
+        
+        return array();
+    }
+    
     
     function tulos_id($kisa_id){
         $this->_tulos_id_haku($kisa_id, "tulos_id", false);
