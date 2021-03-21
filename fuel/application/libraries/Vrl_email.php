@@ -125,7 +125,7 @@ try {
    //     'ConfigurationSetName' => $configuration_set,
     ]);
     $messageId = $result['MessageId'];
-    echo("Email sent! Message ID: $messageId"."\n");
+   // echo("Email sent! Message ID: $messageId"."\n");
 	return true;
 } catch (AwsException $e) {
     // output error message if fails

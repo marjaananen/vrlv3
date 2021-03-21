@@ -57,9 +57,9 @@ class Jasenyys extends CI_Controller
 			else {
 				$this->load->helper(array('form', 'url'));
                 $this->load->model('tunnukset_model');
-                $this->load->library('email');
+                $this->load->library('vrl_email');
                 
-                $this->form_validation->set_rules('nimimerkki', 'Nimimerkki', "required|min_length[1]|max_length[20]|regex_match[/^[A-Za-z0-9_\-.:,; *~#&'@()]*$/]");
+                $this->form_validation->set_rules('nimimerkki', 'Nimimerkki', "required|min_length[1]|max_length[20]");
                 $this->form_validation->set_rules('email', 'Sähköpostiosoite', 'required|valid_email|is_unique[vrlv3_tunnukset.email]|is_unique[vrlv3_tunnukset_jonossa.email]');
 
 
