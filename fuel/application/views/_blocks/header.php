@@ -81,8 +81,8 @@ if(!empty($this->ion_auth))
 						
 						
 			echo '<a href="'.site_url('/profiili/pikaviestit').'"><button type="button" class="btn btn-primary btn-block">
-			<span class="glyphicon glyphicon-envelope" aria-hidden="true"></span> Pikaviestit <span class="badge">'
-			. $this->tunnukset_model->unread_messages($this->session->userdata('identity')) .'</span></button></a>';
+			<span class="glyphicon glyphicon-envelope" aria-hidden="true"></span> Pikaviestit'; if($this->tunnukset_model->unread_messages($this->session->userdata('identity')) != 0 ) { echo ' <span class="badge">'
+			. $this->tunnukset_model->unread_messages($this->session->userdata('identity')) .'</span>'; } echo '</button></a>';
 
 					
 			$group_amount = $this->ion_auth->get_users_groups()->result_array();
@@ -157,8 +157,8 @@ if(!empty($this->ion_auth))
 						
 						
 			echo '<a href="'.site_url('/profiili/pikaviestit').'"><button type="button" class="btn btn-primary btn-block">
-			<span class="glyphicon glyphicon-envelope" aria-hidden="true"></span> Pikaviestit <span class="badge">'
-			. $this->tunnukset_model->unread_messages($this->session->userdata('identity')) .'</span></button></a>';
+			<span class="glyphicon glyphicon-envelope" aria-hidden="true"></span> Pikaviestit'; if($this->tunnukset_model->unread_messages($this->session->userdata('identity')) != 0 ) { echo ' <span class="badge">'
+			. $this->tunnukset_model->unread_messages($this->session->userdata('identity')) .'</span>'; } echo '</button></a>';
 
 					
 			$group_amount = $this->ion_auth->get_users_groups()->result_array();
