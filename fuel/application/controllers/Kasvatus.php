@@ -433,14 +433,19 @@ class Kasvatus extends CI_Controller
 				$type = "DESC";
 				$vars['title'] = 'Aktiivisimmat kasvattajanimet';						
 			}
-			$vars['headers'][1] = array('title' => 'Kasvatteja', 'key' => 'amount');
-			$vars['headers'][2] = array('title' => 'Id', 'key' => 'id', 'key_link' => site_url('kasvatus/kasvattajanimet/nimi/'));
-			$vars['headers'][3] = array('title' => 'Kasvattajanimi', 'key' => 'kasvattajanimi');
-			$vars['headers'][4] = array('title' => 'Rekisteröity', 'key' => 'rekisteroity', 'type' => 'date');
+            $nro = 0;
+            if($type == "DESC"){
+                $vars['headers'][1] = array('title' => 'Kasvatteja', 'key' => 'amount');
+                $nro = 1;
+
+            }
+			$vars['headers'][$nro+1] = array('title' => 'Id', 'key' => 'id', 'key_link' => site_url('kasvatus/kasvattajanimet/nimi/'));
+			$vars['headers'][$nro+2] = array('title' => 'Kasvattajanimi', 'key' => 'kasvattajanimi');
+			$vars['headers'][$nro+3] = array('title' => 'Rekisteröity', 'key' => 'rekisteroity', 'type' => 'date');
 			if($this->user_rights->is_allowed()){
-				$vars['headers'][5] = array('title' => 'Editoi', 'key' => 'id', 'key_link' => site_url('kasvatus/kasvattajanimet/muokkaa/'), 'image' => site_url('assets/images/icons/edit.png'));
+				$vars['headers'][$nro+4] = array('title' => 'Editoi', 'key' => 'id', 'key_link' => site_url('kasvatus/kasvattajanimet/muokkaa/'), 'image' => site_url('assets/images/icons/edit.png'));
 				if($type == "ASC"){
-                    $vars['headers'][6] = array('title' => 'Poista', 'key' => 'id', 'key_link' => site_url('kasvatus/kasvattajanimet/poista/'), 'image' => site_url('assets/images/icons/delete.png'));
+                    $vars['headers'][$nro+5] = array('title' => 'Poista', 'key' => 'id', 'key_link' => site_url('kasvatus/kasvattajanimet/poista/'), 'image' => site_url('assets/images/icons/delete.png'));
                 }
 			}
 				
@@ -531,14 +536,14 @@ class Kasvatus extends CI_Controller
 			}
 			else if($this->input->server('REQUEST_METHOD') == 'POST')
 			{
-			
+			$msg = "";
 				if ($this->_validate_name_form('application') == FALSE)
 				{
 					$vars['msg'] = "Rekisteröinti epäonnistui!";
 					$vars['msg_type'] = "danger";
 				}
-				else if($this->kasvattajanimi_model->is_name_in_use($this->input->post('kasvattajanimi'))){
-					$vars['msg'] = "Kasvattajanimi " .$this->input->post('kasvattajanimi')." on jo olemassa.";
+				else if(!$this->_check_name($this->input->post('kasvattajanimi'), $msg)){
+					$vars['msg'] = $msg;
 					$vars['msg_type'] = "danger";
 				}
 				else
@@ -555,7 +560,9 @@ class Kasvatus extends CI_Controller
                     $insert_data['rekisteroi'] = $this->ion_auth->user()->row()->tunnus;
 					if ($this->input->post('talli') != -1){
 						$insert_data['tnro'] = $this->input->post('talli');
-					}
+					}else {
+                        $insert_data['tnro'] = null;
+                    }
 					$insert_data['kasvattajanimi'] = $this->input->post('kasvattajanimi');
 					
 					//add name
@@ -733,7 +740,7 @@ class Kasvatus extends CI_Controller
                         $fields['msg'] = "Rekisteröinti epäonnistui!";
                         $fields['msg_type'] = "danger";
                     }else {
-                        if ($this->input->post('talli') != -1){
+                        if ($this->input->post('talli')){
                             $insert_data['tnro'] = $this->input->post('talli');
                         }else {
                             $insert_data['tnro'] = null;
@@ -741,11 +748,11 @@ class Kasvatus extends CI_Controller
                         if($this->input->post('kasvattajanimi')){
                             $insert_data['kasvattajanimi'] = $this->input->post('kasvattajanimi');
                         }
-                                        
+                        $msg = "";      
                         if($this->input->post('kasvattajanimi')
                                 && $this->input->post('kasvattajanimi') != $old_data['kasvattajanimi']
-                                && $this->kasvattajanimi_model->is_name_in_use($this->input->post('kasvattajanimi'))){
-                            $fields['msg'] = "Kasvattajanimi " .$this->input->post('kasvattajanimi')." on jo olemassa.";
+                                && !$this->_check_name($this->input->post('kasvattajanimi'), $msg)){
+                            $fields['msg'] = $msg;
                             $fields['msg_type'] = "danger";
                         }
                         else
@@ -775,7 +782,29 @@ class Kasvatus extends CI_Controller
     }
 
 	
+    private function _check_name($name, &$msg){
+        $ok = true;
+        
+        if(strlen($name) >45 ){
+            $msg .= " Kasvattajanimi on liian pitkä (yli 45 merkkiä)";
+           $ok = false;
+        }
+        $not_allowed = array("*", "#", "$", "%", "§", "½", "¤","/", "(", ")", "=", "@", "$", "{", "[", "]", "}", "+", "\\", "€", "<", "|", ">");
+        foreach($not_allowed as $char){
+            if (strpos($name, $char) !== false){
+                $msg .= " Kasvattajanimessä on kielletty merkki: ".$char.".";
+                $ok = false;
+            }
+        }
+        if($ok && $this->kasvattajanimi_model->is_name_in_use($name)){
+            $msg .= " Kasvattajanimi " .$name ." on jo olemassa.";
+            $ok = false;
+        }
+        
        
+        return $ok;
+        
+    }
 	
 	
 	private $allowed_user_groups = array('admin', 'kasvattajanimet');
@@ -857,25 +886,23 @@ class Kasvatus extends CI_Controller
 		}
 		
 
-		$stable_options = array();
-		
-		if ($mode == "application" || $mode == "edit"  || $mode == 'admin'){
-			$stables = $this->tallit_model->get_users_stables($this->ion_auth->user()->row()->tunnus);
-			foreach ($stables as $stable) {
-                $stable_options[$stable['tnro']] = $stable['nimi'];
-            }
-			
-		}
-		
-		else if (isset($name['talli']) && $name['talli'] != "-1") {
-			$stable = $this->tallit_model->get_stable($name['talli']);
-			$stable_options[$name['talli']] = $stable['nimi'];
-			
-		}
-		
-		$stable_options[-1] = "Ei tallia";
-		$fields['talli'] = array('type' => 'select', 'required' => FALSE, 'options' => $stable_options, 'value'=>$name['tnro'] ?? -1, 'class'=>'form-control', 'wrapper_tag' => 'li');
-
+        $this->load->model("Tallit_model");
+        
+        $tallilista  = $this->Tallit_model->get_users_stables($this->ion_auth->user()->row()->tunnus, false, true);
+        
+        $tallit = array();
+        foreach ($tallilista as $talli){
+           $tallit[$talli['tnro']] = $talli['tnro'];
+        }
+        $this->load->library('vrl_helper');
+        $option_script = $this->vrl_helper->get_option_script('talli', $tallit);
+        
+        $kasvattaja_str = '<span class="form_comment">Tallitunnus muodossa XXXX0000.';
+        $kasvattaja_str .= ' Omat tallisi (klikkaa lisätäksesi): ' . $option_script['list'] . '</span>' . $option_script['script'];
+        $kasvattaja_str .= '</span>';
+        
+        $fields['talli'] = array('label'=> 'Kasvattajatalli', 'type' => 'text', 'class'=>'form-control', 'value'=> $name['tnro'] ?? '', 'class'=>'form-control',
+                                    'after_html'=> $kasvattaja_str);
 		
 		
 		//submit buttons

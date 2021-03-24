@@ -1,5 +1,5 @@
 <table class="table table-striped">
-   <tr><th scope="row">Talli</th><td><?php if(isset($nimi['tnro'])) {echo $nimi['tnro'];}?></td></tr>
+   <tr><th scope="row">Talli</th><td><?php if(isset($nimi['tnro'])) {echo '<a href="'.site_url().'tallit/talli/'.$nimi['tnro'].'">'.$nimi['tnro'].'</a>';}?></td></tr>
     <tr><th scope="row">Rekisteröity</th><td><?php if(isset($nimi['rekisteroity'])){ echo $nimi['rekisteroity'];}?></td></tr>
     <tr><th scope="row">Omistaja(t)</th><td> <?php
             $first = true;

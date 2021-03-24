@@ -727,7 +727,8 @@ public function handle_porrastettu_class_results($jaos, $kisa, $classinfo, $part
                                          SELECT reknro, ominaisuus, arvo
                                          FROM vrlv3_hevosrekisteri_ominaisuudet_jonossa as j
                                          WHERE j.tulos_id = '.$tulos_id .' AND NOT EXISTS
-                                         (SELECT reknro FROM vrlv3_hevosrekisteri_ominaisuudet WHERE vrlv3_hevosrekisteri_ominaisuudet.reknro = j.reknro)');
+                                         (SELECT reknro FROM vrlv3_hevosrekisteri_ominaisuudet
+                                         WHERE vrlv3_hevosrekisteri_ominaisuudet.reknro = j.reknro AND vrlv3_hevosrekisteri_ominaisuudet.ominaisuus = j.ominaisuus)');
                     
                     $this->CI->db->delete('vrlv3_hevosrekisteri_ominaisuudet_jonossa', array("tulos_id"=>$tulos_id));
                 

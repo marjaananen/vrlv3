@@ -1762,12 +1762,19 @@ class Virtuaalihevoset extends CI_Controller
         }
         if($this->input->post('kasvattajanimi')){
             $poni['kasvattajanimi'] = $this->input->post('kasvattajanimi');
+        }else {
+            $poni['kasvattajanimi'] = null;
+            $poni['kasvattajanimi_id'] = null;
         }
         if($this->input->post('kasvattaja_talli')){
             $poni['kasvattaja_talli'] = $this->input->post('kasvattaja_talli');
+        }else {
+            $poni['kasvattaja_talli'] = null;
         }
         if ($this->input->post('kasvattaja_tunnus')){
             $poni['kasvattaja_tunnus'] = $this->input->post('kasvattaja_tunnus');
+        }else {
+            $poni['kasvattaja_tunnus'] = null;
         }
         if($this->input->post('i_nro')){
             $poni['i_nro'] = $this->input->post('i_nro');
@@ -1775,6 +1782,7 @@ class Virtuaalihevoset extends CI_Controller
         if($this->input->post('e_nro')){
             $poni['e_nro'] = $this->input->post('e_nro');
         }
+
         
         $vuodet = $this->vuodet;
         foreach($vuodet as $vuosi){

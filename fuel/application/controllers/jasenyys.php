@@ -250,7 +250,7 @@ class Jasenyys extends CI_Controller
 	if($this->input->server('REQUEST_METHOD') == 'POST')
 	{
         $this->form_validation->set_rules('tunnus', 'VRL-tunnus', "min_length[5]|max_length[9]|regex_match[/^[VRL*\-0-9]*$/]");
-	    $this->form_validation->set_rules('nimimerkki', 'Nimimerkki', "min_length[2]|regex_match[/^[A-Za-z0-9_\-.:,; *~#&'@()]*$/]");
+	    $this->form_validation->set_rules('nimimerkki', 'Nimimerkki', "min_length[2]");
         $this->form_validation->set_rules('email', 'Email', "min_length[4]|regex_match[/^[A-Za-z0-9_\-.:,; *~#&'@()]*$/]");
 
 

@@ -98,7 +98,7 @@ class Yllapito_tunnukset extends CI_Controller
         
         if(is_numeric($id) && $id >= 0 && ($approved == 'hyvaksy' || (isset($rej_reason) && strlen($rej_reason) > 5 && $approved == 'hylkaa')))
         {
-            $this->load->library('email');
+            $this->load->library('vrl_email');
             $this->load->model('tunnukset_model');
         
             $application_data = $this->tunnukset_model->get_application($id);
