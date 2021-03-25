@@ -475,13 +475,13 @@ class Hevonen_model extends Base_module_model
         $suku = array();
         if(isset($hevonen['i_nro'])){
             $suku['i_nro'] = $this->CI->vrl_helper->vh_to_number($hevonen['i_nro']);
-            unset($hevonen['i_nro']);
         }
         if(isset($hevonen['e_nro'])){
             $suku['e_nro'] = $this->CI->vrl_helper->vh_to_number($hevonen['e_nro']);
-            unset($hevonen['e_nro']);
 
         }
+        unset($hevonen['i_nro']);
+        unset($hevonen['e_nro']);
         
         if(isset($hevonen['kasvattaja_tunnus'])){
             $hevonen['kasvattaja_tunnus'] = $this->CI->vrl_helper->vrl_to_number($hevonen['kasvattaja_tunnus']);
@@ -1029,7 +1029,7 @@ class Hevonen_model extends Base_module_model
     }
     
     //functions for search
-    function search_horse($reknro = null, $name = null, $rotu=-1, $gender=-1, $dead=null, $color=-1, $birthyear=null){
+    function search_horse($reknro = null, $name = null, $rotu=-1, $gender=-1, $dead=null, $color=-1, $birth_year=null, $rek_year = nuöö){
         $this->db->select("h.reknro, h.nimi, r.lyhenne as rotu, h.vari, IF(sukupuoli='1', 'tamma', IF(sukupuoli='2', 'ori', 'ruuna')) as sukupuoli, syntymaaika");
         
         //jos haetaan rekisterinumerolla, millään muulla ei ole väliä
@@ -1057,6 +1057,11 @@ class Hevonen_model extends Base_module_model
                 $this->db->where("syntymaaika >", ($birth_year-1)."-12-31");
             }
             
+            if(isset($rek_year) && $rek_year > 1000){
+                $this->db->where("h.rekisteroity <", ($rek_year+1)."-01-01");
+                $this->db->where("h.rekisteroity >", ($rek_year-1)."-12-31");
+            }
+            
             if(isset($breeder)){
                 $this->db->where("kasvattaja_tunnus", $breeder);
             }
@@ -1072,6 +1077,7 @@ class Hevonen_model extends Base_module_model
         
         $this->db->from('vrlv3_hevosrekisteri as h');
         $this->db->join("vrlv3_lista_rodut as r", "h.rotu = r.rotunro", 'left outer');
+        $this->db->order_by("h.rekisteroity", "desc");
 
         $this->db->limit(1000);
         $query = $this->db->get();

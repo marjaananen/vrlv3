@@ -64,6 +64,7 @@ class Virtuaalihevoset extends CI_Controller
             $hakudata['kuollut'] = $this->input->post('kuollut');
             $hakudata['vari'] = $this->input->post('vari');
             $hakudata['syntynyt_v'] = $this->input->post('syntynyt_v');
+            $hakudata['rekisteroitynyt_v'] = $this->input->post('rekisteroitynyt_v');
 			
 			if($this->validate_horse_search_form() == true)
 			{
@@ -75,7 +76,7 @@ class Virtuaalihevoset extends CI_Controller
 				$vars['data'] = json_encode($this->hevonen_model->search_horse($reknro, $this->input->post('nimi'), $this->input->post('rotu'),
                                                                                $this->input->post('sukupuoli'),
 																			   $this->input->post('kuollut'), $this->input->post('vari'),
-                                                                               $this->input->post('syntynyt_v')));
+                                                                               $this->input->post('syntynyt_v'), $this->input->post('rekisteroitynyt_v')));
 			}
 			
 			$data['tulokset'] = $this->load->view('misc/taulukko', $vars, TRUE);
@@ -1418,14 +1419,17 @@ class Virtuaalihevoset extends CI_Controller
 		$this->load->library('form_builder', array('submit_value' => 'Hae'));
 
 		
-		$fields['reknro'] = array('type' => 'text', 'class'=>'form-control', 'value'=>$data['reknro'] ?? "");
+		$fields['reknro'] = array('type' => 'text', 'class'=>'form-control', 'value'=>$data['reknro'] ?? "", 'after_html'=> '<span class="form_comment">Vain kokonainen VH-tunnus, ei jokerimerkkejä.</span>');
 		$fields['nimi'] = array('type' => 'text', 'class'=>'form-control', 'value'=>$data['nimi'] ?? "");
 		$fields['rotu'] = array('type' => 'select', 'options' => $r_options, 'value'=>$data['rotu'] ?? -1, 'class'=>'form-control');
 		$fields['sukupuoli'] = array('type' => 'select', 'options' => $skp_options, 'value'=>$data['sukupuoli'] ?? -1, 'class'=>'form-control');
 		$fields['kuollut'] = array('type' => 'checkbox', 'checked'=>$data['kuollut'] ?? false, 'class'=>'form-control');
 		$fields['vari'] = array('label'=>"Väri", 'type' => 'select', 'options' => $color_options, 'value'=>$data['vari'] ?? -1, 'class'=>'form-control');
 		$fields['syntynyt_v'] = array('type' => 'text', 'label'=>'Syntymävuosi', 'class'=>'form-control', 'value'=>$data['syntynyt_v'] ?? "");
-		
+		$fields['rekisteroitynyt_v'] = array('type' => 'text', 'label'=>'Rekisteröintivuosi', 'class'=>'form-control',
+                                             'value'=>$data['rekisteroitynyt_v'] ?? "",
+                                             'after_html'=> '<span class="form_comment">Ennen vuotta 2010 rekisteröityjen hevosten rekisteröintivuosi on 2010.</span>');
+
 		$this->form_builder->form_attrs = array('method' => 'post', 'action' => site_url('/virtuaalihevoset/haku'));
 		        
 		return $this->form_builder->render_template('_layouts/basic_form_template', $fields);
@@ -1442,6 +1446,8 @@ class Virtuaalihevoset extends CI_Controller
 		$this->form_validation->set_rules('rotu', 'Rotu', 'min_length[1]|max_length[4]|numeric');
 		$this->form_validation->set_rules('vari', 'Väri', 'min_length[1]|max_length[4]|numeric');
 		$this->form_validation->set_rules('syntynyt_v', 'Syntymävuosi', 'min_length[4]|max_length[4]|numeric');
+        $this->form_validation->set_rules('rekisteroitynyt_v', 'Syntymävuosi', 'min_length[4]|max_length[4]|numeric');
+
         $this->form_validation->set_rules('nimi', 'Nimi', "min_length[4]");
         return $this->form_validation->run();
 
