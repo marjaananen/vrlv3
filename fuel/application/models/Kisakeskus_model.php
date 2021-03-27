@@ -561,6 +561,7 @@ class Kisakeskus_model extends CI_Model
         $this->db->where('jarj_talli', $jarj_talli);
         $this->db->where('kp', $pvm);
         $this->db->where('jaos', $jaos);
+        $this->db->where('tulokset', 0);
         
         $query = $this->db->get();
         

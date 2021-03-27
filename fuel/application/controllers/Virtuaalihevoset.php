@@ -389,13 +389,11 @@ class Virtuaalihevoset extends CI_Controller
         $this->_massatuho_clean_input('sukupuoli', $haku, -1);
         $this->_massatuho_clean_input('porr_kilpailee', $haku, -1);
         
-        if($this->input->post('kuollut')){
+        if($this->input->post('kuollut') == 1){
             $haku['kuollut'] = 1;
+        }else if($this->input->post('kuollut') == -1){
+            UNSET($haku['kuollut']);
         }else {
-            $haku['kuollut'] = 0;
-        }
-        
-        if(!isset($haku['kuollut'])){
             $haku['kuollut'] = 0;
         }
         
@@ -1492,7 +1490,7 @@ class Virtuaalihevoset extends CI_Controller
             $fields['rotu'] = array('label'=>'Rotu', 'type' => 'select', 'options' => $r_options, 'required' => TRUE, 'value'=> $poni['rotu'] ?? -1, 'class'=>'form-control');
             $fields['syntymaaika'] = array('type' => 'text', 'label'=>'Syntymäaika', 'class'=>'form-control', 'required' => TRUE, 'value'=> $poni['syntymaaika'] ?? '', 'after_html' => '<span class="form_comment">Muodossa pp.kk.vvvv</span>');
 
-        if( isset($poni['sukupuoli']) && $this->hevonen_model->spayable($poni['sukupuoli'])) {
+        if($type != 'admin' && isset($poni['sukupuoli']) && $this->hevonen_model->spayable($poni['sukupuoli'])) {
             
             $skp_options = $this->hevonen_model->get_gender_spayable_option_list();
             $fields['sukupuoli'] = array('type' => 'select', 'label'=> 'Sukupuoli', 'options' => $skp_options, 'required' => TRUE, 'value'=> $poni['sukupuoli'] ?? -1, 'class'=>'form-control');
@@ -1696,6 +1694,7 @@ class Virtuaalihevoset extends CI_Controller
             //luetaan arvot
             $poni['tasot'] = array();
             foreach ($this->jaokset as $jaokset){
+            if(isset($poni['porr_max_taso_jaos_'.$jaokset['id']])){
                 $value = $poni['porr_max_taso_jaos_'.$jaokset['id']];
                 if(is_numeric($value) && $value >= -1 && $value <= 10 ){
                     $poni['tasot'][$jaokset['id']] = $value;
@@ -1703,7 +1702,7 @@ class Virtuaalihevoset extends CI_Controller
                     $msg = "Virheellinen taso jaoksella " . $jaokset['id'] . " (".$value.")";
                     return false;
                 }
-                
+            }
                 unset($poni['porr_max_taso_jaos_'.$jaokset['id']]);
             
             }
