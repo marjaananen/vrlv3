@@ -2016,7 +2016,7 @@ class Virtuaalihevoset extends CI_Controller
         if($this->vrl_helper->check_vh_syntax($reknro)){
         
             $parent = $this->hevonen_model->get_hevonen_basic($reknro);
-            if($this->vrl_helper->validateDate($poni['syntymaaika'])){
+            if(isset($poni['syntymaaika']) && $this->vrl_helper->validateDate($poni['syntymaaika'])){
                 $poni_date = new DateTime($poni['syntymaaika']);
                 $parent_date = $birth_date = new DateTime($parent['syntymaaika']);
                 

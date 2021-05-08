@@ -452,7 +452,8 @@ class Tallit extends CI_Controller
 			if($this->tallit_model->is_stable_active($tnro))
 				$data['editor'] = '<a href="' . site_url('tallit/lopeta') . '/' . $tnro . '"><button type="button" class="btn btn-danger">Lopeta talli</button></a>';
 			else
-				$data['editor'] = "<p>Talli on jo lopetettu.</p>";
+				$data['editor'] = '<a href="' . site_url('tallit/antilopeta') . '/' . $tnro . '"><button type="button" class="btn btn-success">
+                Palauta talli toimintaan</button></a>';
 		}
 		
 		else if($sivu == 'tiedot'){
@@ -479,7 +480,11 @@ class Tallit extends CI_Controller
 						$vars['msg_type'] = "danger";
 						$data['editor'] = $this->load->view('misc/lomakemuokkaus', $vars, true);	
 	
-					}
+					}else if(!substr( trim($this->input->post('osoite')), 0, 4 ) === "http"){
+                        $vars['msg'] = "Muokkaus epäonnistui! Url väärän muotoinen.";
+						$vars['msg_type'] = "danger";
+						$data['editor'] = $this->load->view('misc/lomakemuokkaus', $vars, true);	
+                    }
 					else
 					{
 						$vars['msg'] = "Muokkaus onnistui!";
@@ -533,6 +538,19 @@ class Tallit extends CI_Controller
         $this->tallit_model->mark_stable_inactive($tnro);
             
         $this->fuel->pages->render('misc/naytaviesti', array('msg' => 'Tallisi on merkattu lopettaneeksi.'));
+    }
+    
+    function antilopeta($tnro)
+    {
+        $tnro = $this->_clean_scands_from_url($tnro);
+		if(!$this->_is_editing_allowed($tnro, $msg)){
+            $this->fuel->pages->render('misc/naytaviesti', array('msg_type' => 'danger', 'msg' => $msg));
+			return;
+		}			
+			        
+        $this->tallit_model->mark_stable_inactive($tnro, true);
+            
+        $this->fuel->pages->render('misc/naytaviesti', array('msg' => 'Talli on palautettu toimintaan.'));
     }
     
     function poista($tnro)
@@ -723,7 +741,7 @@ class Tallit extends CI_Controller
 
         $this->form_validation->set_rules('nimi', 'Nimi', "required|min_length[1]|max_length[128]");
         $this->form_validation->set_rules('kuvaus', 'Kuvaus', "max_length[1024]");
-        $this->form_validation->set_rules('osoite', 'Osoite', "required|min_length[4]|max_length[1024]|regex_match[/^[A-Za-z0-9_\-.:,; \/*~#&'@()]*$/]");
+        $this->form_validation->set_rules('osoite', 'Osoite', "required|min_length[15]|max_length[1024]");
         
 
         if($mode == 'application')

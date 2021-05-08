@@ -169,10 +169,15 @@ class Tallit_model extends Base_module_model
         return false;
     }
 
-    function mark_stable_inactive($tnro)
+    function mark_stable_inactive($tnro, $reverse = false)
     {
+        $status = 1;
+        
+        if($reverse){
+            $status = 0;
+        }
         $this->db->where('tnro', $tnro);
-        $this->db->update('vrlv3_tallirekisteri', array('lopettanut' => 1));
+        $this->db->update('vrlv3_tallirekisteri', array('lopettanut' => $status));
 		
 		//päivityksestä jää jälki
 		$this->mark_update($tnro, "Tallin lopetus");

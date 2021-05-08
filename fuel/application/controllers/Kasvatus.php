@@ -536,7 +536,10 @@ class Kasvatus extends CI_Controller
 			}
 			else if($this->input->server('REQUEST_METHOD') == 'POST')
 			{
-			$msg = "";
+                
+                $rotu = $this->input->post('rotu');
+                $this->load->model("Listat_model");
+                $msg = "";
 				if ($this->_validate_name_form('application') == FALSE)
 				{
 					$vars['msg'] = "Rekisteröinti epäonnistui!";
@@ -545,7 +548,11 @@ class Kasvatus extends CI_Controller
 				else if(!$this->_check_name($this->input->post('kasvattajanimi'), $msg)){
 					$vars['msg'] = $msg;
 					$vars['msg_type'] = "danger";
-				}
+				}else if ( !isset($rotu) || !is_numeric($rotu)
+                          || $rotu < 1 || $rotu > 999 || !$this->Listat_model->breed_exists($rotu)){
+                    $vars['msg'] = "Virheellinen rotu!";
+					$vars['msg_type'] = "danger";
+                }
 				else
 				{
 					$vars['msg'] = "Rekisteröinti onnistui!";
@@ -558,15 +565,17 @@ class Kasvatus extends CI_Controller
 					$date->setTimestamp(time());
 					$insert_data['rekisteroity'] = $date->format('Y-m-d H:i:s');
                     $insert_data['rekisteroi'] = $this->ion_auth->user()->row()->tunnus;
-					if ($this->input->post('talli') != -1){
+					if ($this->input->post('talli')){
 						$insert_data['tnro'] = $this->input->post('talli');
 					}else {
                         $insert_data['tnro'] = null;
                     }
+                    
+                    
 					$insert_data['kasvattajanimi'] = $this->input->post('kasvattajanimi');
 					
 					//add name
-					$this->kasvattajanimi_model->add_name($insert_data, $this->input->post('rotu'), $this->ion_auth->user()->row()->tunnus);
+					$this->kasvattajanimi_model->add_name($insert_data, $rotu, $this->ion_auth->user()->row()->tunnus);
 
 				}
 				
