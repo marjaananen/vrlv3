@@ -2010,11 +2010,9 @@ class Virtuaalihevoset extends CI_Controller
     }
     
     private function _check_parent($poni, $reknro, $vanhempi, &$msg){
-                $ok = true;
-
+        $ok = true;
         
         if($this->vrl_helper->check_vh_syntax($reknro)){
-        
             $parent = $this->hevonen_model->get_hevonen_basic($reknro);
             if(isset($poni['syntymaaika']) && $this->vrl_helper->validateDate($poni['syntymaaika'])){
                 $poni_date = new DateTime($poni['syntymaaika']);
@@ -2026,7 +2024,7 @@ class Virtuaalihevoset extends CI_Controller
                     $ok = false;
                 }
             }
-            if(($vanhempi == "isä" && $parent['sukupuoli'] == 1)|| ($vanhempi == "ema" && $parent['sukupuoli'] != 1 )){
+            if(($vanhempi == "isä" && $parent['sukupuoli'] == 1)|| ($vanhempi == "emä" && $parent['sukupuoli'] != 1 )){
                 $msg .= "<li>Hevosen " . $vanhempi . " on väärää sukupuolta!</li>";
                 $ok = false;
             }
