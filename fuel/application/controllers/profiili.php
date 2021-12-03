@@ -82,7 +82,7 @@ class Profiili extends Loggedin_Controller
     {
         $vars = array();
     	$this->load->library('form_validation');
-        $this->load->model('tunnukset_model');
+        $this->load->model('Tunnukset_model');
         $user = $this->ion_auth->user()->row();
         
         if($this->input->server('REQUEST_METHOD') == 'POST')
@@ -169,7 +169,7 @@ class Profiili extends Loggedin_Controller
         $vars = array();
         $vars['success'] = false;
 	$this->load->library('form_validation');
-        $this->load->model('tunnukset_model');
+        $this->load->model('Tunnukset_model');
         $user = $this->ion_auth->user()->row();
         
         // load form_builder
@@ -207,7 +207,7 @@ class Profiili extends Loggedin_Controller
     {
         if(!empty($id))
         {
-            $this->load->model('tunnukset_model');
+            $this->load->model('Tunnukset_model');
             $user = $this->ion_auth->user()->row();
             $this->tunnukset_model->delete_contact($user->tunnus, $id);
         }
@@ -222,7 +222,7 @@ class Profiili extends Loggedin_Controller
         $vars = array();
         $vars['success'] = false;
 	$this->load->library('form_validation');
-        $this->load->model('tunnukset_model');
+        $this->load->model('Tunnukset_model');
         $user = $this->ion_auth->user()->row();
      
         // load form_builder
@@ -261,7 +261,7 @@ class Profiili extends Loggedin_Controller
     {
         if(!empty($id))
         {
-            $this->load->model('tunnukset_model');
+            $this->load->model('Tunnukset_model');
             $user = $this->ion_auth->user()->row();
             $this->tunnukset_model->delete_message($user->tunnus, $id);
         }
@@ -273,7 +273,7 @@ class Profiili extends Loggedin_Controller
     {
         if(!empty($id))
         {
-	    $this->load->model('tunnukset_model');
+	    $this->load->model('Tunnukset_model');
 	    $user = $this->ion_auth->user()->row();
 	    if ($important == "0" || empty($important)){
 		$this->tunnukset_model->mark_as_important($user->tunnus, $id);

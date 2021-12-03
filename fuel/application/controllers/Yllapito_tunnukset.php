@@ -12,7 +12,7 @@ class Yllapito_tunnukset extends CI_Controller
         if (!$this->user_rights->is_allowed()){       
             redirect($this->user_rights->redirect());
         }
-        $this->load->model("tunnukset_model");
+        $this->load->model("Tunnukset_model");
         $this->load->model("Oikeudet_model");
     }
 
@@ -47,7 +47,7 @@ class Yllapito_tunnukset extends CI_Controller
     
     function hakemusjono_etusivu()
     {
-        $this->load->model('tunnukset_model');
+        $this->load->model('Tunnukset_model');
         $this->session->set_flashdata('return_status', '');
         
         $vars['view_status'] = "queue_status";
@@ -65,7 +65,7 @@ class Yllapito_tunnukset extends CI_Controller
     
     function hakemusjono()
     {
-        $this->load->model('tunnukset_model');
+        $this->load->model('Tunnukset_model');
         $this->session->set_flashdata('return_status', '');
         
         $vars['view_status'] = "next_join_application";
@@ -99,7 +99,7 @@ class Yllapito_tunnukset extends CI_Controller
         if(is_numeric($id) && $id >= 0 && ($approved == 'hyvaksy' || (isset($rej_reason) && strlen($rej_reason) > 5 && $approved == 'hylkaa')))
         {
             $this->load->library('vrl_email');
-            $this->load->model('tunnukset_model');
+            $this->load->model('Tunnukset_model');
         
             $application_data = $this->tunnukset_model->get_application($id);
             

@@ -364,7 +364,7 @@ private function _remove_me($item, $taulu, &$msg){
         $id = $taulu['ot']['id'];
         $om = $taulu['ot']['om'];
         $t = $taulu['ot']['t'];
-        $this->CI->load->model('tunnukset_model');
+        $this->CI->load->model('Tunnukset_model');
         
         //Onko item ja tunnukset olemassa ja jos on, onko omistussuhde olemassa?
         if ($this->CI->tunnukset_model->onko_tunnus($owner)
@@ -430,7 +430,7 @@ private function _remove_me($item, $taulu, &$msg){
         $om = $taulu['ot']['om'];
         $t = $taulu['ot']['t'];
         
-        $this->CI->load->model('tunnukset_model');
+        $this->CI->load->model('Tunnukset_model');
         
         //Onko item ja tunnukset olemassa ja jos on, onko omistussuhde olemassa?
         if ($this->CI->tunnukset_model->onko_tunnus($owner)
@@ -498,7 +498,7 @@ private function _remove_me($item, $taulu, &$msg){
         $om = $taulu['ot']['om'];
         $t = $taulu['ot']['t'];
         
-        $this->CI->load->model('tunnukset_model');
+        $this->CI->load->model('Tunnukset_model');
         
         //Onko item ja tunnukset olemassa ja jos on, onko omistussuhde olemassa?
         if ($this->CI->tunnukset_model->onko_tunnus($owner)

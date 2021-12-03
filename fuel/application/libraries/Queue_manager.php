@@ -140,7 +140,7 @@ class Queue_manager
     //lähettää recipientille msg:n adminilta
     public function process_queue_item($id, $approved, $insert_data, $msg_recipient, $msg)
     {
-        $this->CI->load->model('tunnukset_model');
+        $this->CI->load->model('Tunnukset_model');
         $this->CI->tunnukset_model->send_message(1, $msg_recipient, $msg);
         
         if($approved == true)

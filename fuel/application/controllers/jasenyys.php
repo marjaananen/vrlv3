@@ -33,7 +33,7 @@ class Jasenyys extends CI_Controller
         {
             // load form_builder
             $this->load->library('form_builder', array('submit_value' => 'Liity', 'required_text' => '*Pakollinen kenttä'));
-            $this->load->model('tunnukset_model');
+            $this->load->model('Tunnukset_model');
 
             // create fields
             $fields['nimimerkki'] = array('type' => 'text', 'required' => TRUE, 'after_html' => '<span class="form_comment">Nimimerkit eivät ole yksilöllisiä</span>', 'class'=>'form-control');
@@ -56,7 +56,7 @@ class Jasenyys extends CI_Controller
 			}
 			else {
 				$this->load->helper(array('form', 'url'));
-                $this->load->model('tunnukset_model');
+                $this->load->model('Tunnukset_model');
                 $this->load->library('vrl_email');
                 
                 $this->form_validation->set_rules('nimimerkki', 'Nimimerkki', "required|min_length[1]|max_length[20]");
@@ -133,7 +133,7 @@ class Jasenyys extends CI_Controller
         }
         else
         {
-            $this->load->model('tunnukset_model');
+            $this->load->model('Tunnukset_model');
             $pinnumber = $this->vrl_helper->vrl_to_number($tunnus);
             $user = null;
             if($fields['oma']){
@@ -203,7 +203,7 @@ class Jasenyys extends CI_Controller
         
     function vahvista()
         {
-            $this->load->model('tunnukset_model');
+            $this->load->model('Tunnukset_model');
             
             $email = $this->input->get('email', TRUE);
             $code = $this->input->get('code', TRUE);
@@ -239,7 +239,7 @@ class Jasenyys extends CI_Controller
     function haku()
     {
     $this->load->library('Vrl_helper');
-	$this->load->model('tunnukset_model');
+	$this->load->model('Tunnukset_model');
 	$this->load->library('form_validation');
 	$this->load->library('form_builder', array('submit_value' => 'Hae'));
 	$data['title'] = 'Jäsenhaku';
