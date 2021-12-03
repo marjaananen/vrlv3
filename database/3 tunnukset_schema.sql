@@ -76,8 +76,12 @@ INSERT INTO `vrlv3_groups` (`id`, `name`, `description`) VALUES
 -- Rakenne taululle `vrlv3_tunnukset`
 --
 
+  tnro varchar(8) DEFAULT NULL,
+  tila int(11) DEFAULT '1',
+  rekisteroi int(5) unsigned zerofill DEFAULT NULL,
+
 CREATE TABLE `vrlv3_tunnukset` (
-  `id` int(11) UNSIGNED NOT NULL,
+  `id` int unsigned NOT NULL AUTO_INCREMENT,
   `ip_address` varchar(15) NOT NULL,
   `username` varchar(100) NOT NULL,
   `password` varchar(255) NOT NULL,
@@ -87,30 +91,30 @@ CREATE TABLE `vrlv3_tunnukset` (
   `activation_code` varchar(255) DEFAULT NULL,
   `forgotten_password_selector` varchar(255) DEFAULT NULL,
   `forgotten_password_code` varchar(255) DEFAULT NULL,
-  `forgotten_password_time` int(11) UNSIGNED DEFAULT NULL,
+  `forgotten_password_time` int unsigned DEFAULT NULL,
   `remember_selector` varchar(255) DEFAULT NULL,
   `remember_code` varchar(255) DEFAULT NULL,
-  `created_on` int(11) UNSIGNED NOT NULL,
-  `last_login` int(11) UNSIGNED DEFAULT NULL,
-  `active` tinyint(1) UNSIGNED DEFAULT NULL,
-  `tunnus` int(5) UNSIGNED ZEROFILL NOT NULL,
+  `created_on` int unsigned NOT NULL,
+  `last_login` int unsigned DEFAULT NULL,
+  `active` tinyint unsigned DEFAULT NULL,
+  `tunnus` int(5) unsigned zerofill NOT NULL,
   `nimimerkki` varchar(20) NOT NULL,
-  `nayta_email` smallint(1) NOT NULL DEFAULT '0',
+  `nayta_email` smallint NOT NULL DEFAULT '0',
   `jaahylla` datetime NOT NULL,
-  `frozen` int(1) NOT NULL,
+  `frozen` int NOT NULL,
   `reason` varchar(400) NOT NULL,
-  `hyvaksyi` int(5) UNSIGNED ZEROFILL NOT NULL,
+  `hyvaksyi` int(5) unsigned zerofill NOT NULL,
   `hyvaksytty` datetime NOT NULL,
-  `laani` smallint(2) DEFAULT NULL,
+  `laani` smallint DEFAULT NULL,
   `syntymavuosi` date NOT NULL,
-  `nayta_vuosi` smallint(1) NOT NULL DEFAULT '0',
-  `nayta_laani` smallint(1) NOT NULL DEFAULT '0',
+  `nayta_vuosi` smallint NOT NULL DEFAULT '0',
+  `nayta_laani` smallint NOT NULL DEFAULT '0',
   `suositus` varchar(20) NOT NULL,
   `rekisteroitynyt` datetime NOT NULL,
-  `kuvaus` TEXT NULL
-
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
+  `kuvaus` text,
+  PRIMARY KEY (`id`),
+  KEY `tunnus` (`tunnus`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
 -- --------------------------------------------------------
 
 INSERT INTO `vrlv3_tunnukset` (
