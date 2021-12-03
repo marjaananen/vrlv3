@@ -5,7 +5,7 @@
 
 if($this->config->item('vrl_production')){
 
-	require APPPATH.'/third_party/aws/aws-autoloader.php';
+	include APPPATH.'/third_party/aws/aws-autoloader.php';
 	
 	use Aws\Ses\SesClient;
 	use Aws\Exception\AwsException;
