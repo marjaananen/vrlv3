@@ -521,3 +521,8 @@ $config['rewrite_short_tags'] = TRUE;
 | Array:		array('10.0.1.200', '192.168.5.0/24')
 */
 $config['proxy_ips'] = '';
+
+
+//DO NOT EDIT THIS
+
+$config['vrl_production'] = FALSE;

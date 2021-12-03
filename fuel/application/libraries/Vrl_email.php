@@ -2,10 +2,15 @@
 
 	// If necessary, modify the path in the require statement below to refer to the 
 // location of your Composer autoload.php file.
-require APPPATH.'/third_party/aws/aws-autoloader.php';
 
-use Aws\Ses\SesClient;
-use Aws\Exception\AwsException;
+if($this->config->item('vrl_production')){
+
+	require APPPATH.'/third_party/aws/aws-autoloader.php';
+	
+	use Aws\Ses\SesClient;
+	use Aws\Exception\AwsException;
+
+}
 
 class Vrl_email
 {
