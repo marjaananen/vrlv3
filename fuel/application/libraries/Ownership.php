@@ -367,7 +367,7 @@ private function _remove_me($item, $taulu, &$msg){
         $this->CI->load->model('Tunnukset_model');
         
         //Onko item ja tunnukset olemassa ja jos on, onko omistussuhde olemassa?
-        if ($this->CI->tunnukset_model->onko_tunnus($owner)
+        if ($this->CI->Tunnukset_model->onko_tunnus($owner)
             && $this->it_is_there_already($taulu['t'], array($taulu['id']=>$item))
             && !$this->it_is_there_already ($taulunimi, array($id => $item, $om=> $owner))){
             
@@ -433,7 +433,7 @@ private function _remove_me($item, $taulu, &$msg){
         $this->CI->load->model('Tunnukset_model');
         
         //Onko item ja tunnukset olemassa ja jos on, onko omistussuhde olemassa?
-        if ($this->CI->tunnukset_model->onko_tunnus($owner)
+        if ($this->CI->Tunnukset_model->onko_tunnus($owner)
             && $this->it_is_there_already($taulu['t'], array($taulu['id']=>$item))
             && $this->it_is_there_already ($taulunimi, array($id => $item, $om=> $owner))){
             
@@ -501,7 +501,7 @@ private function _remove_me($item, $taulu, &$msg){
         $this->CI->load->model('Tunnukset_model');
         
         //Onko item ja tunnukset olemassa ja jos on, onko omistussuhde olemassa?
-        if ($this->CI->tunnukset_model->onko_tunnus($owner)
+        if ($this->CI->Tunnukset_model->onko_tunnus($owner)
             && $this->it_is_there_already($taulu['t'], array($taulu['id']=>$item))
             && $this->it_is_there_already ($taulunimi, array($id => $item, $om=> $owner))){
             

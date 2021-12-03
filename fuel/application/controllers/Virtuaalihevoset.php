@@ -1167,7 +1167,7 @@ class Virtuaalihevoset extends CI_Controller
                 if($admin){
                     $syy = $this->input->post('syy');
                     foreach($owners as $owner){
-                     $this->tunnukset_model->send_message($user, $owner['omistaja'], "Hevosesi " . $reknro . " poistettiin rekisteristä. Syy:  " .$syy);
+                     $this->Tunnukset_model->send_message($user, $owner['omistaja'], "Hevosesi " . $reknro . " poistettiin rekisteristä. Syy:  " .$syy);
                     }
                 }
                 $this->fuel->pages->render('misc/naytaviesti', $msg);
@@ -1914,7 +1914,7 @@ class Virtuaalihevoset extends CI_Controller
         }
         if (isset($poni['kasvattaja_tunnus']) && !empty($poni['kasvattaja_tunnus']) && (
                  !$this->vrl_helper->check_vrl_syntax($poni['kasvattaja_tunnus'])
-                 || !$this->tunnukset_model->onko_tunnus($this->vrl_helper->vrl_to_number($poni['kasvattaja_tunnus'])))){
+                 || !$this->Tunnukset_model->onko_tunnus($this->vrl_helper->vrl_to_number($poni['kasvattaja_tunnus'])))){
            $msg .= "<li>Kasvattajan VRL-tunnus on virheellinen.</li>";
                 $ok = false;
         }

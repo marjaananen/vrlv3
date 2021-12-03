@@ -589,7 +589,7 @@ class Tallit extends CI_Controller
                 if($admin){
                     $syy = $this->input->post('syy');
                     foreach($owners as $owner){
-                     $this->tunnukset_model->send_message($user, $owner['omistaja'], "Tallisi " . $tnro . " poistettiin rekisteristä. Syy:  " .$syy);
+                     $this->Tunnukset_model->send_message($user, $owner['omistaja'], "Tallisi " . $tnro . " poistettiin rekisteristä. Syy:  " .$syy);
                     }
                 }
                 $this->fuel->pages->render('misc/naytaviesti', $msg);

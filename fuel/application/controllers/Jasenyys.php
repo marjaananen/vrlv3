@@ -70,7 +70,7 @@ class Jasenyys extends CI_Controller
                 }
 				else
 				{
-                    $return_data = $this->tunnukset_model->add_new_application($this->input->post('nimimerkki'), $this->input->post('email'));
+                    $return_data = $this->Tunnukset_model->add_new_application($this->input->post('nimimerkki'), $this->input->post('email'));
 					
 					$to = $this->input->post('email');
                     $data = array();
@@ -142,7 +142,7 @@ class Jasenyys extends CI_Controller
             }
             else {
                 $fields['url'] = "tunnus/";
-                $user = $this->ion_auth->user($this->tunnukset_model->get_users_id($pinnumber))->row();
+                $user = $this->ion_auth->user($this->Tunnukset_model->get_users_id($pinnumber))->row();
             }
             
             $fields['tunnus'] = $this->vrl_helper->get_vrl($tunnus);
@@ -167,8 +167,8 @@ class Jasenyys extends CI_Controller
         
             
             if($fields['logged_in']){
-                $fields['muut_yhteystiedot'] = $this->tunnukset_model->get_users_public_contacts($pinnumber);        
-                $fields['nimimerkit'] = $this->tunnukset_model->get_previous_nicknames($pinnumber);
+                $fields['muut_yhteystiedot'] = $this->Tunnukset_model->get_users_public_contacts($pinnumber);        
+                $fields['nimimerkit'] = $this->Tunnukset_model->get_previous_nicknames($pinnumber);
                 
                  if($sivu == 'kasvatit'){				
                         $fields['foals'] = $this->_omat_kasvatit($pinnumber, $fields['oma'], $fields['admin'] );
@@ -208,7 +208,7 @@ class Jasenyys extends CI_Controller
             $email = $this->input->get('email', TRUE);
             $code = $this->input->get('code', TRUE);
             
-            if($email != false && $code != false && $this->tunnukset_model->validate_application($email, $code) == true){
+            if($email != false && $code != false && $this->Tunnukset_model->validate_application($email, $code) == true){
                 $vars['msg'] = "Sähköpostiosoitteesi vahvistaminen onnistui!<br /><br />Hakemuksesi siirtyy nyt tunnusjonoon, josta VRL:n työntekijä hyväksyy sen.<br />
                 Saat tämän jälkeen sähköpostilla linkin jonka kautta pääset asettamaan tunnuksen ja salasanan.";
                 $vars['msg_type'] = 'success';
@@ -292,7 +292,7 @@ class Jasenyys extends CI_Controller
                 $hakudata['email'] = $this->input->post('email');
                 $email = $this->input->post('email');
             }
-            $vars['data'] = $this->tunnukset_model->search_users($tunnus, $nick, $email, $admin);         
+            $vars['data'] = $this->Tunnukset_model->search_users($tunnus, $nick, $email, $admin);         
 			$vars['data'] = json_encode($vars['data']);
 			
 			$data['tulokset'] = $this->load->view('misc/taulukko', $vars, TRUE);

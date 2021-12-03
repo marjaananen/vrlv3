@@ -122,7 +122,7 @@ class Profiili extends Loggedin_Controller
                     $vars['success'] = $this->ion_auth->update($user->id, $update_data);
                     
                     if($vars['success'] == true && !empty($this->input->post('nimimerkki')) && $this->input->post('nimimerkki') != $user->nimimerkki)
-                        $this->tunnukset_model->add_previous_nickname($previous_nick, $user->tunnus);
+                        $this->Tunnukset_model->add_previous_nickname($previous_nick, $user->tunnus);
                 }
                 
                
@@ -135,7 +135,7 @@ class Profiili extends Loggedin_Controller
 
         $contacts_html = '';
         
-        foreach($this->tunnukset_model->get_users_contacts($user->tunnus) as $row)
+        foreach($this->Tunnukset_model->get_users_contacts($user->tunnus) as $row)
         {
             if(empty($contacts_html))
                 $contacts_html .= "<ul>";
@@ -194,12 +194,12 @@ class Profiili extends Loggedin_Controller
             
             if ($this->form_validation->run() == true)
             {
-                $this->tunnukset_model->add_contact($user->tunnus, $this->input->post('tyyppi'), $this->input->post('yhteystieto'), $this->input->post('nayta'));
+                $this->Tunnukset_model->add_contact($user->tunnus, $this->input->post('tyyppi'), $this->input->post('yhteystieto'), $this->input->post('nayta'));
                 $vars['success'] = true;
             }
         }
         
-        $vars['contact_info'] = $this->tunnukset_model->get_users_contacts($user->tunnus);
+        $vars['contact_info'] = $this->Tunnukset_model->get_users_contacts($user->tunnus);
         $this->fuel->pages->render('profiili/muokkaa_yhteystietoja', $vars);
     }
     
@@ -209,7 +209,7 @@ class Profiili extends Loggedin_Controller
         {
             $this->load->model('Tunnukset_model');
             $user = $this->ion_auth->user()->row();
-            $this->tunnukset_model->delete_contact($user->tunnus, $id);
+            $this->Tunnukset_model->delete_contact($user->tunnus, $id);
         }
         
         redirect('profiili/muokkaa_yhteystietoja');
@@ -247,13 +247,13 @@ class Profiili extends Loggedin_Controller
 		$this->load->library('Vrl_helper');
 		
 		$recipient = $this->vrl_helper->vrl_to_number($this->input->post('vastaanottaja'));
-                $this->tunnukset_model->send_message($user->tunnus, $recipient, $this->input->post('viesti'));
+                $this->Tunnukset_model->send_message($user->tunnus, $recipient, $this->input->post('viesti'));
                 $vars['success'] = true;
 		
             }
         }
         
-        $vars['messages'] = $this->tunnukset_model->get_users_messages($user->tunnus);
+        $vars['messages'] = $this->Tunnukset_model->get_users_messages($user->tunnus);
         $this->fuel->pages->render('profiili/pikaviestit', $vars);
     }
     
@@ -263,7 +263,7 @@ class Profiili extends Loggedin_Controller
         {
             $this->load->model('Tunnukset_model');
             $user = $this->ion_auth->user()->row();
-            $this->tunnukset_model->delete_message($user->tunnus, $id);
+            $this->Tunnukset_model->delete_message($user->tunnus, $id);
         }
         
         redirect('profiili/pikaviestit');
@@ -276,10 +276,10 @@ class Profiili extends Loggedin_Controller
 	    $this->load->model('Tunnukset_model');
 	    $user = $this->ion_auth->user()->row();
 	    if ($important == "0" || empty($important)){
-		$this->tunnukset_model->mark_as_important($user->tunnus, $id);
+		$this->Tunnukset_model->mark_as_important($user->tunnus, $id);
 	    }
             else if ($important == "1"){
-		$this->tunnukset_model->mark_as_unimportant($user->tunnus, $id);
+		$this->Tunnukset_model->mark_as_unimportant($user->tunnus, $id);
 	    }  
         }        
         redirect('profiili/pikaviestit');

@@ -52,13 +52,13 @@ class Yllapito_tunnukset extends CI_Controller
         
         $vars['view_status'] = "queue_status";
         
-        $vars['queue_length'] = $this->tunnukset_model->get_application_queue_length();
+        $vars['queue_length'] = $this->Tunnukset_model->get_application_queue_length();
         if($vars['queue_length'] > 0)
-            $vars['oldest_application'] = $this->tunnukset_model->get_oldest_application();
+            $vars['oldest_application'] = $this->Tunnukset_model->get_oldest_application();
             
-        $vars['queue_unlocked_num'] = $this->tunnukset_model->get_application_queue_unlocked_num();
-        $vars['latest_approvals'] = $this->tunnukset_model->get_latest_approvals();
-        $vars['latest_logins'] = $this->tunnukset_model->get_latest_logins();
+        $vars['queue_unlocked_num'] = $this->Tunnukset_model->get_application_queue_unlocked_num();
+        $vars['latest_approvals'] = $this->Tunnukset_model->get_latest_approvals();
+        $vars['latest_logins'] = $this->Tunnukset_model->get_latest_logins();
             
         $this->fuel->pages->render('yllapito/hakemusjono', $vars);
     }
@@ -70,7 +70,7 @@ class Yllapito_tunnukset extends CI_Controller
         
         $vars['view_status'] = "next_join_application";
         
-        $vars['application_data'] = $this->tunnukset_model->get_next_application();
+        $vars['application_data'] = $this->Tunnukset_model->get_next_application();
         
         if($vars['application_data']['success'] == false)
         {
@@ -79,8 +79,8 @@ class Yllapito_tunnukset extends CI_Controller
             redirect('/yllapito/tunnukset');
         }
         else {
-            $vars['same_ip_logins'] = $this->tunnukset_model->get_logins_by_ip($vars['application_data']['ip']);
-            $vars['same_nicknames'] = $this->tunnukset_model->get_pinnumbers_by_nickname($vars['application_data']['nimimerkki']);
+            $vars['same_ip_logins'] = $this->Tunnukset_model->get_logins_by_ip($vars['application_data']['ip']);
+            $vars['same_nicknames'] = $this->Tunnukset_model->get_pinnumbers_by_nickname($vars['application_data']['nimimerkki']);
             $vars['application_data']['rekisteroitynyt'] = date('d.m.Y H:i',strtotime($vars['application_data']['rekisteroitynyt']));
                 
             $this->fuel->pages->render('yllapito/hakemusjono', $vars);
@@ -101,7 +101,7 @@ class Yllapito_tunnukset extends CI_Controller
             $this->load->library('vrl_email');
             $this->load->model('Tunnukset_model');
         
-            $application_data = $this->tunnukset_model->get_application($id);
+            $application_data = $this->Tunnukset_model->get_application($id);
             
             //email message
             $email = "";
@@ -118,7 +118,7 @@ class Yllapito_tunnukset extends CI_Controller
                 $additional_data = array('nimimerkki' => $application_data['nimimerkki']);
                 $additional_data['hyvaksytty'] = $date->format('Y-m-d H:i:s');
                 $additional_data['hyvaksyi'] = $user->tunnus;
-                $additional_data['tunnus'] = $this->tunnukset_model->get_next_pinnumber();
+                $additional_data['tunnus'] = $this->Tunnukset_model->get_next_pinnumber();
                 $new_pinnumber = str_pad($additional_data['tunnus'], 5, '0', STR_PAD_LEFT);
                 
                 $this->ion_auth->register($new_pinnumber,
@@ -134,7 +134,7 @@ class Yllapito_tunnukset extends CI_Controller
             }
             else
             {
-                //Onko tarve? $this->tunnukset_model->add_rejected_user($id); //Hylkäys muistiin
+                //Onko tarve? $this->Tunnukset_model->add_rejected_user($id); //Hylkäys muistiin
                 
                 
                 $message = $this->load->view('email/tunnus_hylatty', array('reason'=>$rej_reason ), TRUE);
@@ -158,7 +158,7 @@ class Yllapito_tunnukset extends CI_Controller
 					//What if sending fails?
                 
             //poistetaan hakemus kun se on nyt käsitelty
-            $this->tunnukset_model->delete_application($id);
+            $this->Tunnukset_model->delete_application($id);
             $this->hakemusjono();
 
         }else {
@@ -318,7 +318,7 @@ class Yllapito_tunnukset extends CI_Controller
                     $vars['success'] = $this->ion_auth->update($user->id, $update_data);
                     
                     if($vars['success'] == true && !empty($this->input->post('nimimerkki')) && $this->input->post('nimimerkki') != $user->nimimerkki)
-                        $this->tunnukset_model->add_previous_nickname($previous_nick, $user->tunnus);
+                        $this->Tunnukset_model->add_previous_nickname($previous_nick, $user->tunnus);
                 }
             }
     }
@@ -391,7 +391,7 @@ class Yllapito_tunnukset extends CI_Controller
             $vars['headers'] = json_encode($vars['headers']);
             if($tapa == 'tunnus' && $this->input->post('tunnushaku')){
                 if($this->vrl_helper->check_vrl_syntax($this->input->post('tunnus'))){
-                    $latest_logins = $this->tunnukset_model->get_latest_logins($this->vrl_helper->vrl_to_number($this->input->post('tunnus')), 1000);
+                    $latest_logins = $this->Tunnukset_model->get_latest_logins($this->vrl_helper->vrl_to_number($this->input->post('tunnus')), 1000);
                 
                     $vars['data'] = json_encode($latest_logins);            
                     $data['tulokset'] = $this->load->view('misc/taulukko', $vars, TRUE);
@@ -403,7 +403,7 @@ class Yllapito_tunnukset extends CI_Controller
             }
             
             else if($tapa == 'ip' && $this->input->post('iphaku')){
-                $latest_logins = $this->tunnukset_model->get_logins_by_ip($this->input->post('ip'), 1000);
+                $latest_logins = $this->Tunnukset_model->get_logins_by_ip($this->input->post('ip'), 1000);
                 
                 $vars['data'] = json_encode($latest_logins);            
                 $data['tulokset'] = $this->load->view('misc/taulukko', $vars, TRUE);
