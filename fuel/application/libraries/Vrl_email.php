@@ -4,19 +4,19 @@
 // location of your Composer autoload.php file.
 
 
-
-include APPPATH.'/third_party/aws/aws-autoloader.php';	
-use Aws\Ses\SesClient;
-use Aws\Exception\AwsException;
+//NÄMÄ TOIMIVAT VAIN TUOTANTOVRL:SSÄ
+//include APPPATH.'/third_party/aws/aws-autoloader.php';	
+//use Aws\Ses\SesClient;
+//use Aws\Exception\AwsException;
 
 
 class Vrl_email
 {
     
-public function __construct()
-	{
+	public function __construct()
+	{}
+	
 
-	}
 	
 	private function _signature($html = true){
 		
@@ -31,8 +31,13 @@ public function __construct()
 	}
     
 public function send ($to, $subject, $message){
-	return $this->aws_send($to, $subject, $message);
-	return;
+	//TÄMÄ TOIMII VAIN TUOTANTOVRL:SSÄ
+	//return $this->aws_send($to, $subject, $message);
+	//return;
+	
+	
+	//TÄHÄN ALLE VOIT TEHDÄ OMASSA YMPÄRISTÖSSÄSI TOIMIVAN VERSION
+	
     /*
             $CI =& get_instance();
 
@@ -65,6 +70,8 @@ public function send ($to, $subject, $message){
     
 }
 
+
+/*
 function aws_send($to, $subject, $msg){
 
 
@@ -140,6 +147,8 @@ try {
 	
 	
 }
+
+*/
 
  
 }
