@@ -360,7 +360,7 @@ class Rajapinta extends CI_Controller
                                                                    "ika"=> $age,
                                                                    "ikaantyminen_paivaa"=> $ikaantyminen,
                                                                    "ikaantyminen_ika"=>$calculated_age);
-                     $return_data['hevonen']['info']['kuollut'] = i$horse['kuollut'];
+                     $return_data['hevonen']['info']['kuollut'] = $horse['kuollut'];
                      
                      if($return_data['hevonen']['info']['kuollut']){
                         
