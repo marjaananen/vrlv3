@@ -3,14 +3,12 @@
 	// If necessary, modify the path in the require statement below to refer to the 
 // location of your Composer autoload.php file.
 
-if($this->config->item('vrl_production')){
 
-	include APPPATH.'/third_party/aws/aws-autoloader.php';
-	
-	use Aws\Ses\SesClient;
-	use Aws\Exception\AwsException;
 
-}
+include APPPATH.'/third_party/aws/aws-autoloader.php';	
+use Aws\Ses\SesClient;
+use Aws\Exception\AwsException;
+
 
 class Vrl_email
 {
@@ -41,7 +39,7 @@ public function send ($to, $subject, $message){
 		// Check compat first
 		$CI->config->load('ion_auth', TRUE);
 		$CI->load->library(['email']);
-		$CI->load->model('ion_auth_model');
+		$CI->load->model('Ion_auth_model');
 
 	
 		$email_config = $CI->config->item('email_config');

@@ -43,7 +43,7 @@ class User_rights
         }
         
         else {
-            $this->CI->load->model('ion_auth_model');
+            $this->CI->load->model('Ion_auth_model');
             
             $user_is_in_one_of_the_groups = false;
             $allowed_user_groups = array();

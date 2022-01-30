@@ -71,9 +71,9 @@ class Ion_auth
 
 		$this->load->library('session');
 
-		$this->load->model('ion_auth_model');
+		$this->load->model('Ion_auth_model');
 
-		$this->_cache_user_in_group =& $this->ion_auth_model->_cache_user_in_group;
+		$this->_cache_user_in_group =& $this->Ion_auth_model->_cache_user_in_group;
 	
 		$email_config = $this->config->item('email_config', 'ion_auth');
 
@@ -82,7 +82,7 @@ class Ion_auth
 			$this->email->initialize($email_config);
 		}
 
-		$this->ion_auth_model->trigger_events('library_constructor');
+		$this->Ion_auth_model->trigger_events('library_constructor');
 	}
 
 	/**
@@ -98,7 +98,7 @@ class Ion_auth
 	 */
 	public function __call($method, $arguments)
 	{
-		if (!method_exists( $this->ion_auth_model, $method) )
+		if (!method_exists( $this->Ion_auth_model, $method) )
 		{
 			throw new Exception('Undefined method Ion_auth::' . $method . '() called');
 		}
@@ -110,7 +110,7 @@ class Ion_auth
 		{
 			return call_user_func_array([$this, 'update'], $arguments);
 		}
-		return call_user_func_array( [$this->ion_auth_model, $method], $arguments);
+		return call_user_func_array( [$this->Ion_auth_model, $method], $arguments);
 	}
 
 	/**
@@ -140,14 +140,14 @@ class Ion_auth
 	public function forgotten_password($identity)
 	{
 		// Retrieve user information
-		$user = $this->where($this->ion_auth_model->identity_column, $identity)
+		$user = $this->where($this->Ion_auth_model->identity_column, $identity)
 					 ->where('active', 1)
 					 ->users()->row();
 
 		if ($user)
 		{
 			// Generate code
-			$code = $this->ion_auth_model->forgotten_password($identity);
+			$code = $this->Ion_auth_model->forgotten_password($identity);
 
 			if ($code)
 			{
@@ -203,7 +203,7 @@ class Ion_auth
 	 */
 	public function forgotten_password_check($code)
 	{
-		$user = $this->ion_auth_model->get_user_by_forgotten_password_code($code);
+		$user = $this->Ion_auth_model->get_user_by_forgotten_password_code($code);
 
 		if (!is_object($user))
 		{
@@ -220,7 +220,7 @@ class Ion_auth
 				{
 					//it has expired
 					$identity = $user->{$this->config->item('identity', 'ion_auth')};
-					$this->ion_auth_model->clear_forgotten_password_code($identity);
+					$this->Ion_auth_model->clear_forgotten_password_code($identity);
 					$this->set_error('password_change_unsuccessful');
 					return FALSE;
 				}
@@ -245,24 +245,24 @@ class Ion_auth
 	 */
 	public function register($identity, $password, $email, $additional_data = [], $group_ids = [])
 	{
-		$this->ion_auth_model->trigger_events('pre_account_creation');
+		$this->Ion_auth_model->trigger_events('pre_account_creation');
 
 		$email_activation = $this->config->item('email_activation', 'ion_auth');
 
-		$id = $this->ion_auth_model->register($identity, $password, $email, $additional_data, $group_ids);
+		$id = $this->Ion_auth_model->register($identity, $password, $email, $additional_data, $group_ids);
 
 		if (!$email_activation)
 		{
 			if ($id !== FALSE)
 			{
 				$this->set_message('account_creation_successful');
-				$this->ion_auth_model->trigger_events(['post_account_creation', 'post_account_creation_successful']);
+				$this->Ion_auth_model->trigger_events(['post_account_creation', 'post_account_creation_successful']);
 				return $id;
 			}
 			else
 			{
 				$this->set_error('account_creation_unsuccessful');
-				$this->ion_auth_model->trigger_events(['post_account_creation', 'post_account_creation_unsuccessful']);
+				$this->Ion_auth_model->trigger_events(['post_account_creation', 'post_account_creation_unsuccessful']);
 				return FALSE;
 			}
 		}
@@ -275,22 +275,22 @@ class Ion_auth
 			}
 
 			// deactivate so the user must follow the activation flow
-			$deactivate = $this->ion_auth_model->deactivate($id);
+			$deactivate = $this->Ion_auth_model->deactivate($id);
 
 			// the deactivate method call adds a message, here we need to clear that
-			$this->ion_auth_model->clear_messages();
+			$this->Ion_auth_model->clear_messages();
 
 
 			if (!$deactivate)
 			{
 				$this->set_error('deactivate_unsuccessful');
-				$this->ion_auth_model->trigger_events(['post_account_creation', 'post_account_creation_unsuccessful']);
+				$this->Ion_auth_model->trigger_events(['post_account_creation', 'post_account_creation_unsuccessful']);
 				return FALSE;
 			}
 
-			$activation_code = $this->ion_auth_model->activation_code;
+			$activation_code = $this->Ion_auth_model->activation_code;
 			$identity        = $this->config->item('identity', 'ion_auth');
-			$user            = $this->ion_auth_model->user($id)->row();
+			$user            = $this->Ion_auth_model->user($id)->row();
 
 			$data = [
 				'identity'   => $user->{$identity},
@@ -300,7 +300,7 @@ class Ion_auth
 			];
 			if(!$this->config->item('use_ci_email', 'ion_auth'))
 			{
-				$this->ion_auth_model->trigger_events(['post_account_creation', 'post_account_creation_successful', 'activation_email_successful']);
+				$this->Ion_auth_model->trigger_events(['post_account_creation', 'post_account_creation_successful', 'activation_email_successful']);
 				$this->set_message('activation_email_successful');
 				return $data;
 			}
@@ -316,14 +316,14 @@ class Ion_auth
 
 				if ($this->email->send() === TRUE)
 				{
-					$this->ion_auth_model->trigger_events(['post_account_creation', 'post_account_creation_successful', 'activation_email_successful']);
+					$this->Ion_auth_model->trigger_events(['post_account_creation', 'post_account_creation_successful', 'activation_email_successful']);
 					$this->set_message('activation_email_successful');
 					return $id;
 				}
 
 			}
 
-			$this->ion_auth_model->trigger_events(['post_account_creation', 'post_account_creation_unsuccessful', 'activation_email_unsuccessful']);
+			$this->Ion_auth_model->trigger_events(['post_account_creation', 'post_account_creation_unsuccessful', 'activation_email_unsuccessful']);
 			$this->set_error('activation_email_unsuccessful');
 			return FALSE;
 		}
@@ -337,7 +337,7 @@ class Ion_auth
 	 **/
 	public function logout()
 	{
-		$this->ion_auth_model->trigger_events('logout');
+		$this->Ion_auth_model->trigger_events('logout');
 
 		$identity = $this->config->item('identity', 'ion_auth');
 
@@ -347,8 +347,8 @@ class Ion_auth
 		delete_cookie($this->config->item('remember_cookie_name', 'ion_auth'));
 
 		// Clear all codes
-		$this->ion_auth_model->clear_forgotten_password_code($identity);
-		$this->ion_auth_model->clear_remember_code($identity);
+		$this->Ion_auth_model->clear_forgotten_password_code($identity);
+		$this->Ion_auth_model->clear_remember_code($identity);
 
 		// Destroy the session
 		$this->session->sess_destroy();
@@ -369,14 +369,14 @@ class Ion_auth
 	 **/
 	public function logged_in()
 	{
-		$this->ion_auth_model->trigger_events('logged_in');
+		$this->Ion_auth_model->trigger_events('logged_in');
 
-		$recheck = $this->ion_auth_model->recheck_session();
+		$recheck = $this->Ion_auth_model->recheck_session();
 
 		// auto-login the user if they are remembered
 		if (!$recheck && get_cookie($this->config->item('remember_cookie_name', 'ion_auth')))
 		{
-			$recheck = $this->ion_auth_model->login_remembered_user();
+			$recheck = $this->Ion_auth_model->login_remembered_user();
 		}
 
 		return $recheck;
@@ -404,11 +404,11 @@ class Ion_auth
 	 */
 	public function is_admin($id = FALSE)
 	{
-		$this->ion_auth_model->trigger_events('is_admin');
+		$this->Ion_auth_model->trigger_events('is_admin');
 
 		$admin_group = $this->config->item('admin_group', 'ion_auth');
 
-		return $this->ion_auth_model->in_group($admin_group, $id);
+		return $this->Ion_auth_model->in_group($admin_group, $id);
 	}
 
 	/**

@@ -125,7 +125,7 @@ class Yllapito_tunnukset extends CI_Controller
                                           substr(str_shuffle('0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZqwertyuioplkjhgfdsazxcvbnm!"#¤%&/()=?*@£$€{[]}'),1,random_int(10, 20)),
                                           $application_data['email'], $additional_data);
                 
-                $code = $this->ion_auth_model->forgotten_password($new_pinnumber);
+                $code = $this->Ion_auth_model->forgotten_password($new_pinnumber);
                 
                 $message = $this->load->view('email/tunnus_hyvaksytty', array('code'=>$code, 'new_pinnumber'=>$new_pinnumber), TRUE);
                 
