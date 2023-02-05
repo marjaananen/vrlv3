@@ -160,7 +160,7 @@ class Yllapito_hevosrekisteri extends CI_Controller
     }
    
     
-    function varit($msg = array()){
+    function varit($msg = array(), $return = false){
         
          $data = $msg;
          $data['title'] = 'Muokkaa värilistaa';
@@ -169,7 +169,7 @@ class Yllapito_hevosrekisteri extends CI_Controller
 
         //start the form
             
-        if($this->input->server('REQUEST_METHOD') == 'POST'){
+        if(!$return && $this->input->server('REQUEST_METHOD') == 'POST'){
             $tid = 0;
             if ($this->_validate_vari_form('new') == FALSE)
                 {
@@ -234,21 +234,24 @@ class Yllapito_hevosrekisteri extends CI_Controller
 	
     
     function vari ($tapa = null, $id = null){
+        $msg = "";
         if($tapa == null || $id == null){           
            $this->fuel->pages->render('misc/naytaviesti', array('msg_type' => 'danger', 'msg' => "Käsiteltävää väriä ei ole valittu"));
         }
-        $msg = "";
-        if($this->_is_editing_color_allowed($id, $msg)){
+        else if(!$this->_is_editing_color_allowed($id, $msg)){
+            $this->fuel->pages->render('misc/naytaviesti', array('msg_type' => 'danger', 'msg' => $msg));
+        }
+        else {
             $this->load->model("Color_model");
 
             if ($tapa == "poista"){
                 if ($this->Color_model->delete_vari($id) === false){
-                    $this->varit(array('msg_type' => 'danger', 'msg' => "Et voi poistaa väriä jolle on rekisteröity hevosia"));
+                    $this->varit(array('msg_type' => 'danger', 'msg' => "Et voi poistaa väriä jolle on rekisteröity hevosia"), true);
     
                 }
                 
                 else {
-                    $this->varit(array('msg_type' => 'success', 'msg' => "Poisto onnistui."));
+                    $this->varit(array('msg_type' => 'success', 'msg' => "Poisto onnistui."), true);
                 }
             }
             
@@ -263,31 +266,37 @@ class Yllapito_hevosrekisteri extends CI_Controller
                         {
                             $data['msg'] = "Värin muokkaus epäonnistui!";
                             $data['msg_type'] = "danger";
+                            $data['form'] = $this->_get_vari_form('edit',  $id);
+                            $this->fuel->pages->render('misc/haku', $data);
                         }
         
                     else
                         {
-    
                             if($this->Color_model->muokkaa_vari($data['msg'], $id, $this->input->post('vari'), $this->input->post('lyhenne'),
                                                                 $this->input->post('pvari'), $this->input->post('geenit'))){
                                 $data['msg'] = "Muokkaus onnistui! Katso väri <a href=\"". site_url('virtuaalihevoset/vari/'.$id) ."\">täältä</a>.";
                                 $data['msg_type'] = "success";
-                                $this->varit($data);
+                                $this->varit($data, true);
                             }else {
-                                $data['msg_type'] = "danger";                            
+                                $data['msg_type'] = "danger";
+                                $data['form'] = $this->_get_vari_form('edit',  $id);
+                                $this->fuel->pages->render('misc/haku', $data);
+
                             }
+
                         }
+                }else {
+                    $data['form'] = $this->_get_vari_form('edit',  $id);
+                    $this->fuel->pages->render('misc/haku', $data);
+
+                    
                 }
                 
                 
-                $data['form'] = $this->_get_vari_form('edit',  $id);
-                $this->fuel->pages->render('misc/haku', $data);
+
     
             }
-        } else {
-            $this->fuel->pages->render('misc/naytaviesti', array('msg_type' => 'danger', 'msg' => $msg));
- 
-        }
+        } 
      
     
     }
@@ -358,7 +367,7 @@ class Yllapito_hevosrekisteri extends CI_Controller
     //RODUT
     
     
-     function rodut($msg = array()){
+     function rodut($msg = array(), $return = false){
         
          $data = $msg;
          $data['title'] = 'Muokkaa rotulistaa';
@@ -367,7 +376,7 @@ class Yllapito_hevosrekisteri extends CI_Controller
 
         //start the form
             
-        if($this->input->server('REQUEST_METHOD') == 'POST'){
+        if(!$return && $this->input->server('REQUEST_METHOD') == 'POST'){
             $tid = 0;
             if ($this->_validate_breed_form('new') == FALSE)
                 {
@@ -434,21 +443,23 @@ class Yllapito_hevosrekisteri extends CI_Controller
 	
     
     function rotu ($tapa = null, $id = null){
+        $msg = "";
         if($tapa == null || $id == null){           
            $this->fuel->pages->render('misc/naytaviesti', array('msg_type' => 'danger', 'msg' => "Käsiteltävää rotua ei ole valittu"));
         }
-        $msg = "";
-        if($this->_is_editing_breed_allowed($id, $msg)){
+        else if(!$this->_is_editing_breed_allowed($id, $msg)){
+            $this->fuel->pages->render('misc/naytaviesti', array('msg_type' => 'danger', 'msg' => $msg));
+        } else {
             $this->load->model("Breed_model");
 
             if ($tapa == "poista"){
                 if ($this->Breed_model->delete_rotu($id) === false){
-                    $this->rodut(array('msg_type' => 'danger', 'msg' => "Et voi poistaa rotua jolle on rekisteröity hevosia"));
+                    $this->rodut(array('msg_type' => 'danger', 'msg' => "Et voi poistaa rotua jolle on rekisteröity hevosia"), true);
     
                 }
                 
                 else {
-                    $this->rodut(array('msg_type' => 'success', 'msg' => "Poisto onnistui."));
+                    $this->rodut(array('msg_type' => 'success', 'msg' => "Poisto onnistui."), true);
                 }
             }
             
@@ -472,24 +483,24 @@ class Yllapito_hevosrekisteri extends CI_Controller
                                                                 $this->input->post('roturyhma'), $this->input->post('harvinainen'))){
                                 $data['msg'] = "Muokkaus onnistui! Katso rotu <a href=\"". site_url('virtuaalihevoset/rotu/'.$id) ."\">täältä</a>.";
                                 $data['msg_type'] = "success";
-                                $this->fuel->pages->render('misc/naytaviesti', array($data));
+                                $this->rodut($data, true);
+
 
                             }else {
                                 $data['msg_type'] = "danger";
-                                
+                                $data['form'] = $this->_get_breed_form('edit',  $id);
+                                $this->fuel->pages->render('misc/haku', $data);
                             }
                         }
-                }
+                }else {
                 
                 
                 $data['form'] = $this->_get_breed_form('edit',  $id);
                 $this->fuel->pages->render('misc/haku', $data);
+                }
     
             }
-        } else {
-            $this->fuel->pages->render('misc/naytaviesti', array('msg_type' => 'danger', 'msg' => $msg));
- 
-        }
+        } 
      
     
     }

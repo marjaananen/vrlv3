@@ -252,7 +252,9 @@ class Breed_model extends Base_module_model
         $insert_data = array();
         $insert_data['rotu'] = $rotu;
         $insert_data['lyhenne'] = $lyhenne;
-        $insert_data['roturyhma'] = $roturyhma;
+        if($roturyhma != 0 && $roturyhma != NULL){
+            $insert_data['roturyhma'] = $roturyhma;
+        }
         $insert_data['harvinainen'] = $harvinainen;
         
             $this->db->where('rotunro', $id);
