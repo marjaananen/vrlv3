@@ -22,8 +22,8 @@ $vars['main_quickmenu'] = '<li><a href="'.site_url('liitto/yllapito').'">Yhteyst
 
 
 
-$vars['red_bar'] = true;
-$vars['red_bar_message'] = "Uusi VRL on valmis käyttöön! Vanhat salasanat on nollattu, mutta saat uuden käyttöösi palauttamalla salasanan yläpalkin \unohditko salasanasi\" toiminnon avulla!";
+$vars['red_bar'] = false;
+$vars['red_bar_message'] = "Uusi VRL on valmis käyttöön! Vanhat salasanat on nollattu, mutta saat uuden käyttöösi palauttamalla salasanan yläpalkin \"unohditko salasanasi\" toiminnon avulla!";
 
 //$vars['red_bar_message'] = "Uusi VRL on nyt otettu käyttöön! Osoite virtuaalihevoset.net osoittaa toistaiseksi vanhaan VRL:oon,
 //joka ei ole enää käytössä, mutta sen vaihtaminen on työn alla.";
