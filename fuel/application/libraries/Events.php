@@ -106,6 +106,135 @@ public function __construct()
             return true;
         }
     }
+
+
+    private function _parse_event_ppl($osallistujalista_input, &$data, &$luetut_rivit){
+        $this->CI->load->library("Vrl_helper");
+        $this->CI->load->model("Tunnukset_model");
+
+        $osallistujalista = trim($osallistujalista_input);
+		$osallistujat = explode("\n", $osallistujalista);
+		$osallistujat = array_filter($osallistujat, 'trim');
+        $kasitellyt_kopukat = array();
+        $luetut_rivit = array();
+		$virhe = array();		
+		//Jokainen rivi/luokka käydään läpi
+		foreach ($osallistujat as $rivi_input){
+            $luettu = array();
+            $rivi = explode(";", $rivi_input);
+            if(sizeof($rivi) != 4){
+                $virhe[] = "Virheellinen rivi, tarkistathan että riviltä löytyy kolme ; merkkiä! " . $rivi_input;
+
+            }
+            else {
+                if(isset($rivi[0]) && $this->CI->vrl_helper->check_vrl_syntax($rivi[0]) && $this->CI->Tunnukset_model->onko_tunnus($this->CI->vrl_helper->vrl_to_number($rivi[0]))){
+                    $luettu['tunnus'] = $this->CI->vrl_helper->vrl_to_number(trim($rivi[0]));
+                    if(isset($kasitellyt_kopukat[$rivi[0]])){
+                        $virhe[] = "Sama VRL-tunnus toista kertaa rivillä: " . $rivi_input;
+
+                    }
+                    
+                    else if(isset($rivi[2]) && strlen($rivi[2]) > 1){
+                        $luettu['palkinto'] = $rivi[2];
+                                        
+                    
+                        if(isset($rivi[1])){
+                            $luettu['tulos'] = str_replace(",", ".", $rivi[1]);
+                        }
+                        
+                        if(isset($rivi[3])){
+                            $luettu['kommentti'] = htmlspecialchars($rivi[3]);
+                        }
+                        
+                        $luetut_rivit[] = $luettu;
+                        $kasitellyt_kopukat[$rivi[0]] = "ok";
+                        }
+                    
+                    else {
+                        $virhe[] = "Virheellinen palkinto rivillä: " . $rivi_input;
+                    }
+  
+                }else {
+                    $virhe[] = "Virheellinen VRL-tunnus rivillä: " . $rivi_input;
+                }
+            }
+            
+        }
+        
+        if(sizeof($virhe)>0){
+            $data['msg'] = "Virhe osallistujien lisäyksessä!";
+            $data['msg_details'] = $virhe;
+            $data['msg_type'] = 'danger';
+            return false;
+        }
+        else {
+            return true;
+        }
+    }
+
+    private function _parse_event_stable($osallistujalista_input, &$data, &$luetut_rivit){
+        $this->CI->load->library("Vrl_helper");
+        $this->CI->load->model("Tallit_model");
+
+        $osallistujalista = trim($osallistujalista_input);
+		$osallistujat = explode("\n", $osallistujalista);
+		$osallistujat = array_filter($osallistujat, 'trim');
+        $kasitellyt_kopukat = array();
+        $luetut_rivit = array();
+		$virhe = array();		
+		//Jokainen rivi/luokka käydään läpi
+		foreach ($osallistujat as $rivi_input){
+            $luettu = array();
+            $rivi = explode(";", $rivi_input);
+            if(sizeof($rivi) != 4){
+                $virhe[] = "Virheellinen rivi, tarkistathan että riviltä löytyy kolme ; merkkiä! " . $rivi_input;
+
+            }
+            else {
+                if(isset($rivi[0]) && $this->CI->Tallit_model->is_tnro_in_use(trim($rivi[0]))){
+                    $luettu['tnro'] = trim($rivi[0]);
+                    if(isset($kasitellyt_kopukat[$rivi[0]])){
+                        $virhe[] = "Sama Tallitunnus toista kertaa rivillä: " . $rivi_input;
+
+                    }
+                    
+                    else if(isset($rivi[2]) && strlen($rivi[2]) > 1){
+                        $luettu['palkinto'] = $rivi[2];
+                                        
+                    
+                        if(isset($rivi[1])){
+                            $luettu['tulos'] = str_replace(",", ".", $rivi[1]);
+                        }
+                        
+                        if(isset($rivi[3])){
+                            $luettu['kommentti'] = htmlspecialchars($rivi[3]);
+                        }
+                        
+                        $luetut_rivit[] = $luettu;
+                        $kasitellyt_kopukat[$rivi[0]] = "ok";
+                        }
+                    
+                    else {
+                        $virhe[] = "Virheellinen palkinto rivillä: " . $rivi_input;
+                    }
+  
+                }else {
+                    $virhe[] = "Virheellinen tallitunnus rivillä: " . $rivi_input;
+                }
+            }
+            
+        }
+        
+        if(sizeof($virhe)>0){
+            $data['msg'] = "Virhe osallistujien lisäyksessä!";
+            $data['msg_details'] = $virhe;
+            $data['msg_type'] = 'danger';
+            return false;
+        }
+        else {
+            return true;
+        }
+    }
     
     
     function tapahtuma($id, $admin = false, $edit_url = null, $data = array()){

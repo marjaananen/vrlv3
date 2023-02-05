@@ -834,6 +834,7 @@ CREATE TABLE `vrlv3_tapahtumat` (
   `tulos` tinyint(1) DEFAULT '1',
   `jaos_id` int(11) DEFAULT NULL,
   `pulju_id` int(11) DEFAULT NULL,
+  `type` INT(2) NOT NULL DEFAULT '1',
   PRIMARY KEY (`id`),
   KEY `tapahtumajarjestajatunnus_idx` (`vastuu`),
   KEY `tapahtumanjarjestajajaos_idx` (`jaos_id`),
@@ -870,6 +871,44 @@ CREATE TABLE `vrlv3_tapahtumat_osallistujat` (
 ) ENGINE=InnoDB AUTO_INCREMENT=12969 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
+DROP TABLE IF EXISTS `vrlv3_tapahtumat_osallistujat_talli`;
+CREATE TABLE `vrlv3_tapahtumat_osallistujat_talli` (
+  `oid` int(11) NOT NULL AUTO_INCREMENT,
+  `tapahtuma` int(11) NOT NULL,
+  `tnro` varchar(8) NOT NULL,
+  `ilm` datetime NOT NULL,
+  `hyv` int(1) unsigned NOT NULL DEFAULT '0',
+  `syy` text CHARACTER SET latin1 NOT NULL,
+  `luokka` varchar(2) CHARACTER SET latin1 NOT NULL,
+  `tulos` decimal(10,3) NOT NULL,
+  `palkinto` varchar(50) CHARACTER SET latin1 NOT NULL,
+  `kommentti` text CHARACTER SET latin1 NOT NULL,
+  PRIMARY KEY (`oid`),
+  KEY `id` (`tapahtuma`),
+  KEY `tapahtuma_tnro` (`tnro`),
+  CONSTRAINT `tapahtuma_fff` FOREIGN KEY (`tapahtuma`) REFERENCES `vrlv3_tapahtumat` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `tapahtuma_tnro` FOREIGN KEY (`tnro`) REFERENCES `vrlv3_tallirekisteri` (`tnro`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+
+DROP TABLE IF EXISTS `vrlv3_tapahtumat_osallistujat_tunnus`;
+CREATE TABLE `vrlv3_tapahtumat_osallistujat_tunnus` (
+  `oid` int(11) NOT NULL AUTO_INCREMENT,
+  `tapahtuma` int(11) NOT NULL,
+  `tunnus` int(5) unsigned zerofill NOT NULL,
+  `ilm` datetime NOT NULL,
+  `hyv` int(1) unsigned NOT NULL DEFAULT '0',
+  `syy` text CHARACTER SET latin1 NOT NULL,
+  `luokka` varchar(2) CHARACTER SET latin1 NOT NULL,
+  `tulos` decimal(10,3) NOT NULL,
+  `palkinto` varchar(50) CHARACTER SET latin1 NOT NULL,
+  `kommentti` text CHARACTER SET latin1 NOT NULL,
+  PRIMARY KEY (`oid`),
+  KEY `id` (`tapahtuma`),
+  KEY `tunnus` (`tunnus`),
+  CONSTRAINT `tapahtuma_ffff` FOREIGN KEY (`tapahtuma`) REFERENCES `vrlv3_tapahtumat` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `tapahtuma_tunnus` FOREIGN KEY (`tunnus`) REFERENCES `vrlv3_tunnukset` (`tunnus`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 --
 -- Table structure for table `vrlv3_tiedotukset`
 --

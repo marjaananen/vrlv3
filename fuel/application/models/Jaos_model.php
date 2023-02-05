@@ -143,6 +143,38 @@ class Jaos_model extends Base_module_model
         return array();
 
     }
+
+    function get_event_stables($event){
+        $this->db->select('o.oid, o.tnro, o.tulos, o.palkinto, o.kommentti, h.nimi');
+        $this->db->from('vrlv3_tapahtumat_osallistujat_talli as o');
+        $this->db->join('vrlv3_tallirekisteri as h', 'o.tnro = h.tnro');
+        $this->db->where('o.tapahtuma', $event);
+        $query = $this->db->get();
+        
+        if ($query->num_rows() > 0)
+        {
+            return $query->result_array(); 
+        }
+        
+        return array();
+
+    }
+
+    function get_event_ppl($event){
+        $this->db->select('o.oid, o.tunnus, o.tulos, o.palkinto, o.kommentti, h.nimimerkki');
+        $this->db->from('vrlv3_tapahtumat_osallistujat_tunnus as o');
+        $this->db->join('vrlv3_tunnukset as h', 'o.tunnus = h.tunnus');
+        $this->db->where('o.tapahtuma', $event);
+        $query = $this->db->get();
+        
+        if ($query->num_rows() > 0)
+        {
+            return $query->result_array(); 
+        }
+        
+        return array();
+
+    }
     
     function delete_event($id, $jaos_id = null, $pulju_id = null){
         $data = array('id' => $id, 'jaos_id'=>$jaos_id, 'pulju_id'=>$pulju_id);
@@ -153,6 +185,18 @@ class Jaos_model extends Base_module_model
     function delete_event_horse($id, $event_id){
         $data = array('oid' => $id, 'tapahtuma'=>$event_id);
         $this->db->delete('vrlv3_tapahtumat_osallistujat', $data);
+        return true;
+    }
+
+    function delete_event_stable($id, $event_id){
+        $data = array('oid' => $id, 'tapahtuma'=>$event_id);
+        $this->db->delete('vrlv3_tapahtumat_osallistujat_talli', $data);
+        return true;
+    }
+
+    function delete_event_ppl($id, $event_id){
+        $data = array('oid' => $id, 'tapahtuma'=>$event_id);
+        $this->db->delete('vrlv3_tapahtumat_osallistujat_tunnus', $data);
         return true;
     }
     
@@ -196,7 +240,7 @@ class Jaos_model extends Base_module_model
         $this->db->update('vrlv3_tapahtumat', array("otsikko"=>$title, "pv" => $this->CI->vrl_helper->normal_date_to_sql($date)));
     
         return true;
-        }
+    }
     
     
     
@@ -213,6 +257,34 @@ class Jaos_model extends Base_module_model
         
         return true;
     }
+
+    function add_event_participants_ppl($id, $participant_data = array()){
+        
+        foreach($participant_data as $horse){
+           $horse['tapahtuma'] = $id;
+           $horse['hyv'] = 1;
+           $this->db->insert('vrlv3_tapahtumat_osallistujat_tunnus', $horse);
+   
+           
+        }
+           
+           
+           return true;
+    }
+
+     function add_event_participants_stable($id, $participant_data = array()){
+        
+        foreach($participant_data as $horse){
+           $horse['tapahtuma'] = $id;
+           $horse['hyv'] = 1;
+           $this->db->insert('vrlv3_tapahtumat_osallistujat_talli', $horse);
+   
+           
+        }
+           
+           
+           return true;
+       }
     
     function get_event_horse_prizes($reknro){
         $this->db->select('t.pv, t.otsikko, o.tulos, o.palkinto, o.kommentti, t.jaos');
@@ -232,6 +304,48 @@ class Jaos_model extends Base_module_model
         
         return array();
     }
+
+        
+    function get_event_stable_prizes($reknro){
+        $this->db->select('t.pv, t.otsikko, o.tulos, o.palkinto, o.kommentti, t.jaos');
+        $this->db->from('vrlv3_tapahtumat_osallistujat_talli as o');
+        $this->db->join('vrlv3_tapahtumat as t', 't.id = o.tapahtuma');
+        $this->db->where('o.tnro', $reknro);
+        $this->db->where("o.hyv", 1);
+        $this->db->where("t.tulos", 1);
+        $this->db->order_by("t.pv", 'desc');
+        
+         $query = $this->db->get();
+        
+        if ($query->num_rows() > 0)
+        {
+            return $query->result_array(); 
+        }
+        
+        return array();
+    }
+
+        
+    function get_event_ppl_prizes($reknro){
+        $this->db->select('t.pv, t.otsikko, o.tulos, o.palkinto, o.kommentti, t.jaos');
+        $this->db->from('vrlv3_tapahtumat_osallistujat_tunnus as o');
+        $this->db->join('vrlv3_tapahtumat as t', 't.id = o.tapahtuma');
+        $this->db->where('o.tunnus', $reknro);
+        $this->db->where("o.hyv", 1);
+        $this->db->where("t.tulos", 1);
+        $this->db->order_by("t.pv", 'desc');
+        
+         $query = $this->db->get();
+        
+        if ($query->num_rows() > 0)
+        {
+            return $query->result_array(); 
+        }
+        
+        return array();
+    }
+
+    
     
     function get_show_horse_prizes($reknro, $nimi = null){
         $this->db->select('o.*, t.*, tu.paatuomari_nimi');
