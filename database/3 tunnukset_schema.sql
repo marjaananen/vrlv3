@@ -28,7 +28,7 @@ SET time_zone = "+00:00";
 -- Rakenne taululle `ci_sessions`
 --
 
-CREATE TABLE `ci_sessions` (
+CREATE TABLE IF NOT EXISTS `ci_sessions` (
   `id` varchar(40) NOT NULL DEFAULT '0',
   `ip_address` varchar(45) NOT NULL DEFAULT '0',
   `user_agent` varchar(120) NOT NULL,
@@ -43,7 +43,7 @@ CREATE TABLE `ci_sessions` (
 -- Rakenne taululle `vrlv3_groups`
 --
 
-CREATE TABLE `vrlv3_groups` (
+CREATE TABLE IF NOT EXISTS `vrlv3_groups` (
   `id` mediumint(8) UNSIGNED NOT NULL,
   `name` varchar(20) NOT NULL,
   `description` varchar(100) NOT NULL
@@ -76,11 +76,7 @@ INSERT INTO `vrlv3_groups` (`id`, `name`, `description`) VALUES
 -- Rakenne taululle `vrlv3_tunnukset`
 --
 
-  tnro varchar(8) DEFAULT NULL,
-  tila int(11) DEFAULT '1',
-  rekisteroi int(5) unsigned zerofill DEFAULT NULL,
-
-CREATE TABLE `vrlv3_tunnukset` (
+CREATE TABLE IF NOT EXISTS `vrlv3_tunnukset` (
   `id` int unsigned NOT NULL AUTO_INCREMENT,
   `ip_address` varchar(15) NOT NULL,
   `username` varchar(100) NOT NULL,
@@ -120,13 +116,13 @@ CREATE TABLE `vrlv3_tunnukset` (
 INSERT INTO `vrlv3_tunnukset` (
 `id`, `ip_address`, `username`, `password`, `salt`, `email`, `activation_selector`, `activation_code`, `forgotten_password_selector`, `forgotten_password_code`, `forgotten_password_time`, `remember_selector`, `remember_code`, `created_on`, `last_login`, `active`, `tunnus`, `nimimerkki`, `nayta_email`, `jaahylla`, `frozen`, `reason`, `hyvaksyi`, `hyvaksytty`, `laani`, `syntymavuosi`, `nayta_vuosi`, `nayta_laani`, `suositus`, `rekisteroitynyt`) 
 VALUES (
-1, '', '00000', '$2y$12$cICW4ptvxyjJpOvuHHKA2.ColzeKwEFe8p6qtiRoU2xEylbIg/ECO', NULL, 'admin@admin.com', NULL, NULL, NULL, NULL, NULL, NULL, NULL, '0', '1553943885', '1', '00000', 'Testimarsu', '0', '0000-00-00 00:00:00', '0', '', '00000', '0000-00-00 00:00:00', NULL, '0000-00-00', '0', '0', '', '0000-00-00 00:00:00');
+1, '', '00000', '$2y$12$KSY/XQPrE35b/qRbbcdULueHz.RasjT2le4mmJbE4.AVz6QERWFFK', NULL, 'admin@admin.com', NULL, NULL, NULL, NULL, NULL, NULL, NULL, '0', '1553943885', '1', '00000', 'Testimarsu', '0', '0000-00-00 00:00:00', '0', '', '00000', '0000-00-00 00:00:00', NULL, '0000-00-00', '0', '0', '', '0000-00-00 00:00:00');
 
 --
 -- Rakenne taululle `vrlv3_tunnukset_jonossa`
 --
 
-CREATE TABLE `vrlv3_tunnukset_jonossa` (
+CREATE TABLE IF NOT EXISTS `vrlv3_tunnukset_jonossa` (
   `salasana` text NOT NULL,
   `nimimerkki` varchar(20) NOT NULL,
   `email` text NOT NULL,
@@ -145,7 +141,7 @@ CREATE TABLE `vrlv3_tunnukset_jonossa` (
 -- Rakenne taululle `vrlv3_tunnukset_kirjautumiset`
 --
 
-CREATE TABLE `vrlv3_tunnukset_kirjautumiset` (
+CREATE TABLE IF NOT EXISTS `vrlv3_tunnukset_kirjautumiset` (
   `id` int(11) NOT NULL,
   `tunnus` int(5) UNSIGNED ZEROFILL NOT NULL,
   `aika` datetime NOT NULL,
@@ -159,7 +155,7 @@ CREATE TABLE `vrlv3_tunnukset_kirjautumiset` (
 -- Rakenne taululle `vrlv3_tunnukset_nimimerkit`
 --
 
-CREATE TABLE `vrlv3_tunnukset_nimimerkit` (
+CREATE TABLE IF NOT EXISTS `vrlv3_tunnukset_nimimerkit` (
   `id` int(11) NOT NULL,
   `tunnus` int(5) UNSIGNED ZEROFILL NOT NULL,
   `nimimerkki` varchar(20) NOT NULL,
@@ -173,7 +169,7 @@ CREATE TABLE `vrlv3_tunnukset_nimimerkit` (
 -- Rakenne taululle `vrlv3_tunnukset_pikaviestit`
 --
 
-CREATE TABLE `vrlv3_tunnukset_pikaviestit` (
+CREATE TABLE IF NOT EXISTS `vrlv3_tunnukset_pikaviestit` (
   `id` int(11) NOT NULL,
   `lahettaja` int(5) UNSIGNED ZEROFILL DEFAULT NULL,
   `vastaanottaja` int(5) UNSIGNED ZEROFILL NOT NULL,
@@ -189,7 +185,7 @@ CREATE TABLE `vrlv3_tunnukset_pikaviestit` (
 -- Rakenne taululle `vrlv3_tunnukset_yhteystiedot`
 --
 
-CREATE TABLE `vrlv3_tunnukset_yhteystiedot` (
+CREATE TABLE IF NOT EXISTS `vrlv3_tunnukset_yhteystiedot` (
   `id` int(11) NOT NULL,
   `tunnus` int(5) UNSIGNED ZEROFILL NOT NULL,
   `tyyppi` varchar(10) NOT NULL,
@@ -203,7 +199,7 @@ CREATE TABLE `vrlv3_tunnukset_yhteystiedot` (
 -- Rakenne taululle `vrlv3_users_groups`
 --
 
-CREATE TABLE `vrlv3_users_groups` (
+CREATE TABLE IF NOT EXISTS `vrlv3_users_groups` (
   `id` int(11) UNSIGNED NOT NULL,
   `user_id` int(11) UNSIGNED NOT NULL,
   `group_id` mediumint(8) UNSIGNED NOT NULL
@@ -223,7 +219,7 @@ INSERT INTO `vrlv3_users_groups` (`id`, `user_id`, `group_id`) VALUES
 -- Rakenne taululle `vrlv3_login_attempts`
 --
 
-CREATE TABLE `vrlv3_login_attempts` (
+CREATE TABLE IF NOT EXISTS `vrlv3_login_attempts` (
   `id` int(11) UNSIGNED NOT NULL,
   `ip_address` varchar(15) NOT NULL,
   `login` varchar(100) NOT NULL,
@@ -248,13 +244,6 @@ ALTER TABLE `ci_sessions`
 ALTER TABLE `vrlv3_groups`
   ADD PRIMARY KEY (`id`);  
  
-
---
--- Indexes for table `vrlv3_tunnukset`
---
-ALTER TABLE `vrlv3_tunnukset`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `tunnus` (`tunnus`);
   
 --
 -- Indexes for table `vrlv3_login_attempts`
