@@ -4,7 +4,7 @@ DROP TABLE IF EXISTS `vrlv3_hevosrekisteri`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `vrlv3_hevosrekisteri` (
-  `reknro` int(9) unsigned zerofill NOT NULL,
+  `reknro` int(9) unsigned zerofill PRIMARY KEY NOT NULL,
   `nimi` varchar(80) NOT NULL,
   `rotu` smallint(6) NOT NULL,
   `sukupuoli` enum('1','2','3','') NOT NULL,
@@ -30,7 +30,6 @@ CREATE TABLE `vrlv3_hevosrekisteri` (
   `polv_tark_date` datetime DEFAULT NULL,
   `polv_pros` decimal(11,8) DEFAULT NULL,
   `evm` int(11) unsigned NOT NULL DEFAULT '0',
-  PRIMARY KEY (`reknro`),
   KEY `rotu` (`rotu`),
   KEY `hyvaksyi` (`hyvaksyi`),
   KEY `vrlv3_hevosrekisteri_ibfk_3` (`kotitalli`),
@@ -41,20 +40,7 @@ CREATE TABLE `vrlv3_hevosrekisteri` (
   KEY `vrlv3_hevosrekisteri_ibfk_8_idx` (`kasvattaja_tunnus`),
   KEY `vrlv3_hevosrekisteri_ibfk_9_idx` (`kasvattaja_talli`),
   KEY `vrlv3_hevosrekisteri_ibfk_10_idx` (`kasvattajanimi_id`),
-  KEY `vrlv3_hevosrekisteri_ibfk_6_idx` (`polv_tark_vrl`),
-  CONSTRAINT `vrlv3_hevosrekisteri_ibfk_1` FOREIGN KEY (`rotu`) REFERENCES `vrlv3_lista_rodut` (`rotunro`),
-  CONSTRAINT `vrlv3_hevosrekisteri_ibfk_10` FOREIGN KEY (`kasvattajanimi_id`) REFERENCES `vrlv3_kasvattajanimet` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  CONSTRAINT `vrlv3_hevosrekisteri_ibfk_11` FOREIGN KEY (`kotitalli`) REFERENCES `vrlv3_tallirekisteri` (`tnro`) ON DELETE SET NULL ON UPDATE CASCADE,
-  CONSTRAINT `vrlv3_hevosrekisteri_ibfk_12` FOREIGN KEY (`kasvattaja_tunnus`) REFERENCES `vrlv3_tunnukset` (`tunnus`) ON DELETE SET NULL ON UPDATE CASCADE,
-  CONSTRAINT `vrlv3_hevosrekisteri_ibfk_13` FOREIGN KEY (`polv_tark_vrl`) REFERENCES `vrlv3_tunnukset` (`tunnus`) ON DELETE SET NULL ON UPDATE CASCADE,
-  CONSTRAINT `vrlv3_hevosrekisteri_ibfk_2` FOREIGN KEY (`hyvaksyi`) REFERENCES `vrlv3_tunnukset` (`tunnus`),
-  CONSTRAINT `vrlv3_hevosrekisteri_ibfk_3` FOREIGN KEY (`kotitalli`) REFERENCES `vrlv3_tallirekisteri` (`tnro`) ON DELETE SET NULL ON UPDATE CASCADE,
-  CONSTRAINT `vrlv3_hevosrekisteri_ibfk_4` FOREIGN KEY (`kuol_merkkasi`) REFERENCES `vrlv3_tunnukset` (`tunnus`),
-  CONSTRAINT `vrlv3_hevosrekisteri_ibfk_5` FOREIGN KEY (`vari`) REFERENCES `vrlv3_lista_varit` (`vid`),
-  CONSTRAINT `vrlv3_hevosrekisteri_ibfk_6` FOREIGN KEY (`painotus`) REFERENCES `vrlv3_lista_painotus` (`pid`),
-  CONSTRAINT `vrlv3_hevosrekisteri_ibfk_7` FOREIGN KEY (`syntymamaa`) REFERENCES `vrlv3_lista_maat` (`id`),
-  CONSTRAINT `vrlv3_hevosrekisteri_ibfk_8` FOREIGN KEY (`kasvattaja_tunnus`) REFERENCES `vrlv3_tunnukset` (`tunnus`) ON DELETE SET NULL ON UPDATE SET NULL,
-  CONSTRAINT `vrlv3_hevosrekisteri_ibfk_9` FOREIGN KEY (`kasvattaja_talli`) REFERENCES `vrlv3_tallirekisteri` (`tnro`) ON UPDATE CASCADE
+  KEY `vrlv3_hevosrekisteri_ibfk_6_idx` (`polv_tark_vrl`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -99,9 +85,7 @@ CREATE TABLE `vrlv3_hevosrekisteri_kisatiedot` (
   PRIMARY KEY (`reknro`,`jaos`),
   KEY `jaos_idx` (`jaos`),
   KEY `reknro_idx` (`reknro`),
-  KEY `primary_idx` (`reknro`,`jaos`),
-  CONSTRAINT `jaosf` FOREIGN KEY (`jaos`) REFERENCES `vrlv3_kisat_jaokset` (`id`),
-  CONSTRAINT `reknrof` FOREIGN KEY (`reknro`) REFERENCES `vrlv3_hevosrekisteri` (`reknro`) ON DELETE CASCADE ON UPDATE CASCADE
+  KEY `primary_idx` (`reknro`,`jaos`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -141,10 +125,7 @@ CREATE TABLE `vrlv3_hevosrekisteri_ominaisuudet_jonossa` (
   PRIMARY KEY (`id`),
   KEY `hevosrekisteri_reknro` (`reknro`),
   KEY `hevosrekisteri_ominaisuus` (`ominaisuus`),
-  KEY `kisakalenteri_tulos` (`tulos_id`),
-  CONSTRAINT `ominaisuusfff` FOREIGN KEY (`ominaisuus`) REFERENCES `vrlv3_lista_ominaisuudet` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `reknrofff` FOREIGN KEY (`reknro`) REFERENCES `vrlv3_hevosrekisteri` (`reknro`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `tulosfff` FOREIGN KEY (`tulos_id`) REFERENCES `vrlv3_kisat_tulokset` (`tulos_id`) ON DELETE CASCADE ON UPDATE CASCADE
+  KEY `kisakalenteri_tulos` (`tulos_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=177480 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -227,9 +208,7 @@ CREATE TABLE `vrlv3_kasvattajanimet` (
   `rekisteroi` int(5) unsigned zerofill DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `vrlv3_kasvattajanimet_talli_idx` (`tnro`),
-  KEY `vrlv3_kasvattajanimet_rekisteroi` (`rekisteroi`),
-  CONSTRAINT `vrlv3_kasvattajanimet_rekisteroi_f` FOREIGN KEY (`rekisteroi`) REFERENCES `vrlv3_tunnukset` (`tunnus`) ON UPDATE CASCADE,
-  CONSTRAINT `vrlv3_kasvattajanimet_talli` FOREIGN KEY (`tnro`) REFERENCES `vrlv3_tallirekisteri` (`tnro`) ON UPDATE CASCADE
+  KEY `vrlv3_kasvattajanimet_rekisteroi` (`rekisteroi`)
 ) ENGINE=InnoDB AUTO_INCREMENT=3091 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -287,9 +266,7 @@ CREATE TABLE `vrlv3_kisat_bis_tulosrivit` (
   `vh_id` int(9) unsigned zerofill DEFAULT NULL,
   PRIMARY KEY (`tulosrivi_id`),
   KEY `bis_id` (`bis_id`,`nayttely_id`,`vh`),
-  KEY `vh_id` (`vh_id`),
-  CONSTRAINT `bis_idxx` FOREIGN KEY (`bis_id`) REFERENCES `vrlv3_kisat_nayttelytulokset` (`bis_id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `vh_idxx` FOREIGN KEY (`vh_id`) REFERENCES `vrlv3_hevosrekisteri` (`reknro`) ON DELETE SET NULL ON UPDATE CASCADE
+  KEY `vh_id` (`vh_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=77254 DEFAULT CHARSET=utf8 COLLATE=utf8_swedish_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -312,10 +289,7 @@ CREATE TABLE `vrlv3_kisat_etuuspisteet` (
   UNIQUE KEY `tunnusjaosunique` (`tunnus`,`jaos`),
   KEY `tunnusdidx` (`tunnus`),
   KEY `jaosidx` (`jaos`),
-  KEY `muokkaajaindex` (`muokkaaja`),
-  CONSTRAINT `jaosetuusforein` FOREIGN KEY (`jaos`) REFERENCES `vrlv3_kisat_jaokset` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `muokkaajaforein` FOREIGN KEY (`muokkaaja`) REFERENCES `vrlv3_tunnukset` (`tunnus`),
-  CONSTRAINT `tunnusetuusforein` FOREIGN KEY (`tunnus`) REFERENCES `vrlv3_tunnukset` (`tunnus`) ON DELETE CASCADE ON UPDATE CASCADE
+  KEY `muokkaajaindex` (`muokkaaja`)
 ) ENGINE=InnoDB AUTO_INCREMENT=6150 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -442,11 +416,7 @@ CREATE TABLE `vrlv3_kisat_kisakalenteri` (
   KEY `lajii` (`laji`),
   KEY `talli_key_idxi` (`jarj_talli`),
   KEY `tunnus_key_idxi` (`tunnus`),
-  KEY `kasittelija_idx` (`kasittelija`),
-  CONSTRAINT `jaos_keyi` FOREIGN KEY (`jaos`) REFERENCES `vrlv3_kisat_jaokset` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
-  CONSTRAINT `laji_keyi` FOREIGN KEY (`laji`) REFERENCES `vrlv3_lista_painotus` (`pid`) ON DELETE NO ACTION ON UPDATE NO ACTION,
-  CONSTRAINT `talli_keyi` FOREIGN KEY (`jarj_talli`) REFERENCES `vrlv3_tallirekisteri` (`tnro`) ON DELETE NO ACTION ON UPDATE NO ACTION,
-  CONSTRAINT `tunnus_keyi` FOREIGN KEY (`tunnus`) REFERENCES `vrlv3_tunnukset` (`tunnus`) ON DELETE NO ACTION ON UPDATE NO ACTION
+  KEY `kasittelija_idx` (`kasittelija`)
 ) ENGINE=InnoDB AUTO_INCREMENT=171178 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -463,9 +433,7 @@ CREATE TABLE `vrlv3_kisat_kisaluokat` (
   `luokka_id` int(11) NOT NULL,
   PRIMARY KEY (`id`),
   KEY `kisaluokat_kisaid` (`kisa_id`),
-  KEY `kisaluokat_luokkaid` (`luokka_id`),
-  CONSTRAINT `kisaluokkaf` FOREIGN KEY (`luokka_id`) REFERENCES `vrlv3_kisat_luokat` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
-  CONSTRAINT `kisaluokkaff` FOREIGN KEY (`kisa_id`) REFERENCES `vrlv3_kisat_kisakalenteri` (`kisa_id`) ON DELETE NO ACTION ON UPDATE NO ACTION
+  KEY `kisaluokat_luokkaid` (`luokka_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=47306 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -559,13 +527,7 @@ CREATE TABLE `vrlv3_kisat_nayttelykalenteri` (
   KEY `talli_key_idxiI` (`jarj_talli`),
   KEY `tunnus_key_idxiI` (`tunnus`),
   KEY `kasittelija_key_idxI` (`kasittelija`),
-  KEY `hyvaksyi:keyu_idx` (`hyvaksyi`),
-  CONSTRAINT `hyvaksyi:keyu` FOREIGN KEY (`hyvaksyi`) REFERENCES `vrlv3_tunnukset` (`tunnus`) ON DELETE NO ACTION ON UPDATE NO ACTION,
-  CONSTRAINT `jaos_keyiI` FOREIGN KEY (`jaos`) REFERENCES `vrlv3_kisat_jaokset` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
-  CONSTRAINT `kasittelija_keyI` FOREIGN KEY (`kasittelija`) REFERENCES `vrlv3_tunnukset` (`tunnus`) ON DELETE SET NULL ON UPDATE CASCADE,
-  CONSTRAINT `laji_keyiI` FOREIGN KEY (`laji`) REFERENCES `vrlv3_lista_painotus` (`pid`) ON DELETE NO ACTION ON UPDATE NO ACTION,
-  CONSTRAINT `talli_keyiI` FOREIGN KEY (`jarj_talli`) REFERENCES `vrlv3_tallirekisteri` (`tnro`) ON UPDATE CASCADE,
-  CONSTRAINT `tunnus_keyiI` FOREIGN KEY (`tunnus`) REFERENCES `vrlv3_tunnukset` (`tunnus`) ON DELETE NO ACTION ON UPDATE NO ACTION
+  KEY `hyvaksyi:keyu_idx` (`hyvaksyi`)
 ) ENGINE=InnoDB AUTO_INCREMENT=3721 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -953,3 +915,62 @@ CREATE TABLE `vrlv3_tiedotukset_kategoriat` (
   CONSTRAINT `vrlv3_tiedotukset_kategoriat_ibfk_2` FOREIGN KEY (`kid`) REFERENCES `vrlv3_lista_tiedotuskategoriat` (`kid`)
 ) ENGINE=InnoDB AUTO_INCREMENT=659 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- FK Constraints
+-- 
+
+ALTER TABLE `vrlv3_hevosrekisteri`
+  ADD CONSTRAINT `vrlv3_hevosrekisteri_ibfk_1` FOREIGN KEY (`rotu`) REFERENCES `vrlv3_lista_rodut` (`rotunro`),
+  ADD CONSTRAINT `vrlv3_hevosrekisteri_ibfk_10` FOREIGN KEY (`kasvattajanimi_id`) REFERENCES `vrlv3_kasvattajanimet` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `vrlv3_hevosrekisteri_ibfk_11` FOREIGN KEY (`kotitalli`) REFERENCES `vrlv3_tallirekisteri` (`tnro`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `vrlv3_hevosrekisteri_ibfk_12` FOREIGN KEY (`kasvattaja_tunnus`) REFERENCES `vrlv3_tunnukset` (`tunnus`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `vrlv3_hevosrekisteri_ibfk_13` FOREIGN KEY (`polv_tark_vrl`) REFERENCES `vrlv3_tunnukset` (`tunnus`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `vrlv3_hevosrekisteri_ibfk_2` FOREIGN KEY (`hyvaksyi`) REFERENCES `vrlv3_tunnukset` (`tunnus`),
+  ADD CONSTRAINT `vrlv3_hevosrekisteri_ibfk_3` FOREIGN KEY (`kotitalli`) REFERENCES `vrlv3_tallirekisteri` (`tnro`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `vrlv3_hevosrekisteri_ibfk_4` FOREIGN KEY (`kuol_merkkasi`) REFERENCES `vrlv3_tunnukset` (`tunnus`),
+  ADD CONSTRAINT `vrlv3_hevosrekisteri_ibfk_5` FOREIGN KEY (`vari`) REFERENCES `vrlv3_lista_varit` (`vid`),
+  ADD CONSTRAINT `vrlv3_hevosrekisteri_ibfk_6` FOREIGN KEY (`painotus`) REFERENCES `vrlv3_lista_painotus` (`pid`),
+  ADD CONSTRAINT `vrlv3_hevosrekisteri_ibfk_7` FOREIGN KEY (`syntymamaa`) REFERENCES `vrlv3_lista_maat` (`id`),
+  ADD CONSTRAINT `vrlv3_hevosrekisteri_ibfk_8` FOREIGN KEY (`kasvattaja_tunnus`) REFERENCES `vrlv3_tunnukset` (`tunnus`) ON DELETE SET NULL ON UPDATE SET NULL,
+  ADD CONSTRAINT `vrlv3_hevosrekisteri_ibfk_9` FOREIGN KEY (`kasvattaja_talli`) REFERENCES `vrlv3_tallirekisteri` (`tnro`) ON UPDATE CASCADE;
+  
+ALTER TABLE `vrlv3_hevosrekisteri_kisatiedot`
+  ADD CONSTRAINT `jaosf` FOREIGN KEY (`jaos`) REFERENCES `vrlv3_kisat_jaokset` (`id`),
+  ADD CONSTRAINT `reknrof` FOREIGN KEY (`reknro`) REFERENCES `vrlv3_hevosrekisteri` (`reknro`) ON DELETE CASCADE ON UPDATE CASCADE;
+  
+ALTER TABLE `vrlv3_hevosrekisteri_ominaisuudet_jonossa`
+  ADD CONSTRAINT `ominaisuusfff` FOREIGN KEY (`ominaisuus`) REFERENCES `vrlv3_lista_ominaisuudet` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `reknrofff` FOREIGN KEY (`reknro`) REFERENCES `vrlv3_hevosrekisteri` (`reknro`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `tulosfff` FOREIGN KEY (`tulos_id`) REFERENCES `vrlv3_kisat_tulokset` (`tulos_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+  
+ALTER TABLE `vrlv3_kasvattajanimet`
+  ADD CONSTRAINT `vrlv3_kasvattajanimet_rekisteroi_f` FOREIGN KEY (`rekisteroi`) REFERENCES `vrlv3_tunnukset` (`tunnus`) ON UPDATE CASCADE,
+  ADD CONSTRAINT `vrlv3_kasvattajanimet_talli` FOREIGN KEY (`tnro`) REFERENCES `vrlv3_tallirekisteri` (`tnro`) ON UPDATE CASCADE;
+
+ALTER TABLE `vrlv3_kisat_bis_tulosrivit`
+  ADD CONSTRAINT `bis_idxx` FOREIGN KEY (`bis_id`) REFERENCES `vrlv3_kisat_nayttelytulokset` (`bis_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `vh_idxx` FOREIGN KEY (`vh_id`) REFERENCES `vrlv3_hevosrekisteri` (`reknro`) ON DELETE SET NULL ON UPDATE CASCADE;
+  
+ALTER TABLE `vrlv3_kisat_etuuspisteet`
+  ADD CONSTRAINT `jaosetuusforein` FOREIGN KEY (`jaos`) REFERENCES `vrlv3_kisat_jaokset` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `muokkaajaforein` FOREIGN KEY (`muokkaaja`) REFERENCES `vrlv3_tunnukset` (`tunnus`),
+  ADD CONSTRAINT `tunnusetuusforein` FOREIGN KEY (`tunnus`) REFERENCES `vrlv3_tunnukset` (`tunnus`) ON DELETE CASCADE ON UPDATE CASCADE;
+  
+ALTER TABLE `vrlv3_kisat_kisakalenteri`
+  ADD CONSTRAINT `jaos_keyi` FOREIGN KEY (`jaos`) REFERENCES `vrlv3_kisat_jaokset` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  ADD CONSTRAINT `laji_keyi` FOREIGN KEY (`laji`) REFERENCES `vrlv3_lista_painotus` (`pid`) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  ADD CONSTRAINT `talli_keyi` FOREIGN KEY (`jarj_talli`) REFERENCES `vrlv3_tallirekisteri` (`tnro`) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  ADD CONSTRAINT `tunnus_keyi` FOREIGN KEY (`tunnus`) REFERENCES `vrlv3_tunnukset` (`tunnus`) ON DELETE NO ACTION ON UPDATE NO ACTION;
+  
+ALTER TABLE `vrlv3_kisat_kisaluokat`
+  ADD CONSTRAINT `kisaluokkaf` FOREIGN KEY (`luokka_id`) REFERENCES `vrlv3_kisat_luokat` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  ADD CONSTRAINT `kisaluokkaff` FOREIGN KEY (`kisa_id`) REFERENCES `vrlv3_kisat_kisakalenteri` (`kisa_id`) ON DELETE NO ACTION ON UPDATE NO ACTION;
+  
+ALTER TABLE `vrlv3_kisat_nayttelykalenteri`
+  ADD CONSTRAINT `hyvaksyi:keyu` FOREIGN KEY (`hyvaksyi`) REFERENCES `vrlv3_tunnukset` (`tunnus`) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  ADD CONSTRAINT `jaos_keyiI` FOREIGN KEY (`jaos`) REFERENCES `vrlv3_kisat_jaokset` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  ADD CONSTRAINT `kasittelija_keyI` FOREIGN KEY (`kasittelija`) REFERENCES `vrlv3_tunnukset` (`tunnus`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `laji_keyiI` FOREIGN KEY (`laji`) REFERENCES `vrlv3_lista_painotus` (`pid`) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  ADD CONSTRAINT `talli_keyiI` FOREIGN KEY (`jarj_talli`) REFERENCES `vrlv3_tallirekisteri` (`tnro`) ON UPDATE CASCADE,
+  ADD CONSTRAINT `tunnus_keyiI` FOREIGN KEY (`tunnus`) REFERENCES `vrlv3_tunnukset` (`tunnus`) ON DELETE NO ACTION ON UPDATE NO ACTION;

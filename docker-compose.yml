@@ -1,0 +1,40 @@
+version: "3.8"
+services:
+  apache:
+    container_name: php-apache
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      - db
+    volumes:
+      - .:/var/www/html
+    ports:
+      - 80:80
+  db:
+    container_name: db
+    image: mariadb:latest
+    restart: always
+    volumes:
+      - datadump:/var/lib/mysql
+      - ./database:/docker-entrypoint-initdb.d
+    environment:
+      MYSQL_ROOT_PASSWORD: ""
+      MYSQL_USER: "root"
+      MYSQL_PASSWORD: ""
+      MYSQL_DATABASE: "vrlv3"
+      MYSQL_ALLOW_EMPTY_PASSWORD: 1
+    ports:
+      - 3306:3306
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    ports:
+      - 8080:80
+    restart: always
+    environment:
+      PMA_HOST: db
+    depends_on:
+      - db
+
+volumes:
+  datadump:
