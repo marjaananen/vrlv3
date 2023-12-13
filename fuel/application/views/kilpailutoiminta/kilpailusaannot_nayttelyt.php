@@ -7,15 +7,15 @@
         <b>Näyttelyn ajankohta</b>
         <ul>
             <li>Näyttelyt tulee ilmoittaa kalenteriin vähintään neljä vuorokautta ennen viimeistä ilmoittautumispäivää (VIP).</li>
-            <li>Viimeisen ilmoittautumispäivän ja näyttelypäivän välissä tulee olla vähintään viikko (esim. VIP 01.01.2013 ja NP 07.01.2013).</li>
+            <li>Viimeisen ilmoittautumispäivän ja näyttelypäivän välissä tulee olla vähintään viikko (NJ) tai yksi päivä (VSN).</li>
             <li>Näyttelyt voi järjestää kuluvalle tai enintään seuraavalle kalenterikuukaudelle (esim. elokuussa voi anoa näyttelyn enintään syyskuun viimeiselle päivälle).</li>
             <li>Viimeistä ilmoittautumispäivää ei saa rajata tiettyyn kellonaikaan. Päivän vaihtuminen lasketaan Suomen aikavyöhykkeen mukaan.</li>
         </ul>
         
         <b>Näyttelyiden järjestyspaikka</b>
         <ul>
-        <li>Samalla tallilla voi järjestää vain yhdet saman jaoksen näyttelyt samana päivänä riippumatta vastuuhenkilöstä.</li>
-        <li>Järjestäjällä voi olla avoinna vain yksi näyttely per jaos, ellei jaoksen säännöissä anneta poikkeusta.</li>
+        <li>Samalla tallilla voi järjestää vain yhdet NJ:n alaiset näyttelyt samana päivänä. VSN:n alaisia voi olla kahdet samana päivänä, mutta joko luokkien tai tuomareiden tulee olla eri.</li>
+        <li>Järjestäjällä voi olla avoinna vain yksi NJ:n alainen näyttely, VSN:n alaisia näyttelyitä avoinna voi olla kahdet.</li>
         <li>Järjestyspaikan tulee olla VRL:n rekisterissä.</li>
         </ul>
         
@@ -83,7 +83,7 @@
        
         <b>Tulosten ilmoittaminen</b>
         <ul>
-            <li>Tulokset tulee lähettää BIS-listalle ohjeen mukaan neljän viikon kuluessa kilpailupäivästä. </li>
+            <li>Tulokset tulee lähettää tulosarkistoon ohjeen mukaan neljän (NJ) tai kolmen (VSN) viikon kuluessa kilpailupäivästä.</li>
             <li>Myöhässä olevista tuloksista aiheutuu jaoksen määräämä sanktio!</li>
         </ul>
         <b>Tulosten arkistointi</b>
