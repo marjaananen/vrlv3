@@ -51,6 +51,8 @@
 
 <p>Mikäli hevosen tiedot löytyvät joukkosivulta, tulee osoitteen viedä suoraan hevosen kohdalle (ankkurilinkki).</p>
 
+<p>Mikäli hevosen sivut on salasanasuojattu, tulee käyttäjätunnuksen ja salasanan olla: user (tunnus) ja arabians (salasana). Jos nämä eivät toimi, hevosen sivut poistetaan rekisteristä ilman erillistä varoitusta.</p>p>
+
 <p><b>Huomaathan, että rekisterissä ja hevosen sivulla ilmoitettujen tietojen on täsmättävä täydellisesti.</b></p>
 
 <p>Sivulta ei saa löytyä laitonta materiaalia ja tekijänoikeudet tulee olla merkitty asianmukaisesti.</p>
